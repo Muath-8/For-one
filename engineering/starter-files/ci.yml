@@ -1,0 +1,244 @@
+# .github/workflows/ci.yml
+# For one: checks on every pull request and on main. Starter file from engineering/04-ci-cd.md.
+# Expensive jobs (eval-gate, infra-plan, image) run only when their paths changed or on main.
+
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write      # eval-gate and infra-plan post comments
+  id-token: write           # OIDC to AWS for infra-plan and image push
+
+env:
+  FORONE_ENV: ci
+  FORONE_FAKE_VENDORS: "1"
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "22"
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      infra: ${{ steps.filter.outputs.infra }}
+      versioned: ${{ steps.filter.outputs.versioned }}
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            infra:
+              - 'infra/**'
+            web:
+              - 'apps/web/**'
+              - 'ui_strings/**'
+            versioned:
+              - 'packages/languages/**/prompts/**'
+              - 'packages/languages/**/rules/**'
+              - 'packages/languages/**/versions.yaml'
+              - 'packages/adapters/vendors.yaml'
+              - 'packages/measures/**'
+              - 'packages/assess/forone/assess/claims.py'
+              - 'apps/call-worker/governor/**'
+              - 'eval/thresholds.yaml'
+
+  python:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env: { POSTGRES_PASSWORD: dev, POSTGRES_DB: forone }
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+      minio:
+        image: minio/minio:latest
+        env: { MINIO_ROOT_USER: minioadmin, MINIO_ROOT_PASSWORD: minioadmin }
+        ports: ['9000:9000']
+        options: --health-cmd "curl -f http://localhost:9000/minio/health/live" --health-interval 5s --health-timeout 5s --health-retries 10
+      inngest:
+        image: inngest/inngest:latest
+        ports: ['8288:8288']
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres:dev@localhost:5432/forone
+      S3_ENDPOINT_URL: http://localhost:9000
+      INNGEST_BASE_URL: http://localhost:8288
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with: { enable-cache: true }
+      - run: uv python install ${{ env.PYTHON_VERSION }}
+      - run: uv sync --frozen --all-packages
+      - name: Ruff (lint, format, banned imports)
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Pyright
+        run: uv run pyright
+      - name: Import layering
+        run: uv run lint-imports
+      - name: Unit tests (fake vendors)
+        run: uv run pytest -m "not integration" -q --cov --cov-report=xml
+      - name: Migrations up and down on a fresh database
+        run: |
+          uv run alembic upgrade head
+          uv run alembic downgrade base
+          uv run alembic upgrade head
+      - name: Integration tests (RLS walk, Inngest payloads, messaging enum, PII scrub corpus, language literals)
+        run: uv run pytest -m integration -q
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: coverage, path: coverage.xml }
+
+  web:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.web == 'true' || github.ref == 'refs/heads/main'
+    defaults: { run: { working-directory: apps/web } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: pnpm, cache-dependency-path: pnpm-lock.yaml }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tsc --noEmit
+      - name: ESLint (includes the law-furniture rule)
+        run: pnpm eslint . --max-warnings 0
+      - run: pnpm next build
+        env: { NEXT_PUBLIC_API_URL: http://localhost:8000 }
+      - name: Playwright smoke against mocked API
+        run: pnpm playwright test --project=smoke --trace off
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --frozen --package forone-languages --package forone-adapters
+      - name: Validate language packages, vendors.yaml, prices.yaml and the processor register
+        run: |
+          uv run forone-package validate packages/languages
+          uv run forone-vendors validate packages/adapters/vendors.yaml packages/adapters/prices.yaml
+          uv run forone-vendors check-register packages/adapters/vendors.yaml docs/ropa.md
+      - name: No Hume anywhere
+        run: |
+          ! grep -ri "hume" uv.lock packages/adapters/vendors.yaml
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  infra-plan:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
+    strategy:
+      matrix: { env: [staging, prod] }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: "1.9.8" }
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}      # read-only plan role; no secrets in GitHub
+          aws-region: ${{ vars.HOME_REGION }}
+      - run: terraform -chdir=infra/terraform/envs/${{ matrix.env }} fmt -check -recursive
+      - run: terraform -chdir=infra/terraform/envs/${{ matrix.env }} init -input=false
+      - run: terraform -chdir=infra/terraform/envs/${{ matrix.env }} validate
+      - uses: aquasecurity/tfsec-action@v1.0.3
+        with: { working_directory: infra/terraform }
+      - id: plan
+        run: terraform -chdir=infra/terraform/envs/${{ matrix.env }} plan -input=false -no-color -out=tfplan | tee plan.txt
+      - name: Post plan to the PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('plan.txt', 'utf8').slice(0, 60000);
+            await github.rest.issues.createComment({
+              ...context.repo, issue_number: context.issue.number,
+              body: `### terraform plan (${{ matrix.env }})\n\n<details><summary>plan</summary>\n\n\`\`\`\n${plan}\n\`\`\`\n</details>`
+            });
+
+  eval-gate:
+    runs-on: ubuntu-latest
+    needs: [changes, python, package]
+    if: needs.changes.outputs.versioned == 'true'
+    concurrency:
+      group: staging-lock        # suites that need staging run one at a time
+      cancel-in-progress: false
+    env:
+      FORONE_FAKE_VENDORS: ""    # the gate calls real vendors; cost is printed before the run
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --frozen --all-packages
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_EVAL_ROLE_ARN }}      # may read the eval secret and start/stop staging
+          aws-region: ${{ vars.HOME_REGION }}
+      - name: Load eval vendor keys from Secrets Manager (capped keys, never prod keys)
+        run: |
+          aws secretsmanager get-secret-value --secret-id forone/ci/eval --query SecretString --output text > /tmp/eval.env
+          while IFS= read -r line; do echo "::add-mask::${line#*=}"; echo "$line" >> "$GITHUB_ENV"; done < /tmp/eval.env
+          rm /tmp/eval.env
+      - name: Refuse illegal version changes
+        run: uv run tools/eval check-versions --base ${{ github.event.pull_request.base.sha || github.event.before }} --head ${{ github.sha }}
+      - name: Plan the suites for this diff and print the cost
+        id: plan
+        run: uv run tools/eval plan --base ${{ github.event.pull_request.base.sha || github.event.before }} --head ${{ github.sha }} --max-usd 25 --labels "${{ join(github.event.pull_request.labels.*.name, ',') }}" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Run the suites against the committed baselines
+        run: uv run tools/eval run --from-plan --baselines eval/baselines --report eval-report.md --junit eval.xml
+      - name: Post the report
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with: { path: eval-report.md, header: eval-gate }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: eval-report, path: [eval-report.md, eval.xml] }
+
+  image:
+    runs-on: ubuntu-latest
+    needs: [python, package, secrets]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.HOME_REGION }}
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr
+      - name: Fetch baked assets (spaCy model, turn-detector and Silero weights) from the fixtures bucket
+        run: aws s3 sync s3://forone-fixtures/baked-assets/ ./build/assets/ --only-show-errors
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.python
+          push: true
+          tags: ${{ steps.ecr.outputs.registry }}/forone-python:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ steps.ecr.outputs.registry }}/forone-python:${{ github.sha }}
+          severity: CRITICAL
+          exit-code: '1'

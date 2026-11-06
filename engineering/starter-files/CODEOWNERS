@@ -1,0 +1,45 @@
+# CODEOWNERS for Muath-8/for-one
+# Starter file from engineering/04-ci-cd.md and 08-coding-standards-and-review.md.
+# Replace @engineer-a and @engineer-b with the real GitHub logins when they join.
+# The last matching line wins. Every protected path needs one approval from a listed owner.
+
+# Default: any engineer reviews
+*                                           @Muath-8 @engineer-a @engineer-b
+
+# Anything a model reads: a second pair of eyes that is not the author, plus the eval gate
+packages/languages/**/prompts/              @Muath-8 @engineer-a @engineer-b
+packages/languages/**/rules/                @Muath-8 @engineer-a @engineer-b
+packages/languages/**/versions.yaml         @Muath-8 @engineer-a @engineer-b
+packages/languages/**/bibles/               @Muath-8
+packages/adapters/vendors.yaml              @Muath-8 @engineer-a
+packages/adapters/prices.yaml               @Muath-8 @engineer-a
+
+# What the learner reads in their own language, and anything counsel has reviewed
+ui_strings/                                 @Muath-8
+packages/languages/**/crisis*               @Muath-8
+
+# Evaluation thresholds and baselines move only with a reason in the PR
+eval/thresholds.yaml                        @Muath-8 @engineer-a
+eval/baselines/                             @engineer-a @engineer-b
+
+# Infrastructure, secrets handling, CI
+infra/                                      @engineer-a @Muath-8
+.github/                                    @engineer-a @engineer-b
+infra/MANUAL.md                             @engineer-a @Muath-8
+
+# Data handling: keys, deletion, consent, anonymization, audit, the processor register
+packages/core/forone/core/keys*.py          @engineer-a @Muath-8
+packages/core/forone/core/anonymize.py      @engineer-a @Muath-8
+packages/core/forone/core/messaging.py      @engineer-a @engineer-b
+packages/learner/forone/learner/pii.py      @engineer-a @Muath-8
+apps/workflows/functions/learner_delete.py  @engineer-a @Muath-8
+apps/workflows/functions/learner_export.py  @engineer-a @Muath-8
+apps/workflows/functions/audio_expire.py    @engineer-a @Muath-8
+apps/workflows/functions/privacy_verify.py  @engineer-a @Muath-8
+docs/ropa.md                                @Muath-8
+
+# Migrations: an engineer who did not write it
+packages/core/forone/core/migrations/       @engineer-a @engineer-b
+
+# The handbook itself
+engineering/                                @Muath-8 @engineer-a
