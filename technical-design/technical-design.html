@@ -1,0 +1,438 @@
+<title>For one technical design</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an engineering notebook. Narrow measure for prose, full-width drawings; section numbers are the file numbers 00..10. */
+:root{
+  --bg:#F2F4F7; --surface:#FFFFFF; --ink:#141A24; --ink-2:#4A5568; --ink-3:#7A8699; --line:#D9DEE6; --line-2:#E9ECF1;
+  --accent:#2F6FED; --accent-ink:#1D4FBF; --amber:#C4701F; --amber-soft:#FBEBD7; --accent-soft:#E6EEFD;
+  --c1:#2F6FED; --c2:#0E9F8A; --c3:#C4701F; --c4:#C9439A; --c5:#7A5AF8;
+  --bar:#2F6FED; --bar-soft:#9DB8F5; --good:#1F8A5B; --warn:#B86A12;
+  --display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif; --body:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif; --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1419; --surface:#171D25; --ink:#E8ECF2; --ink-2:#B4BDCB; --ink-3:#7F8CA0; --line:#2A3340; --line-2:#1F2731;
+  --accent:#5B8DF5; --accent-ink:#8FB0F8; --amber:#C98228; --amber-soft:#2B2113; --accent-soft:#17243D;
+  --c1:#5B8DF5; --c2:#1FA893; --c3:#C98228; --c4:#CF5BA6; --c5:#8F75F5; --bar:#5B8DF5; --bar-soft:#2E4A80; --good:#3DBE86; --warn:#E0953A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1419; --surface:#171D25; --ink:#E8ECF2; --ink-2:#B4BDCB; --ink-3:#7F8CA0; --line:#2A3340; --line-2:#1F2731;
+  --accent:#5B8DF5; --accent-ink:#8FB0F8; --amber:#C98228; --amber-soft:#2B2113; --accent-soft:#17243D;
+  --c1:#5B8DF5; --c2:#1FA893; --c3:#C98228; --c4:#CF5BA6; --c5:#8F75F5; --bar:#5B8DF5; --bar-soft:#2E4A80; --good:#3DBE86; --warn:#E0953A; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 72px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-0.01em}
+h1{font-size:clamp(34px,5vw,56px);line-height:1.02;font-weight:700}
+h2{font-size:clamp(24px,3vw,32px);line-height:1.15;font-weight:700}
+h3{font-size:18px;font-weight:600}
+p{margin:0}
+a{color:var(--accent-ink);text-decoration:none;border-bottom:1px solid transparent}
+a:hover,a:focus-visible{border-bottom-color:currentColor;outline:none}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.measure{max-width:68ch;color:var(--ink-2)}
+header.top{padding-block:56px 36px;display:grid;gap:22px}
+.facts{display:flex;flex-wrap:wrap;gap:12px 28px;border-top:1px solid var(--line);padding-top:18px}
+.fact{display:grid;gap:2px}
+.fact b{font:600 22px/1.1 var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
+.fact span{font-size:13px;color:var(--ink-3)}
+section{padding-block:40px;border-top:1px solid var(--line);display:grid;gap:20px}
+.sec-head{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:baseline}
+.num{font:500 13px/1 var(--mono);color:var(--accent);padding:6px 8px;border:1px solid var(--line);border-radius:4px;align-self:start}
+.sec-head .measure{grid-column:2}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;min-width:640px}
+.fig.narrow svg{min-width:0}
+.cap{font-size:13px;color:var(--ink-3);margin-top:10px;max-width:80ch}
+.cap b{color:var(--ink-2);font-weight:500}
+svg text{font-family:var(--body);fill:var(--ink)}
+svg .mono{font-family:var(--mono)}
+svg .muted{fill:var(--ink-3)}
+svg .sm{font-size:11px}
+svg .md{font-size:12.5px}
+svg .box{fill:var(--bg);stroke:var(--line);stroke-width:1}
+svg .box.svc{fill:var(--accent-soft);stroke:var(--accent)}
+svg .box.store{fill:var(--surface);stroke:var(--ink-3)}
+svg .box.vendor{fill:var(--surface);stroke:var(--line);stroke-dasharray:3 3}
+svg .arrow{stroke:var(--ink-3);stroke-width:1.2;fill:none;marker-end:url(#ah)}
+svg .arrow.hot{stroke:var(--amber);stroke-width:1.6;marker-end:url(#ahh)}
+svg .grid{stroke:var(--line-2);stroke-width:1}
+svg .axis{stroke:var(--line);stroke-width:1}
+svg .bar{fill:var(--bar)} svg .bar.soft{fill:var(--bar-soft)}
+svg .bar:hover{opacity:.82}
+svg .mark{stroke:var(--amber);stroke-width:1.5;stroke-dasharray:4 3}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.two > *{min-width:0}
+.timeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0;position:relative;padding-top:14px}
+.timeline::before{content:"";position:absolute;left:0;right:0;top:19px;height:2px;background:var(--line)}
+.mo{position:relative;padding:18px 12px 0 0;display:grid;gap:4px;min-width:0}
+.mo::before{content:"";position:absolute;top:-1px;left:0;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+.mo.live::before{border-color:var(--amber);background:var(--amber)}
+.mo .t{font:500 12px/1 var(--mono);color:var(--ink-3)}
+.mo h3{font-size:15px}
+.mo p{font-size:13px;color:var(--ink-2)}
+.mo .b{font:500 12px/1.3 var(--mono);color:var(--accent-ink)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line-2);vertical-align:top}
+th{font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+td code{font:13px var(--mono);background:var(--accent-soft);color:var(--accent-ink);padding:1px 5px;border-radius:3px}
+.tablewrap{overflow-x:auto}
+.ladder{display:grid;gap:0}
+.rung{display:grid;grid-template-columns:150px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--line-2);align-items:start}
+.rung:last-child{border-bottom:0}
+.rung .k{font:500 13px/1.3 var(--mono);color:var(--amber)}
+.rung p{font-size:14px;color:var(--ink-2)}
+.weeks{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.wk{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:6px;background:var(--surface);min-width:0}
+.wk .eyebrow{color:var(--accent)}
+.wk p{font-size:13.5px;color:var(--ink-2)}
+.wk .files{font:500 12px/1.4 var(--mono);color:var(--ink-3)}
+.files-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.file{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:14px;border:1px solid var(--line);border-radius:6px;background:var(--surface);min-width:0}
+.file .num{align-self:start}
+.file h3{font-size:16px}
+.file p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+.file a{display:inline-block;margin-top:8px;font:500 12px/1 var(--mono)}
+.oq{display:grid;gap:10px}
+.oq-item{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:14px;border-left:3px solid var(--amber);background:var(--surface);border-radius:0 6px 6px 0}
+.oq-item .k{font:500 12px/1.3 var(--mono);color:var(--amber);padding-top:3px}
+.oq-item p{font-size:14px;color:var(--ink-2)}
+.oq-item b{color:var(--ink);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--ink-2);margin-top:10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:6px}
+footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+@media (max-width:640px){.rung{grid-template-columns:1fr}.sec-head{grid-template-columns:1fr}.sec-head .measure{grid-column:1}}
+@media (prefers-reduced-motion:no-preference){.bar{transition:opacity .15s}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Technical design, version 1.0 · 6 November 2026 · the level below the nine architecture documents</div>
+  <h1>For one technical design</h1>
+  <p class="measure">One private podcast per learner, written overnight at 95% known words, a live call with a host who corrects only by recasting, and a learner model rebuilt from an append-only log. This page is the entry point; the eleven files on GitHub hold every table, endpoint, prompt and state machine.</p>
+  <div class="facts">
+    <div class="fact"><b>11</b><span>design files, 00 to 10</span></div>
+    <div class="fact"><b>4 services</b><span>web · api · workflows · call-worker</span></div>
+    <div class="fact"><b>~0.95 s</b><span>host reply design target (gate 1.5 s)</span></div>
+    <div class="fact"><b>$0.64</b><span>per session, beta stack, against $0.60</span></div>
+    <div class="fact"><b>18 Nov → 22 Dec</b><span>five build weeks</span></div>
+  </div>
+</header>
+
+<section id="system">
+  <div class="sec-head"><span class="num">00</span><h2>What runs where</h2>
+    <p class="measure">Four deployables and two stores inside one AWS region, every vendor behind an adapter. Live roles read the learner model; only the after-session pass writes it. Inngest carries ids, never content.</p></div>
+  <div class="fig">
+  <svg viewBox="0 0 1060 430" role="img" aria-label="System map: web and feed on the left, api, workflows and call-worker in the middle with Postgres and S3 below, vendors on the right">
+    <defs>
+      <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink-3)"/></marker>
+      <marker id="ahh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--amber)"/></marker>
+    </defs>
+    <!-- region frame -->
+    <rect x="300" y="18" width="440" height="396" rx="8" class="box" style="fill:none;stroke-dasharray:5 4"/>
+    <text x="316" y="40" class="sm mono muted">AWS home region · me-central-1 pending counsel · VPC, ALB + WAF, RDS Multi-AZ, S3, KMS</text>
+    <!-- client -->
+    <rect x="24" y="80" width="200" height="74" rx="6" class="box svc"/>
+    <text x="40" y="106" class="md" font-weight="600">apps/web</text>
+    <text x="40" y="124" class="sm muted">Next.js 15 PWA on Vercel</text>
+    <text x="40" y="140" class="sm muted">player · call screen · notebook</text>
+    <rect x="24" y="190" width="200" height="60" rx="6" class="box"/>
+    <text x="40" y="214" class="md" font-weight="600">Private podcast feed</text>
+    <text x="40" y="232" class="sm muted">RSS per learner, tokenized URL</text>
+    <rect x="24" y="286" width="200" height="60" rx="6" class="box"/>
+    <text x="40" y="310" class="md" font-weight="600">LiveKit Cloud</text>
+    <text x="40" y="328" class="sm muted">WebRTC rooms call-{id}</text>
+    <!-- services -->
+    <rect x="330" y="70" width="180" height="64" rx="6" class="box svc"/>
+    <text x="346" y="94" class="md" font-weight="600">apps/api · FastAPI</text>
+    <text x="346" y="112" class="sm muted">/v1 routes, events, feed, media</text>
+    <rect x="540" y="70" width="180" height="64" rx="6" class="box svc"/>
+    <text x="556" y="94" class="md" font-weight="600">apps/workflows</text>
+    <text x="556" y="112" class="sm muted">Inngest functions, durable jobs</text>
+    <rect x="330" y="170" width="180" height="64" rx="6" class="box svc"/>
+    <text x="346" y="194" class="md" font-weight="600">apps/call-worker</text>
+    <text x="346" y="212" class="sm muted">LiveKit Agents, Python</text>
+    <rect x="540" y="170" width="180" height="64" rx="6" class="box"/>
+    <text x="556" y="194" class="md" font-weight="600">Inngest Cloud</text>
+    <text x="556" y="212" class="sm muted">ids and enums only</text>
+    <!-- stores -->
+    <path d="M330 300 h180 v70 h-180 z" class="box store"/>
+    <ellipse cx="420" cy="300" rx="90" ry="10" class="box store"/>
+    <text x="346" y="330" class="md" font-weight="600">Postgres 16 + pgvector</text>
+    <text x="346" y="348" class="sm muted">events (append-only), 9 stores, RLS</text>
+    <path d="M540 300 h180 v70 h-180 z" class="box store"/>
+    <ellipse cx="630" cy="300" rx="90" ry="10" class="box store"/>
+    <text x="556" y="330" class="md" font-weight="600">S3 · media, voice, exports</text>
+    <text x="556" y="348" class="sm muted">SSE-C, one data key per learner</text>
+    <!-- vendors -->
+    <g class="md">
+      <rect x="800" y="60" width="236" height="46" rx="6" class="box vendor"/><text x="814" y="80" class="md">Anthropic</text><text x="814" y="96" class="sm muted">teacher · writer · host · Salma · analyst</text>
+      <rect x="800" y="116" width="236" height="46" rx="6" class="box vendor"/><text x="814" y="136" class="md">Google Gemini</text><text x="814" y="152" class="sm muted">editor (second vendor) · TTS</text>
+      <rect x="800" y="172" width="236" height="46" rx="6" class="box vendor"/><text x="814" y="192" class="md">Soniox · AssemblyAI</text><text x="814" y="208" class="sm muted">streaming STT · verbatim re-transcription</text>
+      <rect x="800" y="228" width="236" height="46" rx="6" class="box vendor"/><text x="814" y="248" class="md">Inworld · ElevenLabs</text><text x="814" y="264" class="sm muted">understudy voices, wired from day one</text>
+      <rect x="800" y="284" width="236" height="46" rx="6" class="box vendor"/><text x="814" y="304" class="md">Langfuse · Sentry</text><text x="814" y="320" class="sm muted">pseudonym only; text stays in model_io</text>
+    </g>
+    <!-- arrows -->
+    <path d="M224 110 H326" class="arrow"/><text x="236" y="104" class="sm mono muted">HTTPS, cookie</text>
+    <path d="M224 220 H262 V110" class="arrow" style="marker-end:none"/>
+    <path d="M124 286 V154" class="arrow hot"/><text x="130" y="272" class="sm mono" fill="var(--amber)">WebRTC</text>
+    <path d="M224 316 H326 V234" class="arrow hot" style="marker-end:url(#ahh)"/><text x="236" y="310" class="sm mono" fill="var(--amber)">job dispatch</text>
+    <path d="M510 102 H536" class="arrow"/><text x="512" y="94" class="sm mono muted">send</text>
+    <path d="M630 134 V166" class="arrow"/>
+    <path d="M630 170 V140" class="arrow" style="marker-end:none"/>
+    <path d="M420 134 V286" class="arrow"/>
+    <path d="M510 202 H536 V134" class="arrow" style="marker-end:none"/>
+    <path d="M420 234 V290" class="arrow" style="marker-end:none"/>
+    <path d="M580 134 V290" class="arrow"/>
+    <path d="M700 134 V290" class="arrow"/>
+    <path d="M720 92 H796" class="arrow"/>
+    <path d="M720 110 H780 V139 H796" class="arrow"/>
+    <path d="M720 118 H770 V195 H796" class="arrow"/>
+    <path d="M720 126 H760 V251 H796" class="arrow"/>
+    <path d="M510 190 H740 V83 H796" class="arrow hot"/><text x="520" y="184" class="sm mono" fill="var(--amber)">STT · host LLM · TTS, per turn</text>
+    <path d="M510 218 H530 V380 H760 V307 H796" class="arrow"/>
+    <text x="24" y="412" class="sm mono muted">Amber = the live path (~1 s per turn). Grey = request/response and durable jobs. Live roles never write the learner model.</text>
+  </svg>
+  <p class="cap"><b>One Docker image, three entrypoints.</b> <code>forone-python</code> runs api, workflows and call-worker selected by one environment variable; the image bakes in ffmpeg, spaCy, the LiveKit turn detector and Silero VAD so a worker cold-starts inside 60 s.</p>
+  </div>
+</section>
+
+<section id="day">
+  <div class="sec-head"><span class="num">00</span><h2>One learner's day, with its budgets</h2>
+    <p class="measure">Every budget in PRD part 15 is an alarm in production. Amber moments are live; the rest run in durable jobs nobody waits for, on batch pricing where the clock allows.</p></div>
+  <div class="timeline">
+    <div class="mo"><span class="t">evening</span><h3>Pick tomorrow</h3><p>Three ideas, one wildcard; or tell Salma. Cutoff at drop − 6 h uses the top-ranked.</p><span class="b">idea.chosen → episode row</span></div>
+    <div class="mo"><span class="t">overnight</span><h3>Write, fit, check, voice</h3><p>Teacher → writer → fitter (95% known words) → editor (second vendor) → TTS, align, re-listen.</p><span class="b">ready before drop − 90 min</span></div>
+    <div class="mo"><span class="t">07:40 local</span><h3>The drop</h3><p>Feed item plus one push with title and length. No other message, ever.</p><span class="b">dropped start &lt; 2 s</span></div>
+    <div class="mo"><span class="t">+ 6 min</span><h3>Listen, read, tap</h3><p>Word-synced player, Huh? replays slower, word sheet from a precomputed index.</p><span class="b">sheet &lt; 300 ms · swap &lt; 30 s</span></div>
+    <div class="mo live"><span class="t">+ 7 min</span><h3>Call the host</h3><p>LiveKit room, governor and turn machine, recasts only, talkback to Salma, hold-to-talk.</p><span class="b">connect &lt; 3 s · reply p50 &lt; 1.5 s</span></div>
+    <div class="mo"><span class="t">+ 15 min</span><h3>Re-transcribe verbatim</h3><p>Every learner turn, disfluencies kept; audio deleted at once when voice storage is off.</p><span class="b">audio gone ≤ 15 min</span></div>
+    <div class="mo"><span class="t">+ 25 min</span><h3>After-session pass</h3><p>Analyst, classifier, measures, memory keeper, updater, claim gate; stores bumped to a new version.</p><span class="b">complete &lt; 10 min</span></div>
+    <div class="mo"><span class="t">weekly</span><h3>The proof</h3><p>Salma speaks only claims that passed the gate. A flat week says so.</p><span class="b">~2 min · evidence, not tests</span></div>
+  </div>
+</section>
+
+<section id="pipeline">
+  <div class="sec-head"><span class="num">03</span><h2>The episode factory and what each station costs</h2>
+    <p class="measure">One Inngest function, idempotent per episode, with cut lines at drop − 4 h (teacher), − 2 h 30 (writer) and − 90 min (switch to on-demand pricing). Bars are cost per daily episode at list prices; voice is the line to attack.</p></div>
+  <div class="fig">
+  <svg viewBox="0 0 1060 330" role="img" aria-label="Pipeline stations from teacher to publish with cost bars beneath: teacher $0.077, writer $0.055, fitter and editor $0.018, voice studio $0.217, publish near zero">
+    <g class="md">
+      <rect x="20" y="24" width="150" height="72" rx="6" class="box svc"/><text x="34" y="48" font-weight="600">Teacher</text><text x="34" y="66" class="sm muted">Opus 5.5 · batch</text><text x="34" y="82" class="sm muted">EpisodePlan, validated</text>
+      <rect x="200" y="24" width="150" height="72" rx="6" class="box svc"/><text x="214" y="48" font-weight="600">Writer</text><text x="214" y="66" class="sm muted">Sonnet 5.5 · batch</text><text x="214" y="82" class="sm muted">+ SentencePatch rewrites</text>
+      <rect x="380" y="24" width="150" height="72" rx="6" class="box svc"/><text x="394" y="48" font-weight="600">Fitter</text><text x="394" y="66" class="sm muted">code + Haiku 5.5</text><text x="394" y="82" class="sm muted">coverage ≥ 95% ear, 98% eye</text>
+      <rect x="560" y="24" width="150" height="72" rx="6" class="box svc"/><text x="574" y="48" font-weight="600">Editor</text><text x="574" y="66" class="sm muted">Gemini 3.8 Flash + code</text><text x="574" y="82" class="sm muted">11 checks, 1 repair, else fallback</text>
+      <rect x="740" y="24" width="150" height="72" rx="6" class="box svc"/><text x="754" y="48" font-weight="600">Voice studio</text><text x="754" y="66" class="sm muted">TTS · mix · align · re-listen</text><text x="754" y="82" class="sm muted">understudy voice wired</text>
+      <rect x="920" y="24" width="120" height="72" rx="6" class="box"/><text x="934" y="48" font-weight="600">Publish</text><text x="934" y="66" class="sm muted">manifest, word</text><text x="934" y="82" class="sm muted">index, "why"</text>
+    </g>
+    <path d="M170 60 H196" class="arrow"/><path d="M350 60 H376" class="arrow"/><path d="M530 60 H556" class="arrow"/><path d="M710 60 H736" class="arrow"/><path d="M890 60 H916" class="arrow"/>
+    <path d="M455 96 V116 H275 V100" class="arrow hot"/><text x="300" y="130" class="sm mono" fill="var(--amber)">≤ 2 rewrite rounds on failing sentences</text>
+    <path d="M635 96 V140 H275 V100" class="arrow hot" style="opacity:.6"/><text x="640" y="152" class="sm mono" fill="var(--amber)">repair once; second fail restarts as fallback episode</text>
+    <!-- cost bars: scale 0.25 $ = 200px -->
+    <text x="20" y="196" class="sm mono muted">COST PER DAILY EPISODE (USD, beta stack, Gemini voice, Oct 2026 list)</text>
+    <line x1="20" x2="1040" y1="300" y2="300" class="axis"/>
+    <g class="sm">
+      <rect x="20" y="238" width="62" height="56" rx="0" class="bar"><title>Teacher $0.077</title></rect><text x="20" y="232" class="mono">$0.077</text>
+      <rect x="200" y="250" width="44" height="44" class="bar"><title>Writer with rewrites $0.055</title></rect><text x="200" y="244" class="mono">$0.055</text>
+      <rect x="380" y="280" width="14" height="14" class="bar"><title>Fitter, glosses, embedding (with editor) $0.018</title></rect><text x="380" y="274" class="mono">$0.018 with editor</text>
+      <rect x="560" y="280" width="14" height="14" class="bar soft"><title>Editor, counted with the fitter line</title></rect>
+      <rect x="740" y="120" width="174" height="174" class="bar"><title>Voice studio $0.217 (batch TTS $0.150, P1)</title></rect><text x="740" y="114" class="mono">$0.217</text>
+      <rect x="920" y="291" width="3" height="3" class="bar"/><text x="920" y="286" class="mono">&lt; $0.006</text>
+      <text x="20" y="318" class="mono muted">Pipeline total $0.367 · with batch TTS where offered (P1) $0.300 · Gemini prices double 1 Jan 2027: voice +$0.135</text>
+    </g>
+  </svg>
+  <p class="cap"><b>Coverage is code.</b> The fitter lemmatizes the script, scores every running unit with the learner's Beta mean (or the frequency prior from the 48-item word check), and fails any sentence holding an unplanned unit below p = 0.5. Prompts, schemas and the algorithm are in <a href="https://github.com/Muath-8/for-one/blob/main/technical-design/03-generation-pipeline.md">03-generation-pipeline.md</a>.</p>
+  </div>
+</section>
+
+<section id="call">
+  <div class="sec-head"><span class="num">04</span><h2>The live call: one second per turn, and only recasts</h2>
+    <p class="measure">The host declares its moves in a header line before it speaks; a governor in code refuses any move outside the budget. Streaming recognizers smooth learner errors, so every turn is re-transcribed verbatim afterwards.</p></div>
+  <div class="two">
+    <div class="fig narrow">
+      <svg viewBox="0 0 520 190" role="img" aria-label="Stacked bar of the host reply latency budget: STT final 150 ms, first token 350, header 120, TTS first byte 200, network 120, total about 950 ms against a 1.5 second gate">
+        <text x="0" y="14" class="sm mono muted">HOST REPLY, p50 BUDGET FROM END OF TURN (ms)</text>
+        <g>
+          <rect x="0" y="40" width="45" height="38" fill="var(--c1)"><title>STT final after end of turn: 150 ms</title></rect>
+          <rect x="47" y="40" width="103" height="38" fill="var(--c2)"><title>Host first token (cached prefix, effort low): 350 ms</title></rect>
+          <rect x="152" y="40" width="34" height="38" fill="var(--c3)"><title>@moves header parsed: 120 ms</title></rect>
+          <rect x="188" y="40" width="58" height="38" fill="var(--c4)"><title>TTS first byte, sentence 1: 200 ms</title></rect>
+          <rect x="248" y="40" width="34" height="38" rx="0" fill="var(--c5)"><title>LiveKit and network: 120 ms</title></rect>
+        </g>
+        <line x1="0" x2="500" y1="92" y2="92" class="axis"/>
+        <g class="sm mono muted"><text x="0" y="108">0</text><text x="140" y="108">500</text><text x="290" y="108">1,000</text><text x="440" y="108">1,500</text></g>
+        <line x1="150" x2="150" y1="86" y2="96" class="axis"/><line x1="300" x2="300" y1="86" y2="96" class="axis"/><line x1="450" x2="450" y1="86" y2="96" class="axis"/>
+        <line x1="450" x2="450" y1="32" y2="92" class="mark"/><text x="455" y="36" class="sm mono" fill="var(--amber)">gate 1.5 s</text>
+        <text x="286" y="64" class="sm mono" font-weight="500">≈ 950 ms</text>
+        <g class="sm"><text x="0" y="140" class="muted">p95 budget about 2.0 s against a 2.5 s gate.</text>
+        <text x="0" y="158" class="muted">Connect under 3 s with one warm worker task.</text>
+        <text x="0" y="176" class="muted">tools/call-bench runs 50 scripted calls in CI; a miss blocks the deploy.</text></g>
+      </svg>
+      <div class="legend"><span><i style="background:var(--c1)"></i>STT final 150</span><span><i style="background:var(--c2)"></i>first token 350</span><span><i style="background:var(--c3)"></i>header 120</span><span><i style="background:var(--c4)"></i>TTS first byte 200</span><span><i style="background:var(--c5)"></i>network 120</span></div>
+    </div>
+    <div class="fig narrow">
+      <svg viewBox="0 0 520 260" role="img" aria-label="The declare-then-speak protocol: learner turn, operator note, host header checked by the governor, speech streamed to TTS">
+        <g class="md">
+          <rect x="0" y="10" width="150" height="40" rx="6" class="box"/><text x="12" y="34">learner turn (streaming)</text>
+          <rect x="0" y="80" width="150" height="40" rx="6" class="box svc"/><text x="12" y="104">governor: allowances</text>
+          <rect x="190" y="80" width="150" height="40" rx="6" class="box"/><text x="202" y="104">host model, cached brief</text>
+          <rect x="370" y="80" width="150" height="40" rx="6" class="box svc"/><text x="382" y="104">check @moves header</text>
+          <rect x="370" y="160" width="150" height="40" rx="6" class="box"/><text x="382" y="184">TTS, sentence by sentence</text>
+          <rect x="190" y="160" width="150" height="40" rx="6" class="box" style="stroke:var(--amber)"/><text x="202" y="184">"Do not use: nudge. Again."</text>
+        </g>
+        <path d="M75 50 V76" class="arrow"/>
+        <path d="M150 100 H186" class="arrow"/><text x="154" y="94" class="sm mono muted">operator note</text>
+        <path d="M340 100 H366" class="arrow"/>
+        <path d="M445 120 V156" class="arrow"/><text x="452" y="142" class="sm mono muted">allowed</text>
+        <path d="M370 110 H355 V180 H344" class="arrow hot"/><text x="250" y="150" class="sm mono" fill="var(--amber)">violation, once</text>
+        <path d="M265 160 V124" class="arrow hot"/>
+        <text x="0" y="230" class="sm mono muted">@moves {"recast":{"heard":"I go","form":"went"},"clarify":false,"nudge":false,...}</text>
+        <text x="0" y="248" class="sm muted">You WENT to the derby with your manager? With who else?</text>
+      </svg>
+    </div>
+  </div>
+  <div class="ladder">
+    <div class="rung"><span class="k">recast</span><p>At most one per learner turn, only on the session's grammar target or an error that blurred meaning, the corrected word stressed inside a reply with its own point. The caption brightens the span for one second with no label. Never in the first call.</p></div>
+    <div class="rung"><span class="k">clarify · nudge · gap</span><p>Three clarification requests, one nudge, two to four recall gaps and one 60 to 90 s retell per main call; anxiety mode (short turns or two 8 s silences) drops the nudge and keeps one gap.</p></div>
+    <div class="rung"><span class="k">verbatim</span><p>Each turn's audio is encoded, stored under a per-call key and transcribed with disfluencies by a second recognizer; the analyst reads only that text. With voice storage off the audio is deleted the moment the transcript lands, and in any case within 15 minutes.</p></div>
+    <div class="rung"><span class="k">never</span><p>"You said X, it should be Y", grammar names, praise for grammar, scores. The governor logs a violation, re-requests once, and the offline suite fails the build on a scripted call that produces any of them.</p></div>
+  </div>
+</section>
+
+<section id="model">
+  <div class="sec-head"><span class="num">05 · 06</span><h2>Memory you can open, claims that passed a gate</h2>
+    <p class="measure">Nine stores are derived from the log and rebuildable. A life fact exists only with the learner's exact words and the event they came from. A progress sentence exists only as a claim row written by code after five checks.</p></div>
+  <div class="two">
+    <div class="fig narrow">
+      <svg viewBox="0 0 520 300" role="img" aria-label="From the event log through the after-session pass to nine stores and compiled briefs">
+        <path d="M0 40 h130 v60 h-130 z" class="box store"/><ellipse cx="65" cy="40" rx="65" ry="9" class="box store"/>
+        <text x="14" y="70" class="md" font-weight="600">events</text><text x="14" y="88" class="sm muted">append-only, UUIDv7</text>
+        <rect x="180" y="40" width="150" height="60" rx="6" class="box svc"/><text x="194" y="64" class="md" font-weight="600">after-session pass</text><text x="194" y="82" class="sm muted">AfterPassResult, one txn</text>
+        <path d="M130 70 H176" class="arrow"/>
+        <g class="sm">
+          <rect x="380" y="10" width="140" height="22" rx="4" class="box"/><text x="388" y="26">1 word bank · Beta(a,b)</text>
+          <rect x="380" y="38" width="140" height="22" rx="4" class="box"/><text x="388" y="54">2 structure map</text>
+          <rect x="380" y="66" width="140" height="22" rx="4" class="box"/><text x="388" y="82">3 error profile</text>
+          <rect x="380" y="94" width="140" height="22" rx="4" class="box"/><text x="388" y="110">4 skills (mean, sd)</text>
+          <rect x="380" y="122" width="140" height="22" rx="4" class="box"/><text x="388" y="138">5 interests</text>
+          <rect x="380" y="150" width="140" height="22" rx="4" class="box" style="stroke:var(--amber)"/><text x="388" y="166">6 life facts + quote</text>
+          <rect x="380" y="178" width="140" height="22" rx="4" class="box"/><text x="388" y="194">7 goals</text>
+          <rect x="380" y="206" width="140" height="22" rx="4" class="box"/><text x="388" y="222">8 taste</text>
+          <rect x="380" y="234" width="140" height="22" rx="4" class="box"/><text x="388" y="250">9 show canon</text>
+        </g>
+        <path d="M330 70 H355 V130 H376" class="arrow"/>
+        <text x="338" y="150" class="sm mono muted">lm_version++</text>
+        <rect x="180" y="200" width="150" height="60" rx="6" class="box"/><text x="194" y="224" class="md" font-weight="600">compiled briefs</text><text x="194" y="242" class="sm muted">teacher ≤12k · host ≤900 tokens</text>
+        <path d="M376 130 H355 V230 H334" class="arrow"/>
+        <path d="M255 200 V100" class="arrow hot" style="marker-end:none"/><text x="20" y="200" class="sm mono" fill="var(--amber)">rebuild = replay the log</text>
+        <path d="M130 180 H175 V100" class="arrow hot" style="opacity:.6"/>
+        <text x="0" y="292" class="sm muted">Learner edits in the notebook write synchronously and append an event; nothing a model says is stored without a quote.</text>
+      </svg>
+    </div>
+    <div>
+      <div class="eyebrow" style="margin-bottom:10px">The claim gate, in the order the checks run</div>
+      <div class="ladder">
+        <div class="rung"><span class="k">4 · clean evidence</span><p>Verbatim done, recognizer confidence over the span at or above the package threshold, no dial-in or voice-note source.</p></div>
+        <div class="rung"><span class="k">5 · openable</span><p>The quote is in the log and an audio range or a text fallback exists, so "how we know" is a render of the row.</p></div>
+        <div class="rung"><span class="k">1 · like for like</span><p>Same task type, same assessment version; a then-and-now compares different stimulus forms.</p></div>
+        <div class="rung"><span class="k">2 · beyond noise</span><p>A standard error from at least 12 test-retest pairs exists, and the change is at least twice it. Until then only did-it, first-ever and word-owned claims can pass.</p></div>
+        <div class="rung"><span class="k">3 · repeated</span><p>The two most recent comparable segments point the same way, each beyond the threshold.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cost">
+  <div class="sec-head"><span class="num">09</span><h2>Where a session's $0.64 goes</h2>
+    <p class="measure">Measured from <code>vendor_calls</code>, never estimated, once learners exist. The beta budget is $0.60; the stop line is $1.00 with no costed plan; the scale target is $0.35.</p></div>
+  <div class="fig">
+    <svg viewBox="0 0 1060 400" role="img" aria-label="Horizontal bars of cost per session by component, with the $0.60 budget and $1.00 stop line marked">
+      <g class="sm">
+        <text x="0" y="14" class="mono muted">USD PER DAILY SESSION · BETA STACK, GEMINI VOICE, OCTOBER 2026 LIST PRICES</text>
+        <!-- scale: 1.00 USD = 700px, origin x=220 -->
+        <g class="grid"><line x1="220" x2="220" y1="30" y2="356"/><line x1="395" x2="395" y1="30" y2="356"/><line x1="570" x2="570" y1="30" y2="356"/><line x1="745" x2="745" y1="30" y2="356"/><line x1="920" x2="920" y1="30" y2="356"/></g>
+        <g class="mono muted"><text x="216" y="372">$0</text><text x="383" y="372">$0.25</text><text x="558" y="372">$0.50</text><text x="733" y="372">$0.75</text><text x="908" y="372">$1.00</text></g>
+        <g>
+          <text x="0" y="52">Voice studio (episode, read-aloud, recap)</text><rect x="220" y="40" width="152" height="18" class="bar"><title>$0.217</title></rect><text x="378" y="54" class="mono">0.217</text>
+          <text x="0" y="82">Live call (STT, host, TTS, LiveKit)</text><rect x="220" y="70" width="85" height="18" class="bar"><title>$0.122</title></rect><text x="311" y="84" class="mono">0.122</text>
+          <text x="0" y="112">Teacher</text><rect x="220" y="100" width="54" height="18" class="bar"><title>$0.077</title></rect><text x="280" y="114" class="mono">0.077</text>
+          <text x="0" y="142">Writer and rewrites</text><rect x="220" y="130" width="39" height="18" class="bar"><title>$0.055</title></rect><text x="265" y="144" class="mono">0.055</text>
+          <text x="0" y="172">Chat host (notes off)</text><rect x="220" y="160" width="26" height="18" class="bar"><title>$0.037</title></rect><text x="252" y="174" class="mono">0.037</text>
+          <text x="0" y="202">Verbatim re-transcription, pronunciation</text><rect x="220" y="190" width="25" height="18" class="bar"><title>$0.036</title></rect><text x="251" y="204" class="mono">0.036</text>
+          <text x="0" y="232">Swap allowance (5% of sessions)</text><rect x="220" y="220" width="18" height="18" class="bar"><title>$0.025</title></rect><text x="244" y="234" class="mono">0.025</text>
+          <text x="0" y="262">Round two, 50% uptake [P1]</text><rect x="220" y="250" width="18" height="18" class="bar soft"><title>$0.025</title></rect><text x="244" y="264" class="mono">0.025</text>
+          <text x="0" y="292">Proof share and hosting</text><rect x="220" y="280" width="15" height="18" class="bar"><title>$0.021</title></rect><text x="241" y="294" class="mono">0.021</text>
+          <text x="0" y="322">Fitter, glosses, editor, embedding</text><rect x="220" y="310" width="13" height="18" class="bar"><title>$0.018</title></rect><text x="239" y="324" class="mono">0.018</text>
+          <text x="0" y="352">Analyst and memory keeper</text><rect x="220" y="340" width="4" height="18" class="bar"><title>$0.005</title></rect><text x="230" y="354" class="mono">0.005</text>
+        </g>
+        <line x1="640" x2="640" y1="30" y2="356" class="mark"/><text x="646" y="42" class="mono" fill="var(--amber)">budget $0.60</text>
+        <line x1="667" x2="667" y1="30" y2="356" class="axis" style="stroke:var(--ink)"/><text x="673" y="60" class="mono">total $0.638</text>
+        <line x1="920" x2="920" y1="30" y2="356" class="mark" style="stroke:var(--warn)"/><text x="846" y="42" class="mono" fill="var(--warn)">stop line $1.00</text>
+        <text x="0" y="394" class="mono muted">Levers in order: batch TTS where offered (−$0.07, P1) · 5 to 6 min episodes (−$0.03) · Sonnet teacher in conserve mode (−$0.05) · cheapest voice that passes the blind test.</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<section id="laws">
+  <div class="sec-head"><span class="num">00 · 08</span><h2>Product laws as code</h2>
+    <p class="measure">Each law has a mechanism that fails a build, a request or a test. The full mapping of the twelve laws and eight trust promises is in the overview file.</p></div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Law or promise</th><th>Mechanism</th></tr></thead>
+    <tbody>
+      <tr><td>Teaching is invisible</td><td>Host prompt forbids grading; governor rejects undeclared or disallowed moves; <code>notes.enabled</code> defaults off (open question 1).</td></tr>
+      <tr><td>Finite portion, by plan</td><td><code>episodes unique (learner_id, local_date, kind, slot)</code>; allowance from <code>subscriptions.episodes_per_day</code> checked in api; no next-episode route; no autoplay.</td></tr>
+      <tr><td>Three message kinds only</td><td>Only <code>forone.core.messaging</code> may import the email or push client (Ruff banned-api rule); a unit test asserts the enum size.</td></tr>
+      <tr><td>No claim without proof</td><td><code>claims.text_native</code> is written by <code>gate()</code> in code and is the only progress sentence any surface may speak.</td></tr>
+      <tr><td>Told, not inferred</td><td><code>life_facts.quote_event_id not null</code>; validator refuses a fact whose quote is not in a verbatim or chat event; no enrichment adapters exist.</td></tr>
+      <tr><td>Data is theirs</td><td>Export within 1 h; deletion ends access at once, live purge 24 h, backups 30 d; destroying the learner's data key crypto-shreds all voice.</td></tr>
+      <tr><td>Nothing per country</td><td>No default time zone; <code>native_lang</code>/<code>target_lang</code> columns; one language package directory per pair; USD list prices.</td></tr>
+      <tr><td>Inngest sees pointers</td><td>CI fails any event model with a field named name, email, text, topic, quote, transcript or audio, or a string over 200 chars.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="weeks">
+  <div class="sec-head"><span class="num">00</span><h2>Five build weeks</h2>
+    <p class="measure">P0 only. Exit on 22 December: every P0 works end to end with the Milestone 0 learners, cost per session measured, and a costed path to $0.35.</p></div>
+  <div class="weeks">
+    <div class="wk"><span class="eyebrow">Week 1 · 18 Nov</span><p>Schema and migrations, event ingestion, RLS and roles, adapters with tracing, lexicon and FSRS scheduler, language package skeleton, the 30-clip and 50-call vendor tests.</p><span class="files">01 · 02 · 05 · 09</span></div>
+    <div class="wk"><span class="eyebrow">Week 2 · 25 Nov</span><p>Teacher, writer, fitter, editor and voice studio end to end on test learners; gloss cache; episode state machine; publish.</p><span class="files">03</span></div>
+    <div class="wk"><span class="eyebrow">Week 3 · 2 Dec</span><p>Onboarding A1 to A10 with Salma, Today, player, word sheet, feed, push, payments, account.</p><span class="files">02 · 07</span></div>
+    <div class="wk"><span class="eyebrow">Week 4 · 9 Dec</span><p>Call worker: governor, turn-taking, talkback, hold-to-talk, recorder, verbatim path; voice-note fallback; chat.</p><span class="files">04</span></div>
+    <div class="wk"><span class="eyebrow">Week 5 · 16 Dec</span><p>After-session pass, memory keeper, claim gate, notebook, Controls, simple weekly proof, first then-and-now, deletion and export jobs, crisis protocol.</p><span class="files">05 · 06 · 08</span></div>
+  </div>
+</section>
+
+<section id="open">
+  <div class="sec-head"><span class="num">10</span><h2>What the architecture got wrong since 23 October, and what is still owed</h2>
+    <p class="measure">The nine architecture documents predate Muath's decisions of 23 October. The design takes a stance on each conflict and leaves the architecture files untouched; the full list of 20 items is in the open-questions file.</p></div>
+  <div class="oq">
+    <div class="oq-item"><span class="k">1 · notes</span><p><b>Salma's after-call notes, the polish card and the chat margin note were dropped by decision 3.</b> The architecture still builds them. The design keeps the tables behind a flag that defaults off. Muath decides whether a non-corrective "new for you" card survives.</p></div>
+    <div class="oq-item"><span class="k">2 · country</span><p><b>Arabic, Riyadh and SAR are baked into the architecture.</b> The design moves them into the first language package, removes the time-zone default and adds language columns.</p></div>
+    <div class="oq-item"><span class="k">3 · plans</span><p><b>Plans sell 1, 2 or 3 episodes a day; the schema allowed one.</b> A slot column and a server-side allowance fix the data; how a second episode interacts with "one open session" needs a PRD rule.</p></div>
+    <div class="oq-item"><span class="k">13 · vendors</span><p><b>Voice and recognizer vendors are open</b> until the blind test, the 30 clips and the 50 calls run in week 1. Defaults: Gemini 3.8 Flash TTS, Soniox, AssemblyAI. Hume is excluded.</p></div>
+    <div class="oq-item"><span class="k">15 · bibles</span><p><b>Nobody has written Karim, Mona and Salma.</b> Week 2 cannot test real voices without them; due before 18 November.</p></div>
+    <div class="oq-item"><span class="k">12 · counsel</span><p><b>Home region and processor register</b> wait on the legal review; the region is a Terraform variable, not code.</p></div>
+  </div>
+</section>
+
+<section id="files">
+  <div class="sec-head"><span class="num">00 → 10</span><h2>The eleven files</h2>
+    <p class="measure">Markdown with Mermaid diagrams, in <a href="https://github.com/Muath-8/for-one/tree/main/technical-design">Muath-8/for-one/technical-design</a> and in the project folder.</p></div>
+  <div class="files-grid">
+    <div class="file"><span class="num">00</span><div><h3>Overview and module map</h3><p>Services, packages, roles, the day as a sequence, laws as code, build order.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/00-overview.md">00-overview.md</a></div></div>
+    <div class="file"><span class="num">01</span><div><h3>Data model</h3><p>Every table and column, the ERD, encryption classes, retention windows, roles.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/01-data-model.md">01-data-model.md</a></div></div>
+    <div class="file"><span class="num">02</span><div><h3>API contracts</h3><p>REST, SSE, LiveKit data channels, Inngest events, TodayDoc and manifests, errors, auth scopes.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/02-api-contracts.md">02-api-contracts.md</a></div></div>
+    <div class="file"><span class="num">03</span><div><h3>Generation pipeline</h3><p>Steps, deadlines, prompt templates with variables, the coverage algorithm, caches, cost per step.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/03-generation-pipeline.md">03-generation-pipeline.md</a></div></div>
+    <div class="file"><span class="num">04</span><div><h3>Live call</h3><p>Room lifecycle, phase and turn machines, the declare-then-speak protocol, recast rules, verbatim path, latency budget.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/04-live-call.md">04-live-call.md</a></div></div>
+    <div class="file"><span class="num">05</span><div><h3>Learner model and notebook</h3><p>Facts ladder and validator, word probabilities and FSRS, structures and mistakes, replanning, briefs.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/05-learner-model.md">05-learner-model.md</a></div></div>
+    <div class="file"><span class="num">06</span><div><h3>After-session pass and proof</h3><p>Seven stages, the analyst schema, the claim gate, weekly proof modes, then-and-now, flags for notes.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/06-after-session-and-proof.md">06-after-session-and-proof.md</a></div></div>
+    <div class="file"><span class="num">07</span><div><h3>Client</h3><p>Routes, state, player, word sheet, call screen, offline PWA, feed and push, onboarding.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/07-client.md">07-client.md</a></div></div>
+    <div class="file"><span class="num">08</span><div><h3>Security and privacy</h3><p>Threat model, keys, isolation, consent machine, deletion jobs, crisis protocol, payments, residency.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/08-security-privacy.md">08-security-privacy.md</a></div></div>
+    <div class="file"><span class="num">09</span><div><h3>Observability and cost</h3><p>Tracing, measures, alarms, spend modes, offline suite, flags, deploys and on-call.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/09-observability.md">09-observability.md</a></div></div>
+    <div class="file"><span class="num">10</span><div><h3>Open questions</h3><p>Eight contradictions with the architecture, twelve decisions owed, seven assumptions to measure.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/10-open-questions.md">10-open-questions.md</a></div></div>
+  </div>
+</section>
+
+<footer>Written 6 November 2026 against concept v2, decisions.md (23 October), the nine architecture documents and PRD-v2 v3.1. Numbers marked as assumptions in the files are to be replaced by measurements in build weeks 1 and 2.</footer>
+</div>

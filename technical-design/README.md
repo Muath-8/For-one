@@ -16,4 +16,4 @@ The level below `/architecture/`: what an engineer opens to start coding. Writte
 | [09-observability.md](09-observability.md) | tracing, measures, alarms, cost controls, evals, flags, ops |
 | [10-open-questions.md](10-open-questions.md) | contradictions with the architecture, decisions owed, assumptions |
 
-Readable entry page: `technical-design.html` in this folder (published as an Artifact; link in the thread).
+Readable entry page: `technical-design.html` in this folder, published at https://claude.ai/artifact/JQbc7a1UbnSuHGyCgsb8Zk
