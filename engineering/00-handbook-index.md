@@ -2,7 +2,7 @@
 
 Written 2026-11-06 for the team that builds For one between 2026-11-18 and 2026-12-22 and runs the paid beta from 2026-12-23. The handbook covers everything needed to set up and run the build that is not product, architecture or design: those live in `PRD-v2.md`, `concept-v2.md`, `decisions.md`, `architecture/` and `design/`.
 
-The readable entry point is the handbook page (one designed HTML page, linked from the project). These Markdown files are the source of truth and are edited by pull request like code.
+The readable entry point is the handbook page: https://claude.ai/artifact/CafNuoUdqfKawrPo8LbCRp (source: `engineering/handbook.html`). These Markdown files are the source of truth and are edited by pull request like code.
 
 ## The pages
 
