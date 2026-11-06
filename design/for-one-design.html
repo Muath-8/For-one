@@ -1,0 +1,587 @@
+<title>For one design book</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,300..900&family=Martian+Mono:wdth,wght@75..112.5,300..600&family=Readex+Pro:wght@200..700&display=swap">
+<style>
+/* Layout: a single reading column (680) with full-bleed bands for the screens gallery; phone frames drawn in CSS; night studio first. */
+:root{
+  color-scheme:dark;
+  --page:#09080D;--bg:#110F17;--s1:#1A1722;--s2:#24202E;--s3:#2F2A3B;
+  --line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);
+  --text:#F5F1EA;--mute:#A59FB2;--faint:#6E6879;--on-accent:#09080D;
+  --karim:#FF8A4C;--mona:#FF5C9A;--salma:#C9BCFF;--learner:#5FE3B0;--recast:#FFC86B;--warn:#FF5D5D;
+  --focus:#8FD3FF;
+  --display:"Anybody","Arial Narrow",Impact,sans-serif;
+  --body:"Readex Pro",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  --mono:"Martian Mono",ui-monospace,Menlo,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --art-ink:rgba(245,241,234,.55);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    color-scheme:light;
+    --page:#F2EEE6;--bg:#FBF9F4;--s1:#FFFFFF;--s2:#F1EDE5;--s3:#E6E1D8;
+    --line:rgba(23,20,30,.08);--line2:rgba(23,20,30,.16);
+    --text:#17141E;--mute:#5A5566;--faint:#8B869A;--on-accent:#FFFFFF;
+    --karim:#D9601F;--mona:#D2306E;--salma:#6B57C9;--learner:#178A62;--recast:#8A5A00;--warn:#C8303A;
+    --focus:#1F6FD6;--art-ink:rgba(23,20,30,.5);
+  }
+}
+:root[data-theme="light"]{
+  color-scheme:light;
+  --page:#F2EEE6;--bg:#FBF9F4;--s1:#FFFFFF;--s2:#F1EDE5;--s3:#E6E1D8;
+  --line:rgba(23,20,30,.08);--line2:rgba(23,20,30,.16);
+  --text:#17141E;--mute:#5A5566;--faint:#8B869A;--on-accent:#FFFFFF;
+  --karim:#D9601F;--mona:#D2306E;--salma:#6B57C9;--learner:#178A62;--recast:#8A5A00;--warn:#C8303A;
+  --focus:#1F6FD6;--art-ink:rgba(23,20,30,.5);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+a{color:inherit;text-decoration-color:var(--faint);text-underline-offset:3px}
+a:hover{text-decoration-color:var(--text)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.col{max-width:680px}
+h1,h2,h3{font-family:var(--display);line-height:1.05;letter-spacing:-.01em;text-wrap:balance;margin:0}
+h2{font-size:clamp(28px,4vw,40px);font-variation-settings:"wdth" 85,"wght" 750;margin-bottom:12px}
+h3{font-size:20px;font-variation-settings:"wdth" 100,"wght" 650;margin-bottom:8px}
+p{margin:0 0 14px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);font-variation-settings:"wdth" 100,"wght" 500}
+.lede{font-size:19px;line-height:1.5;color:var(--text)}
+.mute{color:var(--mute)}
+section{padding-block:56px;border-top:1px solid var(--line)}
+section:first-of-type{border-top:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px 32px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.card{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+code,.mono{font-family:var(--mono);font-size:.85em}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:10px 12px 10px 0;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);font-weight:500}
+.tablewrap{overflow-x:auto}
+/* hero */
+.hero{padding-block:64px 40px}
+.hero .mark{font-family:var(--display);font-size:clamp(56px,11vw,128px);line-height:.9;font-variation-settings:"wdth" 62,"wght" 850;letter-spacing:-.02em}
+.hero .mark span{color:var(--salma)}
+.orbs{display:flex;gap:28px;align-items:flex-end;margin:28px 0 8px;flex-wrap:wrap}
+.orb{position:relative;border-radius:50%;flex:none;animation:breathe 2.4s var(--ease) infinite alternate}
+.orb::after{content:"";position:absolute;inset:-18%;border-radius:50%;background:inherit;filter:blur(18px);opacity:.35;z-index:-1}
+.orb.k{background:radial-gradient(circle at 35% 35%,#fff3 0,transparent 45%),var(--karim);width:96px;height:96px}
+.orb.m{background:radial-gradient(circle at 35% 35%,#fff3 0,transparent 45%),var(--mona);width:96px;height:96px;animation-delay:-.8s}
+.orb.s{background:var(--salma);width:40px;height:40px;box-shadow:0 0 0 3px var(--bg),0 0 0 4px var(--salma);animation-delay:-1.6s}
+.orb.s::after{display:none}
+.orb.l{background:radial-gradient(circle at 35% 35%,#fff3 0,transparent 45%),var(--learner);width:64px;height:64px;animation-delay:-.4s}
+.orbname{font-family:var(--display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-variation-settings:"wdth" 110,"wght" 600;color:var(--mute);text-align:center;margin-top:8px}
+@keyframes breathe{from{transform:scale(.96)}to{transform:scale(1.06)}}
+@media (prefers-reduced-motion:reduce){.orb{animation:none}}
+.toc{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:20px;font-size:14px}
+.toc a{color:var(--mute);text-decoration:none;border-bottom:1px solid var(--line2)}
+.toc a:hover{color:var(--text)}
+/* principles */
+.princ{counter-reset:p;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:4px 32px}
+.princ div{padding:14px 0;border-bottom:1px solid var(--line);min-width:0}
+.princ b{display:block;font-family:var(--display);font-size:19px;font-variation-settings:"wdth" 95,"wght" 650;margin-bottom:4px}
+.princ .t{font-family:var(--mono);font-size:12.5px;color:var(--mute);line-height:1.5;display:block;margin-top:6px}
+.princ .t::before{content:"TEST  ";color:var(--learner);letter-spacing:.08em}
+/* roles */
+.role{display:grid;grid-template-columns:48px 1fr;gap:14px;align-items:start}
+.role .orb{animation:none;width:40px;height:40px;margin-top:4px}
+.role .never{font-family:var(--mono);font-size:12.5px;color:var(--mute);margin-top:6px}
+.role .never::before{content:"NEVER  ";color:var(--warn);letter-spacing:.08em}
+/* swatches */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.sw{border-radius:10px;padding:12px;border:1px solid var(--line);min-height:84px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;min-width:0}
+.sw b{font-family:var(--display);font-size:14px;font-variation-settings:"wdth" 100,"wght" 650}
+.sw small{font-family:var(--mono);font-size:11px;opacity:.8}
+.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.theme{border-radius:16px;padding:18px;border:1px solid var(--line)}
+.theme.dark{background:#110F17;color:#F5F1EA}
+.theme.light{background:#FBF9F4;color:#17141E}
+.theme .eyebrow{color:inherit;opacity:.7}
+.theme .sw{border-color:transparent}
+.theme.dark .sw{border-color:rgba(255,255,255,.08)}
+.theme.light .sw{border-color:rgba(23,20,30,.1)}
+/* type specimens */
+.spec{display:grid;gap:14px}
+.spec .row{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line)}
+.spec .row .eyebrow{font-size:11px}
+.spec .cover{font-family:var(--display);font-size:clamp(34px,6vw,56px);line-height:1;font-variation-settings:"wdth" 68,"wght" 820}
+.spec .title{font-family:var(--display);font-size:28px;font-variation-settings:"wdth" 90,"wght" 700}
+.spec .name{font-family:var(--display);font-size:14px;letter-spacing:.08em;text-transform:uppercase;font-variation-settings:"wdth" 110,"wght" 600}
+.spec .read{font-size:19px;line-height:1.7}
+.spec .ar{font-size:19px;line-height:1.9;direction:rtl;text-align:right}
+.spec .lab{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+@media (max-width:520px){.spec .row{grid-template-columns:1fr;gap:4px}}
+.scale{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}
+.scale i{display:block;background:var(--salma);border-radius:3px}
+.scale span{font-family:var(--mono);font-size:11px;color:var(--mute);display:block;text-align:center;margin-top:6px}
+.radii{display:flex;gap:14px;flex-wrap:wrap}
+.radii i{display:block;width:56px;height:56px;background:var(--s2);border:1px solid var(--line2)}
+/* phones */
+.band{background:var(--page);border-block:1px solid var(--line);padding-block:48px}
+.phones{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:28px 24px;margin-top:28px}
+.ph{min-width:0}
+.ph .cap{margin-top:12px}
+.ph .cap b{display:block;font-family:var(--display);font-size:17px;font-variation-settings:"wdth" 95,"wght" 650}
+.ph .cap span{font-size:13.5px;color:var(--mute);display:block;line-height:1.45}
+.phone{background:#110F17;color:#F5F1EA;border-radius:34px;border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 50px rgba(0,0,0,.45),inset 0 0 0 6px #09080D;aspect-ratio:9/19;max-width:100%;padding:22px 16px 16px;display:flex;flex-direction:column;gap:8px;overflow:hidden;position:relative;font-size:12.5px;line-height:1.4;--k:#FF8A4C;--m:#FF5C9A;--sa:#C9BCFF;--lr:#5FE3B0;--rc:#FFC86B;--mu:#A59FB2;--s1p:#1A1722;--s2p:#24202E;--lnp:rgba(255,255,255,.1)}
+.phone.day{background:#FBF9F4;color:#17141E;--k:#D9601F;--m:#D2306E;--sa:#6B57C9;--lr:#178A62;--rc:#8A5A00;--mu:#5A5566;--s1p:#FFFFFF;--s2p:#F1EDE5;--lnp:rgba(23,20,30,.1);box-shadow:0 20px 50px rgba(0,0,0,.25),inset 0 0 0 6px #09080D}
+.phone .ml{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
+.phone .dl{font-family:var(--display)}
+.phone .hostline{display:flex;gap:7px;align-items:flex-start;color:var(--mu);font-size:11.5px}
+.phone .d{width:16px;height:16px;border-radius:50%;flex:none;margin-top:2px}
+.phone .d.k{background:var(--k)}.phone .d.m{background:var(--m)}.phone .d.s{background:var(--sa)}.phone .d.l{background:var(--lr)}
+.cover{position:relative;border-radius:14px;overflow:hidden;background:var(--s1p);aspect-ratio:1/1.08;padding:12px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
+.cover canvas{position:absolute;inset:0;width:100%;height:100%}
+.cover>*{position:relative}
+.cover .ttl{font-family:var(--display);font-size:26px;line-height:.95;font-variation-settings:"wdth" 65,"wght" 850;letter-spacing:-.01em}
+.cover .hosts{display:flex;gap:4px}
+.cover .hosts .d{width:14px;height:14px;margin:0}
+.pill{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:9px 14px;font-weight:600;font-size:12.5px;background:var(--lr);color:#09080D;align-self:flex-start}
+.phone.day .pill{color:#fff}
+.quiet{color:var(--mu);font-size:11.5px;padding:7px 0;border-top:1px solid var(--lnp);display:flex;justify-content:space-between}
+.tabs{margin-top:auto;display:flex;justify-content:space-around;font-family:var(--display);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-variation-settings:"wdth" 110,"wght" 600;color:var(--mu);padding-top:10px;border-top:1px solid var(--lnp)}
+.tabs b{color:inherit;font-weight:inherit}
+.tabs .on{color:var(--lr)}
+/* player */
+.tr{display:flex;flex-direction:column;gap:6px;font-size:12.5px;line-height:1.45;color:var(--mu);flex:1;justify-content:center}
+.tr .now{color:inherit;font-size:15px;line-height:1.4;border-left:2px solid var(--lr);padding-left:8px;margin-left:-10px}
+.phone .now{color:#F5F1EA}.phone.day .now{color:#17141E}
+.tr .gl{font-size:10.5px;color:var(--mu);direction:rtl;text-align:right;margin-top:2px}
+.scrub{height:3px;background:var(--lnp);border-radius:2px;position:relative;margin:4px 0}
+.scrub i{position:absolute;left:0;top:0;bottom:0;width:31%;background:var(--lr);border-radius:2px}
+.ctr{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--mu)}
+.ctr .play{width:40px;height:40px;border-radius:50%;background:var(--s2p);display:grid;place-items:center;color:inherit;font-size:14px}
+.huh{align-self:center;border-radius:999px;padding:9px 22px;border:1px solid var(--lnp);font-family:var(--display);font-size:15px;font-variation-settings:"wdth" 90,"wght" 700}
+/* call */
+.bigorb{width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff3 0,transparent 45%),var(--k);margin:10px auto 4px;box-shadow:0 0 40px -6px var(--k)}
+.capt{font-size:14px;line-height:1.4;padding:4px 0}
+.capt b{color:var(--rc);font-weight:600}
+.holdpad{margin-top:auto;height:78px;border-radius:16px;border:1.5px solid var(--lr);display:grid;place-items:center;color:var(--mu);font-size:12px;background:color-mix(in oklab,var(--lr) 10%,transparent)}
+.callrow{display:flex;justify-content:space-between;align-items:center;color:var(--mu);font-size:11px}
+.wordbtn{width:44px;height:44px;border-radius:50%;background:var(--s2p);display:grid;place-items:center;font-family:var(--display);font-size:11px;font-variation-settings:"wdth" 100,"wght" 650;color:inherit}
+/* notebook */
+.nb .row{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--lnp);font-size:12.5px}
+.nb .row span{color:var(--mu);font-family:var(--mono);font-size:10.5px}
+.nb .work{background:var(--s1p);border-radius:12px;padding:10px 12px;font-size:12px;display:flex;flex-direction:column;gap:6px}
+.nb .work i{font-style:normal;display:flex;justify-content:space-between;color:inherit}
+.nb .work i em{font-style:normal;color:var(--mu)}
+/* proof */
+.pcover{background:linear-gradient(160deg,color-mix(in oklab,var(--sa) 55%,#110F17),#110F17 85%);border-radius:14px;padding:12px;aspect-ratio:1.6;display:flex;flex-direction:column;justify-content:flex-end}
+.phone.day .pcover{background:linear-gradient(160deg,color-mix(in oklab,var(--sa) 45%,#FBF9F4),#FBF9F4 85%)}
+.clips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.clip{background:var(--s1p);border-radius:10px;padding:10px;font-size:11px;color:var(--mu)}
+.clip b{display:block;font-family:var(--mono);font-size:13px;color:inherit;font-weight:500}
+.phone .clip b{color:#F5F1EA}.phone.day .clip b{color:#17141E}
+/* plans */
+.plan{border:1px solid var(--lnp);border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.plan.rec{border-color:var(--lr);background:color-mix(in oklab,var(--lr) 8%,transparent)}
+.plan .pr{font-family:var(--display);font-size:20px;font-variation-settings:"wdth" 80,"wght" 750;line-height:1}
+.plan small{display:block;font-family:var(--mono);font-size:9.5px;color:var(--mu);margin-top:3px}
+.plan .tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--lr)}
+/* diagrams */
+.dia{overflow-x:auto;margin-top:16px}
+.dia svg{display:block;max-width:100%;height:auto;font-family:var(--body)}
+.dia text{fill:var(--text);font-size:13px}
+.dia .m{fill:var(--mute);font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+.dia .box{fill:var(--s1);stroke:var(--line2)}
+.dia .ln{stroke:var(--faint);fill:none;stroke-width:1.5}
+.dia .ak{stroke:var(--karim)}.dia .am{stroke:var(--mona)}.dia .as{stroke:var(--salma)}.dia .al{stroke:var(--learner)}
+/* bars */
+.bars{display:grid;grid-template-columns:90px 1fr 48px;gap:8px 12px;align-items:center;font-size:14px;margin-top:12px}
+.bars i{display:block;height:14px;border-radius:0 4px 4px 0;background:var(--salma)}
+.bars .v{font-family:var(--mono);font-size:12px;color:var(--mute);text-align:right;font-variant-numeric:tabular-nums}
+.bars .lbl{color:var(--text)}
+/* states table */
+.st td:first-child{font-family:var(--display);font-variation-settings:"wdth" 95,"wght" 650;white-space:nowrap}
+/* open questions */
+.oq{display:grid;gap:10px}
+.oq div{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.oq .n{font-family:var(--mono);color:var(--faint);font-size:12px;padding-top:4px}
+.oq b{font-family:var(--display);font-size:17px;font-variation-settings:"wdth" 95,"wght" 650;display:block}
+.oq span{color:var(--mute);font-size:14px}
+.files{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.files a{display:block;background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none;min-width:0}
+.files a b{font-family:var(--display);font-size:16px;font-variation-settings:"wdth" 95,"wght" 650;display:block}
+.files a span{font-size:13px;color:var(--mute)}
+.files a:hover{border-color:var(--line2)}
+.note{border-left:2px solid var(--salma);padding-left:14px;color:var(--mute);font-size:14.5px}
+footer{padding-block:40px 60px;color:var(--mute);font-size:13.5px;border-top:1px solid var(--line)}
+</style>
+
+<div class="wrap">
+<header class="hero">
+  <div class="eyebrow">For one · design documentation · 6 Nov 2026</div>
+  <div class="mark">A studio<br>with <span>one</span><br>listener.</div>
+  <div class="orbs">
+    <div><div class="orb k" aria-hidden="true"></div><div class="orbname">Karim</div></div>
+    <div><div class="orb m" aria-hidden="true"></div><div class="orbname">Mona</div></div>
+    <div><div class="orb l" aria-hidden="true"></div><div class="orbname">You</div></div>
+    <div><div class="orb s" aria-hidden="true"></div><div class="orbname">Salma</div></div>
+  </div>
+  <p class="lede col">For one makes one show for one person, every day. The product is sound; the screen is the studio window. This book sets the principles, the design system, the map, the flows and the key screens so the beta can be built without reopening the product decisions.</p>
+  <nav class="toc" aria-label="Sections">
+    <a href="#principles">Principles</a><a href="#roles">Who is who</a><a href="#system">Design system</a><a href="#screens">Key screens</a><a href="#day">A day</a><a href="#map">The map</a><a href="#states">Today's states</a><a href="#call">The call</a><a href="#open">Open questions</a><a href="#files">The documents</a>
+  </nav>
+</header>
+
+<section id="principles">
+  <div class="eyebrow">00 · Principles</div>
+  <h2>Ten rules, each with a test</h2>
+  <p class="col mute">Three facts shape every screen: the product is sound, teaching is invisible, and progress is evidence rather than games. The rules below follow from them, and each can be applied to a mockup and answered yes or no.</p>
+  <div class="princ">
+    <div><b>One thing, made today</b>The home screen is today's episode and one button. Alternatives are one tap away and quieter.<span class="t">Within two seconds of opening, does the learner know the one thing to do?</span></div>
+    <div><b>Ears first, eyes optional</b>Play, replay a sentence, accept the call, hold the floor, ask for a word, end: all from headphone and lock-screen controls.<span class="t">Can a whole session happen on a bus with the phone in a pocket?</span></div>
+    <div><b>The teacher has a voice, never a dashboard</b>Progress arrives as Salma's sentences and the learner's own recordings.<span class="t">Would a good human tutor say this out loud?</span></div>
+    <div><b>Nobody is ever told they were wrong</b>No screen, card, colour or sound marks a learner sentence as incorrect. The right form is heard in the host's reply and returns in later episodes.<span class="t">Find any pixel that says "this was wrong". There must be none.</span></div>
+    <div><b>Hidden by default, open on request</b>The notebook shows every fact with its source and a delete, the "working on" list of at most three, and why today's episode was made.<span class="t">Does every hidden decision have a place where it can be seen and corrected?</span></div>
+    <div><b>Never leave a debt</b>No missed days, overdue items or unread counts. A learner back after three weeks sees a day like any other, plus an easier return episode that never mentions the gap.<span class="t">Does any screen change because the learner was away?</span></div>
+    <div><b>A finite, good portion</b>A session ends like a show: sting, sign-off, tomorrow's time. No autoplay, no "one more", no infinite scroll.<span class="t">After the session, is there anything left to scroll?</span></div>
+    <div><b>Make speaking safe</b>Hold to keep the floor; the host waits as long as needed. Hold the word button and say it in your own language; the host gives it back and carries on.<span class="t">What does a frozen learner do? There must be an obvious, kind answer.</span></div>
+    <div><b>Sound is interface</b>A breath and a rising tone before your turn; a closer, drier voice for Salma; a sting at each end of an episode. No reward sounds, ever.<span class="t">With eyes closed, can the learner tell who is talking and whose turn it is?</span></div>
+    <div><b>Your life, your words, your voice</b>Every example on screen is the learner's own sentence, recording, team or interview. No stock sentences anywhere.<span class="t">Could this screen be shown to a different learner unchanged?</span></div>
+  </div>
+</section>
+
+<section id="roles">
+  <div class="eyebrow">Who is who on screen</div>
+  <h2>Three voices and nothing else</h2>
+  <div class="grid3" style="margin-top:20px">
+    <div class="role"><div class="orb k" aria-hidden="true"></div><div><h3>The hosts</h3><p class="mute" style="font-size:14.5px">Karim and Mona, in the target language only. They make the episode, argue on the call, banter in the chat, echo the right form inside a reply, leave gaps for last week's words, ask for a sixty-second retell, give a word back when asked, explain only when asked.</p><div class="never">correct, grade, mention progress, interrupt, praise the person, pretend to be human</div></div></div>
+    <div class="role"><div class="orb s" aria-hidden="true"></div><div><h3>Salma, the producer</h3><p class="mute" style="font-size:14.5px">The face of the app in the learner's own language. Onboarding, the notebook, "why this episode", the weekly proof, the season finale, the plan and the controls in plain words. Silent during calls.</p><div class="never">correct, send notes after a call, exclaim, guilt, persuade</div></div></div>
+    <div class="role"><div class="orb l" aria-hidden="true"></div><div><h3>The learner</h3><p class="mute" style="font-size:14.5px">Picks tomorrow from three ideas, takes sides, calls in, keeps words, vetoes what the show works on. The green orb appears only on the hold pad and on the tape.</p><div class="never">fill in forms, take tests, see a score</div></div></div>
+  </div>
+</section>
+
+<section id="system">
+  <div class="eyebrow">01 · Design system</div>
+  <h2>Night studio, with a daylight version</h2>
+  <p class="col mute">Dark is the default because the show is heard at 7:40 on a bus and at night in bed. Colour comes from the voices, never from status: there is no green tick and no red mark anywhere near a learner's words. Tokens are in <code>tokens.css</code> and <code>tokens.json</code>.</p>
+  <div class="themes" style="margin-top:24px">
+    <div class="theme dark">
+      <div class="eyebrow">Dark · default</div>
+      <div class="swatches" style="margin-top:10px">
+        <div class="sw" style="background:#09080D"><b>page</b><small>#09080D</small></div>
+        <div class="sw" style="background:#110F17"><b>bg</b><small>#110F17</small></div>
+        <div class="sw" style="background:#1A1722"><b>s1</b><small>#1A1722</small></div>
+        <div class="sw" style="background:#24202E"><b>s2</b><small>#24202E</small></div>
+        <div class="sw" style="background:#FF8A4C;color:#09080D"><b>Karim</b><small>#FF8A4C</small></div>
+        <div class="sw" style="background:#FF5C9A;color:#09080D"><b>Mona</b><small>#FF5C9A</small></div>
+        <div class="sw" style="background:#C9BCFF;color:#09080D"><b>Salma</b><small>#C9BCFF</small></div>
+        <div class="sw" style="background:#5FE3B0;color:#09080D"><b>learner</b><small>#5FE3B0</small></div>
+        <div class="sw" style="background:#FFC86B;color:#09080D"><b>recast</b><small>#FFC86B · caption only</small></div>
+        <div class="sw" style="background:#FF5D5D;color:#09080D"><b>warn</b><small>#FF5D5D · system only</small></div>
+        <div class="sw" style="background:#1A1722;color:#F5F1EA"><b>text</b><small>#F5F1EA</small></div>
+        <div class="sw" style="background:#1A1722;color:#A59FB2"><b>mute</b><small>#A59FB2</small></div>
+      </div>
+    </div>
+    <div class="theme light">
+      <div class="eyebrow">Light · daylight</div>
+      <div class="swatches" style="margin-top:10px">
+        <div class="sw" style="background:#F2EEE6"><b>page</b><small>#F2EEE6</small></div>
+        <div class="sw" style="background:#FBF9F4"><b>bg</b><small>#FBF9F4</small></div>
+        <div class="sw" style="background:#FFFFFF"><b>s1</b><small>#FFFFFF</small></div>
+        <div class="sw" style="background:#F1EDE5"><b>s2</b><small>#F1EDE5</small></div>
+        <div class="sw" style="background:#D9601F;color:#fff"><b>Karim</b><small>#D9601F</small></div>
+        <div class="sw" style="background:#D2306E;color:#fff"><b>Mona</b><small>#D2306E</small></div>
+        <div class="sw" style="background:#6B57C9;color:#fff"><b>Salma</b><small>#6B57C9</small></div>
+        <div class="sw" style="background:#178A62;color:#fff"><b>learner</b><small>#178A62</small></div>
+        <div class="sw" style="background:#8A5A00;color:#fff"><b>recast</b><small>#8A5A00 · caption only</small></div>
+        <div class="sw" style="background:#C8303A;color:#fff"><b>warn</b><small>#C8303A · system only</small></div>
+        <div class="sw" style="background:#FFFFFF;color:#17141E"><b>text</b><small>#17141E</small></div>
+        <div class="sw" style="background:#FFFFFF;color:#5A5566"><b>mute</b><small>#5A5566</small></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:40px">Type</h3>
+  <p class="col mute">One condensed display face does the work illustration would do elsewhere, loud on covers and quiet everywhere else. The body face sets Arabic and Latin with the same rhythm. The mono face carries timecodes, dates and labels.</p>
+  <div class="spec">
+    <div class="row"><div class="eyebrow">Cover · Anybody 68/820</div><div class="cover">MONA IS NOT NICE</div></div>
+    <div class="row"><div class="eyebrow">Screen title · 90/700</div><div class="title">Notebook</div></div>
+    <div class="row"><div class="eyebrow">Host name · 110/600</div><div class="name">Karim · 2:41</div></div>
+    <div class="row"><div class="eyebrow">Reading · Readex Pro 19/1.7</div><div class="read">So you'd start him because he scored twice. Fair. But Saturday was against a team that sat back for ninety minutes.</div></div>
+    <div class="row"><div class="eyebrow">Arabic · Readex Pro 19/1.9</div><div class="ar">عن أي شيء تستطيع أن تتكلم لساعة كاملة؟</div></div>
+    <div class="row"><div class="eyebrow">Label · Martian Mono 12</div><div class="lab">7 min · call · article</div></div>
+  </div>
+
+  <div class="grid2" style="margin-top:36px">
+    <div>
+      <h3>Space, 4pt grid</h3>
+      <div class="scale">
+        <div><i style="width:4px;height:4px"></i><span>4</span></div>
+        <div><i style="width:8px;height:8px"></i><span>8</span></div>
+        <div><i style="width:12px;height:12px"></i><span>12</span></div>
+        <div><i style="width:16px;height:16px"></i><span>16</span></div>
+        <div><i style="width:24px;height:24px"></i><span>24</span></div>
+        <div><i style="width:32px;height:32px"></i><span>32</span></div>
+        <div><i style="width:48px;height:48px"></i><span>48</span></div>
+        <div><i style="width:64px;height:64px"></i><span>64</span></div>
+      </div>
+      <p class="mute" style="font-size:14px;margin-top:12px">Phone gutter 20. Reading measure 34rem. Minimum tap target 44. The hold pad is 112 tall on purpose.</p>
+    </div>
+    <div>
+      <h3>Radius and motion</h3>
+      <div class="radii"><i style="border-radius:6px"></i><i style="border-radius:10px"></i><i style="border-radius:14px"></i><i style="border-radius:20px"></i><i style="border-radius:999px"></i></div>
+      <p class="mute" style="font-size:14px;margin-top:12px">One easing, four durations: 120 for taps, 200 for sheets, 320 for screens, 600 for the orbs' breath and the cover reveal. Nothing about progress animates. All durations fall to zero under reduced motion.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:36px">What is not in the system, on purpose</h3>
+  <p class="col mute">Progress bars for learning, streak counters, badges, confetti, level labels, percentage rings, red error states on text, modals that interrupt audio, infinite lists, faces for the hosts, chip grids, explanatory text inside the app.</p>
+</section>
+</div>
+
+<div class="band" id="screens">
+<div class="wrap">
+  <div class="eyebrow">04 · Key screens</div>
+  <h2>Six screens that carry the product</h2>
+  <p class="col mute">Drawn from the screen specifications. The example learner is Faisal, learning English from Arabic; nothing is tuned to his country. The second phone is the daylight theme.</p>
+  <div class="phones">
+    <div class="ph"><div class="phone">
+      <div class="ml">Thursday 6 Nov</div>
+      <div class="hostline"><span class="d m"></span><span>Mona: Still can't believe you called the new coach a genius.</span></div>
+      <div class="cover"><canvas data-seed="7" data-hue="28"></canvas><div class="hosts"><span class="d k"></span><span class="d m"></span></div><div class="ttl">MONA IS NOT NICE</div><div class="ml">7 min · call · article</div><div class="pill">Play</div></div>
+      <div class="quiet"><span>Why this episode?</span><span>›</span></div>
+      <div class="quiet"><span>2 other ideas</span><span>⌄</span></div>
+      <div class="quiet"><span>Tell Salma an idea</span><span>🎙</span></div>
+      <div class="tabs"><b class="on">Today</b><b>Show</b><b>Notebook</b></div>
+    </div><div class="cap"><b>Today</b><span>One hero, one button. A real memory from a host above it. Everything else is quieter and one tap away.</span></div></div>
+
+    <div class="ph"><div class="phone day">
+      <div class="ml">⌄ &nbsp; Mona is not nice</div>
+      <div class="tr">
+        <div>Mona: and honestly I think he's been</div>
+        <div class="now">KARIM: Overrated? He <u style="text-decoration-color:var(--lr)">scored twice</u> on Saturday!<div class="gl">مُبالغ في تقديره · سجّل هدفين</div></div>
+        <div>Mona: Twice against a team that sat back…</div>
+        <div>Karim: Doesn't matter. Faisal, settle this.</div>
+      </div>
+      <div class="scrub"><i></i></div>
+      <div class="ctr"><span class="mono">2:14 / 7:02</span><span class="play">❚❚</span><span>0.85×</span></div>
+      <div class="ctr"><span>⟲ line</span><span class="huh">Huh?</span><span>words</span></div>
+    </div><div class="cap"><b>Player, with Huh? open</b><span>The unit is the sentence. Huh? replays the last line slower and unfolds glosses in the learner's language. Tap any word. Daylight theme.</span></div></div>
+
+    <div class="ph"><div class="phone">
+      <div class="ml">Karim · 2:41</div>
+      <div class="bigorb" aria-hidden="true"></div>
+      <div class="dl" style="text-align:center;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)">Karim</div>
+      <div class="capt">Oh, you <b>went</b> there yesterday? And what happened?</div>
+      <div class="holdpad">hold to keep the floor</div>
+      <div class="callrow"><span class="wordbtn">word</span><span>mute</span><span>✕</span></div>
+    </div><div class="cap"><b>The call</b><span>Open mic, host captions only. The echoed form is heavier in the caption and nothing else. The pad keeps the floor; the word button gives a word back.</span></div></div>
+
+    <div class="ph"><div class="phone nb">
+      <div class="dl" style="font-size:24px;font-variation-settings:'wdth' 90,'wght' 700">Notebook</div>
+      <div class="hostline"><span class="d s"></span><span>Salma's notes on Faisal</span></div>
+      <div class="ml" style="margin-top:4px">Working on with you</div>
+      <div class="work"><i>Past tense in stories <em>✕</em></i><i>Talking about plans ("I'm going to…") <em>✕</em></i><i>6 words from this week <em>✕</em></i></div>
+      <div class="row">About you <span>14</span></div>
+      <div class="row">Words you own <span>212</span></div>
+      <div class="row">The tape <span>3</span></div>
+      <div class="row">Out in the world <span>4</span></div>
+      <div class="row">Hours <span>41 heard · 6 spoken</span></div>
+      <div class="row">Controls <span>›</span></div>
+      <div class="tabs"><b>Today</b><b>Show</b><b class="on">Notebook</b></div>
+    </div><div class="cap"><b>Notebook</b><span>The teacher's file, open. Each fact with its quote and a delete. A "working on" list of at most three the learner can veto. No chart anywhere.</span></div></div>
+
+    <div class="ph"><div class="phone">
+      <div class="pcover"><div class="ml">Week 6 · Salma</div><div class="dl" style="font-size:20px;line-height:1;font-variation-settings:'wdth' 70,'wght' 800">YOU TOLD THE WHOLE STORY IN THE PAST TENSE</div></div>
+      <div class="clips"><div class="clip"><b>0:48</b>Sep 12 · then ▶</div><div class="clip"><b>2:05</b>Nov 4 · now ▶</div></div>
+      <div style="font-size:12.5px">On Tuesday you told Mona about the interview from start to finish, all in the past. Next: talking about plans.</div>
+      <div class="quiet"><span>How we know</span><span>⌄</span></div>
+      <div class="pill" style="margin-top:auto;align-self:center">Done</div>
+    </div><div class="cap"><b>Weekly proof</b><span>Two minutes of Salma, one claim that passed the gate, the clip pair, how we know. A flat week says so and names the one change.</span></div></div>
+
+    <div class="ph"><div class="phone">
+      <div class="dl" style="font-size:24px;font-variation-settings:'wdth' 90,'wght' 700">Your plan</div>
+      <div class="plan"><div><div class="pr">1 a day</div><small>$19.99 · $0.67 an episode</small></div><div class="dl">$19.99</div></div>
+      <div class="plan rec"><div><div class="tag">Recommended</div><div class="pr">2 a day</div><small>about $1 a day · $0.50 an episode</small></div><div class="dl">$29.99</div></div>
+      <div class="plan"><div><div class="pr">3 a day</div><small>$44.99 · $0.50 an episode</small></div><div class="dl">$44.99</div></div>
+      <div style="font-size:11.5px;color:var(--mu)">Every plan: listen again as often as you like, the article, the chat, round two. A tutor is about $160 a month for two lessons a week.</div>
+      <div class="pill" style="margin-top:auto;align-self:stretch;justify-content:center">Choose 2 a day</div>
+      <div class="ml" style="text-align:center">Cancel in one tap, any time</div>
+    </div><div class="cap"><b>Plans</b><span>Three plans, the middle one recommended, the top one as anchor, price per day. No countdowns, no scarcity, no pre-ticked upgrade.</span></div></div>
+  </div>
+</div>
+</div>
+
+<div class="wrap">
+<section id="day">
+  <div class="eyebrow">03 · Flows</div>
+  <h2>A day, from the drop to tomorrow's choice</h2>
+  <p class="col mute">The episode drops at the time the learner chose. Doors open in any order; reading before the call is suggested because the article arms it. Nothing is shown after the call. Tomorrow is chosen tonight.</p>
+  <div class="dia">
+    <svg viewBox="0 0 960 250" role="img" aria-label="Timeline of a day: drop, episode, throw, call, nothing after, article and chat, tomorrow's choice">
+      <line x1="40" y1="120" x2="920" y2="120" class="ln"/>
+      <g>
+        <circle cx="60" cy="120" r="7" fill="var(--salma)"/><text x="60" y="80" text-anchor="middle" class="m">7:40</text><text x="60" y="160" text-anchor="middle">The drop</text><text x="60" y="180" text-anchor="middle" class="m">one cue</text>
+        <rect x="120" y="98" width="150" height="44" rx="10" class="box"/><text x="195" y="125" text-anchor="middle">Episode · 5 to 7 min</text><text x="195" y="80" text-anchor="middle" class="m">Ears</text><text x="195" y="165" text-anchor="middle" class="m">cold open · Huh? · tap a word</text>
+        <circle cx="300" cy="120" r="7" fill="var(--karim)"/><text x="300" y="160" text-anchor="middle">The throw</text><text x="300" y="180" text-anchor="middle" class="m">call · read · later</text>
+        <rect x="340" y="98" width="150" height="44" rx="10" class="box" style="stroke:var(--learner)"/><text x="415" y="125" text-anchor="middle">Call · 5 to 7 min</text><text x="415" y="80" text-anchor="middle" class="m">Voice · 4+ min of you</text><text x="415" y="165" text-anchor="middle" class="m">hold · word · retell</text>
+        <circle cx="520" cy="120" r="7" fill="var(--faint)"/><text x="520" y="160" text-anchor="middle">Nothing</text><text x="520" y="180" text-anchor="middle" class="m">no notes · no score</text>
+        <rect x="560" y="98" width="150" height="44" rx="10" class="box"/><text x="635" y="125" text-anchor="middle">Article · chat</text><text x="635" y="80" text-anchor="middle" class="m">Eyes · lunch</text><text x="635" y="165" text-anchor="middle" class="m">every word tappable</text>
+        <circle cx="740" cy="120" r="7" fill="var(--mona)"/><text x="740" y="160" text-anchor="middle">Tomorrow</text><text x="740" y="180" text-anchor="middle" class="m">pick 1 of 3 ideas</text>
+        <rect x="780" y="98" width="140" height="44" rx="10" class="box" style="stroke:var(--salma)"/><text x="850" y="125" text-anchor="middle">The wrap</text><text x="850" y="80" text-anchor="middle" class="m">sting · sign-off</text><text x="850" y="165" text-anchor="middle" class="m">nothing left to scroll</text>
+      </g>
+      <text x="40" y="230" class="m">A bad day: the small door (90-second recap, one voice note) counts fully.   After a gap: a return episode, one step easier, never mentioning the days.</text>
+    </svg>
+  </div>
+  <div class="grid2" style="margin-top:28px">
+    <div>
+      <h3>Where the time goes</h3>
+      <p class="mute" style="font-size:14px">Estimated share of a learner's time by mode, from the UI/UX lens. It is why lock screen and headphones come before any screen.</p>
+      <div class="bars" role="img" aria-label="Ears 65 percent, voice 20 percent, eyes 15 percent, estimates">
+        <span class="lbl">Ears</span><i style="width:65%"></i><span class="v">~65%</span>
+        <span class="lbl">Voice</span><i style="width:20%"></i><span class="v">~20%</span>
+        <span class="lbl">Eyes</span><i style="width:15%"></i><span class="v">~15%</span>
+      </div>
+    </div>
+    <div>
+      <h3>The first ten minutes (order A)</h3>
+      <p class="mute" style="font-size:14px">Sound in under a minute, the first spoken sentence within five, the account only once there is something to keep. Order B (account first) is designed too; the steps are the same and the order is configurable for the pilot.</p>
+      <div class="tablewrap"><table>
+        <tr><th>Step</th><th>Minutes</th></tr>
+        <tr><td>Open, one tap</td><td class="mono">0:00</td></tr>
+        <tr><td>Salma's voice, three questions, fact cards</td><td class="mono">0:30 to 3:30</td></tr>
+        <tr><td>Casting while the pilot is made</td><td class="mono">3:30 to 4:30</td></tr>
+        <tr><td>Pilot episode, then the first call</td><td class="mono">4:30 to 8:30</td></tr>
+        <tr><td>Keep your show: account, drop time, consent, trial</td><td class="mono">8:30 to 9:30</td></tr>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<section id="map">
+  <div class="eyebrow">02 · Information architecture</div>
+  <h2>Three places, four modes, one feed</h2>
+  <p class="col mute">Today, Show and Notebook are places. The player, the call, the proof and the finale are modes that hide the navigation. Everything not on this map is a sentence to Salma.</p>
+  <div class="dia">
+    <svg viewBox="0 0 960 330" role="img" aria-label="Map: Today, Show and Notebook as destinations; player, call, proof and finale as modes; the podcast feed and the sample page alongside">
+      <rect x="20" y="20" width="280" height="130" rx="14" class="box" style="stroke:var(--learner)"/><text x="40" y="48" class="m">TODAY</text><text x="40" y="76">Hero cover → Player → Throw → Call</text><text x="40" y="100">Why this episode · 2 other ideas</text><text x="40" y="124">Tell Salma · small door · proof cover</text>
+      <rect x="340" y="20" width="280" height="130" rx="14" class="box"/><text x="360" y="48" class="m">SHOW</text><text x="360" y="76">Seasons as rows of covers</text><text x="360" y="100">Proofs · finales</text><text x="360" y="124">Re-listening is unlimited</text>
+      <rect x="660" y="20" width="280" height="130" rx="14" class="box" style="stroke:var(--salma)"/><text x="680" y="48" class="m">NOTEBOOK</text><text x="680" y="76">Working on (≤3) · About you</text><text x="680" y="100">Words you own · The tape · Hours</text><text x="680" y="124">Out in the world · Controls</text>
+      <path d="M160 150 v40" class="ln al"/><path d="M480 150 v40" class="ln"/><path d="M800 150 v40" class="ln as"/>
+      <rect x="20" y="190" width="200" height="50" rx="10" class="box"/><text x="120" y="221" text-anchor="middle">Player (mode)</text>
+      <rect x="240" y="190" width="200" height="50" rx="10" class="box" style="stroke:var(--karim)"/><text x="340" y="221" text-anchor="middle">Call (mode)</text>
+      <rect x="500" y="190" width="200" height="50" rx="10" class="box" style="stroke:var(--salma)"/><text x="600" y="221" text-anchor="middle">Proof (mode)</text>
+      <rect x="720" y="190" width="220" height="50" rx="10" class="box" style="stroke:var(--salma)"/><text x="830" y="221" text-anchor="middle">Finale and the tape (mode)</text>
+      <rect x="20" y="270" width="440" height="44" rx="10" class="box" style="stroke-dasharray:4 4"/><text x="240" y="297" text-anchor="middle">Private podcast feed: episode and proof audio, a deep link to call in</text>
+      <rect x="500" y="270" width="440" height="44" rx="10" class="box" style="stroke-dasharray:4 4"/><text x="720" y="297" text-anchor="middle">Sample page (public): one question, a 90-second episode, Start your show</text>
+    </svg>
+  </div>
+  <div class="grid2" style="margin-top:24px">
+    <div class="card"><h3>Web app plus feed</h3><p class="mute" style="font-size:14px;margin:0">Same screens. Adds a "keep the screen on" hint before calls and an install card once. The feed carries lock-screen listening. Web checkout keeps about 96% of revenue.</p></div>
+    <div class="card"><h3>Native app</h3><p class="mute" style="font-size:14px;margin:0">Same screens. Adds lock-screen call accept, hands-free calls, guaranteed headphone actions and CarPlay Now Playing. Store checkout keeps about 85%. Open decision; both are designed.</p></div>
+  </div>
+</section>
+
+<section id="states">
+  <div class="eyebrow">04 · States</div>
+  <h2>What Today looks like on every kind of day</h2>
+  <div class="tablewrap"><table class="st">
+    <tr><th>Day</th><th>The hero area</th><th>What never appears</th></tr>
+    <tr><td>Ready</td><td>Cover, title, hosts, "7 min · call · article", Play.</td><td>A feed, a calendar, a counter</td></tr>
+    <tr><td>In progress</td><td>The doors row: Listen ✓ · Call · Read · Chat. Any order.</td><td>A progress bar</td></tr>
+    <tr><td>Done</td><td>"That's today's show. Tomorrow at 7:40: Mona interviews you for the job." Three ideas if unpicked.</td><td>Autoplay, "one more"</td></tr>
+    <tr><td>Allowance reached</td><td>"That's two today. Tomorrow's is ready at 7:40." Said by Salma, not in character.</td><td>A meter, an upsell</td></tr>
+    <tr><td>Proof day</td><td>The proof cover, in Salma's colour, above the hero.</td><td>A score</td></tr>
+    <tr><td>Back after a gap</td><td>Exactly like any day. The hero is a return episode, one step easier.</td><td>"We missed you", days missed</td></tr>
+    <tr><td>Bad day</td><td>The small door card: 90-second recap and one voice note. Counts fully.</td><td>Guilt</td></tr>
+    <tr><td>Not ready</td><td>Art and title, Play disabled, Salma: "Still making today's. A few minutes." Shelf offered.</td><td>A spinner over the hero</td></tr>
+    <tr><td>Offline</td><td>The cached episode plays; otherwise "Ready when you're back online."</td><td>A full-screen error</td></tr>
+    <tr><td>Trial ended, no plan</td><td>Salma: "No new episodes until you pick a plan." One button. Shelf and notebook unchanged.</td><td>A lockout of what was made</td></tr>
+  </table></div>
+</section>
+
+<section id="call">
+  <div class="eyebrow">05 · Interaction and audio</div>
+  <h2>Making speaking safe, in milliseconds</h2>
+  <p class="col mute">The call is where learners freeze and where consumer assistants fail them by jumping in. The host waits longer than any assistant, never barges in, and the silence after the learner's turn is covered by breath and fillers in the host's own voice, never by a spinner.</p>
+  <div class="dia">
+    <svg viewBox="0 0 960 200" role="img" aria-label="Latency masking: 0 to 400 milliseconds nothing; 400 to 1200 the host's breath; 1.2 to 2.5 seconds a filler in the host's voice; above 2.5 the first clause streams; above 6 seconds voice notes">
+      <line x1="40" y1="100" x2="920" y2="100" class="ln"/>
+      <g class="m"><text x="40" y="130">0</text><text x="200" y="130">0.4s</text><text x="400" y="130">1.2s</text><text x="620" y="130">2.5s</text><text x="880" y="130">6s</text></g>
+      <rect x="40" y="70" width="160" height="30" rx="6" fill="var(--s2)"/><text x="120" y="90" text-anchor="middle">nothing</text>
+      <rect x="204" y="70" width="192" height="30" rx="6" fill="var(--karim)" opacity=".85"/><text x="300" y="90" text-anchor="middle" style="fill:#09080D">the host's breath</text>
+      <rect x="404" y="70" width="212" height="30" rx="6" fill="var(--karim)" opacity=".6"/><text x="510" y="90" text-anchor="middle" style="fill:#09080D">"hmm", "okay so"</text>
+      <rect x="624" y="70" width="252" height="30" rx="6" fill="var(--learner)" opacity=".8"/><text x="750" y="90" text-anchor="middle" style="fill:#09080D">first clause streams</text>
+      <rect x="880" y="70" width="40" height="30" rx="6" fill="var(--faint)"/><text x="900" y="90" text-anchor="middle" style="font-size:11px;fill:#09080D">notes</text>
+      <text x="40" y="40">Target: median reply within 1.2 seconds, 95th percentile within 2.5. Never a spinner, never "thinking".</text>
+      <text x="40" y="175" class="m">End-of-turn silence threshold 1.6s at lower levels, adapted per learner. Holding the pad switches detection off. After 8s of silence the host offers a smaller question.</text>
+    </svg>
+  </div>
+  <div class="grid3" style="margin-top:20px">
+    <div class="card"><h3>Hold the pad</h3><p class="mute" style="font-size:14px;margin:0">While held, the host does not speak, however long. Release hands the turn back after 400ms so a late syllable is not cut.</p></div>
+    <div class="card"><h3>The word button</h3><p class="mute" style="font-size:14px;margin:0">Hold, say the word in your own language, release. The host gives it back inside its next line and carries on. Salma is silent in calls.</p></div>
+    <div class="card"><h3>The echo</h3><p class="mute" style="font-size:14px;margin:0">"Oh, you <b style="color:var(--recast)">went</b> there yesterday?" is the only correction the learner ever meets. Heavier weight in the caption, no label, no tap target.</p></div>
+  </div>
+</section>
+
+<section id="open">
+  <div class="eyebrow">07 · Open</div>
+  <h2>Designed both ways, waiting on a decision</h2>
+  <div class="oq">
+    <div><span class="n">01</span><div><b>Web app plus feed, or native, for the beta</b><span>Both designed on the same screens. The pilot's commute data settles it: calls abandoned on the move and the feed-to-call handoff.</span></div></div>
+    <div><span class="n">02</span><div><b>First-session order</b><span>Sound in 60 seconds with the account after the first call, or account first. Built as a configurable step order so the pilot can compare drop-off.</span></div></div>
+    <div><span class="n">03</span><div><b>Who writes the host and Salma bibles</b><span>The content guidelines are the brief; the model writes episodes inside the bibles and never writes the bibles. An owner is needed before Nov 18.</span></div></div>
+    <div><span class="n">04</span><div><b>Spoken talkback</b><span>Button-only in the beta. Voice ("how do you say…") waits for the per-language speech stack to catch code-switching reliably.</span></div></div>
+    <div><span class="n">05</span><div><b>Dark only, or dark and light</b><span>Both exist in the tokens at little cost; dark is the default. Learner preference in the beta decides whether light stays.</span></div></div>
+  </div>
+  <p class="note" style="margin-top:20px">Sixteen more open items, each with an owner and what settles it, are in 07-open-questions.md.</p>
+</section>
+
+<section id="files">
+  <div class="eyebrow">The documents</div>
+  <h2>Eight files and the tokens</h2>
+  <p class="col mute">In the project's <code>design/</code> folder and on GitHub at <a href="https://github.com/Muath-8/for-one/tree/main/design">Muath-8/for-one/design</a>.</p>
+  <div class="files">
+    <a href="https://github.com/Muath-8/for-one/blob/main/design/00-design-principles.md"><b>00 Design principles</b><span>Thesis, ten tests, who is who, the laws, departures from the UI/UX lens</span></a>
+    <a href="https://github.com/Muath-8/for-one/blob/main/design/01-design-system.md"><b>01 Design system</b><span>Tokens, type, layout, motion, orbs, cover art, 24 components, themes, accessibility</span></a>
+    <a href="https://github.com/Muath-8/for-one/blob/main/design/tokens.css"><b>tokens.css · tokens.json</b><span>Dark default and light theme, for web and native</span></a>
+    <a href="https://github.com/Muath-8/for-one/blob/main/design/02-information-architecture.md"><b>02 Information architecture</b><span>The map, modes, navigation rules, the feed, web vs native, the object model</span></a>
+    <a href="https://github.com/Muath-8/for-one/blob/main/design/03-user-flows.md"><b>03 User flows</b><span>Twelve flows incl. both first-session orders, subscribe, cancel, deletion, return after a gap</span></a>
+    <a href="https://github.com/Muath-8/for-one/blob/main/design/04-screen-specs.md"><b>04 Screen specs</b><span>Every screen with states, copy and what Salma or the hosts say</span></a>
+    <a href="https://github.com/Muath-8/for-one/blob/main/design/05-interaction-and-audio-ux.md"><b>05 Interaction and audio UX</b><span>Listening, turn-taking, latency masking, headphones, hard moments, measures</span></a>
+    <a href="https://github.com/Muath-8/for-one/blob/main/design/06-content-and-voice-guidelines.md"><b>06 Content and voice</b><span>The hosts, Salma, interface copy, localisation, proof content rules</span></a>
+    <a href="https://github.com/Muath-8/for-one/blob/main/design/07-open-questions.md"><b>07 Open questions</b><span>Twenty items with owners and what settles each</span></a>
+  </div>
+</section>
+
+<footer>For one · design book · built from concept v2, the decisions of 23 Oct 2026, the UI/UX, enjoyment and consistency lenses, the feature map and the v2 prototype. Dates, prices and timings follow the pilot kit and concept v2 and are not final.</footer>
+</div>
+
+<script>
+(function(){
+  // Generated contour art for covers: seeded concentric lines warped by two host hues (the prototype's method).
+  function rng(seed){let s=seed*9301+49297;return function(){s=(s*9301+49297)%233280;return s/233280;}}
+  function draw(c){
+    const dpr=Math.min(2,window.devicePixelRatio||1);
+    const w=c.clientWidth||220,h=c.clientHeight||240;
+    c.width=w*dpr;c.height=h*dpr;
+    const x=c.getContext('2d');x.scale(dpr,dpr);
+    const r=rng(+c.dataset.seed||1);
+    const ink=getComputedStyle(document.documentElement).getPropertyValue('--art-ink').trim()||'rgba(245,241,234,.5)';
+    const k=getComputedStyle(c).getPropertyValue('--k').trim()||'#FF8A4C';
+    const m=getComputedStyle(c).getPropertyValue('--m').trim()||'#FF5C9A';
+    const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,k);g.addColorStop(1,m);
+    x.globalAlpha=.18;x.fillStyle=g;x.fillRect(0,0,w,h);x.globalAlpha=1;
+    const cx=w*(.3+r()*.4),cy=h*(.25+r()*.3);
+    const bumps=[];for(let i=0;i<4;i++)bumps.push({a:r()*Math.PI*2,amp:6+r()*14,f:1+Math.floor(r()*3)});
+    x.lineWidth=1;x.strokeStyle=ink;
+    for(let ring=10;ring<Math.max(w,h)*1.1;ring+=9){
+      x.beginPath();
+      for(let t=0;t<=Math.PI*2+.01;t+=.06){
+        let rad=ring;for(const b of bumps)rad+=Math.sin(t*b.f+b.a)*b.amp*(ring/120);
+        const px=cx+Math.cos(t)*rad,py=cy+Math.sin(t)*rad*.78;
+        if(t===0)x.moveTo(px,py);else x.lineTo(px,py);
+      }
+      x.globalAlpha=Math.max(.08,.6-ring/400);x.stroke();
+    }
+    x.globalAlpha=1;
+  }
+  function all(){document.querySelectorAll('.cover canvas').forEach(draw);}
+  all();
+  let t;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(all,150);});
+  if(window.matchMedia){window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',all);}
+})();
+</script>

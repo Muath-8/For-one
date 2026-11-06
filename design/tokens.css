@@ -1,0 +1,118 @@
+/* For one — design tokens (01-design-system.md §2)
+   Source of truth is tokens.json; this file mirrors it for CSS.
+   Dark ("night studio") is the default; light ("daylight") applies with
+   [data-theme="light"] or the OS preference when no data-theme is set. */
+
+:root {
+  /* ---- type ---- */
+  --font-display: "Anybody", "Arial Narrow", Impact, sans-serif;      /* titles, covers, host names. Variable: wdth 50..150, wght 300..900 */
+  --font-body: "Readex Pro", system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; /* everything read, Arabic included */
+  --font-mono: "Martian Mono", ui-monospace, Menlo, monospace;        /* timecodes, dates, small labels */
+
+  --text-xs: 0.75rem;   /* 12 */
+  --text-sm: 0.875rem;  /* 14 */
+  --text-md: 1rem;      /* 16 base */
+  --text-lg: 1.125rem;  /* 18 reading */
+  --text-xl: 1.375rem;  /* 22 */
+  --text-2xl: 1.75rem;  /* 28 */
+  --text-3xl: 2.25rem;  /* 36 */
+  --text-4xl: 3rem;     /* 48 cover titles */
+  --text-5xl: 4rem;     /* 64 */
+
+  --leading-tight: 1.05;
+  --leading-snug: 1.25;
+  --leading-body: 1.55;
+  --leading-read: 1.7;   /* article, transcript */
+  --leading-arabic: 1.9; /* Arabic body blocks */
+
+  --tracking-display: -0.01em;
+  --tracking-label: 0.08em; /* uppercase mono labels */
+
+  /* ---- space (4pt grid) ---- */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  --space-12: 48px; --space-16: 64px;
+  --gutter: 20px;          /* phone side gutter */
+  --gutter-wide: 32px;     /* ≥ 768px */
+  --measure: 34rem;        /* max line length for reading */
+
+  /* ---- radius ---- */
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px; --radius-xl: 20px; --radius-pill: 999px;
+
+  /* ---- motion ---- */
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --ease-in: cubic-bezier(.4,0,1,1);
+  --dur-1: 120ms;  /* taps, toggles */
+  --dur-2: 200ms;  /* sheets, fades */
+  --dur-3: 320ms;  /* screen transitions */
+  --dur-4: 600ms;  /* orb breathing half-cycle, cover reveal */
+
+  /* ---- elevation ---- */
+  --shadow-sheet: 0 -8px 40px rgba(0,0,0,.45);
+  --shadow-card: 0 10px 30px rgba(0,0,0,.35);
+
+  /* ---- sizes ---- */
+  --tap-min: 44px;
+  --hold-pad-h: 112px;
+  --orb: 120px;
+  --orb-sm: 40px;
+
+  /* ---- dark surfaces (default) ---- */
+  --page: #09080D;   /* behind everything */
+  --bg: #110F17;     /* screen background */
+  --s1: #1A1722;     /* cards, sheets */
+  --s2: #24202E;     /* raised rows, inputs */
+  --s3: #2F2A3B;     /* pressed, hover */
+  --line: rgba(255,255,255,.08);
+  --line-2: rgba(255,255,255,.14);
+  --text: #F5F1EA;
+  --mute: #A59FB2;
+  --faint: #6E6879;
+  --on-accent: #09080D;
+
+  /* ---- voices ---- */
+  --karim: #FF8A4C;   /* host 1, warm */
+  --mona: #FF5C9A;    /* host 2, warm */
+  --salma: #C9BCFF;   /* producer, cool and lighter */
+  --learner: #5FE3B0; /* the learner's own voice */
+  --recast: #FFC86B;  /* the heavier-weight form in a host caption; never a label */
+  --warn: #FF5D5D;    /* system errors only (network, payment). Never on a learner sentence */
+
+  /* ---- semantic ---- */
+  --accent: var(--learner);      /* primary action: play, call, continue */
+  --focus: #8FD3FF;
+  --cover-ink: var(--text);
+  --scrim: rgba(9,8,13,.72);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --page: #F2EEE6; --bg: #FBF9F4; --s1: #FFFFFF; --s2: #F1EDE5; --s3: #E6E1D8;
+    --line: rgba(23,20,30,.08); --line-2: rgba(23,20,30,.16);
+    --text: #17141E; --mute: #5A5566; --faint: #8B869A; --on-accent: #FFFFFF;
+    --karim: #D9601F; --mona: #D2306E; --salma: #6B57C9; --learner: #178A62;
+    --recast: #8A5A00; --warn: #C8303A;
+    --focus: #1F6FD6; --scrim: rgba(23,20,30,.55);
+    --shadow-sheet: 0 -8px 40px rgba(23,20,30,.18);
+    --shadow-card: 0 10px 30px rgba(23,20,30,.12);
+  }
+}
+:root[data-theme="light"] {
+  --page: #F2EEE6; --bg: #FBF9F4; --s1: #FFFFFF; --s2: #F1EDE5; --s3: #E6E1D8;
+  --line: rgba(23,20,30,.08); --line-2: rgba(23,20,30,.16);
+  --text: #17141E; --mute: #5A5566; --faint: #8B869A; --on-accent: #FFFFFF;
+  --karim: #D9601F; --mona: #D2306E; --salma: #6B57C9; --learner: #178A62;
+  --recast: #8A5A00; --warn: #C8303A;
+  --focus: #1F6FD6; --scrim: rgba(23,20,30,.55);
+  --shadow-sheet: 0 -8px 40px rgba(23,20,30,.18);
+  --shadow-card: 0 10px 30px rgba(23,20,30,.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-1: 0ms; --dur-2: 0ms; --dur-3: 0ms; --dur-4: 0ms; }
+}
+
+/* base */
+html { font-family: var(--font-body); font-size: 100%; }
+body { background: var(--bg); color: var(--text); line-height: var(--leading-body); }
+[dir="rtl"], :lang(ar), :lang(fa), :lang(ur), :lang(he) { line-height: var(--leading-arabic); }
