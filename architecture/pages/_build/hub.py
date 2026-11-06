@@ -33,15 +33,17 @@ def card(d):
 </li>"""
 
 DUE = [
-  ("2026-11-01", "Counsel: may Saudi voice and transcripts rest on AWS in the UAE or EU?", "01 #1", "A no means moving to GCP Dammam: 5 to 8 engineer-days, and it must be known before week 1 builds the infrastructure."),
-  ("2026-11-02", "One engineer or two", "01 #5", "The build plan assumes two and still lists P0 items likely to slip into the first beta week."),
-  ("2026-11-02", "Consent addendum for the vendor tests", "01 #11", "The week-1 recognizer and voice tests send pilot clips to vendors the Milestone 0 consent does not name."),
-  ("2026-11-02", "Brand domain", "06 #1", "forone.app is a placeholder; DNS, cookies and push identity are set in week 1."),
-  ("2026-11-09", "Apple Developer and Google OAuth started", "01 #6, 06 #2", "Both take days to approve; otherwise week 3 ships with email codes only."),
-  ("2026-11-09", "English Grammar Profile permission", "04 #1, 05 #3", "The structure inventory is seeded from it in week 1; a refusal means rewriting it."),
-  ("2026-11-13", "Voice vendor after the blind test", "08", "The largest single cost decision: $0.57 to $0.67 a session on the viable stacks, $1.17 on ElevenLabs list."),
-  ("2026-11-16", "Legal entity and payment processor", "01 #3", "Mada needs a Saudi-capable processor; three extra engineering days if it is not Stripe."),
-  ("ongoing", "Fixed infrastructure budget, about $800 to $1,100 a month", "01 #4", "Approve, or set a cap and choose between Multi-AZ and a restore drill."),
+  ("now", "Consent addendum for the vendor tests", "10 #13", "Clips from the Milestone 0 pilot go to recognizer and voice vendors the pilot consent does not name. Nothing leaves before the addendum is signed."),
+  ("2026-11-17", "Home region and the legal view on storing learner voice", "10 #1", "Counsel confirms where a worldwide cohort's voice and transcripts may rest. eu-central-1 is the default; me-central-1 is a one-day config move, but it must be known before build week 1."),
+  ("2026-11-17", "Which jurisdictions the beta covers on day one", "10 #2", "Recommended: EU and UK GDPR, Saudi PDPL and a generic baseline. Sets the consent copy per native language and the DPIA."),
+  ("2026-11-17", "Voice vendor after the English blind test", "10 #5", "The largest single cost decision. The floor stack lands at $0.43 to $0.45 a session after Gemini's 2027 price rise, against a $0.42 break-even on the 2 and 3 a day plans."),
+  ("2026-11-18", "Second engineer, and which week-6 items may slip", "10 #10", "The build plan assumes two engineers from the first day of build week 1."),
+  ("2026-11-18", "Apple Developer, Google OAuth and the brand domain started", "10 #15", "Approvals take days; DNS, cookies and push identity are set in week 1."),
+  ("2026-12-02", "Payment processor and legal entity", "10 #3", "Paddle as merchant of record (about 5%, tax handled everywhere) or Stripe with Stripe Tax (about 3% plus registrations, needs an entity in a Stripe country). Checkout is built in week 3."),
+  ("2026-12-15", "Crisis protocol details", "10 #12", "Per-country resources and the international fallback, clip wording, whether the keyword list may fire alone."),
+  ("2026-12-22", "Tier prices against the break-even, and the last lever to $0.35", "10 #4, #5", "Keep $19.99 / $29.99 / $44.99 and accept the loss on full-use learners, raise 2 a day to $34.99, or sign a voice contract. The exit document carries the measured number."),
+  ("ongoing", "Fixed infrastructure budget, about $1,000 to $1,300 a month", "10 #9", "01's $800 to $1,100 plus staging kept up through the beta, plus vendor minimums and the Anthropic prepaid balance."),
+  ("ongoing", "Web or native for the beta", "10 #8", "The architecture builds the installable web app plus the private podcast feed; the switch-to-native triggers are measured from day one."),
 ]
 
 due_html = "\n".join(f"""<li class="due"><span class="dd">{esc(d)}</span><div><h4>{esc(t)}</h4><p>{esc(why)}</p><span class="src">{esc(src)}</span></div></li>""" for d, t, src, why in DUE)
@@ -58,7 +60,10 @@ MAP = """flowchart LR
   S07["07 Security and privacy<br/>keys, consent, deletion, crisis"] -.- T01
   K08["08 Cost and vendors<br/>adapters, tracing, spend guard"] -.- P02
   K08 -.- C03
-  O09["09 Evaluation and operations<br/>measures, alerts, eval gate"] -.- T01"""
+  O09["09 Evaluation and operations<br/>measures, alerts, eval gate"] -.- T01
+  R10["10 Decision records<br/>22 rulings, the open register"] ==> T01
+  R10 ==> P02
+  R10 ==> C06"""
 
 cards = "\n".join(card(d) for d in DOCS)
 
@@ -96,22 +101,22 @@ body = f"""
 <style>{HUB_CSS}</style>
 <div class="page">
 <header class="hero hubhero">
-  <p class="eyebrow">For one · Technical architecture · 2026-10-16 to 2026-10-23</p>
+  <p class="eyebrow">For one · Technical architecture · written 2026-10-16, revised 2026-11-06</p>
   <h1>For one architecture</h1>
-  <p class="lede">How the beta gets built between 2026-11-02 and 2026-12-06: nine domain documents, each answering one question, written against PRD-v2 and concept v2.</p>
+  <p class="lede">How the beta gets built between 2026-11-18 and 2026-12-22: nine domain documents, each answering one question, plus the decision records that reconcile them with the 2026-10-23 decisions: no launch country, monthly USD plans, invisible teaching, evidence instead of tests.</p>
 </header>
 
 <div class="figs">
-  <div class="fig"><b>9</b><span>domain documents</span></div>
+  <div class="fig"><b>9 + 1</b><span>domain documents and the decision records</span></div>
   <div class="fig"><b>{total_dec}</b><span>decisions made</span></div>
   <div class="fig"><b>{total_open}</b><span>items open for you</span></div>
   <div class="fig"><b>{total_words//1000}k</b><span>words in total</span></div>
-  <div class="fig"><b>11 of 18</b><span>planned reviews done</span></div>
+  <div class="fig"><b>17 of 18</b><span>planned reviews done, all applied</span></div>
 </div>
 
 <section class="block">
   <h2>How the nine fit together</h2>
-  <p class="muted">Solid arrows are the daily loop: an episode is made, heard, talked about, assessed, and feeds tomorrow's episode. Dotted lines are the domains that cut across all of it.</p>
+  <p class="muted">Solid arrows are the daily loop: an episode is made, heard, talked about, assessed, and feeds tomorrow's episode. Dotted lines are the domains that cut across all of it. The thick arrows are document 10, whose rulings every other document was revised to on 2026-11-06.</p>
   <div class="diagram"><pre class="mermaid">
 {esc(MAP)}
 </pre></div>
@@ -120,37 +125,36 @@ body = f"""
 <section class="block">
   <h2>The documents</h2>
   <div class="legend">
-    <div><span class="pill st-ok"><i></i>{STATUS['ok'][0]}</span><p>01 and 02. Rewritten after both reviews. Rely on these first.</p></div>
-    <div><span class="pill st-warn"><i></i>{STATUS['warn'][0]}</span><p>03, 04, 05. Each page lists the open findings. Read them before relying on a section.</p></div>
-    <div><span class="pill st-one"><i></i>{STATUS['one'][0]}</span><p>06. The skeptic review never ran.</p></div>
-    <div><span class="pill st-none"><i></i>{STATUS['none'][0]}</span><p>07, 08, 09. Complete drafts that nobody has checked.</p></div>
+    <div><span class="pill st-ok"><i></i>{STATUS['ok'][0]}</span><p>01 to 05 and 07 to 09. Both reviews ran, every finding was applied, and the text follows the decision records. Section 11 of each document logs what changed.</p></div>
+    <div><span class="pill st-one"><i></i>{STATUS['one'][0]}</span><p>06. The skeptic review never ran; the conformance findings and the decision records were applied.</p></div>
+    <div><span class="pill st-adr"><i></i>{STATUS['adr'][0]}</span><p>10. The twenty-two cross-domain rulings, the naming table for the technical design, and the register of everything open for you.</p></div>
   </div>
   <ol class="dlist">{cards}</ol>
 </section>
 
 <section class="block">
   <h2>Decisions that are due soon</h2>
-  <p class="muted">Pulled from the "Open for Muath" sections. The build starts on 2026-11-02, so the first few block week 1. Each domain page has its full list.</p>
+  <p class="muted">From the register in document 10, section 10. The build starts on 2026-11-18, so the first few block week 1. Each domain page keeps its own items too.</p>
   <ol class="dues">{due_html}</ol>
 </section>
 
 <section class="block">
-  <h2>What was cut</h2>
-  <p class="muted">The original plan was an architecture phase, then a design phase. The run stopped on the usage limit and you asked to finish up, so this set is what exists.</p>
+  <h2>What changed on 2026-11-06, and what is still missing</h2>
+  <p class="muted">The 2026-10-23 run stopped on the usage limit with 07 to 09 unreviewed and 03 to 06 unrevised. This pass finished the set.</p>
   <ul class="cut">
-    <li><strong>The whole design phase.</strong> Eleven designers, their reviews and the clickable prototype never ran. <code>design/</code> is empty.</li>
-    <li><strong>Seven of eighteen reviews.</strong> 07, 08 and 09 have no review; 06 has the conformance review but no skeptic review.</li>
-    <li><strong>Revisions for 03 to 06.</strong> Their review findings are listed on each page but not applied to the text.</li>
-    <li><strong>The integration pass.</strong> No one has reconciled the nine documents against each other after the reviews. Event names and a few interfaces disagree between documents; the reviews flag several.</li>
+    <li><strong>Six new reviews.</strong> 07, 08 and 09 were each read by the conformance and the skeptic lens: 60 findings, six blockers, all applied.</li>
+    <li><strong>Every document revised.</strong> The 2026-10-23 decisions had moved under the documents: no launch country, USD monthly plans with 1, 2 or 3 episodes a day, no correction notes, a build re-dated to 2026-11-18. Document 10 records the 22 rulings and each document's section 11 says what changed.</li>
+    <li><strong>The integration pass.</strong> Names that disagreed between documents (`episodes.state`, `call_turn_verbatim`, `word_uses`, `expects_drop`, package paths) have one spelling now, listed in document 10 section 4 for the technical design.</li>
+    <li><strong>Still missing.</strong> The skeptic review of 06, and a review of document 10 itself. The design phase ran separately and lives in <code>design/</code>.</li>
   </ul>
 </section>
 
 <section class="block">
   <h2>Source files</h2>
-  <p class="muted">Everything is in the project folder under <code>architecture/</code>: the nine Markdown documents, <code>_review-findings.md</code> (all eleven completed reviews), <code>_digest-constraints.md</code> (every budget and rule extracted from PRD-v2), and these pages under <code>architecture/pages/</code>.</p>
+  <p class="muted">Everything is in the project folder and in the GitHub repository under <code>architecture/</code>: the ten Markdown documents, <code>_review-findings.md</code> (all seventeen reviews), <code>_digest-constraints.md</code> (every budget and rule extracted from PRD-v2), and these pages under <code>architecture/pages/</code>.</p>
 </section>
 
-<footer class="foot"><span class="muted">For one · architecture set, published 2026-10-23</span></footer>
+<footer class="foot"><span class="muted">For one · architecture set, published 2026-10-23, revised 2026-11-06</span></footer>
 </div>
 """
 

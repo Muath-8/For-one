@@ -51,7 +51,7 @@ p { margin: 0; }
 .chip, .pill { font-family: var(--mono); font-size: .78rem; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; background: var(--surface); white-space: nowrap; }
 .pill { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; }
 .pill i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
-.st-ok { color: var(--ok); } .st-warn { color: var(--warn); } .st-one { color: var(--risk); } .st-none { color: var(--none); }
+.st-ok { color: var(--ok); } .st-warn { color: var(--warn); } .st-one { color: var(--flag); } .st-none { color: var(--none); } .st-adr { color: var(--accent); }
 .statusbox { border-left: 4px solid currentColor; background: var(--surface); padding: 14px 18px; border-radius: 0 8px 8px 0; }
 .statusbox p { color: var(--ink); max-width: 75ch; }
 
@@ -186,22 +186,22 @@ details > summary { cursor: pointer; }
 </style>
 <div class="page">
 <header class="hero hubhero">
-  <p class="eyebrow">For one · Technical architecture · 2026-10-16 to 2026-10-23</p>
+  <p class="eyebrow">For one · Technical architecture · written 2026-10-16, revised 2026-11-06</p>
   <h1>For one architecture</h1>
-  <p class="lede">How the beta gets built between 2026-11-02 and 2026-12-06: nine domain documents, each answering one question, written against PRD-v2 and concept v2.</p>
+  <p class="lede">How the beta gets built between 2026-11-18 and 2026-12-22: nine domain documents, each answering one question, plus the decision records that reconcile them with the 2026-10-23 decisions: no launch country, monthly USD plans, invisible teaching, evidence instead of tests.</p>
 </header>
 
 <div class="figs">
-  <div class="fig"><b>9</b><span>domain documents</span></div>
-  <div class="fig"><b>144</b><span>decisions made</span></div>
-  <div class="fig"><b>89</b><span>items open for you</span></div>
-  <div class="fig"><b>157k</b><span>words in total</span></div>
-  <div class="fig"><b>11 of 18</b><span>planned reviews done</span></div>
+  <div class="fig"><b>9 + 1</b><span>domain documents and the decision records</span></div>
+  <div class="fig"><b>186</b><span>decisions made</span></div>
+  <div class="fig"><b>112</b><span>items open for you</span></div>
+  <div class="fig"><b>246k</b><span>words in total</span></div>
+  <div class="fig"><b>17 of 18</b><span>planned reviews done, all applied</span></div>
 </div>
 
 <section class="block">
   <h2>How the nine fit together</h2>
-  <p class="muted">Solid arrows are the daily loop: an episode is made, heard, talked about, assessed, and feeds tomorrow's episode. Dotted lines are the domains that cut across all of it.</p>
+  <p class="muted">Solid arrows are the daily loop: an episode is made, heard, talked about, assessed, and feeds tomorrow's episode. Dotted lines are the domains that cut across all of it. The thick arrows are document 10, whose rulings every other document was revised to on 2026-11-06.</p>
   <div class="diagram"><pre class="mermaid">
 flowchart LR
   L[&quot;Learner&#x27;s phone&quot;] --&gt; C06[&quot;06 Client and delivery&lt;br/&gt;PWA, podcast feed, push&quot;]
@@ -216,16 +216,18 @@ flowchart LR
   K08[&quot;08 Cost and vendors&lt;br/&gt;adapters, tracing, spend guard&quot;] -.- P02
   K08 -.- C03
   O09[&quot;09 Evaluation and operations&lt;br/&gt;measures, alerts, eval gate&quot;] -.- T01
+  R10[&quot;10 Decision records&lt;br/&gt;22 rulings, the open register&quot;] ==&gt; T01
+  R10 ==&gt; P02
+  R10 ==&gt; C06
 </pre></div>
 </section>
 
 <section class="block">
   <h2>The documents</h2>
   <div class="legend">
-    <div><span class="pill st-ok"><i></i>Reviewed twice, revised</span><p>01 and 02. Rewritten after both reviews. Rely on these first.</p></div>
-    <div><span class="pill st-warn"><i></i>Reviewed twice, not revised</span><p>03, 04, 05. Each page lists the open findings. Read them before relying on a section.</p></div>
-    <div><span class="pill st-one"><i></i>One review, not revised</span><p>06. The skeptic review never ran.</p></div>
-    <div><span class="pill st-none"><i></i>Unreviewed first draft</span><p>07, 08, 09. Complete drafts that nobody has checked.</p></div>
+    <div><span class="pill st-ok"><i></i>Reviewed twice, revised 2026-11-06</span><p>01 to 05 and 07 to 09. Both reviews ran, every finding was applied, and the text follows the decision records. Section 11 of each document logs what changed.</p></div>
+    <div><span class="pill st-one"><i></i>One review, revised 2026-11-06</span><p>06. The skeptic review never ran; the conformance findings and the decision records were applied.</p></div>
+    <div><span class="pill st-adr"><i></i>Decision records, written 2026-11-06</span><p>10. The twenty-two cross-domain rulings, the naming table for the technical design, and the register of everything open for you.</p></div>
   </div>
   <ol class="dlist"><li class="dcard">
   <a class="dlink" href="https://claude.ai/artifact/QWkYDMbtW1EXwF2UTZwXjq">
@@ -233,9 +235,9 @@ flowchart LR
     <span class="dbody">
       <span class="dtitle">System topology</span>
       <span class="dq">What runs where, so one or two engineers can ship the beta and grow it to 10,000 learners without a rewrite.</span>
-      <span class="dmeta"><span class="pill st-ok"><i></i>Reviewed twice, revised</span></span>
+      <span class="dmeta"><span class="pill st-ok"><i></i>Reviewed twice, revised 2026-11-06</span></span>
       <span class="drc">Conformance: 1 blocker, 7 major · Skeptic: 2 blocker, 14 major</span>
-      <span class="dfoot">15 decisions · 13 open for you · 22,188 words</span>
+      <span class="dfoot">17 decisions · 13 open for you · 27,838 words</span>
     </span>
   </a>
 </li>
@@ -245,9 +247,9 @@ flowchart LR
     <span class="dbody">
       <span class="dtitle">Generation pipeline</span>
       <span class="dq">How every episode is planned, written, checked, voiced and published by the drop time, with a fallback that never misses a morning.</span>
-      <span class="dmeta"><span class="pill st-ok"><i></i>Reviewed twice, revised</span></span>
+      <span class="dmeta"><span class="pill st-ok"><i></i>Reviewed twice, revised 2026-11-06</span></span>
       <span class="drc">Conformance: 2 blocker, 10 major · Skeptic: 2 blocker, 13 major</span>
-      <span class="dfoot">22 decisions · 12 open for you · 23,071 words</span>
+      <span class="dfoot">25 decisions · 12 open for you · 28,944 words</span>
     </span>
   </a>
 </li>
@@ -257,9 +259,9 @@ flowchart LR
     <span class="dbody">
       <span class="dtitle">Live call and voice</span>
       <span class="dq">How the 6 to 8 minute call with the hosts works: turn-taking, budgets enforced by code, talkback to Salma, and nothing lost when voice fails.</span>
-      <span class="dmeta"><span class="pill st-warn"><i></i>Reviewed twice, not revised</span></span>
+      <span class="dmeta"><span class="pill st-ok"><i></i>Reviewed twice, revised 2026-11-06</span></span>
       <span class="drc">Conformance: 0 blocker, 11 major · Skeptic: 2 blocker, 7 major</span>
-      <span class="dfoot">15 decisions · 7 open for you · 13,877 words</span>
+      <span class="dfoot">18 decisions · 8 open for you · 25,208 words</span>
     </span>
   </a>
 </li>
@@ -269,9 +271,9 @@ flowchart LR
     <span class="dbody">
       <span class="dtitle">Learner model and data</span>
       <span class="dq">Where everything known about a learner lives: one append-only event log, nine derived stores that can be rebuilt, and versioned briefs.</span>
-      <span class="dmeta"><span class="pill st-warn"><i></i>Reviewed twice, not revised</span></span>
+      <span class="dmeta"><span class="pill st-ok"><i></i>Reviewed twice, revised 2026-11-06</span></span>
       <span class="drc">Conformance: 1 blocker, 9 major · Skeptic: 5 blocker, 16 major</span>
-      <span class="dfoot">20 decisions · 8 open for you · 16,973 words</span>
+      <span class="dfoot">22 decisions · 12 open for you · 29,883 words</span>
     </span>
   </a>
 </li>
@@ -281,9 +283,9 @@ flowchart LR
     <span class="dbody">
       <span class="dtitle">Assessment and after-session</span>
       <span class="dq">What happens in the ten minutes after a session: Salma&#x27;s notes in 90 seconds, measures by code, and a five-rule gate before any progress claim is shown.</span>
-      <span class="dmeta"><span class="pill st-warn"><i></i>Reviewed twice, not revised</span></span>
+      <span class="dmeta"><span class="pill st-ok"><i></i>Reviewed twice, revised 2026-11-06</span></span>
       <span class="drc">Conformance: 0 blocker, 13 major · Skeptic: 4 blocker, 11 major</span>
-      <span class="dfoot">16 decisions · 9 open for you · 16,228 words</span>
+      <span class="dfoot">17 decisions · 9 open for you · 26,954 words</span>
     </span>
   </a>
 </li>
@@ -293,9 +295,9 @@ flowchart LR
     <span class="dbody">
       <span class="dtitle">Client and delivery</span>
       <span class="dq">The installable web app, the private podcast feed and the three messages the product may send, with every rule kept on the server.</span>
-      <span class="dmeta"><span class="pill st-one"><i></i>One review, not revised</span></span>
+      <span class="dmeta"><span class="pill st-one"><i></i>One review, revised 2026-11-06</span></span>
       <span class="drc">Conformance: 0 blocker, 7 major</span>
-      <span class="dfoot">16 decisions · 11 open for you · 17,212 words</span>
+      <span class="dfoot">19 decisions · 15 open for you · 25,659 words</span>
     </span>
   </a>
 </li>
@@ -305,9 +307,9 @@ flowchart LR
     <span class="dbody">
       <span class="dtitle">Security, privacy, compliance</span>
       <span class="dq">How the promises about voice and life facts become verifiable: logged consent, deletion jobs with independent checks, staff access the learner can see, and a crisis path.</span>
-      <span class="dmeta"><span class="pill st-none"><i></i>Unreviewed first draft</span></span>
-      <span class="drc">No review ran</span>
-      <span class="dfoot">15 decisions · 11 open for you · 16,240 words</span>
+      <span class="dmeta"><span class="pill st-ok"><i></i>Reviewed twice, revised 2026-11-06</span></span>
+      <span class="drc">Conformance: 1 blocker, 8 major · Skeptic: 1 blocker, 7 major</span>
+      <span class="dfoot">16 decisions · 11 open for you · 25,641 words</span>
     </span>
   </a>
 </li>
@@ -317,9 +319,9 @@ flowchart LR
     <span class="dbody">
       <span class="dtitle">Cost model and vendors</span>
       <span class="dq">What one session costs on each vendor stack, how every vendor call is priced and traced, and which decisions move the number.</span>
-      <span class="dmeta"><span class="pill st-none"><i></i>Unreviewed first draft</span></span>
-      <span class="drc">No review ran</span>
-      <span class="dfoot">12 decisions · 8 open for you · 13,988 words</span>
+      <span class="dmeta"><span class="pill st-ok"><i></i>Reviewed twice, revised 2026-11-06</span></span>
+      <span class="drc">Conformance: 1 blocker, 7 major · Skeptic: 1 blocker, 5 major</span>
+      <span class="dfoot">14 decisions · 9 open for you · 23,063 words</span>
     </span>
   </a>
 </li>
@@ -329,9 +331,21 @@ flowchart LR
     <span class="dbody">
       <span class="dtitle">Evaluation and operations</span>
       <span class="dq">How the team knows the product works and keeps it working without building an observability product: rows in Postgres, alerts as SQL, an offline eval gate.</span>
-      <span class="dmeta"><span class="pill st-none"><i></i>Unreviewed first draft</span></span>
+      <span class="dmeta"><span class="pill st-ok"><i></i>Reviewed twice, revised 2026-11-06</span></span>
+      <span class="drc">Conformance: 1 blocker, 5 major · Skeptic: 1 blocker, 6 major</span>
+      <span class="dfoot">15 decisions · 8 open for you · 25,016 words</span>
+    </span>
+  </a>
+</li>
+<li class="dcard">
+  <a class="dlink" href="https://claude.ai/artifact/YFmgXzTod2yDshMpmiyhnK">
+    <span class="dn">10</span>
+    <span class="dbody">
+      <span class="dtitle">Decision records</span>
+      <span class="dq">The twenty-two rulings that reconcile the nine domains with the 2026-10-23 decisions: no launch country, monthly USD plans, invisible teaching, the re-dated build, and every name two documents disagreed on.</span>
+      <span class="dmeta"><span class="pill st-adr"><i></i>Decision records, written 2026-11-06</span></span>
       <span class="drc">No review ran</span>
-      <span class="dfoot">13 decisions · 10 open for you · 17,363 words</span>
+      <span class="dfoot">23 decisions · 15 open for you · 7,949 words</span>
     </span>
   </a>
 </li></ol>
@@ -339,34 +353,36 @@ flowchart LR
 
 <section class="block">
   <h2>Decisions that are due soon</h2>
-  <p class="muted">Pulled from the "Open for Muath" sections. The build starts on 2026-11-02, so the first few block week 1. Each domain page has its full list.</p>
-  <ol class="dues"><li class="due"><span class="dd">2026-11-01</span><div><h4>Counsel: may Saudi voice and transcripts rest on AWS in the UAE or EU?</h4><p>A no means moving to GCP Dammam: 5 to 8 engineer-days, and it must be known before week 1 builds the infrastructure.</p><span class="src">01 #1</span></div></li>
-<li class="due"><span class="dd">2026-11-02</span><div><h4>One engineer or two</h4><p>The build plan assumes two and still lists P0 items likely to slip into the first beta week.</p><span class="src">01 #5</span></div></li>
-<li class="due"><span class="dd">2026-11-02</span><div><h4>Consent addendum for the vendor tests</h4><p>The week-1 recognizer and voice tests send pilot clips to vendors the Milestone 0 consent does not name.</p><span class="src">01 #11</span></div></li>
-<li class="due"><span class="dd">2026-11-02</span><div><h4>Brand domain</h4><p>forone.app is a placeholder; DNS, cookies and push identity are set in week 1.</p><span class="src">06 #1</span></div></li>
-<li class="due"><span class="dd">2026-11-09</span><div><h4>Apple Developer and Google OAuth started</h4><p>Both take days to approve; otherwise week 3 ships with email codes only.</p><span class="src">01 #6, 06 #2</span></div></li>
-<li class="due"><span class="dd">2026-11-09</span><div><h4>English Grammar Profile permission</h4><p>The structure inventory is seeded from it in week 1; a refusal means rewriting it.</p><span class="src">04 #1, 05 #3</span></div></li>
-<li class="due"><span class="dd">2026-11-13</span><div><h4>Voice vendor after the blind test</h4><p>The largest single cost decision: $0.57 to $0.67 a session on the viable stacks, $1.17 on ElevenLabs list.</p><span class="src">08</span></div></li>
-<li class="due"><span class="dd">2026-11-16</span><div><h4>Legal entity and payment processor</h4><p>Mada needs a Saudi-capable processor; three extra engineering days if it is not Stripe.</p><span class="src">01 #3</span></div></li>
-<li class="due"><span class="dd">ongoing</span><div><h4>Fixed infrastructure budget, about $800 to $1,100 a month</h4><p>Approve, or set a cap and choose between Multi-AZ and a restore drill.</p><span class="src">01 #4</span></div></li></ol>
+  <p class="muted">From the register in document 10, section 10. The build starts on 2026-11-18, so the first few block week 1. Each domain page keeps its own items too.</p>
+  <ol class="dues"><li class="due"><span class="dd">now</span><div><h4>Consent addendum for the vendor tests</h4><p>Clips from the Milestone 0 pilot go to recognizer and voice vendors the pilot consent does not name. Nothing leaves before the addendum is signed.</p><span class="src">10 #13</span></div></li>
+<li class="due"><span class="dd">2026-11-17</span><div><h4>Home region and the legal view on storing learner voice</h4><p>Counsel confirms where a worldwide cohort&#x27;s voice and transcripts may rest. eu-central-1 is the default; me-central-1 is a one-day config move, but it must be known before build week 1.</p><span class="src">10 #1</span></div></li>
+<li class="due"><span class="dd">2026-11-17</span><div><h4>Which jurisdictions the beta covers on day one</h4><p>Recommended: EU and UK GDPR, Saudi PDPL and a generic baseline. Sets the consent copy per native language and the DPIA.</p><span class="src">10 #2</span></div></li>
+<li class="due"><span class="dd">2026-11-17</span><div><h4>Voice vendor after the English blind test</h4><p>The largest single cost decision. The floor stack lands at $0.43 to $0.45 a session after Gemini&#x27;s 2027 price rise, against a $0.42 break-even on the 2 and 3 a day plans.</p><span class="src">10 #5</span></div></li>
+<li class="due"><span class="dd">2026-11-18</span><div><h4>Second engineer, and which week-6 items may slip</h4><p>The build plan assumes two engineers from the first day of build week 1.</p><span class="src">10 #10</span></div></li>
+<li class="due"><span class="dd">2026-11-18</span><div><h4>Apple Developer, Google OAuth and the brand domain started</h4><p>Approvals take days; DNS, cookies and push identity are set in week 1.</p><span class="src">10 #15</span></div></li>
+<li class="due"><span class="dd">2026-12-02</span><div><h4>Payment processor and legal entity</h4><p>Paddle as merchant of record (about 5%, tax handled everywhere) or Stripe with Stripe Tax (about 3% plus registrations, needs an entity in a Stripe country). Checkout is built in week 3.</p><span class="src">10 #3</span></div></li>
+<li class="due"><span class="dd">2026-12-15</span><div><h4>Crisis protocol details</h4><p>Per-country resources and the international fallback, clip wording, whether the keyword list may fire alone.</p><span class="src">10 #12</span></div></li>
+<li class="due"><span class="dd">2026-12-22</span><div><h4>Tier prices against the break-even, and the last lever to $0.35</h4><p>Keep $19.99 / $29.99 / $44.99 and accept the loss on full-use learners, raise 2 a day to $34.99, or sign a voice contract. The exit document carries the measured number.</p><span class="src">10 #4, #5</span></div></li>
+<li class="due"><span class="dd">ongoing</span><div><h4>Fixed infrastructure budget, about $1,000 to $1,300 a month</h4><p>01&#x27;s $800 to $1,100 plus staging kept up through the beta, plus vendor minimums and the Anthropic prepaid balance.</p><span class="src">10 #9</span></div></li>
+<li class="due"><span class="dd">ongoing</span><div><h4>Web or native for the beta</h4><p>The architecture builds the installable web app plus the private podcast feed; the switch-to-native triggers are measured from day one.</p><span class="src">10 #8</span></div></li></ol>
 </section>
 
 <section class="block">
-  <h2>What was cut</h2>
-  <p class="muted">The original plan was an architecture phase, then a design phase. The run stopped on the usage limit and you asked to finish up, so this set is what exists.</p>
+  <h2>What changed on 2026-11-06, and what is still missing</h2>
+  <p class="muted">The 2026-10-23 run stopped on the usage limit with 07 to 09 unreviewed and 03 to 06 unrevised. This pass finished the set.</p>
   <ul class="cut">
-    <li><strong>The whole design phase.</strong> Eleven designers, their reviews and the clickable prototype never ran. <code>design/</code> is empty.</li>
-    <li><strong>Seven of eighteen reviews.</strong> 07, 08 and 09 have no review; 06 has the conformance review but no skeptic review.</li>
-    <li><strong>Revisions for 03 to 06.</strong> Their review findings are listed on each page but not applied to the text.</li>
-    <li><strong>The integration pass.</strong> No one has reconciled the nine documents against each other after the reviews. Event names and a few interfaces disagree between documents; the reviews flag several.</li>
+    <li><strong>Six new reviews.</strong> 07, 08 and 09 were each read by the conformance and the skeptic lens: 60 findings, six blockers, all applied.</li>
+    <li><strong>Every document revised.</strong> The 2026-10-23 decisions had moved under the documents: no launch country, USD monthly plans with 1, 2 or 3 episodes a day, no correction notes, a build re-dated to 2026-11-18. Document 10 records the 22 rulings and each document's section 11 says what changed.</li>
+    <li><strong>The integration pass.</strong> Names that disagreed between documents (`episodes.state`, `call_turn_verbatim`, `word_uses`, `expects_drop`, package paths) have one spelling now, listed in document 10 section 4 for the technical design.</li>
+    <li><strong>Still missing.</strong> The skeptic review of 06, and a review of document 10 itself. The design phase ran separately and lives in <code>design/</code>.</li>
   </ul>
 </section>
 
 <section class="block">
   <h2>Source files</h2>
-  <p class="muted">Everything is in the project folder under <code>architecture/</code>: the nine Markdown documents, <code>_review-findings.md</code> (all eleven completed reviews), <code>_digest-constraints.md</code> (every budget and rule extracted from PRD-v2), and these pages under <code>architecture/pages/</code>.</p>
+  <p class="muted">Everything is in the project folder and in the GitHub repository under <code>architecture/</code>: the ten Markdown documents, <code>_review-findings.md</code> (all seventeen reviews), <code>_digest-constraints.md</code> (every budget and rule extracted from PRD-v2), and these pages under <code>architecture/pages/</code>.</p>
 </section>
 
-<footer class="foot"><span class="muted">For one · architecture set, published 2026-10-23</span></footer>
+<footer class="foot"><span class="muted">For one · architecture set, published 2026-10-23, revised 2026-11-06</span></footer>
 </div>
 

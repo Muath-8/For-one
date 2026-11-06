@@ -1,0 +1,1112 @@
+<title>Architecture decision records</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (72ch prose) inside a 1080px frame; diagrams and decision cards use the full frame. */
+:root {
+  --paper: #F1F4F3; --surface: #FFFFFF; --ink: #142128; --muted: #55656C; --line: #D3DCDA;
+  --accent: #0D6A68; --accent-soft: #DDEDEA; --flag: #A86A12; --flag-soft: #F6EBD6;
+  --ok: #2E7A4E; --warn: #A86A12; --risk: #B0452C; --none: #6E7C83;
+  --blocker: #B0452C; --major: #C9842A; --minor: #A9B6B9;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0E1618; --surface: #152024; --ink: #E2EAE9; --muted: #95A6AA; --line: #28373B;
+  --accent: #5CC0B9; --accent-soft: #17332F; --flag: #E2A94C; --flag-soft: #352914;
+  --ok: #6BC08D; --warn: #E2A94C; --risk: #E8836A; --none: #8C9A9F;
+  --blocker: #E8836A; --major: #E2A94C; --minor: #56676B; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0E1618; --surface: #152024; --ink: #E2EAE9; --muted: #95A6AA; --line: #28373B;
+  --accent: #5CC0B9; --accent-soft: #17332F; --flag: #E2A94C; --flag-soft: #352914;
+  --ok: #6BC08D; --warn: #E2A94C; --risk: #E8836A; --none: #8C9A9F;
+  --blocker: #E8836A; --major: #E2A94C; --minor: #56676B; color-scheme: dark }
+
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+.page { max-width: 1080px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 44px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+code { font-family: var(--mono); font-size: .86em; background: var(--accent-soft); padding: .08em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+h1, h2, h3, h4 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h2 { font-size: 1.7rem; font-weight: 700; letter-spacing: -.01em; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+h4 { font-size: 1.02rem; font-weight: 700; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.lbl { font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-right: .4em; }
+
+.crumbs { display: flex; gap: 8px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); font-family: var(--mono); }
+.crumbs a { text-decoration: none; }
+.hero { display: flex; flex-direction: column; gap: 14px; }
+.eyebrow { font-family: var(--mono); font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font-size: clamp(2rem, 5.2vw, 3.4rem); font-weight: 700; letter-spacing: -.02em; max-width: 20ch; }
+.lede { font-size: 1.2rem; max-width: 60ch; color: var(--ink); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip, .pill { font-family: var(--mono); font-size: .78rem; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; background: var(--surface); white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; }
+.pill i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.st-ok { color: var(--ok); } .st-warn { color: var(--warn); } .st-one { color: var(--flag); } .st-none { color: var(--none); } .st-adr { color: var(--accent); }
+.statusbox { border-left: 4px solid currentColor; background: var(--surface); padding: 14px 18px; border-radius: 0 8px 8px 0; }
+.statusbox p { color: var(--ink); max-width: 75ch; }
+
+.block { display: flex; flex-direction: column; gap: 14px; }
+.block > .muted { max-width: 70ch; }
+.prose { max-width: 74ch; display: flex; flex-direction: column; gap: 12px; }
+.prose.big p { font-size: 1.08rem; line-height: 1.7; }
+.prose ul, .prose ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+.prose pre { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-size: .8rem; line-height: 1.5; margin: 0; }
+.prose pre code { background: none; padding: 0; overflow-wrap: normal; }
+.prose h3, .prose h4 { margin-top: 10px; }
+.prose blockquote { margin: 0; padding-left: 14px; border-left: 3px solid var(--line); color: var(--muted); }
+.tw { overflow-x: auto; max-width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.prose .tw { max-width: min(1080px, 100vw - 32px); width: max-content; min-width: 100%; }
+table { border-collapse: collapse; font-size: .84rem; line-height: 1.45; min-width: 560px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: var(--accent-soft); }
+tr:last-child td { border-bottom: 0; }
+td { min-width: 9ch; }
+
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; text-align: center; font-family: var(--body); }
+
+.decisions { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 12px; }
+.dec { display: flex; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+.dec-n { font-family: var(--mono); font-size: .8rem; color: var(--accent); font-weight: 500; min-width: 2.2ch; padding-top: 2px; }
+.dec-body { display: flex; flex-direction: column; gap: 7px; min-width: 0; font-size: .9rem; line-height: 1.5; }
+.dec-body h4 { font-size: 1rem; }
+.dec-chosen { color: var(--ink); }
+.dec-why { color: var(--ink); }
+.dec-rej { color: var(--muted); font-size: .84rem; }
+
+.openitems { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; counter-reset: oi; }
+.oi { counter-increment: oi; display: flex; gap: 14px; background: var(--flag-soft); border-radius: 10px; padding: 14px 18px; }
+.oi::before { content: counter(oi); font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--flag); min-width: 1.4ch; line-height: 1.2; }
+.oi > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.oi-b { font-size: .92rem; max-width: 80ch; }
+.oi-b p + p { margin-top: 8px; }
+
+.rv-note { max-width: 75ch; }
+.warnnote { border-left: 4px solid var(--warn); padding-left: 12px; }
+.nore { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 16px 18px; max-width: 75ch; }
+.rv { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.rv-h { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.rv-h > div:first-child { display: flex; flex-direction: column; gap: 4px; max-width: 60ch; }
+.rv-counts { display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-start; }
+.cnt { font-family: var(--mono); font-size: .74rem; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.cnt.blocker { color: var(--blocker); } .cnt.major { color: var(--major); } .cnt.minor { color: var(--muted); }
+.sevbar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px; }
+.seg.blocker { background: var(--blocker); } .seg.major { background: var(--major); } .seg.minor { background: var(--minor); }
+details > summary { cursor: pointer; }
+.rv-list > summary { font-weight: 600; font-size: .92rem; color: var(--accent); }
+.findings { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 10px; }
+.fd { display: flex; gap: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+.sev { font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; padding: 2px 7px; border-radius: 4px; height: fit-content; white-space: nowrap; border: 1px solid currentColor; }
+.fd.blocker .sev { color: var(--blocker); } .fd.major .sev { color: var(--major); }
+.fd-b { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: .9rem; }
+.fd-b details { font-size: .86rem; color: var(--ink); }
+.fd-b details > summary { color: var(--muted); font-size: .8rem; }
+.fd-b details[open] { display: flex; flex-direction: column; gap: 8px; }
+.fd-loc { font-family: var(--mono); font-size: .76rem; color: var(--muted); overflow-wrap: anywhere; }
+.minors { margin: 8px 0 0; padding-left: 1.2em; font-size: .86rem; display: flex; flex-direction: column; gap: 5px; color: var(--muted); }
+
+.toc { columns: 2 260px; margin: 0; padding-left: 1.3em; font-size: .9rem; }
+.toc li { break-inside: avoid; padding: 2px 0; }
+.fs { border-top: 1px solid var(--line); padding-block: 4px; }
+.fs > summary { list-style: none; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 0; }
+.fs > summary::-webkit-details-marker { display: none; }
+.fs > summary h3::before { content: "+"; font-family: var(--mono); color: var(--accent); display: inline-block; width: 1.4em; }
+.fs[open] > summary h3::before { content: "−"; }
+.wc { font-family: var(--mono); font-size: .74rem; color: var(--muted); white-space: nowrap; }
+.fs > .prose { padding-bottom: 18px; padding-left: 1.6em; }
+
+.foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--line); padding-top: 16px; font-size: .9rem; }
+
+/* cost chart (domain 08) */
+.costfig { margin: 6px 0 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+.costfig figcaption { display: flex; flex-direction: column; gap: 2px; }
+.cc { display: flex; flex-direction: column; gap: 8px; --lab: 120px; }
+.cc-scale { position: relative; height: 18px; margin-left: var(--lab); font-family: var(--mono); font-size: .7rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cc-scale span { position: absolute; transform: translateX(-50%); }
+.cc-scale span:first-child { transform: none; } .cc-scale span:last-child { transform: translateX(-100%); }
+.cc-plot { position: relative; display: flex; flex-direction: column; gap: 14px; padding-block: 18px 4px; }
+.refs { position: absolute; top: 0; bottom: 0; left: var(--lab); right: 0; pointer-events: none; }
+.ref { position: absolute; top: 0; bottom: 0; border-left: 1.5px dashed var(--muted); }
+.ref span { position: absolute; top: 0; left: 4px; font-family: var(--mono); font-size: .68rem; color: var(--muted); white-space: nowrap; }
+.ref.stop { border-color: var(--risk); } .ref.stop span { color: var(--risk); }
+.cc-row { display: flex; align-items: center; }
+.cc-l { width: var(--lab); flex: none; font-size: .84rem; }
+.cc-bars { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.bar { height: 16px; border-radius: 0 3px 3px 0; position: relative; }
+.bar b { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: .68rem; font-weight: 500; color: var(--paper); font-variant-numeric: tabular-nums; }
+.bar.now { background: var(--accent); }
+.bar.later { background: var(--flag); }
+.cc-key { display: flex; gap: 16px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); margin-left: var(--lab); }
+.k { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.k.now { background: var(--accent); } .k.later { background: var(--flag); }
+@media (max-width: 560px) { .cc { --lab: 92px; } .cc-l { font-size: .76rem; } }
+
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+
+</style>
+
+<div class="page">
+<nav class="crumbs"><a href="https://claude.ai/artifact/C3oRETQgDsX3X6dv8VjdP5">For one architecture</a><span>/</span><span>Decision records</span></nav>
+<header class="hero">
+  <p class="eyebrow">Document 10 · Technical architecture · written 2026-11-06</p>
+  <h1>Architecture decision records and the cross-domain pass</h1>
+  <p class="lede">The twenty-two rulings that reconcile the nine domains with the 2026-10-23 decisions: no launch country, monthly USD plans, invisible teaching, the re-dated build, and every name two documents disagreed on.</p>
+  <div class="meta">
+    <span class="pill st-adr"><i></i>Decision records, written 2026-11-06</span>
+    <span class="chip">23 decisions</span>
+    <span class="chip">15 open for Muath</span>
+    <span class="chip">7,949 words, about 35 min</span>
+  </div>
+</header>
+
+<section class="statusbox st-adr">
+  <p><strong>Decision records, written 2026-11-06.</strong> The cross-domain rulings that the nine domain documents were revised to. It records why each ruling was made and what it changed; it has not itself been reviewed.</p>
+</section>
+
+<section class="block" id="summary">
+  <h2>In one paragraph</h2>
+  <div class="prose big"></div>
+</section>
+
+<section class="block" id="picture">
+  <h2>The picture</h2>
+  <p class="muted">How the records were made and where they land.</p>
+  <div class="diagram"><pre class="mermaid">
+flowchart LR
+  D[&quot;decisions.md&lt;br/&gt;2026-10-23&quot;] --&gt; ADR[&quot;10 Decision records&lt;br/&gt;ADR-01 to ADR-22&quot;]
+  C[&quot;concept-v2.md&quot;] --&gt; ADR
+  R[&quot;_review-findings.md&lt;br/&gt;17 reviews, second pass 2026-11-06&quot;] --&gt; ADR
+  ADR --&gt; N[&quot;No launch country&lt;br/&gt;ADR-02, 03, 20&quot;]
+  ADR --&gt; P[&quot;Plans and episodes a day&lt;br/&gt;ADR-04, 05, 15, 21&quot;]
+  ADR --&gt; I[&quot;Invisible teaching&lt;br/&gt;ADR-06&quot;]
+  ADR --&gt; T[&quot;Dates and operations&lt;br/&gt;ADR-07, 16&quot;]
+  ADR --&gt; K[&quot;Keys, regions, tracing&lt;br/&gt;ADR-08, 09, 12, 17, 18&quot;]
+  ADR --&gt; M[&quot;Names and interfaces&lt;br/&gt;ADR-19&quot;]
+  N &amp; P &amp; I &amp; T &amp; K &amp; M --&gt; DOCS[&quot;01 to 09 revised 2026-11-06&quot;]
+  ADR --&gt; O[&quot;§10 Open for Muath&lt;br/&gt;15 items&quot;]
+</pre></div>
+  
+</section>
+
+<section class="block" id="decisions">
+  <h2>The decisions</h2>
+  <p class="muted">Section 1's table, one card per decision. "Rejected" is what was considered and turned down.</p>
+  <ol class="decisions">
+<li class="dec">
+<span class="dec-n">ADR-01</span>
+<div class="dec-body">
+<h4>Source of truth for the architecture</h4>
+<p class="dec-chosen">decisions.md (2026-10-23) over concept-v2 over PRD-v2; the nine documents are revised to it; a PRD-v3 carries the same changes [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> The architecture must build what Muath decided, not what the PRD said two weeks earlier</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Waiting for PRD-v3 before revising (the technical design depends on these documents now)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-02</span>
+<div class="dec-body">
+<h4>Languages as two package kinds</h4>
+<p class="dec-chosen">A target-language package <code>packages/languages/&lt;target&gt;/</code> (voices, recognizers, lexicon, structure inventory, calibration set, law words, crisis keywords, prompts) and a native-language package <code>packages/native/&lt;lang&gt;/</code> (interface strings, consent texts, privacy notice, gloss language, Salma's voice and lines, crisis clips and resources); <code>package_ar_en</code> is split into <code>lang/en</code> and <code>native/ar</code>; every learner carries <code>native_language</code>, <code>target_language</code>, <code>residence_country</code>, <code>tz</code> [DECISION, decisions.md §1, concept-v2 §7 and §8]</p>
+<p class="dec-why"><span class="lbl">Why</span> No launch pair means the pair is a per-learner fact; the two sides have different bars (the gate for a target, strings for a native language)</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> One package per pair (n × m packages); hard-coding English and Arabic until "later"</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-03</span>
+<div class="dec-body">
+<h4>The language gate as code</h4>
+<p class="dec-chosen"><code>forone.langgate</code> runs concept-v2 §8's five checks per target language from <code>vendor-lab</code>; a target opens when its gate run passes; English is the pilot target and the only one that must pass before the beta; the gate runs in parallel with Milestone 0 [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> 08's vendor tests and 09's recognizer suite are the gate's first three checks; one harness, one evidence folder</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Vendor tests as one-off scripts per language</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-04</span>
+<div class="dec-body">
+<h4>Plans and allowance</h4>
+<p class="dec-chosen">Three monthly USD plans: <code>one_a_day</code> $19.99, <code>two_a_day</code> $29.99 (recommended, the trial plan), <code>three_a_day</code> $44.99; the allowance is <code>plan.episodes_per_day</code> new episodes per learner-local day; one swap a day stays; listening, the article, the chat and round two are unlimited; founding = the first 100 payers keep their plan's price (<code>founding_locked</code>), no yearly plan [DECISION, decisions.md §2]</p>
+<p class="dec-why"><span class="lbl">Why</span> Decided by Muath; the cost model sets the price</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> SAR founding year and yearly plan (PRD-v2 1.4)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-05</span>
+<div class="dec-body">
+<h4>How episodes 2 and 3 are made</h4>
+<p class="dec-chosen">The first new episode of the day is produced by the batch pipeline for the drop; episodes 2 and 3 are made on request ("next one", a learner action, never autoplay) through the on-demand path, streamed under 30 s, with the teacher's plan for them prepared in the nightly run so no Opus call sits on the path; the nightly run may pre-produce episode 2 for learners whose last 7 days show they use it [DECISION, concept-v2 law 11]</p>
+<p class="dec-why"><span class="lbl">Why</span> Typical use is 50 to 60% of the allowance, so pre-producing everything wastes about a third of the voice line; the on-demand path already exists</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Pre-producing the full allowance; a "next episode" feed</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-06</span>
+<div class="dec-body">
+<h4>Invisible teaching in the architecture</h4>
+<p class="dec-chosen">Salma's after-call notes, the polish card and the chat margin note are removed; <code>session/after-pass</code> loses stage 1 (the 90-second notes step) and keeps the 10-minute pass; the correction guard (07) blocks explicit corrections from every host and Salma line in code; the editor's check "nothing reads as a correction" is a model check; "say it once" and shadowing stay as pronunciation; the notebook, the weekly proof, "why this episode" and "where do I stand" stay as evidence [DECISION, decisions.md §3 and §4, concept-v2 law 7]</p>
+<p class="dec-why"><span class="lbl">Why</span> Muath's call; law 7 must be enforced by code the way law 12 is</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Keeping notes as an option behind a flag (a flag never changes a law, 09 D8)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-07</span>
+<div class="dec-body">
+<h4>Dates</h4>
+<p class="dec-chosen">Milestone 0 2026-10-24 to 11-18; language gate and vendor tests during it; build 2026-11-18 to 12-22 in five weeks; beta 2026-12-23 to 2027-01-26; gate review 2027-01-26; every "2026-11-02" in the first drafts moves 16 days [DECISION, milestone-0/03-schedule.md]</p>
+<p class="dec-why"><span class="lbl">Why</span> The pilot had not started when the first drafts were written</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Keeping the old dates "until the PRD moves"</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-08</span>
+<div class="dec-body">
+<h4>Home region</h4>
+<p class="dec-chosen">Default <code>HOME_REGION = eu-central-1</code> (Frankfurt) for a worldwide cohort; <code>me-central-1</code> (UAE) remains a one-day config move if counsel and the cohort favour it; <code>call-worker</code> runs where the vendors are fastest; <strong>final answer stays [OPEN for Muath, with counsel]</strong> [DECISION on the default only]</p>
+<p class="dec-why"><span class="lbl">Why</span> With no launch country, EU and UK learners' data in the UAE is itself a transfer without adequacy; an EU region needs only the AWS DPA for them</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> GCP Dammam now; a region per learner (two of everything)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-09</span>
+<div class="dec-body">
+<h4>Tracing data (Langfuse)</h4>
+<p class="dec-chosen">01 D15 stands for every domain: metadata only by default (ids, versions, usage, cost, latency, prompt hash); prompt and completion text only for learners with <code>data_use = true</code>, after <code>anonymize()</code>; <code>user_id</code> is the research pseudonym, never the learner id; 30-day retention; debugging reads prompts from the home region (02's <code>pipeline_steps</code> artifacts, the call brief and turns in <code>events</code>) [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> Three documents had three rules for one processor; the strictest one is also the one 01 already designed</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> 08 D3 (full text, learner id, 100%)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-10</span>
+<div class="dec-body">
+<h4>Embeddings vendor</h4>
+<p class="dec-chosen">Google's embedding model under the existing Google processor row; no OpenAI processor [DECISION, 02 §9.7]</p>
+<p class="dec-why"><span class="lbl">Why</span> One fewer processor for one cosine check</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> OpenAI <code>text-embedding-3-small</code> (07 and 08 first drafts)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-11</span>
+<div class="dec-body">
+<h4>Editor fallback</h4>
+<p class="dec-chosen">When the second vendor is down the editor runs on <code>claude-opus-5-5</code> (standard), flagged <code>same_vendor_edit</code> for review; never code checks only [DECISION, 02 §9.7]</p>
+<p class="dec-why"><span class="lbl">Why</span> The editor must be at least as strong as the writer when it shares the writer's vendor</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Haiku as the fallback editor (08 first draft)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-12</span>
+<div class="dec-body">
+<h4>Media key model</h4>
+<p class="dec-chosen">Learner-voice kinds (<code>call_turn</code>, <code>call_full</code>, <code>recording</code>, <code>voice_note</code>, <code>say_it_once</code>, <code>shadow</code>, <code>clip</code>, the name clip) are SSE-C under the learner's DEK; produced show kinds (<code>episode_segment</code>, <code>episode_full</code>, <code>episode_feed</code>, <code>read_aloud</code>, <code>recap</code>, <code>feed_tag</code>, <code>proof</code>) are SSE-KMS under the environment key, served by short-lived presigned URLs, deleted by prefix in <code>learner/delete</code> [DECISION, amends 07 D1 and D3, 01 D7]</p>
+<p class="dec-why"><span class="lbl">Why</span> SSE-C can never be served by a presigned URL, a CDN or <code>&lt;audio src&gt;</code>; locking show audio behind <code>api</code> bandwidth forever was an accident of the first draft</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Everything SSE-C (07 D1); everything SSE-KMS (loses "key deletion deletes the voice")</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-13</span>
+<div class="dec-body">
+<h4>Cost rows and the spend counter</h4>
+<p class="dec-chosen"><code>vendor_calls</code> rows are written in their own short transaction the moment a vendor responds, idempotent on <code>(inngest_run_id, step, attempt)</code> or <code>(call_id, turn_index, capability)</code>; the same statement upserts <code>learner_spend_daily</code>; the worker appends each turn's rows to an S3 spool before any buffered flush; reconciliation hourly [DECISION, amends 08 §3.2 and 07 §4.11]</p>
+<p class="dec-why"><span class="lbl">Why</span> A cost row inside the caller's transaction is lost on exactly the retry the spend guard exists to catch</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Same-transaction writes; nightly reconciliation</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-14</span>
+<div class="dec-body">
+<h4>Spend modes and model levers</h4>
+<p class="dec-chosen">Automatic spend modes may change only what no learner hears (force batch, cap rewrites, skip canaries and the nightly smoke, defer anonymization) and may pause on-demand extras under the daily cap; model downgrades (Haiku host, Sonnet teacher) are feature flags a person flips after <code>eval-gate</code> passes [DECISION, 09 D8 over 08 D4 <code>conserve</code>]</p>
+<p class="dec-why"><span class="lbl">Why</span> A quality change is a human decision, not an alarm's</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> 08's automatic <code>conserve</code> downgrades</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-15</span>
+<div class="dec-body">
+<h4>Per-plan cost guard and caps</h4>
+<p class="dec-chosen">Soft guard 2.5 × <code>episodes_per_day</code> × budget, hard 4 × episodes × budget; call starts 6 × episodes a day; ideas 3 per episode slot; daily spend cap Σ <code>episodes × $1.00</code> over learners; the weekly report gains "Margin by plan", <code>plan_mix</code> and <code>blended_margin</code> [DECISION, amends 07 D11 and 08]</p>
+<p class="dec-why"><span class="lbl">Why</span> Every per-day limit in the first drafts assumed one episode a day</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Fixed $2.50 / $5.00 guards</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-16</span>
+<div class="dec-body">
+<h4>Operations around the clock</h4>
+<p class="dec-chosen">No protected hour and no timezone-fixed job: every rule is relative to each learner's <code>drop_at</code>; <code>measures/daily</code> and <code>privacy/verify</code> run hourly over learner-local days that closed; reports at fixed UTC times; the release tool computes the deploy window from <code>learner_schedule</code> (deploy only when under 2% of learners have a drop in the next 45 min, <code>call-worker</code> only when idle) and the check is binding; per-learner lateness is P2, systemic lateness (3+ learners or 5%) is P1; staging stays up from build week 2 through the beta [DECISION, amends 09 D9, D11, 4.10 and 01 D14]</p>
+<p class="dec-why"><span class="lbl">Why</span> Learners anywhere means drops at every hour</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> A Riyadh-centred rota and release window</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-17</span>
+<div class="dec-body">
+<h4>Database roles for staff surfaces</h4>
+<p class="dec-chosen"><code>forone_admin</code> serves the <code>/admin</code> pages (aggregate reads across learners, writes only to the admin tables), with every content read in <code>audit_log</code>; pgaudit applies only to <code>forone_human</code>, the role psql sessions use [DECISION, amends 07 §4.2 and 09 D2]</p>
+<p class="dec-why"><span class="lbl">Why</span> pgaudit on the dashboards' role would bury the human-SQL audit it exists for</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Dashboards on <code>forone_readonly</code> under pgaudit</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-18</span>
+<div class="dec-body">
+<h4>DEK cache and audit</h4>
+<p class="dec-chosen"><code>keys.get_dek</code> caches 60 s in <code>api</code> and <code>workflows</code>, never for <code>admin_break_glass</code> or <code>export</code>; one <code>audit_log</code> row per <code>(learner_id, purpose, actor)</code> per cache window with a <code>uses</code> count; cache entries are keyed by <code>(learner_id, key_version)</code> and <code>destroy()</code> bumps the version in the row so every process misses on its next read; the zeroization claim is dropped [DECISION, amends 07 D2 and §4.1]</p>
+<p class="dec-why"><span class="lbl">Why</span> A 10-minute cache made the audit log incomplete and let a destroyed key keep working in other tasks</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Per-read KMS calls (latency and cost); the first draft's cache</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-19</span>
+<div class="dec-body">
+<h4>Naming rulings</h4>
+<p class="dec-chosen"><code>episodes.state</code> (not <code>status</code>); <code>events</code> append-only with <code>call_turn_verbatim</code> as a second event appended by <code>workflows</code> through <code>events.append()</code>; <code>word_uses</code> is 04's per-use word evidence table written by 05 (the twin of <code>structure_observations</code>); <code>learner_schedule.expects_drop</code>; <code>tools/call-bench</code> is the one load and latency tool; <code>cohort_key = invite_date</code>; <code>proofs.sessions_in_week</code> is computed, not stored [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> Nine documents, one vocabulary; the technical design needs the names fixed</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Leaving each document's spelling</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-20</span>
+<div class="dec-body">
+<h4>Jurisdiction and crisis resources</h4>
+<p class="dec-chosen"><code>learners.residence_country</code> is asked at A9, never inferred; 07 §4.9 becomes a regime table (EU and UK GDPR, Saudi PDPL, a generic baseline for unreviewed countries) with the breach clock and DPIA per regime; crisis resources per ISO country with an international directory as the fallback; a DPIA is the fifth counsel artifact [DECISION; which regimes counsel covers on day one is OPEN]</p>
+<p class="dec-why"><span class="lbl">Why</span> A Saudi-only privacy design cannot serve a learner in Berlin</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> PDPL-only (07 first draft); blocking signups from unreviewed countries</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-21</span>
+<div class="dec-body">
+<h4>Payments</h4>
+<p class="dec-chosen">Three USD plans as in ADR-04; hosted checkout; cards, Apple Pay and Google Pay worldwide; a merchant-of-record processor recommended (Paddle; Stripe with Stripe Tax as the fallback) because tax falls due in many countries; Mada and other regional methods later; founding price lock, not a founding plan; <strong>processor stays [OPEN for Muath]</strong> [DECISION on the model]</p>
+<p class="dec-why"><span class="lbl">Why</span> No launch country means no single tax jurisdiction</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> SAR-first, Mada-first processors (07 §4.14 first draft)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-22</span>
+<div class="dec-body">
+<h4>Open-item register</h4>
+<p class="dec-chosen">The items only Muath can settle are listed once, in section 10 of this document, with the domain that waits on each; the other nine documents' section 10 lists point here where they overlap [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> Thirteen plus eleven plus ten open lists in nine documents hid the few that block the build</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Each document keeping its own full list</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-23</span>
+<div class="dec-body">
+<h4>Second-pass naming (integration, 2026-11-06 evening)</h4>
+<p class="dec-chosen">After the nine revisions: Inngest event <code>learner.extra_requested {learner_id, local_date, slot, episode_id}</code>; <code>episodes.slot</code> (1 = the drop, 2 and 3 = <code>daily_extra</code>); terminal state <code>superseded</code> for unused extras and swapped dailies; <code>turn_index</code> everywhere; <code>cost/reconcile-spend</code> hourly; <code>rater.pinned_until = 2027-02-16</code> (05's cohort-aligned first window); object keys <code>learners/{lid}/...</code> with the bucket-level <code>ephemeral/</code> prefix (04 D15); <code>client_perf.first_sentence_ms</code>; A3 facts stored <code>usable</code>; no zeroization claim anywhere</p>
+<p class="dec-why"><span class="lbl">Why</span> Nine agents revising in parallel chose different spellings for the same new things; one spelling per thing before the technical design reads them</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> <code>day_seq</code>, <code>learner.next_requested</code>, <code>unused</code>, <code>turn_n</code>, <code>cost/reconcile</code>, a 2027-01-19 rater window, <code>episodes/{learner_id}/</code> prefixes</p>
+</div></li>
+</ol>
+  
+</section>
+
+<section class="block" id="open">
+  <h2>Open for Muath</h2>
+  <p class="muted">Section 10: the register of everything only you can settle, across all ten documents.</p>
+  <ol class="openitems"><li class="oi"><div><h4>Home region and the legal view on storing learner voice (counsel, by 2026-11-17)</h4><div class="oi-b"><p>ADR-08 makes <code>eu-central-1</code> the default for a worldwide cohort and keeps <code>me-central-1</code> as a one-day config move. Counsel confirms: where a worldwide cohort's voice recordings and transcripts may rest, the transfer basis for the US model, voice and recognition vendors (standard contractual clauses plus consent is the working assumption), whether voice used only for the learner's own progress counts as biometric data under GDPR or PDPL, and whether the in-session verbatim "yes" is explicit consent for sensitive-class facts. [01, 07]</p></div></div></li>
+<li class="oi"><div><h4>Which jurisdictions the beta covers on day one (counsel, by 2026-11-17)</h4><div class="oi-b"><p>Recommended: EU and UK GDPR, Saudi PDPL and the generic baseline; signups from unreviewed countries accepted under the generic notice. Also the DPIA, the consent and notice copy per native language, and the reviewer and tagger confidentiality agreement. [07, 06]</p></div></div></li>
+<li class="oi"><div><h4>Payment processor and legal entity (by 2026-12-02)</h4><div class="oi-b"><p>A merchant-of-record processor (Paddle, about 5%) handles tax in every country; Stripe with Stripe Tax (about 3% plus registrations) needs an entity in a Stripe country. Trial without a card (PRD 18 #4) is assumed. [07, 01, 06]</p></div></div></li>
+<li class="oi"><div><h4>Tier prices against the break-even</h4><div class="oi-b"><p>At the post-doubling floor stack ($0.43 to $0.45 a session) the 2 and 3 a day plans lose money on a learner who uses every episode (break-even $0.42). Options: keep the prices and accept the loss on full-use learners (typical use is about half), raise 2 a day to $34.99, or commit to the voice contract in #5. The exit document on 2026-12-22 carries the measured number. [08]</p></div></div></li>
+<li class="oi"><div><h4>The last lever to $0.35 and the voice contract (by 2026-12-22)</h4><div class="oi-b"><p>A negotiated voice rate near $12 to $15 per million characters (no product change), read-aloud and recap rendered on first tap (about four engineer-days across 02, 03 and 06 and a 2 to 4 s wait), or 5-minute calls (in tension with the 4-minute speech gate). If Gemini wins the English blind test, decide the January plan now: swap the episode voice to the runner-up on 2027-01-01 with the on-air line, or ask Google for a rate. [08, 02, 03, 06]</p></div></div></li>
+<li class="oi"><div><h4>Haiku 5.5 as the call host</h4><div class="oi-b"><p>if the 50-call comparison in build week 4 shows no difference in move-contract violations, talk share and the human read; worth $0.046 a session. [03, 08]</p></div></div></li>
+<li class="oi"><div><h4>On-call for a worldwide cohort</h4><div class="oi-b"><p>With learners in every timezone there is no quiet hour. Accept that in the beta a one-engineer rota answers overnight P1s with the product's fallbacks (yesterday's episode stays; voice notes) and a human at the next working hour, or fund a second responder; and approve Better Stack's on-call plan (about $30 a month). [09, 01]</p></div></div></li>
+<li class="oi"><div><h4>Web or native for the beta</h4><div class="oi-b"><p>The architecture builds the installable web app plus the private feed (decisions.md §7's recommendation); the switch-to-native triggers (calls abandoned on the move, feed-to-call handoff lost) are measured from day one. This stays open as the coordinator asked; nothing in this pass changes it. [06, 01]</p></div></div></li>
+<li class="oi"><div><h4>Fixed infrastructure budget: about $1,000 to $1,300 a month</h4><div class="oi-b"><p>(01's $800 to $1,100 plus staging kept up through the beta, ADR-16), plus vendor minimums (voice winner's paid tier $100 to $330, LiveKit Ship $50, Langfuse Core up to $59, Speechace, Better Stack $30) and the Anthropic prepaid balance (about $2,500 for the beta's first month at the upper plans' usage). [01, 08, 09]</p></div></div></li>
+<li class="oi"><div><h4>Second engineer, and the week-6 slips</h4><div class="oi-b"><p>(01 §10 #5). Decide by 2026-11-18. [01]</p></div></div></li>
+<li class="oi"><div><h4>The reviewers</h4><div class="oi-b"><p>A paid native reader per target language (English first; about 4 hours a day at 100 learners, less with 09's cut), who also performs the language gate's writing check; the claims auditor (Muath or a second trained person); the native-language law-scan reader (Muath for Arabic). [09, 02]</p></div></div></li>
+<li class="oi"><div><h4>Crisis protocol details (counsel, by 2026-12-15)</h4><div class="oi-b"><p>Clip wording per pair, the per-country resources list and the international fallback, whether the keyword list may fire alone (ADR default: the host confirms first, 2-second cap), whether SB 243 applies, and whether Muath wants to be told of activations and write personally. [07, 03]</p></div></div></li>
+<li class="oi"><div><h4>Consents for Milestone 0 data</h4><div class="oi-b"><p>(01 §10 #11): the vendor-test addendum before any clip leaves (by 2026-11-01), and whether the pilot consent covers re-onboarding the 15 learners in build week 5 and keeping de-identified fixtures. [01, 07, 09]</p></div></div></li>
+<li class="oi"><div><h4>Processors to approve</h4><div class="oi-b"><p>(07 §4.9 as revised): Langfuse Cloud EU under ADR-09, Resend with tracking off, Sentry EU, Vercel, LiveKit Cloud, Inngest EU, the verbatim recognizer with minimum retention; and the Anthropic zero-data-retention request. [07, 01, 08]</p></div></div></li>
+<li class="oi"><div><h4>Smaller items that stay with their documents</h4><div class="oi-b"><p>archive growth (01 §10 #7), WhatsApp invites (01 #8), the 30 s median / 45 s p95 budgets (01 #9), the PRD 3.10 amendment for two transactional emails (01 #10), the brand domain (01 #13), research rows after deletion (04 and 07: deleted), the export passphrase (04), the "very disappointed" question mechanism (09), pulling a shipped episode (09 R4), the stop line's owner and window (08, 09: a human, 48 hours), the daily cap formula (08), cost figures in the review packet (08), staff passkeys and a penetration test before public launch (07), age verification beyond self-attestation (07), waitlist retention (07), the first rater window to 2027-02-16 (05 §10 #6), and the fact that <code>renewal_m2</code> for the first cohort is not readable before the 2027-01-26 gate review (09): the review reads it as "not yet".</p>
+<hr /></div></div></li></ol>
+</section>
+
+<section class="block" id="build">
+  <h2>Build plan, 2026-11-18 to 2026-12-22</h2>
+  <div class="prose"><p>The five weeks keep the contents of each document's section 7, moved by 16 days, with these cross-domain changes placed where they must land.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Dates</th>
+<th>Cross-domain items added or moved by this pass</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 (Milestone 0, in parallel)</td>
+<td>2026-11-01 to 11-17</td>
+<td><code>vendor-lab gate --target en</code> on the pilot's clips and scripts (ADR-03); <code>vendors.yaml</code> committed by 11-17; counsel's answers on region, consents and crisis lines by 11-17; Terraform written for <code>eu-central-1</code> with the region as one variable (ADR-08)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>2026-11-18 to 11-24</td>
+<td><code>learners.{native_language,target_language,residence_country,plan,tz}</code>; the two package directories with <code>lang/en</code> and <code>native/ar</code> and <code>native/en</code> skeletons (ADR-02); <code>media_objects.encryption</code> and the two bucket policies (ADR-12); <code>vendor_calls</code> own-transaction write and the worker S3 spool (ADR-13); <code>events</code> append-only with <code>call_turn_verbatim</code>; <code>word_uses</code> DDL (ADR-19); <code>forone_admin</code> and <code>forone_human</code> roles (ADR-17); <code>keys.get_dek</code> with the 60 s versioned cache (ADR-18); logging and paging skeleton (09)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2026-11-25 to 12-01</td>
+<td>Teacher's multi-episode day plan and <code>daily_extra</code> kind in <code>episode/produce</code> (ADR-05); editor check widened to corrections (ADR-06); Google embeddings (ADR-10); editor fallback on Opus (ADR-11); Langfuse metadata-only wiring with the pseudonym (ADR-09); <code>eval-gate</code> with the per-package path map; staging stays up from here (ADR-16)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2026-12-02 to 12-08</td>
+<td><code>plans.yaml</code>, allowance by plan, <code>POST /v1/episodes/next</code>, the "next one" control (ADR-04, 05); A9 with the country question and consent per native language (ADR-20); payments scaffold on the chosen processor with the three plans and the founding lock (ADR-21); processor decision by 12-02</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2026-12-09 to 12-15</td>
+<td>Correction guard in the worker and chat paths (ADR-06); crisis clips per pair and resources per country (ADR-20); <code>talkback_stt</code> language hint per learner (ADR-02); <code>call-bench</code> 50-call run on the English stack; per-plan cost guard (ADR-15)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2026-12-16 to 12-22</td>
+<td><code>session/after-pass</code> as one function (ADR-06); <code>measures/hourly</code>, <code>privacy/verify</code> hourly, <code>drops_late_systemic</code>, the binding release window (ADR-16); "Margin by plan" in the weekly report (ADR-15); the end-to-end run with the Milestone 0 learners under a consent that covers it; the exit document with measured cost and the costed path</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Freeze:</strong> 2026-12-21 12:00 to 12-24 12:00 UTC. <strong>Beta week 2 (2027-01-01):</strong> the Gemini doubling lands; the voice plan from 08 §6.1 note 3 is executed in the first release after 2027-01-02.</p>
+<hr /></div>
+</section>
+
+<section class="block" id="reviews">
+  <h2>Review findings</h2>
+  <div class="nore"><p><strong>This document has not been reviewed.</strong> It was written on 2026-11-06 from the seventeen reviews of the nine domains and the 2026-10-23 decisions; section 9 says how each finding was applied, and section 11 of every domain document logs what changed.</p></div>
+</section>
+
+<section class="block" id="full">
+  <h2>The full document</h2>
+  <p class="muted">Every section as written, closed by default. Source file: <code>architecture/10-decision-records.md</code>.</p>
+  <ol class="toc"><li><a href="#s1-summary-and-the-decisions-in-one-table">1. Summary and the decisions in one table</a></li><li><a href="#s2-what-changed-on-2026-10-23-and-what-it">2. What changed on 2026-10-23 and what it does to the architecture</a></li><li><a href="#s3-the-decision-records">3. The decision records</a></li><li><a href="#s4-naming-and-interface-rulings">4. Naming and interface rulings</a></li><li><a href="#s5-what-the-prd-v3-thread-needs-to-carry">5. What the PRD-v3 thread needs to carry</a></li><li><a href="#s6-dates-in-one-table">6. Dates, in one table</a></li><li><a href="#s7-build-plan-for-2026-11-18-to-2026-12-2">7. Build plan for 2026-11-18 to 2026-12-22</a></li><li><a href="#s8-alternatives-rejected-in-the-cross-dom">8. Alternatives rejected in the cross-domain pass</a></li><li><a href="#s9-how-the-findings-were-applied">9. How the findings were applied</a></li><li><a href="#s10-open-for-muath">10. Open for Muath</a></li><li><a href="#s11-revision-log">11. Revision log</a></li></ol>
+  <details class="fs"><summary><h3>Front matter</h3></summary><div class="prose"><p>Domain 10 of the For one technical architecture. Written 2026-11-06 by the "Finish the architecture documentation" thread after reviewing domains 07 to 09 and cross-checking all nine domain documents against each other, against <a href="../decisions.md">decisions.md</a> (Muath's answers of 2026-10-23) and against <a href="../concept-v2.md">concept-v2.md</a>. Each record below is a ruling that two or more documents now follow; the nine documents were revised on the same day to match. Tags as in the other documents: [DECISION] ruled here; [ASSUMPTION] assumed because the sources are silent; [OPEN for Muath] only the owner can settle, and section 10 lists every one of them.</p>
+<p>The one fact behind most records: the nine documents were written on 2026-10-16 and 10-17 against PRD-v2, which encodes the decisions as they stood on 2026-10-10 (one launch pair, Saudi Arabic speakers learning English, SAR prices, a founding year, Salma's correction notes). On 2026-10-23 Muath decided differently on five points and the pilot kit re-dated the schedule. PRD-v2 remains the build spec wherever decisions.md and concept-v2 are silent; where they differ, decisions.md wins, and the PRD-v3 thread is carrying the same changes into the PRD.</p></div></details>
+  <details class="fs" id="s1-summary-and-the-decisions-in-one-table"><summary><h3>1. Summary and the decisions in one table</h3><span class="wc">1,995 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Chosen</th>
+<th>Reason in one line</th>
+<th>Rejected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ADR-01</td>
+<td>Source of truth for the architecture</td>
+<td>decisions.md (2026-10-23) over concept-v2 over PRD-v2; the nine documents are revised to it; a PRD-v3 carries the same changes [DECISION]</td>
+<td>The architecture must build what Muath decided, not what the PRD said two weeks earlier</td>
+<td>Waiting for PRD-v3 before revising (the technical design depends on these documents now)</td>
+</tr>
+<tr>
+<td>ADR-02</td>
+<td>Languages as two package kinds</td>
+<td>A target-language package <code>packages/languages/&lt;target&gt;/</code> (voices, recognizers, lexicon, structure inventory, calibration set, law words, crisis keywords, prompts) and a native-language package <code>packages/native/&lt;lang&gt;/</code> (interface strings, consent texts, privacy notice, gloss language, Salma's voice and lines, crisis clips and resources); <code>package_ar_en</code> is split into <code>lang/en</code> and <code>native/ar</code>; every learner carries <code>native_language</code>, <code>target_language</code>, <code>residence_country</code>, <code>tz</code> [DECISION, decisions.md §1, concept-v2 §7 and §8]</td>
+<td>No launch pair means the pair is a per-learner fact; the two sides have different bars (the gate for a target, strings for a native language)</td>
+<td>One package per pair (n × m packages); hard-coding English and Arabic until "later"</td>
+</tr>
+<tr>
+<td>ADR-03</td>
+<td>The language gate as code</td>
+<td><code>forone.langgate</code> runs concept-v2 §8's five checks per target language from <code>vendor-lab</code>; a target opens when its gate run passes; English is the pilot target and the only one that must pass before the beta; the gate runs in parallel with Milestone 0 [DECISION]</td>
+<td>08's vendor tests and 09's recognizer suite are the gate's first three checks; one harness, one evidence folder</td>
+<td>Vendor tests as one-off scripts per language</td>
+</tr>
+<tr>
+<td>ADR-04</td>
+<td>Plans and allowance</td>
+<td>Three monthly USD plans: <code>one_a_day</code> $19.99, <code>two_a_day</code> $29.99 (recommended, the trial plan), <code>three_a_day</code> $44.99; the allowance is <code>plan.episodes_per_day</code> new episodes per learner-local day; one swap a day stays; listening, the article, the chat and round two are unlimited; founding = the first 100 payers keep their plan's price (<code>founding_locked</code>), no yearly plan [DECISION, decisions.md §2]</td>
+<td>Decided by Muath; the cost model sets the price</td>
+<td>SAR founding year and yearly plan (PRD-v2 1.4)</td>
+</tr>
+<tr>
+<td>ADR-05</td>
+<td>How episodes 2 and 3 are made</td>
+<td>The first new episode of the day is produced by the batch pipeline for the drop; episodes 2 and 3 are made on request ("next one", a learner action, never autoplay) through the on-demand path, streamed under 30 s, with the teacher's plan for them prepared in the nightly run so no Opus call sits on the path; the nightly run may pre-produce episode 2 for learners whose last 7 days show they use it [DECISION, concept-v2 law 11]</td>
+<td>Typical use is 50 to 60% of the allowance, so pre-producing everything wastes about a third of the voice line; the on-demand path already exists</td>
+<td>Pre-producing the full allowance; a "next episode" feed</td>
+</tr>
+<tr>
+<td>ADR-06</td>
+<td>Invisible teaching in the architecture</td>
+<td>Salma's after-call notes, the polish card and the chat margin note are removed; <code>session/after-pass</code> loses stage 1 (the 90-second notes step) and keeps the 10-minute pass; the correction guard (07) blocks explicit corrections from every host and Salma line in code; the editor's check "nothing reads as a correction" is a model check; "say it once" and shadowing stay as pronunciation; the notebook, the weekly proof, "why this episode" and "where do I stand" stay as evidence [DECISION, decisions.md §3 and §4, concept-v2 law 7]</td>
+<td>Muath's call; law 7 must be enforced by code the way law 12 is</td>
+<td>Keeping notes as an option behind a flag (a flag never changes a law, 09 D8)</td>
+</tr>
+<tr>
+<td>ADR-07</td>
+<td>Dates</td>
+<td>Milestone 0 2026-10-24 to 11-18; language gate and vendor tests during it; build 2026-11-18 to 12-22 in five weeks; beta 2026-12-23 to 2027-01-26; gate review 2027-01-26; every "2026-11-02" in the first drafts moves 16 days [DECISION, milestone-0/03-schedule.md]</td>
+<td>The pilot had not started when the first drafts were written</td>
+<td>Keeping the old dates "until the PRD moves"</td>
+</tr>
+<tr>
+<td>ADR-08</td>
+<td>Home region</td>
+<td>Default <code>HOME_REGION = eu-central-1</code> (Frankfurt) for a worldwide cohort; <code>me-central-1</code> (UAE) remains a one-day config move if counsel and the cohort favour it; <code>call-worker</code> runs where the vendors are fastest; <strong>final answer stays [OPEN for Muath, with counsel]</strong> [DECISION on the default only]</td>
+<td>With no launch country, EU and UK learners' data in the UAE is itself a transfer without adequacy; an EU region needs only the AWS DPA for them</td>
+<td>GCP Dammam now; a region per learner (two of everything)</td>
+</tr>
+<tr>
+<td>ADR-09</td>
+<td>Tracing data (Langfuse)</td>
+<td>01 D15 stands for every domain: metadata only by default (ids, versions, usage, cost, latency, prompt hash); prompt and completion text only for learners with <code>data_use = true</code>, after <code>anonymize()</code>; <code>user_id</code> is the research pseudonym, never the learner id; 30-day retention; debugging reads prompts from the home region (02's <code>pipeline_steps</code> artifacts, the call brief and turns in <code>events</code>) [DECISION]</td>
+<td>Three documents had three rules for one processor; the strictest one is also the one 01 already designed</td>
+<td>08 D3 (full text, learner id, 100%)</td>
+</tr>
+<tr>
+<td>ADR-10</td>
+<td>Embeddings vendor</td>
+<td>Google's embedding model under the existing Google processor row; no OpenAI processor [DECISION, 02 §9.7]</td>
+<td>One fewer processor for one cosine check</td>
+<td>OpenAI <code>text-embedding-3-small</code> (07 and 08 first drafts)</td>
+</tr>
+<tr>
+<td>ADR-11</td>
+<td>Editor fallback</td>
+<td>When the second vendor is down the editor runs on <code>claude-opus-5-5</code> (standard), flagged <code>same_vendor_edit</code> for review; never code checks only [DECISION, 02 §9.7]</td>
+<td>The editor must be at least as strong as the writer when it shares the writer's vendor</td>
+<td>Haiku as the fallback editor (08 first draft)</td>
+</tr>
+<tr>
+<td>ADR-12</td>
+<td>Media key model</td>
+<td>Learner-voice kinds (<code>call_turn</code>, <code>call_full</code>, <code>recording</code>, <code>voice_note</code>, <code>say_it_once</code>, <code>shadow</code>, <code>clip</code>, the name clip) are SSE-C under the learner's DEK; produced show kinds (<code>episode_segment</code>, <code>episode_full</code>, <code>episode_feed</code>, <code>read_aloud</code>, <code>recap</code>, <code>feed_tag</code>, <code>proof</code>) are SSE-KMS under the environment key, served by short-lived presigned URLs, deleted by prefix in <code>learner/delete</code> [DECISION, amends 07 D1 and D3, 01 D7]</td>
+<td>SSE-C can never be served by a presigned URL, a CDN or <code>&lt;audio src&gt;</code>; locking show audio behind <code>api</code> bandwidth forever was an accident of the first draft</td>
+<td>Everything SSE-C (07 D1); everything SSE-KMS (loses "key deletion deletes the voice")</td>
+</tr>
+<tr>
+<td>ADR-13</td>
+<td>Cost rows and the spend counter</td>
+<td><code>vendor_calls</code> rows are written in their own short transaction the moment a vendor responds, idempotent on <code>(inngest_run_id, step, attempt)</code> or <code>(call_id, turn_index, capability)</code>; the same statement upserts <code>learner_spend_daily</code>; the worker appends each turn's rows to an S3 spool before any buffered flush; reconciliation hourly [DECISION, amends 08 §3.2 and 07 §4.11]</td>
+<td>A cost row inside the caller's transaction is lost on exactly the retry the spend guard exists to catch</td>
+<td>Same-transaction writes; nightly reconciliation</td>
+</tr>
+<tr>
+<td>ADR-14</td>
+<td>Spend modes and model levers</td>
+<td>Automatic spend modes may change only what no learner hears (force batch, cap rewrites, skip canaries and the nightly smoke, defer anonymization) and may pause on-demand extras under the daily cap; model downgrades (Haiku host, Sonnet teacher) are feature flags a person flips after <code>eval-gate</code> passes [DECISION, 09 D8 over 08 D4 <code>conserve</code>]</td>
+<td>A quality change is a human decision, not an alarm's</td>
+<td>08's automatic <code>conserve</code> downgrades</td>
+</tr>
+<tr>
+<td>ADR-15</td>
+<td>Per-plan cost guard and caps</td>
+<td>Soft guard 2.5 × <code>episodes_per_day</code> × budget, hard 4 × episodes × budget; call starts 6 × episodes a day; ideas 3 per episode slot; daily spend cap Σ <code>episodes × $1.00</code> over learners; the weekly report gains "Margin by plan", <code>plan_mix</code> and <code>blended_margin</code> [DECISION, amends 07 D11 and 08]</td>
+<td>Every per-day limit in the first drafts assumed one episode a day</td>
+<td>Fixed $2.50 / $5.00 guards</td>
+</tr>
+<tr>
+<td>ADR-16</td>
+<td>Operations around the clock</td>
+<td>No protected hour and no timezone-fixed job: every rule is relative to each learner's <code>drop_at</code>; <code>measures/daily</code> and <code>privacy/verify</code> run hourly over learner-local days that closed; reports at fixed UTC times; the release tool computes the deploy window from <code>learner_schedule</code> (deploy only when under 2% of learners have a drop in the next 45 min, <code>call-worker</code> only when idle) and the check is binding; per-learner lateness is P2, systemic lateness (3+ learners or 5%) is P1; staging stays up from build week 2 through the beta [DECISION, amends 09 D9, D11, 4.10 and 01 D14]</td>
+<td>Learners anywhere means drops at every hour</td>
+<td>A Riyadh-centred rota and release window</td>
+</tr>
+<tr>
+<td>ADR-17</td>
+<td>Database roles for staff surfaces</td>
+<td><code>forone_admin</code> serves the <code>/admin</code> pages (aggregate reads across learners, writes only to the admin tables), with every content read in <code>audit_log</code>; pgaudit applies only to <code>forone_human</code>, the role psql sessions use [DECISION, amends 07 §4.2 and 09 D2]</td>
+<td>pgaudit on the dashboards' role would bury the human-SQL audit it exists for</td>
+<td>Dashboards on <code>forone_readonly</code> under pgaudit</td>
+</tr>
+<tr>
+<td>ADR-18</td>
+<td>DEK cache and audit</td>
+<td><code>keys.get_dek</code> caches 60 s in <code>api</code> and <code>workflows</code>, never for <code>admin_break_glass</code> or <code>export</code>; one <code>audit_log</code> row per <code>(learner_id, purpose, actor)</code> per cache window with a <code>uses</code> count; cache entries are keyed by <code>(learner_id, key_version)</code> and <code>destroy()</code> bumps the version in the row so every process misses on its next read; the zeroization claim is dropped [DECISION, amends 07 D2 and §4.1]</td>
+<td>A 10-minute cache made the audit log incomplete and let a destroyed key keep working in other tasks</td>
+<td>Per-read KMS calls (latency and cost); the first draft's cache</td>
+</tr>
+<tr>
+<td>ADR-19</td>
+<td>Naming rulings</td>
+<td><code>episodes.state</code> (not <code>status</code>); <code>events</code> append-only with <code>call_turn_verbatim</code> as a second event appended by <code>workflows</code> through <code>events.append()</code>; <code>word_uses</code> is 04's per-use word evidence table written by 05 (the twin of <code>structure_observations</code>); <code>learner_schedule.expects_drop</code>; <code>tools/call-bench</code> is the one load and latency tool; <code>cohort_key = invite_date</code>; <code>proofs.sessions_in_week</code> is computed, not stored [DECISION]</td>
+<td>Nine documents, one vocabulary; the technical design needs the names fixed</td>
+<td>Leaving each document's spelling</td>
+</tr>
+<tr>
+<td>ADR-20</td>
+<td>Jurisdiction and crisis resources</td>
+<td><code>learners.residence_country</code> is asked at A9, never inferred; 07 §4.9 becomes a regime table (EU and UK GDPR, Saudi PDPL, a generic baseline for unreviewed countries) with the breach clock and DPIA per regime; crisis resources per ISO country with an international directory as the fallback; a DPIA is the fifth counsel artifact [DECISION; which regimes counsel covers on day one is OPEN]</td>
+<td>A Saudi-only privacy design cannot serve a learner in Berlin</td>
+<td>PDPL-only (07 first draft); blocking signups from unreviewed countries</td>
+</tr>
+<tr>
+<td>ADR-21</td>
+<td>Payments</td>
+<td>Three USD plans as in ADR-04; hosted checkout; cards, Apple Pay and Google Pay worldwide; a merchant-of-record processor recommended (Paddle; Stripe with Stripe Tax as the fallback) because tax falls due in many countries; Mada and other regional methods later; founding price lock, not a founding plan; <strong>processor stays [OPEN for Muath]</strong> [DECISION on the model]</td>
+<td>No launch country means no single tax jurisdiction</td>
+<td>SAR-first, Mada-first processors (07 §4.14 first draft)</td>
+</tr>
+<tr>
+<td>ADR-22</td>
+<td>Open-item register</td>
+<td>The items only Muath can settle are listed once, in section 10 of this document, with the domain that waits on each; the other nine documents' section 10 lists point here where they overlap [DECISION]</td>
+<td>Thirteen plus eleven plus ten open lists in nine documents hid the few that block the build</td>
+<td>Each document keeping its own full list</td>
+</tr>
+<tr>
+<td>ADR-23</td>
+<td>Second-pass naming (integration, 2026-11-06 evening)</td>
+<td>After the nine revisions: Inngest event <code>learner.extra_requested {learner_id, local_date, slot, episode_id}</code>; <code>episodes.slot</code> (1 = the drop, 2 and 3 = <code>daily_extra</code>); terminal state <code>superseded</code> for unused extras and swapped dailies; <code>turn_index</code> everywhere; <code>cost/reconcile-spend</code> hourly; <code>rater.pinned_until = 2027-02-16</code> (05's cohort-aligned first window); object keys <code>learners/{lid}/...</code> with the bucket-level <code>ephemeral/</code> prefix (04 D15); <code>client_perf.first_sentence_ms</code>; A3 facts stored <code>usable</code>; no zeroization claim anywhere</td>
+<td>Nine agents revising in parallel chose different spellings for the same new things; one spelling per thing before the technical design reads them</td>
+<td><code>day_seq</code>, <code>learner.next_requested</code>, <code>unused</code>, <code>turn_n</code>, <code>cost/reconcile</code>, a 2027-01-19 rater window, <code>episodes/{learner_id}/</code> prefixes</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div></details><details class="fs" id="s2-what-changed-on-2026-10-23-and-what-it"><summary><h3>2. What changed on 2026-10-23 and what it does to the architecture</h3><span class="wc">266 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>Decision (decisions.md)</th>
+<th>What the first drafts assumed</th>
+<th>What the architecture now does</th>
+<th>Domains touched</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. No launch country or group; a language gate</td>
+<td>Saudi Arabic speakers learning English; <code>package_ar_en</code>; Arabic UI, consent and Salma; PDPL and SDAIA; Riyadh time everywhere; 5 Saudi raters</td>
+<td>ADR-02, 03, 08, 16, 20: two package kinds, a per-learner pair and country, EU default region, round-the-clock operations, the gate as code</td>
+<td>all nine</td>
+</tr>
+<tr>
+<td>2. Monthly USD tiers of 1, 2 or 3 episodes a day</td>
+<td>One new episode a day; SAR 89 monthly, SAR 449 yearly, SAR 349 founding year; Mada</td>
+<td>ADR-04, 05, 15, 21: plans, allowance by plan, on-demand episodes 2 and 3, per-plan guards and margins, MoR payments</td>
+<td>01, 02, 06, 07, 08, 09</td>
+</tr>
+<tr>
+<td>3. Teaching is invisible</td>
+<td>Salma's notes in 90 s, polish card, margin note; <code>notes</code> tables, door, measures, latency budget, cost line</td>
+<td>ADR-06: all removed; the correction guard added; the after-pass is one stage</td>
+<td>02, 03, 05, 06, 07, 08, 09</td>
+</tr>
+<tr>
+<td>4. Evidence instead of tests</td>
+<td>Already in PRD-v2 (word check, recordings, notebook, claim gate)</td>
+<td>No change beyond ADR-06's note that "New for you", the notebook and the proof are evidence and stay</td>
+<td>04, 05, 06</td>
+</tr>
+<tr>
+<td>5. 4-week seasons</td>
+<td>Already in PRD-v2</td>
+<td>No change; dates of the first finales move with ADR-07</td>
+<td>02, 05, 09</td>
+</tr>
+<tr>
+<td>Pilot kit re-dated (2026-10-23)</td>
+<td>Build 11-02 to 12-06, beta 12-07, gate 2027-01-10</td>
+<td>ADR-07</td>
+<td>all nine</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div></details><details class="fs" id="s3-the-decision-records"><summary><h3>3. The decision records</h3><span class="wc">2,484 words</span></summary><div class="prose"><p>Each record: context, the ruling, consequences per domain, and what stays open.</p>
+<h3>ADR-01 Source of truth</h3>
+<p><strong>Context.</strong> PRD-v2 (2026-10-10) is the build spec every document cites by part number. Muath's answers of 2026-10-23 overruled parts of it; concept-v2 and decisions.md were updated the same day; the PRD was not. <strong>Ruling.</strong> decisions.md wins over concept-v2, which wins over PRD-v2; PRD part numbers stay as citations for the unchanged parts; where a document cites a changed part it now cites the decision. <strong>Consequences.</strong> Every document's front matter says "revised 2026-11-06 to the decisions of 2026-10-23"; the PRD-v3 thread is told which parts changed (section 5 lists them).</p>
+<h3>ADR-02 Languages as two package kinds</h3>
+<p><strong>Context.</strong> <code>package_ar_en</code> appears in 02 (gloss language, prompts), 03 (Salma persona, talkback), 06 (<code>lang="ar"</code>, RTL), 07 (consent texts, notice, crisis), 08 (<code>packages/language/ar-en/recognizer.yaml</code>), 09 (<code>versions.yaml</code>). Concept-v2 §7 says the target language is a package that passes the gate and the learner's own language "needs only interface text, glosses, and a recognizer that catches it when the learner switches". <strong>Ruling.</strong> Two package kinds. <code>packages/languages/&lt;target&gt;/</code>: episode and call voices, streaming and verbatim recognizers with thresholds, lexicon and frequency list, structure inventory and rules, calibration set, law words and correction phrases, crisis keywords, host prompts, format patterns, the ban list. <code>packages/native/&lt;lang&gt;/</code>: interface strings (direction from the package: <code>dir</code>), consent texts and the privacy notice, gloss target language, Salma's voice and persona lines, crisis clips and the resources card copy, the talkback language hint. <code>learners</code> gains <code>native_language</code>, <code>target_language</code>, <code>residence_country</code>; every brief compiler, prompt loader and TTS request reads the pair from the learner row. The pilot's packages are <code>lang/en</code> and <code>native/ar</code>; <code>native/en</code> is the universal fallback for interface and consent. <strong>Consequences.</strong> 02: gloss cache key already carries <code>native_lang</code>; prompts load from <code>lang/&lt;target&gt;</code>. 03: Salma's talkback and persona from <code>native/&lt;lang&gt;</code>; <code>talkback_stt.languages = [native, target]</code> per call. 06: <code>dir</code> and <code>lang</code> from the native package; the landing page is served per <code>Accept-Language</code> with English as the default. 07: ADR-20. 08: the gate per target. 09: <code>versions.yaml</code> per package; corpora per language. <strong>Open.</strong> None for the mechanism; which native packages exist on 2026-12-23 depends on the beta cohort (English and Arabic are certain).</p>
+<h3></h3>
+<p><strong>Reconciled 2026-11-06 with the sibling threads.</strong> The engineering handbook (engineering/01-repository-layout.md) already uses <code>packages/languages/&lt;target&gt;/</code> with <code>gate.yaml</code> inside it, so that is the path; the architecture's earlier <code>packages/lang/</code> spelling is dropped. The technical design (technical-design/00-overview.md) chose a per-pair package <code>packages/language/&lt;pair&gt;/</code> with <code>ar-en</code> first and columns <code>native_lang</code> / <code>target_lang</code>; this record overrides it: two axes, not pairs (a pair package would multiply content by every native language), <code>packages/languages/&lt;target&gt;/</code> plus <code>packages/native/&lt;lang&gt;/</code>, and the column names <code>native_language</code> and <code>target_language</code>. The handbook's <code>ui_strings/</code> is the UI part of <code>packages/native/&lt;lang&gt;/</code>.</p>
+<p>ADR-03 The language gate as code</p>
+<p><strong>Context.</strong> 08 §4.6 specifies the voice blind test, the 50-call latency test and the 30-clip recognizer test for one pair; 09 §4.2 wraps them as suites; concept-v2 §8 names five checks (voices, learner speech to text, writing, the call, structures) that open a language. <strong>Ruling.</strong> <code>forone.langgate</code> (in the <code>vendor-lab</code> CLI) runs the five checks for a target language and writes one evidence folder <code>langgate/&lt;target&gt;/&lt;date&gt;/</code>; a <code>lang/&lt;target&gt;/gate.yaml</code> records the pass with the date and the winners; <code>vendors.yaml</code> roles that depend on the target (<code>episode_tts</code>, <code>call_tts</code>, <code>streaming_stt</code>, <code>verbatim_stt</code>, <code>pronunciation</code>) are keyed by target language. Raters: 5 native speakers of the target plus 5 learners of it from anywhere; clips: 30 real learner clips per target. <strong>Consequences.</strong> 08 §4.6 is rewritten as the gate's checks 1, 2 and 4; 09's <code>recognizers</code>, <code>voices-blind</code> and <code>calls_50</code> suites are the gate's regression form; 02's writing check (a native speaker reads 10 scripts) and 04's structure inventory are checks 3 and 5. English runs during Milestone 0 on the pilot's clips.</p>
+<h3>ADR-04 Plans and allowance</h3>
+<p><strong>Ruling.</strong> <code>plans.yaml</code>: <code>one_a_day</code> $19.99, <code>two_a_day</code> $29.99 (recommended; the 7-day trial plan), <code>three_a_day</code> $44.99, USD, monthly, VAT or sales tax handled by the processor (ADR-21). <code>subscriptions.plan</code> takes these three values; <code>founding_locked boolean</code> and <code>founding_seq</code> 1 to 100 lock the price for as long as the subscription lasts. The allowance is <code>plan.episodes_per_day</code> new episodes per learner-local day, enforced in <code>api</code> (<code>episodes_today &lt; plan.episodes_per_day</code>), with one swap a day (PRD 3.6) and unlimited listening, article, chat and round two. <strong>Consequences.</strong> 01: <code>plans.yaml</code>, the allowance check, <code>learners.plan</code>. 06: the plan picker on day 7, "about $1 a day", the compromise and anchor layout from concept-v2 §8, cancel in one tap. 07: ADR-21. 08: ADR-15. 09: <code>plan_mix</code>, <code>blended_margin</code>. <strong>Open.</strong> The exact price points stay adjustable (decisions.md); see section 10 #4 for the break-even warning.</p>
+<h3>ADR-05 Episodes 2 and 3</h3>
+<p><strong>Context.</strong> Law 11 (concept-v2 §5): "One, two or three new episodes a day depending on the plan, each with a clear ending, no autoplay and no feed." The batch pipeline makes one episode for the drop; the on-demand path (swap, return) streams in under 30 s. Typical use is 60%, 50% and 45% of the allowance (concept-v2 §8). <strong>Ruling.</strong> Episode 1 is the drop (batch). Episodes 2 and 3 are made when the learner asks ("next one" on Today after the current session's episode is heard), through the on-demand path with <code>episode_kind = daily_extra</code>, standard pricing, scene 1 first. The nightly teacher run plans all of the day's episodes (one plan with 1 to 3 episode briefs, each with its own targets so the day's language load stays within the 2 to 4 words and 1 structure per episode rule), so the on-demand run starts at the writer. Learners whose last 7 days show 5 or more extra episodes get episode 2 pre-produced in the nightly batch (<code>prewrite_extra</code>), the way 02 D15 pre-writes the rank-2 idea. The feed carries only the drop episode plus any extra the learner has played. <strong>Consequences.</strong> 01: <code>day/next</code> creates up to <code>episodes_per_day</code> <code>episodes</code> rows in state <code>planned</code>; <code>POST /v1/episodes/next</code>. 02: <code>daily_extra</code> kind; the teacher's multi-episode plan schema; <code>prewrite_extra</code>. 06: the "next one" control (one button, after the episode ends, never autoplay); the Show tab lists all of the day's episodes. 08: the cost model prices a learner-day as 1 + extras × on-demand premium (about +$0.05 an episode for standard pricing), and the margin by plan uses measured extras.</p>
+<h3>ADR-06 Invisible teaching</h3>
+<p><strong>Context.</strong> decisions.md §3 drops "the after-call correction notes, the polish card, the chat margin note"; concept-v2 law 7 forbids "the correct answer is" and correction notes; Salma "never corrects, never sends notes". 05 built <code>notes</code>, <code>margin_notes</code>, a 90-second stage 1, the polish TTS, the notes door; 06 renders them; 08 prices them; 09 measures them; 07 guards them. <strong>Ruling.</strong> Remove: <code>notes</code>, <code>margin_notes</code> tables and functions; <code>session/after-pass</code> stage 1; the notes door and the margin chip; <code>notes.enabled</code>; <code>notes_late</code>, <code>chat_opener_late</code> stays; the "Notes under 90 s" budget; the cost line "Salma's notes and chat" becomes "Salma (when asked) and chat". Keep as evidence (decision 4): the notebook with its "working on" list, "words you own", the tape, "how we know"; the weekly proof and finale through the claim gate; "why this episode"; "where do I stand" when asked, with a range; the "New for you" card from <code>did_it</code> and <code>first_ever</code> claims; "say it once" and shadowing as pronunciation with internal scoring only. Add: the correction guard in <code>guard.check_output</code> (07) with a per-language phrase list, counted in <code>moves.violations</code> and in 09's <code>explicit_corrections_per_100_turns</code> (ceiling 0); the editor's check "nothing reads as a correction or a lesson" as a model check on every script, article and chat opener (02 check 10 widened); the teacher's "echo plan" (which of the learner's recurring errors the host should recast this call and which right forms the next episodes carry), already the host brief's <code>recasts</code> field in 03, now the only correction channel. The after-session pass is one function with the 10-minute budget; the analyst's first stage runs inside it. <strong>Consequences.</strong> 02, 03, 05, 06, 07, 08, 09 revised; the technical-design thread should drop the notes screens and the margin chip. Salma's remaining per-session role is explanations when the learner asks (<code>salma_explain</code>, Sonnet, on demand).</p>
+<h3>ADR-07 Dates</h3>
+<p><strong>Ruling.</strong> Milestone 0: 2026-10-24 to 11-18 (gate decision 11-18). Language gate for English and the vendor tests: 2026-11-01 to 11-17 on the pilot's clips (recognizer by 11-10, voice by 11-17, <code>vendors.yaml</code> committed before build week 1). Build weeks: W1 2026-11-18 to 11-24, W2 11-25 to 12-01, W3 12-02 to 12-08, W4 12-09 to 12-15, W5 12-16 to 12-22; exit 12-22 (measured cost per session and a costed path to $0.35). Beta: 2026-12-23 to 2027-01-26; first cohort 12-23 (a Wednesday; the invite cadence is weekly on the beta's weekday, <code>cohort_key = invite_date</code>); the Gemini price doubling lands in beta week 2; first finales from 2027-01-19; first "active in week 4" readable 2027-01-20; gate review 2027-01-26. Freezes: 2026-12-21 12:00 to 12-24 12:00 UTC and 2026-12-31 to 2027-01-02. Counsel's answers (region, consents, crisis lines) due before build week 1: 2026-11-17. <strong>Consequences.</strong> Every build plan (section 7 of each document) is re-dated by 16 days with the same week contents unless a record above changes them; the hub's "due soon" list is re-dated.</p>
+<h3>ADR-08 Home region</h3>
+<p><strong>Context.</strong> 01 D8 chose <code>me-central-1</code> for Saudi residents' data; 07 D7 accepted it; 01 §10 #1 asked counsel "may Saudi residents' voice rest in the UAE or EU". With learners anywhere the question is different: EU and UK learners' data in the UAE is a transfer without an adequacy decision; the same data in Frankfurt needs only the AWS DPA, while the US vendor transfers are the same in every option. Latency does not decide it: 01 §3.6 already lets <code>call-worker</code> run near the vendors and no database sits on the turn path. <strong>Ruling.</strong> The default becomes <code>HOME_REGION = eu-central-1</code>; <code>me-central-1</code> stays available as the alternative if counsel and the first cohort's residence countries favour it; Vercel region follows (<code>fra1</code>); Inngest and Langfuse stay EU. The architecture is indifferent between the two AWS regions (one config key), so the choice can be made as late as the Terraform apply in build week 1. <strong>Open.</strong> [OPEN for Muath, with counsel] the final region and the transfer basis for the US vendors (section 10 #1). This is the item the coordinator asked to keep open.</p>
+<h3>ADR-09 Tracing data</h3>
+<p><strong>Ruling.</strong> 01 D15 as revised on 2026-10-17 stands for every domain (see the table). 08 D3 and §4.3 are rewritten; 07's Langfuse register row says "metadata and pseudonymous ids by default; anonymized text only for <code>data_use</code> learners; 30 days"; 09 §4.9's Langfuse row says the same. The research pseudonym is a row in <code>research_pseudonyms(learner_id, pseudonym)</code> (deleted with the learner) rather than an HMAC of a never-rotated secret, so the secret can rotate and deletion by pseudonym still works (07 skeptic minor). Langfuse deletion is by pseudonym and does not hold up the "deleted" email (closes 04 §10's question).</p>
+<h3>ADR-10 and ADR-11 Embeddings and the editor fallback</h3>
+<p>As in the table; 07 §4.9 loses the OpenAI row, 08 §4.2 and §4.7 change the <code>embeddings</code> and <code>editor</code> rows, 02 §4 keeps its similarity check on the Google model. The editor fallback's cost (about $0.05 on a fallback day) is in 08's failure table.</p>
+<h3>ADR-12 Media key model</h3>
+<p><strong>Context.</strong> 07 skeptic finding: SSE-C objects cannot be served by presigned URLs, a CDN or <code>&lt;audio src&gt;</code>, so every byte of show audio was routed through <code>api</code> forever; 06 §4.4.4 already proxies media through <code>api</code> with Range support, which hides the consequence. <strong>Ruling.</strong> As in the table. <code>media_objects.encryption in ('sse_c_learner', 'sse_kms_env')</code> set by kind; <code>api</code>'s media route issues 10-minute presigned URLs for <code>sse_kms_env</code> kinds (the feed's enclosure URLs are already tokenized and stay proxied, because podcast apps cache URLs); learner-voice kinds stay behind <code>api</code> with the DEK. <code>learner/delete</code> deletes show kinds by prefix (already in 04's purge order) and destroys the DEK last. <strong>Consequences.</strong> 01 D7 and the media route; 06 §4.4.4 source selection (case 2 becomes a presigned URL); 07 D1, D3, §4.1; 08's hosting line (egress moves from Fargate to S3, cheaper).</p>
+<h3>ADR-13 to ADR-15 Cost rows, spend modes, per-plan guards</h3>
+<p>As in the table. The report's "Margin by plan" section: net price (list less the processor's measured fee and tax), measured episodes used, measured cost per learner-month, margin, and the break-even cost per session at full use ($0.57 / $0.42 / $0.42 from decisions.md); <code>plan_mix</code> and <code>blended_margin</code> are measures in 09 and lines in the Tuesday review. Section 10 #4 carries the warning that the post-doubling floor ($0.43 to $0.45) is above the 2 and 3 a day break-even at full use.</p>
+<h3>ADR-16 Operations around the clock</h3>
+<p>As in the table. Jobs: <code>measures/daily</code> → <code>measures/hourly</code> computing learner-local days that closed in the last hour; <code>privacy/verify</code> hourly over the last 25 hours with <code>expires_at</code>-based checks; <code>retention/daily</code> per learner-local midnight; the digest at 06:00 UTC; the weekly report Mondays 06:00 UTC. Alerts: <code>episode_not_ready_before_drop</code> is P2 per learner with dedupe, and a new <code>drops_late_systemic</code> rule is P1 at 3 or more learners or 5%. Release: <code>tools/release</code> refuses a deploy when more than 2% of learners have a drop in the next 45 minutes (an override needs a reason row); <code>call-worker</code> deploys drain as 01 §4.4 #7 says, at any hour. On-call: P1 pages at any hour; the honest beta statement is that a one-engineer rota means some overnight P1s are answered by the product's fallbacks (yesterday's episode stays; voice notes) and a human at the next working hour; section 10 #7 asks Muath to accept that. Staging stays up from build week 2 through the beta (about +$180 a month, carried into 01 §6 and §10 #4).</p>
+<h3>ADR-17 to ADR-19</h3>
+<p>As in the table. For ADR-19, the full list of renamings is in section 4.</p>
+<h3>ADR-20 Jurisdiction and crisis resources</h3>
+<p><strong>Ruling.</strong> <code>learners.residence_country</code> (ISO 3166-1) asked at A9 as one question with a country picker, never from IP (trust promise 6). 07 §4.9 becomes a table of regimes with, per regime: lawful basis for voice and for the research set, breach clock and regulator, DPIA requirement, children's age threshold (the product's 18+ gate exceeds all of them), transfer basis for US vendors, and the status of counsel's review; a generic baseline row applies to a learner whose country is not reviewed and says so in the notice. <code>packages/native/&lt;lang&gt;/crisis/resources.yaml</code> keyed by ISO country with an international directory entry as the fallback; the card shows the learner's country's lines or the directory. Counsel artifacts: consent texts, notice, crisis files, processor register, DPIA. <strong>Open.</strong> Section 10 #2: which regimes counsel covers for 2026-12-23 and whether signups from unreviewed countries are accepted under the generic notice.</p>
+<h3>ADR-21 Payments</h3>
+<p>As in the table. The <code>Payments</code> adapter interface (01 §4.5) is unchanged; a merchant-of-record processor changes who issues the invoice and remits tax, not the webhook model. Fees: about 5% (MoR) against about 3% plus tax registrations; the margin section reads the real fee row. <strong>Open.</strong> Section 10 #3.</p>
+<h3>ADR-22 Open-item register</h3>
+<p>Section 10 below is the register. Each domain document's section 10 keeps only the items specific to that domain and points here for the shared ones.</p>
+<hr /></div></details><details class="fs" id="s4-naming-and-interface-rulings"><summary><h3>4. Naming and interface rulings</h3><span class="wc">751 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>First drafts</th>
+<th>Ruled</th>
+<th>Documents changed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Episode lifecycle column</td>
+<td><code>episodes.state</code> (01, 06), <code>episodes.status</code> (02, 09)</td>
+<td><code>episodes.state</code></td>
+<td>02, 09</td>
+</tr>
+<tr>
+<td>Verbatim result</td>
+<td>update of <code>call_turn</code> (01 first draft) vs second event</td>
+<td><code>call_turn_verbatim</code> appended by <code>workflows</code> through <code>events.append()</code></td>
+<td>confirmed in 01, 03, 04, 05</td>
+</tr>
+<tr>
+<td>Who appends events</td>
+<td>"only <code>api</code>" (01 first draft)</td>
+<td><code>api</code> and <code>workflows</code>; <code>call-worker</code> never holds a connection</td>
+<td>confirmed</td>
+</tr>
+<tr>
+<td>Word-use evidence</td>
+<td><code>word_uses</code> [ASSUMPTION in 09]; a list in 05's <code>AnalystOutput.target_uses</code></td>
+<td><code>word_uses(learner_id, unit_id, event_id, occurred_at, clean, correct, prompted, quote)</code> owned by 04, written by 05</td>
+<td>04, 05, 09</td>
+</tr>
+<tr>
+<td>Drop expectation</td>
+<td><code>learner_schedule.expects_drop</code> [ASSUMPTION in 09]</td>
+<td>Added to <code>learner_schedule</code>; set when the previous local day was active</td>
+<td>01, 09</td>
+</tr>
+<tr>
+<td>Load and latency tool</td>
+<td><code>tools/load-call</code> (01), <code>tools/call-bench</code> (03)</td>
+<td><code>tools/call-bench</code></td>
+<td>01</td>
+</tr>
+<tr>
+<td>Cohort key</td>
+<td><code>cohort_monday</code></td>
+<td><code>cohort_key = invite_date</code></td>
+<td>09, 04</td>
+</tr>
+<tr>
+<td>Package paths</td>
+<td><code>packages/package_ar_en/...</code>, <code>packages/language/ar-en/...</code></td>
+<td><code>packages/languages/&lt;target&gt;/...</code>, <code>packages/native/&lt;lang&gt;/...</code></td>
+<td>02, 03, 06, 07, 08, 09</td>
+</tr>
+<tr>
+<td>Learner columns</td>
+<td><code>native_language</code> only</td>
+<td><code>native_language</code>, <code>target_language</code>, <code>residence_country</code>, <code>plan</code>, <code>tz</code></td>
+<td>01, 04</td>
+</tr>
+<tr>
+<td>Plans</td>
+<td><code>founding</code>, <code>monthly</code>, <code>yearly</code></td>
+<td><code>one_a_day</code>, <code>two_a_day</code>, <code>three_a_day</code>; <code>founding_locked</code></td>
+<td>01, 06, 07, 08, 09</td>
+</tr>
+<tr>
+<td>Episode kinds</td>
+<td>daily, swap, return, pilot, sample, fallback, rehearsal, finale, proof, canary</td>
+<td>plus <code>daily_extra</code></td>
+<td>01, 02, 06, 08</td>
+</tr>
+<tr>
+<td>Media encryption</td>
+<td>SSE-C for all learner-scoped objects</td>
+<td><code>media_objects.encryption in ('sse_c_learner','sse_kms_env')</code> by kind</td>
+<td>01, 02, 06, 07</td>
+</tr>
+<tr>
+<td>Removed tables and functions</td>
+<td><code>notes</code>, <code>margin_notes</code>, <code>chat/margin-note</code>, <code>stage1_notes</code>, <code>notes.ready</code>, <code>note_shown</code> (event type), <code>notes_mode</code></td>
+<td>removed</td>
+<td>02, 03, 05, 06, 07, 08, 09</td>
+</tr>
+<tr>
+<td>New guard items</td>
+<td>law words, humanity, progress claims</td>
+<td>plus the correction guard (<code>guard/correction_words.yaml</code> per language)</td>
+<td>03, 07, 09</td>
+</tr>
+<tr>
+<td>Langfuse <code>user_id</code></td>
+<td>learner id (08), tokenized names (07)</td>
+<td>research pseudonym; metadata only unless <code>data_use</code></td>
+<td>07, 08, 09</td>
+</tr>
+<tr>
+<td>Database roles</td>
+<td><code>forone_app</code>, <code>forone_workflows</code>, <code>forone_purge</code>, <code>forone_readonly</code></td>
+<td>plus <code>forone_admin</code> (pages), <code>forone_human</code> (psql, pgaudit)</td>
+<td>04, 07, 09</td>
+</tr>
+<tr>
+<td>Cost tables</td>
+<td><code>session_costs</code> as a table (08) and "a view" (09)</td>
+<td>a table filled by <code>cost/rollup</code>, with <code>plan</code></td>
+<td>09</td>
+</tr>
+<tr>
+<td>Alert for the stop line</td>
+<td>P1 <code>spend_cap_or_stop_line</code></td>
+<td><code>cost_runaway</code> P1; <code>cost_stop_line</code> P3 plus the ticket</td>
+<td>09</td>
+</tr>
+</tbody>
+</table></div>
+<p>| Extra-episode trigger (Inngest) | <code>learner.next_requested</code> (01), <code>learner.extra_requested</code> (02); log event <code>episode_next_requested</code> (04) | Inngest <code>learner.extra_requested {learner_id, local_date, slot, episode_id}</code>; the learner-log event stays <code>episode_next_requested</code> (04 owns the log catalogue) | 01, 02, 04 |
+| Episode sequence in the day | <code>episodes.day_seq</code> (01), <code>episodes.slot</code> (02, technical design) | <code>episodes.slot smallint</code>, unique <code>(learner_id, local_date, kind, slot)</code> | 01, 02, 04 |
+| Unused extra / swapped daily | <code>unused</code> (01), <code>superseded</code> (02) | <code>superseded</code> | 01, 02 |
+| Turn counter | <code>turn_n</code> (08), <code>turn_index</code> (03, 04, 05) | <code>turn_index</code> | 08 |
+| Hourly spend reconcile | <code>cost/reconcile</code> (01), <code>cost/reconcile-spend</code> (08) | <code>cost/reconcile-spend</code> | 01 |
+| Rater pin window | 2026-12-31 (08), 2027-01-19 (01), 2027-02-16 (05) | <code>rater.pinned_until = 2027-02-16</code>; 09's window calendar starts the next window on 2027-02-17 | 01, 08, 09 |
+| Object key layout | <code>episodes/{learner_id}/</code> (02), <code>learners/{lid}/calls/{id}/{ephemeral/}</code> (01), <code>learners/{lid}/ephemeral/calls/</code> (03) | 04 D15: <code>learners/{lid}/...</code>; storage-off voice under the bucket-level prefix <code>ephemeral/learners/{lid}/...</code> so a lifecycle rule can match it | 01, 02, 03 |
+| First-sound client metric | <code>client_perf.first_english_ms</code> (06) | <code>client_perf.first_sentence_ms</code> (language-neutral) | 06, 09 |
+| A3 intake facts | <code>ground_truth</code> at once (02) | <code>usable</code> at once; <code>ground_truth</code> after a later confirmation (04, PRD 8.4.2) | 02 |
+| Research pseudonym | "the secret can rotate" (ADR-09 as first written) | a random stored value in <code>research_pseudonyms</code>; there is no HMAC secret and no <code>RESEARCH_PSEUDONYM_SECRET</code> (07) | 07, 08, 09 |</p>
+<p><strong>For the technical-design thread.</strong> (Updated after the nine revisions: each document's section 11 lists every new name it introduced; the ten rows above this paragraph are the ones two documents spelled differently. The technical design's <code>packages/language/&lt;pair&gt;/</code> with <code>ar-en</code> first, and its <code>native_lang</code>/<code>target_lang</code> columns, are overridden by ADR-02: two axes, <code>packages/languages/&lt;target&gt;/</code> plus <code>packages/native/&lt;lang&gt;/</code>, columns <code>native_language</code> and <code>target_language</code>.) Interfaces that changed name or shape in this pass: <code>episodes.state</code>; <code>POST /v1/episodes/next</code> and <code>episode_kind = daily_extra</code>; <code>learners.{native_language,target_language,residence_country,plan}</code>; <code>plans.yaml</code> and <code>subscriptions.plan</code>; <code>media_objects.encryption</code> and presigned URLs for show audio; <code>word_uses</code>; <code>learner_schedule.expects_drop</code>; <code>research_pseudonyms</code>; <code>forone_admin</code>; <code>guard.check_output</code> item 6; the removal of <code>notes</code>, <code>margin_notes</code>, the notes door and <code>note_shown</code>; package paths <code>packages/lang/&lt;target&gt;</code> and <code>packages/native/&lt;lang&gt;</code>; <code>keys.get_dek</code> cache semantics; <code>vendor_calls</code> written in its own transaction; <code>measures/hourly</code>.</p>
+<hr /></div></details><details class="fs" id="s5-what-the-prd-v3-thread-needs-to-carry"><summary><h3>5. What the PRD-v3 thread needs to carry</h3><span class="wc">111 words</span></summary><div class="prose"><p>Parts of PRD-v2 that these rulings change: 1.4 (plans, prices, payments, platform note unchanged); 2.2 A9 (residence country question, consent per native language); 3.6 (allowance by plan, "next one"); 5.5 and 5.6 rule 6 (notes and margin note removed); 6.3 check 10 (widened to corrections); 7.3 (Salma's language is the learner's native language); 8.6 (host brief's echo plan); 10.2 (no stage 1 notes; the pass is one function); 12.5 and 12.6 (regimes, region default); 13 (two package kinds); 14.3 (Langfuse rule, embeddings vendor); 14.5 (cost lines, margin by plan); 15 (notes budget removed); 16.1 (gates re-dated; renewal reads all subscribers); 18 (open items replaced by section 10 here); 19 (dates).</p>
+<hr /></div></details><details class="fs" id="s6-dates-in-one-table"><summary><h3>6. Dates, in one table</h3><span class="wc">154 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>Milestone</th>
+<th>First drafts</th>
+<th>Now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Milestone 0</td>
+<td>2026-10-12 to 11-01</td>
+<td>2026-10-24 to 11-18</td>
+</tr>
+<tr>
+<td>Recognizer test</td>
+<td>by 2026-11-08</td>
+<td>by 2026-11-10 (during Milestone 0)</td>
+</tr>
+<tr>
+<td>Voice decision, <code>vendors.yaml</code> committed</td>
+<td>2026-11-13</td>
+<td>by 2026-11-17</td>
+</tr>
+<tr>
+<td>Counsel: region, consent copy, crisis lines</td>
+<td>2026-11-01 and 11-16</td>
+<td>2026-11-17 (before build week 1)</td>
+</tr>
+<tr>
+<td>Build</td>
+<td>2026-11-02 to 12-06</td>
+<td>2026-11-18 to 12-22</td>
+</tr>
+<tr>
+<td>Payment processor and entity</td>
+<td>2026-11-16</td>
+<td>2026-12-02 (start of build week 3)</td>
+</tr>
+<tr>
+<td>Exit (measured cost, costed path)</td>
+<td>2026-12-06</td>
+<td>2026-12-22</td>
+</tr>
+<tr>
+<td>Beta opens, first cohort</td>
+<td>2026-12-07</td>
+<td>2026-12-23</td>
+</tr>
+<tr>
+<td>Gemini prices double</td>
+<td>2027-01-01 (beta week 4)</td>
+<td>2027-01-01 (beta week 2)</td>
+</tr>
+<tr>
+<td>First finales</td>
+<td>2027-01-03</td>
+<td>2027-01-19</td>
+</tr>
+<tr>
+<td>First "active in week 4" readable</td>
+<td>2027-01-04</td>
+<td>2027-01-20</td>
+</tr>
+<tr>
+<td>Gate review</td>
+<td>2027-01-10</td>
+<td>2027-01-26</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div></details><details class="fs" id="s7-build-plan-for-2026-11-18-to-2026-12-2"><summary><h3>7. Build plan for 2026-11-18 to 2026-12-22</h3><span class="wc">379 words</span></summary><div class="prose"><p>The five weeks keep the contents of each document's section 7, moved by 16 days, with these cross-domain changes placed where they must land.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Dates</th>
+<th>Cross-domain items added or moved by this pass</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 (Milestone 0, in parallel)</td>
+<td>2026-11-01 to 11-17</td>
+<td><code>vendor-lab gate --target en</code> on the pilot's clips and scripts (ADR-03); <code>vendors.yaml</code> committed by 11-17; counsel's answers on region, consents and crisis lines by 11-17; Terraform written for <code>eu-central-1</code> with the region as one variable (ADR-08)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>2026-11-18 to 11-24</td>
+<td><code>learners.{native_language,target_language,residence_country,plan,tz}</code>; the two package directories with <code>lang/en</code> and <code>native/ar</code> and <code>native/en</code> skeletons (ADR-02); <code>media_objects.encryption</code> and the two bucket policies (ADR-12); <code>vendor_calls</code> own-transaction write and the worker S3 spool (ADR-13); <code>events</code> append-only with <code>call_turn_verbatim</code>; <code>word_uses</code> DDL (ADR-19); <code>forone_admin</code> and <code>forone_human</code> roles (ADR-17); <code>keys.get_dek</code> with the 60 s versioned cache (ADR-18); logging and paging skeleton (09)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2026-11-25 to 12-01</td>
+<td>Teacher's multi-episode day plan and <code>daily_extra</code> kind in <code>episode/produce</code> (ADR-05); editor check widened to corrections (ADR-06); Google embeddings (ADR-10); editor fallback on Opus (ADR-11); Langfuse metadata-only wiring with the pseudonym (ADR-09); <code>eval-gate</code> with the per-package path map; staging stays up from here (ADR-16)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2026-12-02 to 12-08</td>
+<td><code>plans.yaml</code>, allowance by plan, <code>POST /v1/episodes/next</code>, the "next one" control (ADR-04, 05); A9 with the country question and consent per native language (ADR-20); payments scaffold on the chosen processor with the three plans and the founding lock (ADR-21); processor decision by 12-02</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2026-12-09 to 12-15</td>
+<td>Correction guard in the worker and chat paths (ADR-06); crisis clips per pair and resources per country (ADR-20); <code>talkback_stt</code> language hint per learner (ADR-02); <code>call-bench</code> 50-call run on the English stack; per-plan cost guard (ADR-15)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2026-12-16 to 12-22</td>
+<td><code>session/after-pass</code> as one function (ADR-06); <code>measures/hourly</code>, <code>privacy/verify</code> hourly, <code>drops_late_systemic</code>, the binding release window (ADR-16); "Margin by plan" in the weekly report (ADR-15); the end-to-end run with the Milestone 0 learners under a consent that covers it; the exit document with measured cost and the costed path</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Freeze:</strong> 2026-12-21 12:00 to 12-24 12:00 UTC. <strong>Beta week 2 (2027-01-01):</strong> the Gemini doubling lands; the voice plan from 08 §6.1 note 3 is executed in the first release after 2027-01-02.</p>
+<hr /></div></details><details class="fs" id="s8-alternatives-rejected-in-the-cross-dom"><summary><h3>8. Alternatives rejected in the cross-domain pass</h3><span class="wc">235 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>Alternative</th>
+<th>Why rejected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revising only 07 to 09 and leaving 01 to 06 on the old decisions</td>
+<td>The technical design would inherit two incompatible products (one pair, SAR, notes; versus anyone anywhere, USD tiers, invisible teaching)</td>
+</tr>
+<tr>
+<td>Keeping one package per language pair</td>
+<td>n × m packages; the native side needs strings and a voice, the target side needs a gate; they change at different rates</td>
+</tr>
+<tr>
+<td>Pre-producing every episode of the allowance in the nightly batch</td>
+<td>About a third of the voice line spent on episodes 50% of learners never ask for; the on-demand path already meets 30 s</td>
+</tr>
+<tr>
+<td>Keeping Salma's notes behind a flag "in case Muath changes his mind"</td>
+<td>A flag never changes a law (09 D8); decisions.md says the reversal would be his explicit call, and the correction guard would then need a hole</td>
+</tr>
+<tr>
+<td>A region per learner (EU for Europeans, UAE for Gulf learners)</td>
+<td>Two of every store and job for a two-engineer team; one region plus the vendor transfers that every option shares is the honest minimum</td>
+</tr>
+<tr>
+<td>Blocking signups from countries counsel has not reviewed</td>
+<td>Contradicts "anyone, anywhere"; the generic notice plus the strictest regime's controls is the defensible default, confirmed by counsel</td>
+</tr>
+<tr>
+<td>Leaving <code>episodes.status</code> and <code>episodes.state</code> to the integrator</td>
+<td>The integrator is this pass</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div></details><details class="fs" id="s9-how-the-findings-were-applied"><summary><h3>9. How the findings were applied</h3><span class="wc">281 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Reviews applied on 2026-11-06</th>
+<th>Status after this pass</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01 System topology</td>
+<td>Cross-domain rulings only (its two reviews were applied on 2026-10-17)</td>
+<td>Revised to the 2026-10-23 decisions</td>
+</tr>
+<tr>
+<td>02 Generation pipeline</td>
+<td>Cross-domain rulings only (its two reviews were applied on 2026-10-17)</td>
+<td>Revised to the 2026-10-23 decisions</td>
+</tr>
+<tr>
+<td>03 Live call and voice</td>
+<td>Conformance (24 findings) and skeptic (19) reviews of 2026-10-21, plus the rulings</td>
+<td>Reviewed twice, revised</td>
+</tr>
+<tr>
+<td>04 Learner model and data</td>
+<td>Conformance (24) and skeptic (30), plus the rulings</td>
+<td>Reviewed twice, revised</td>
+</tr>
+<tr>
+<td>05 Assessment and after-session</td>
+<td>Conformance (28) and skeptic (22), plus the rulings</td>
+<td>Reviewed twice, revised</td>
+</tr>
+<tr>
+<td>06 Client and delivery</td>
+<td>Conformance (20), plus the rulings; no skeptic review exists</td>
+<td>Reviewed once, revised</td>
+</tr>
+<tr>
+<td>07 Security, privacy, compliance</td>
+<td>Conformance (12) and skeptic (11) of 2026-11-06, plus the rulings</td>
+<td>Reviewed twice, revised</td>
+</tr>
+<tr>
+<td>08 Cost model and vendors</td>
+<td>Conformance (9) and skeptic (9) of 2026-11-06, plus the rulings</td>
+<td>Reviewed twice, revised</td>
+</tr>
+<tr>
+<td>09 Evaluation and operations</td>
+<td>Conformance (8) and skeptic (10) of 2026-11-06, plus the rulings</td>
+<td>Reviewed twice, revised</td>
+</tr>
+<tr>
+<td>10 Decision records</td>
+<td>None; the integration pass of the same evening added ADR-23 and the ten naming rows in §4</td>
+<td>Written, unreviewed</td>
+</tr>
+</tbody>
+</table></div>
+<p>Where a finding's fix was applied, the document says so in its section 11 (revision log) and the finding stays in <code>_review-findings.md</code> as history. Where a finding was declined, the revision log says why. The skeptic review of 06 was never run and is the one review still missing.</p>
+<hr /></div></details><details class="fs" id="s10-open-for-muath"><summary><h3>10. Open for Muath</h3><span class="wc">926 words</span></summary><div class="prose"><p>The register of everything only Muath can settle, across the ten documents. The domain in brackets waits on the answer.</p>
+<ol>
+<li><strong>Home region and the legal view on storing learner voice (counsel, by 2026-11-17).</strong> ADR-08 makes <code>eu-central-1</code> the default for a worldwide cohort and keeps <code>me-central-1</code> as a one-day config move. Counsel confirms: where a worldwide cohort's voice recordings and transcripts may rest, the transfer basis for the US model, voice and recognition vendors (standard contractual clauses plus consent is the working assumption), whether voice used only for the learner's own progress counts as biometric data under GDPR or PDPL, and whether the in-session verbatim "yes" is explicit consent for sensitive-class facts. [01, 07]</li>
+<li><strong>Which jurisdictions the beta covers on day one (counsel, by 2026-11-17).</strong> Recommended: EU and UK GDPR, Saudi PDPL and the generic baseline; signups from unreviewed countries accepted under the generic notice. Also the DPIA, the consent and notice copy per native language, and the reviewer and tagger confidentiality agreement. [07, 06]</li>
+<li><strong>Payment processor and legal entity (by 2026-12-02).</strong> A merchant-of-record processor (Paddle, about 5%) handles tax in every country; Stripe with Stripe Tax (about 3% plus registrations) needs an entity in a Stripe country. Trial without a card (PRD 18 #4) is assumed. [07, 01, 06]</li>
+<li><strong>Tier prices against the break-even.</strong> At the post-doubling floor stack ($0.43 to $0.45 a session) the 2 and 3 a day plans lose money on a learner who uses every episode (break-even $0.42). Options: keep the prices and accept the loss on full-use learners (typical use is about half), raise 2 a day to $34.99, or commit to the voice contract in #5. The exit document on 2026-12-22 carries the measured number. [08]</li>
+<li><strong>The last lever to $0.35 and the voice contract (by 2026-12-22).</strong> A negotiated voice rate near $12 to $15 per million characters (no product change), read-aloud and recap rendered on first tap (about four engineer-days across 02, 03 and 06 and a 2 to 4 s wait), or 5-minute calls (in tension with the 4-minute speech gate). If Gemini wins the English blind test, decide the January plan now: swap the episode voice to the runner-up on 2027-01-01 with the on-air line, or ask Google for a rate. [08, 02, 03, 06]</li>
+<li><strong>Haiku 5.5 as the call host</strong> if the 50-call comparison in build week 4 shows no difference in move-contract violations, talk share and the human read; worth $0.046 a session. [03, 08]</li>
+<li><strong>On-call for a worldwide cohort.</strong> With learners in every timezone there is no quiet hour. Accept that in the beta a one-engineer rota answers overnight P1s with the product's fallbacks (yesterday's episode stays; voice notes) and a human at the next working hour, or fund a second responder; and approve Better Stack's on-call plan (about $30 a month). [09, 01]</li>
+<li><strong>Web or native for the beta.</strong> The architecture builds the installable web app plus the private feed (decisions.md §7's recommendation); the switch-to-native triggers (calls abandoned on the move, feed-to-call handoff lost) are measured from day one. This stays open as the coordinator asked; nothing in this pass changes it. [06, 01]</li>
+<li><strong>Fixed infrastructure budget: about $1,000 to $1,300 a month</strong> (01's $800 to $1,100 plus staging kept up through the beta, ADR-16), plus vendor minimums (voice winner's paid tier $100 to $330, LiveKit Ship $50, Langfuse Core up to $59, Speechace, Better Stack $30) and the Anthropic prepaid balance (about $2,500 for the beta's first month at the upper plans' usage). [01, 08, 09]</li>
+<li><strong>Second engineer, and the week-6 slips</strong> (01 §10 #5). Decide by 2026-11-18. [01]</li>
+<li><strong>The reviewers.</strong> A paid native reader per target language (English first; about 4 hours a day at 100 learners, less with 09's cut), who also performs the language gate's writing check; the claims auditor (Muath or a second trained person); the native-language law-scan reader (Muath for Arabic). [09, 02]</li>
+<li><strong>Crisis protocol details (counsel, by 2026-12-15).</strong> Clip wording per pair, the per-country resources list and the international fallback, whether the keyword list may fire alone (ADR default: the host confirms first, 2-second cap), whether SB 243 applies, and whether Muath wants to be told of activations and write personally. [07, 03]</li>
+<li><strong>Consents for Milestone 0 data</strong> (01 §10 #11): the vendor-test addendum before any clip leaves (by 2026-11-01), and whether the pilot consent covers re-onboarding the 15 learners in build week 5 and keeping de-identified fixtures. [01, 07, 09]</li>
+<li><strong>Processors to approve</strong> (07 §4.9 as revised): Langfuse Cloud EU under ADR-09, Resend with tracking off, Sentry EU, Vercel, LiveKit Cloud, Inngest EU, the verbatim recognizer with minimum retention; and the Anthropic zero-data-retention request. [07, 01, 08]</li>
+<li><strong>Smaller items that stay with their documents:</strong> archive growth (01 §10 #7), WhatsApp invites (01 #8), the 30 s median / 45 s p95 budgets (01 #9), the PRD 3.10 amendment for two transactional emails (01 #10), the brand domain (01 #13), research rows after deletion (04 and 07: deleted), the export passphrase (04), the "very disappointed" question mechanism (09), pulling a shipped episode (09 R4), the stop line's owner and window (08, 09: a human, 48 hours), the daily cap formula (08), cost figures in the review packet (08), staff passkeys and a penetration test before public launch (07), age verification beyond self-attestation (07), waitlist retention (07), the first rater window to 2027-02-16 (05 §10 #6), and the fact that <code>renewal_m2</code> for the first cohort is not readable before the 2027-01-26 gate review (09): the review reads it as "not yet".</li>
+</ol>
+<hr /></div></details><details class="fs" id="s11-revision-log"><summary><h3>11. Revision log</h3><span class="wc">96 words</span></summary><div class="prose"><ul>
+<li>2026-11-06: written. Companion changes: <code>_review-findings.md</code> gained the six reviews of 07 to 09; the nine domain documents were revised to these records; the pages and hub were rebuilt.</li>
+<li>2026-11-06, evening: integration pass after the nine parallel revisions. ADR-23 added; §4 gained ten rows for names two documents spelled differently; the post-doubling floor is now $0.43 to $0.45 (08 §6.3, after re-adopting 02 §6's unit table); ADR-02's package path is <code>packages/languages/&lt;target&gt;/</code> to match the engineering handbook; the pseudonym has no secret (07). The edits were applied to 01, 02, 03, 06, 08 and 09 directly.</li>
+</ul></div></details>
+</section>
+
+<footer class="foot">
+  <a href="https://claude.ai/artifact/C3oRETQgDsX3X6dv8VjdP5">Back to the architecture hub</a>
+  <span class="muted">For one · architecture set, 2026-10-23, revised 2026-11-06</span>
+</footer>
+</div>
+<script>
+document.querySelectorAll('.toc a').forEach(a => a.addEventListener('click', () => {
+  const d = document.querySelector(a.getAttribute('href')); if (d) d.open = true;
+}));
+</script>
+

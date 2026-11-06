@@ -1,0 +1,349 @@
+{
+ "01": {
+  "title": "System topology",
+  "words": 27838,
+  "decisions": 17,
+  "open": 13,
+  "open_titles": [
+   "Home region and counsel's view on storing learner voice (counsel, by 2026-11-17)",
+   "Processors to approve",
+   "Payment processor and legal entity (by 2026-12-02)",
+   "Fixed infrastructure budget: about $1,000 to $1,300 a month",
+   "Second engineer, and the week-6 slips (decide by 2026-11-18)",
+   "Apple Developer Program ($99/year) and Google Cloud OAuth verification",
+   "Archive growth",
+   "Invites over WhatsApp",
+   "Streamed on-demand budgets: 30 s median, 45 s p95",
+   "PRD 3.10 amendment",
+   "Consents for Milestone 0 data",
+   "On-call for a worldwide cohort",
+   "Domain and sending identity"
+  ],
+  "review_counts": [
+   [
+    "conformance",
+    {
+     "blocker": 1,
+     "major": 7,
+     "minor": 15
+    }
+   ],
+   [
+    "skeptic",
+    {
+     "blocker": 2,
+     "major": 14,
+     "minor": 9
+    }
+   ]
+  ]
+ },
+ "02": {
+  "title": "Generation pipeline architecture",
+  "words": 28944,
+  "decisions": 25,
+  "open": 12,
+  "open_titles": [
+   "Voice vendor economics and the January voice plan",
+   "Frequency-list license",
+   "The announcement lines",
+   "Relaxing two taste checks",
+   "The reviewers and the review budget",
+   "Name respelling picker on A5",
+   "Ideas language",
+   "Pre-writing the next idea",
+   "On-demand p95",
+   "Processors that see scripts",
+   "Export contents",
+   "The second target language"
+  ],
+  "review_counts": [
+   [
+    "conformance",
+    {
+     "blocker": 2,
+     "major": 10,
+     "minor": 9
+    }
+   ],
+   [
+    "skeptic",
+    {
+     "blocker": 2,
+     "major": 13,
+     "minor": 11
+    }
+   ]
+  ]
+ },
+ "03": {
+  "title": "Live call and voice architecture",
+  "words": 25208,
+  "decisions": 18,
+  "open": 8,
+  "open_titles": [
+   "The call-voice gate on the episode vendor (D8)",
+   "Salma's variety and voice vendor per native language",
+   "Vendor contracts for concurrency and the Anthropic tier",
+   "Crisis protocol lines and resources",
+   "Processors for audio",
+   "The dial-in experiment's number and telephony provider",
+   "Haiku 5.5 as the host",
+   "Which clock PRD 15 means for the 1.5 s host reply"
+  ],
+  "review_counts": [
+   [
+    "conformance",
+    {
+     "blocker": 0,
+     "major": 11,
+     "minor": 13
+    }
+   ],
+   [
+    "skeptic",
+    {
+     "blocker": 2,
+     "major": 7,
+     "minor": 10
+    }
+   ]
+  ]
+ },
+ "04": {
+  "title": "Learner model and data architecture",
+  "words": 29883,
+  "decisions": 22,
+  "open": 12,
+  "open_titles": [
+   "English Grammar Profile permission (PRD-v2 Part 18 #8), by 2026-11-24 (end of build week 1)",
+   "Home region and the legal view on storing learner voice",
+   "Which jurisdictions the beta covers on day one",
+   "Sensitive facts: same session only, or the rest of the week",
+   "The name clip",
+   "[OPEN for Muath, with counsel] `crisis_log` after account deletion",
+   "Rebuilds in the beta: who runs them, and two scope cuts",
+   "The 30-day backup statement",
+   "Storage growth of kept voice (money)",
+   "Export form",
+   "Fixed infrastructure budget",
+   "Consents for Milestone 0 data"
+  ],
+  "review_counts": [
+   [
+    "conformance",
+    {
+     "blocker": 1,
+     "major": 9,
+     "minor": 14
+    }
+   ],
+   [
+    "skeptic",
+    {
+     "blocker": 5,
+     "major": 16,
+     "minor": 9
+    }
+   ]
+  ]
+ },
+ "05": {
+  "title": "Assessment and after-session architecture",
+  "words": 26954,
+  "decisions": 17,
+  "open": 9,
+  "open_titles": [
+   "Test-retest pairs before the beta",
+   "The second tagger for calibration",
+   "English Grammar Profile permission (PRD-v2 Part 18 #8)",
+   "Should \"where do I stand\" wait for the external test?",
+   "How a shaky owned word is shown",
+   "Rater windows aligned to cohorts",
+   "Whether a worse week with an unknown reason is said, and the week-5 cut",
+   "Forms C and D of the then-and-now task bank",
+   "Data-use consent wording for calibration samples"
+  ],
+  "review_counts": [
+   [
+    "conformance",
+    {
+     "blocker": 0,
+     "major": 13,
+     "minor": 15
+    }
+   ],
+   [
+    "skeptic",
+    {
+     "blocker": 4,
+     "major": 11,
+     "minor": 7
+    }
+   ]
+  ]
+ },
+ "06": {
+  "title": "Client and delivery architecture",
+  "words": 25659,
+  "decisions": 19,
+  "open": 15,
+  "open_titles": [
+   "The brand domain, by 2026-11-18",
+   "Apple Developer Program ($99 a year) and Google Cloud OAuth verification, started by 2026-11-25",
+   "Which three podcast apps A10 names",
+   "The feed-link session (D7)",
+   "Digits and type",
+   "\"Plays the feed\" (PRD-v2 3.8.3)",
+   "The public sample share page",
+   "Vercel, Resend and Sentry as processors",
+   "The day-7 payment card on Today",
+   "One engineer or two",
+   "Device test budget",
+   "Web or native for the beta",
+   "Payment processor and legal entity, by 2026-12-02",
+   "Jurisdictions, consent copy per native language and the crisis resources",
+   "Read-aloud and recap rendered on first tap"
+  ],
+  "review_counts": [
+   [
+    "conformance",
+    {
+     "blocker": 0,
+     "major": 7,
+     "minor": 13
+    }
+   ]
+  ]
+ },
+ "07": {
+  "title": "Security, privacy, compliance architecture",
+  "words": 25641,
+  "decisions": 16,
+  "open": 11,
+  "open_titles": [
+   "Home region and the legal view on storing learner voice (counsel, by 2026-11-17)",
+   "Which jurisdictions the beta covers on day one, the DPIA, the consent and notice copy per native language, and the reviewer and tagger agreement (counsel, by 2026-11-17)",
+   "Payment processor and legal entity (by 2026-12-02)",
+   "Trial without a card (PRD 18 #4)",
+   "Crisis protocol details (counsel, by 2026-12-15)",
+   "Processors to approve",
+   "Milestone 0 import consent",
+   "Research rows after deletion",
+   "Second factor for staff (passkeys) and a penetration test",
+   "Age verification beyond self-attestation",
+   "Waitlist retention"
+  ],
+  "review_counts": [
+   [
+    "conformance",
+    {
+     "blocker": 1,
+     "major": 8,
+     "minor": 3
+    }
+   ],
+   [
+    "skeptic",
+    {
+     "blocker": 1,
+     "major": 7,
+     "minor": 3
+    }
+   ]
+  ]
+ },
+ "08": {
+  "title": "Cost model and vendors architecture",
+  "words": 23063,
+  "decisions": 14,
+  "open": 9,
+  "open_titles": [
+   "Tier prices against the break-even (6.5)",
+   "The last lever to $0.35 and the voice contract (6.4)",
+   "Haiku 5.5 as the call host",
+   "Budget approvals",
+   "Payment processor",
+   "Consent for the Milestone 0 clips to reach the recognizer and voice vendors",
+   "The daily spend cap formula",
+   "Whether cost figures may appear in the monthly human review packet",
+   "The on-demand premium's planning value"
+  ],
+  "review_counts": [
+   [
+    "conformance",
+    {
+     "blocker": 1,
+     "major": 7,
+     "minor": 1
+    }
+   ],
+   [
+    "skeptic",
+    {
+     "blocker": 1,
+     "major": 5,
+     "minor": 3
+    }
+   ]
+  ]
+ },
+ "09": {
+  "title": "Evaluation and operations architecture",
+  "words": 25016,
+  "decisions": 15,
+  "open": 8,
+  "open_titles": [
+   "On-call for a worldwide cohort",
+   "The paid reviewer, the claims auditor and the native-language law-scan reader",
+   "The \"very disappointed\" question",
+   "Pulling a shipped episode",
+   "The stop line's owner and window",
+   "Milestone 0 fixtures and consent",
+   "Budget for this domain",
+   "The invite weekday"
+  ],
+  "review_counts": [
+   [
+    "conformance",
+    {
+     "blocker": 1,
+     "major": 5,
+     "minor": 2
+    }
+   ],
+   [
+    "skeptic",
+    {
+     "blocker": 1,
+     "major": 6,
+     "minor": 3
+    }
+   ]
+  ]
+ },
+ "10": {
+  "title": "Architecture decision records",
+  "words": 7949,
+  "decisions": 23,
+  "open": 15,
+  "open_titles": [
+   "Home region and the legal view on storing learner voice (counsel, by 2026-11-17)",
+   "Which jurisdictions the beta covers on day one (counsel, by 2026-11-17)",
+   "Payment processor and legal entity (by 2026-12-02)",
+   "Tier prices against the break-even",
+   "The last lever to $0.35 and the voice contract (by 2026-12-22)",
+   "Haiku 5.5 as the call host",
+   "On-call for a worldwide cohort",
+   "Web or native for the beta",
+   "Fixed infrastructure budget: about $1,000 to $1,300 a month",
+   "Second engineer, and the week-6 slips",
+   "The reviewers",
+   "Crisis protocol details (counsel, by 2026-12-15)",
+   "Consents for Milestone 0 data",
+   "Processors to approve",
+   "Smaller items that stay with their documents"
+  ],
+  "review_counts": []
+ }
+}

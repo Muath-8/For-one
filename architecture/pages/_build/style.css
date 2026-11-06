@@ -45,7 +45,7 @@ p { margin: 0; }
 .chip, .pill { font-family: var(--mono); font-size: .78rem; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; background: var(--surface); white-space: nowrap; }
 .pill { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; }
 .pill i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
-.st-ok { color: var(--ok); } .st-warn { color: var(--warn); } .st-one { color: var(--risk); } .st-none { color: var(--none); }
+.st-ok { color: var(--ok); } .st-warn { color: var(--warn); } .st-one { color: var(--flag); } .st-none { color: var(--none); } .st-adr { color: var(--accent); }
 .statusbox { border-left: 4px solid currentColor; background: var(--surface); padding: 14px 18px; border-radius: 0 8px 8px 0; }
 .statusbox p { color: var(--ink); max-width: 75ch; }
 
