@@ -1,0 +1,1955 @@
+<title>Live call and voice architecture</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (72ch prose) inside a 1080px frame; diagrams and decision cards use the full frame. */
+:root {
+  --paper: #F1F4F3; --surface: #FFFFFF; --ink: #142128; --muted: #55656C; --line: #D3DCDA;
+  --accent: #0D6A68; --accent-soft: #DDEDEA; --flag: #A86A12; --flag-soft: #F6EBD6;
+  --ok: #2E7A4E; --warn: #A86A12; --risk: #B0452C; --none: #6E7C83;
+  --blocker: #B0452C; --major: #C9842A; --minor: #A9B6B9;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0E1618; --surface: #152024; --ink: #E2EAE9; --muted: #95A6AA; --line: #28373B;
+  --accent: #5CC0B9; --accent-soft: #17332F; --flag: #E2A94C; --flag-soft: #352914;
+  --ok: #6BC08D; --warn: #E2A94C; --risk: #E8836A; --none: #8C9A9F;
+  --blocker: #E8836A; --major: #E2A94C; --minor: #56676B; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0E1618; --surface: #152024; --ink: #E2EAE9; --muted: #95A6AA; --line: #28373B;
+  --accent: #5CC0B9; --accent-soft: #17332F; --flag: #E2A94C; --flag-soft: #352914;
+  --ok: #6BC08D; --warn: #E2A94C; --risk: #E8836A; --none: #8C9A9F;
+  --blocker: #E8836A; --major: #E2A94C; --minor: #56676B; color-scheme: dark }
+
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+.page { max-width: 1080px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 44px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+code { font-family: var(--mono); font-size: .86em; background: var(--accent-soft); padding: .08em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+h1, h2, h3, h4 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h2 { font-size: 1.7rem; font-weight: 700; letter-spacing: -.01em; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+h4 { font-size: 1.02rem; font-weight: 700; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.lbl { font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-right: .4em; }
+
+.crumbs { display: flex; gap: 8px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); font-family: var(--mono); }
+.crumbs a { text-decoration: none; }
+.hero { display: flex; flex-direction: column; gap: 14px; }
+.eyebrow { font-family: var(--mono); font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font-size: clamp(2rem, 5.2vw, 3.4rem); font-weight: 700; letter-spacing: -.02em; max-width: 20ch; }
+.lede { font-size: 1.2rem; max-width: 60ch; color: var(--ink); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip, .pill { font-family: var(--mono); font-size: .78rem; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; background: var(--surface); white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; }
+.pill i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.st-ok { color: var(--ok); } .st-warn { color: var(--warn); } .st-one { color: var(--risk); } .st-none { color: var(--none); }
+.statusbox { border-left: 4px solid currentColor; background: var(--surface); padding: 14px 18px; border-radius: 0 8px 8px 0; }
+.statusbox p { color: var(--ink); max-width: 75ch; }
+
+.block { display: flex; flex-direction: column; gap: 14px; }
+.block > .muted { max-width: 70ch; }
+.prose { max-width: 74ch; display: flex; flex-direction: column; gap: 12px; }
+.prose.big p { font-size: 1.08rem; line-height: 1.7; }
+.prose ul, .prose ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+.prose pre { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-size: .8rem; line-height: 1.5; margin: 0; }
+.prose pre code { background: none; padding: 0; overflow-wrap: normal; }
+.prose h3, .prose h4 { margin-top: 10px; }
+.prose blockquote { margin: 0; padding-left: 14px; border-left: 3px solid var(--line); color: var(--muted); }
+.tw { overflow-x: auto; max-width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.prose .tw { max-width: min(1080px, 100vw - 32px); width: max-content; min-width: 100%; }
+table { border-collapse: collapse; font-size: .84rem; line-height: 1.45; min-width: 560px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: var(--accent-soft); }
+tr:last-child td { border-bottom: 0; }
+td { min-width: 9ch; }
+
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; text-align: center; font-family: var(--body); }
+
+.decisions { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 12px; }
+.dec { display: flex; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+.dec-n { font-family: var(--mono); font-size: .8rem; color: var(--accent); font-weight: 500; min-width: 2.2ch; padding-top: 2px; }
+.dec-body { display: flex; flex-direction: column; gap: 7px; min-width: 0; font-size: .9rem; line-height: 1.5; }
+.dec-body h4 { font-size: 1rem; }
+.dec-chosen { color: var(--ink); }
+.dec-why { color: var(--ink); }
+.dec-rej { color: var(--muted); font-size: .84rem; }
+
+.openitems { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; counter-reset: oi; }
+.oi { counter-increment: oi; display: flex; gap: 14px; background: var(--flag-soft); border-radius: 10px; padding: 14px 18px; }
+.oi::before { content: counter(oi); font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--flag); min-width: 1.4ch; line-height: 1.2; }
+.oi > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.oi-b { font-size: .92rem; max-width: 80ch; }
+.oi-b p + p { margin-top: 8px; }
+
+.rv-note { max-width: 75ch; }
+.warnnote { border-left: 4px solid var(--warn); padding-left: 12px; }
+.nore { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 16px 18px; max-width: 75ch; }
+.rv { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.rv-h { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.rv-h > div:first-child { display: flex; flex-direction: column; gap: 4px; max-width: 60ch; }
+.rv-counts { display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-start; }
+.cnt { font-family: var(--mono); font-size: .74rem; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.cnt.blocker { color: var(--blocker); } .cnt.major { color: var(--major); } .cnt.minor { color: var(--muted); }
+.sevbar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px; }
+.seg.blocker { background: var(--blocker); } .seg.major { background: var(--major); } .seg.minor { background: var(--minor); }
+details > summary { cursor: pointer; }
+.rv-list > summary { font-weight: 600; font-size: .92rem; color: var(--accent); }
+.findings { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 10px; }
+.fd { display: flex; gap: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+.sev { font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; padding: 2px 7px; border-radius: 4px; height: fit-content; white-space: nowrap; border: 1px solid currentColor; }
+.fd.blocker .sev { color: var(--blocker); } .fd.major .sev { color: var(--major); }
+.fd-b { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: .9rem; }
+.fd-b details { font-size: .86rem; color: var(--ink); }
+.fd-b details > summary { color: var(--muted); font-size: .8rem; }
+.fd-b details[open] { display: flex; flex-direction: column; gap: 8px; }
+.fd-loc { font-family: var(--mono); font-size: .76rem; color: var(--muted); overflow-wrap: anywhere; }
+.minors { margin: 8px 0 0; padding-left: 1.2em; font-size: .86rem; display: flex; flex-direction: column; gap: 5px; color: var(--muted); }
+
+.toc { columns: 2 260px; margin: 0; padding-left: 1.3em; font-size: .9rem; }
+.toc li { break-inside: avoid; padding: 2px 0; }
+.fs { border-top: 1px solid var(--line); padding-block: 4px; }
+.fs > summary { list-style: none; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 0; }
+.fs > summary::-webkit-details-marker { display: none; }
+.fs > summary h3::before { content: "+"; font-family: var(--mono); color: var(--accent); display: inline-block; width: 1.4em; }
+.fs[open] > summary h3::before { content: "−"; }
+.wc { font-family: var(--mono); font-size: .74rem; color: var(--muted); white-space: nowrap; }
+.fs > .prose { padding-bottom: 18px; padding-left: 1.6em; }
+
+.foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--line); padding-top: 16px; font-size: .9rem; }
+
+/* cost chart (domain 08) */
+.costfig { margin: 6px 0 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+.costfig figcaption { display: flex; flex-direction: column; gap: 2px; }
+.cc { display: flex; flex-direction: column; gap: 8px; --lab: 120px; }
+.cc-scale { position: relative; height: 18px; margin-left: var(--lab); font-family: var(--mono); font-size: .7rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cc-scale span { position: absolute; transform: translateX(-50%); }
+.cc-scale span:first-child { transform: none; } .cc-scale span:last-child { transform: translateX(-100%); }
+.cc-plot { position: relative; display: flex; flex-direction: column; gap: 14px; padding-block: 18px 4px; }
+.refs { position: absolute; top: 0; bottom: 0; left: var(--lab); right: 0; pointer-events: none; }
+.ref { position: absolute; top: 0; bottom: 0; border-left: 1.5px dashed var(--muted); }
+.ref span { position: absolute; top: 0; left: 4px; font-family: var(--mono); font-size: .68rem; color: var(--muted); white-space: nowrap; }
+.ref.stop { border-color: var(--risk); } .ref.stop span { color: var(--risk); }
+.cc-row { display: flex; align-items: center; }
+.cc-l { width: var(--lab); flex: none; font-size: .84rem; }
+.cc-bars { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.bar { height: 16px; border-radius: 0 3px 3px 0; position: relative; }
+.bar b { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: .68rem; font-weight: 500; color: var(--paper); font-variant-numeric: tabular-nums; }
+.bar.now { background: var(--accent); }
+.bar.later { background: var(--flag); }
+.cc-key { display: flex; gap: 16px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); margin-left: var(--lab); }
+.k { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.k.now { background: var(--accent); } .k.later { background: var(--flag); }
+@media (max-width: 560px) { .cc { --lab: 92px; } .cc-l { font-size: .76rem; } }
+
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+
+</style>
+
+<div class="page">
+<nav class="crumbs"><a href="https://claude.ai/artifact/C3oRETQgDsX3X6dv8VjdP5">For one architecture</a><span>/</span><span>Domain 3 of 9</span></nav>
+<header class="hero">
+  <p class="eyebrow">Domain 03 · Technical architecture · written 2026-10-16</p>
+  <h1>Live call and voice stack</h1>
+  <p class="lede">How the 6 to 8 minute call with the hosts works: turn-taking, budgets enforced by code, talkback to Salma, and nothing lost when voice fails.</p>
+  <div class="meta">
+    <span class="pill st-warn"><i></i>Reviewed twice, not revised</span>
+    <span class="chip">15 decisions</span>
+    <span class="chip">7 open for Muath</span>
+    <span class="chip">13,877 words, about 60 min</span>
+  </div>
+</header>
+
+<section class="statusbox st-warn">
+  <p><strong>Reviewed twice, not revised.</strong> Both reviews found real problems that are not fixed in the text yet. Read the findings below before relying on a section.</p>
+</section>
+
+<section class="block" id="summary">
+  <h2>In one paragraph</h2>
+  <div class="prose big"><p>The call is one Python process per concurrent call inside the <code>call-worker</code> service (LiveKit Agents), fed by a streaming recognizer, a Sonnet-class host whose brief sits in a cached prompt prefix, and the episode vendor's streaming voice, so the host sounds like the episode. Code, not the model, enforces every budget in the host's move contract (PRD 5.4.6): the host declares its moves in a one-line header before it speaks, and a governor in the worker checks that header against the remaining budgets before any audio is synthesized. Turn-taking is a learner-specific setting, not a vendor default: end-of-turn silence starts at 1.5 s and comes from the pause profile within 1.0 to 2.5 s, the floor can be held with a pad, and the host backchannels from pre-rendered clips instead of waiting in silence. Talkback is a second recognizer stream (Arabic-capable) opened only while the S button is held, answered by Salma on a separate audio track in under 2 s. Every learner turn is uploaded as it ends and transcribed verbatim while the call continues, which is what makes Salma's notes possible 90 s after the call and makes the 15-minute deletion window safe to honour. When live voice fails, the same call thread continues as voice notes through one Inngest function and nothing is lost.</p></div>
+</section>
+
+<section class="block" id="picture">
+  <h2>The picture</h2>
+  <p class="muted">Drawn from section 3 of the document. Boxes are the canonical names the other domains use.</p>
+  <div class="diagram"><pre class="mermaid">
+sequenceDiagram
+  participant P as Phone
+  participant A as api
+  participant LK as LiveKit Cloud
+  participant CW as call-worker
+  participant V as STT / LLM / TTS
+  participant I as Inngest
+  P-&gt;&gt;A: POST /v1/calls
+  A-&gt;&gt;LK: create room + dispatch
+  CW-&gt;&gt;A: GET brief (CallBundle)
+  CW-&gt;&gt;P: opening line (pre-rendered)
+  loop each turn
+    P-&gt;&gt;CW: learner speech
+    CW-&gt;&gt;V: streaming STT, end-of-turn from pause profile
+    CW-&gt;&gt;V: host LLM with @moves header
+    Note over CW: governor checks moves against budgets
+    CW-&gt;&gt;P: host voice + captions
+    CW-&gt;&gt;I: turn audio ready (verbatim re-transcription)
+  end
+  CW-&gt;&gt;A: call.ended
+  A-&gt;&gt;I: after-session pass (notes in 90 s)
+</pre></div>
+  
+</section>
+
+<section class="block" id="decisions">
+  <h2>The decisions</h2>
+  <p class="muted">Section 1's table, one card per decision. "Rejected" is what was considered and turned down.</p>
+  <ol class="decisions">
+<li class="dec">
+<span class="dec-n">D1</span>
+<div class="dec-body">
+<h4>Pipeline (streaming STT, text host, streaming TTS) on LiveKit Agents, one <code>AgentSession</code> per call [DECISION, PRD 14.3]</h4>
+<p class="dec-why"><span class="lbl">Why</span> The only design where the recast, the transcript and the voice are all under the product's control; LiveKit's multilingual turn model covers Arabic for talkback</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Speech-to-speech models (no custom voice, approximate transcripts, per-turn re-billing); Pipecat (English-only turn model)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D2</span>
+<div class="dec-body">
+<h4>Host declares moves in a header line before its reply text; a code governor enforces the PRD 5.4.6 budgets and can abort and re-request once [DECISION]</h4>
+<p class="dec-why"><span class="lbl">Why</span> Law 7 and the move caps are hard constraints; a prompt alone cannot be trusted to count</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Structured-output JSON for the whole reply (delays first audio until the JSON closes); post-hoc filtering of text (cannot remove a nudge once spoken)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D3</span>
+<div class="dec-body">
+<h4>End-of-turn silence <code>p</code> from the pause profile, 1.5 s for a new learner, clamp 1.0 to 2.5 s; when the turn model says the sentence is unfinished, wait up to <code>p + 1.5 s</code> with one backchannel at 1.2 s [DECISION, PRD 5.4.4]</h4>
+<p class="dec-why"><span class="lbl">Why</span> Learners pause mid-clause about three times as often as natives (voice lens); the vendor defaults of 0.5 to 0.8 s cut them off</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> A fixed long silence (makes every reply slow); vendor semantic VAD only (not tunable per learner)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D4</span>
+<div class="dec-body">
+<h4>Backchannels are pre-rendered clips per host voice, chosen by code, never synthesized live [DECISION]</h4>
+<p class="dec-why"><span class="lbl">Why</span> Zero latency and zero cost at the moment latency matters most; the words never take the floor because the list is fixed</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Asking the model for a backchannel (adds a model round trip inside the learner's pause)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D5</span>
+<div class="dec-body">
+<h4>Talkback audio goes to a second recognizer stream (Soniox, <code>ar</code>+<code>en</code>) opened on S-down and closed on S-up; the host stream is paused and its turn detector frozen; Salma answers on a second published audio track [DECISION, PRD 5.4.5, 0.1 row 7]</h4>
+<p class="dec-why"><span class="lbl">Why</span> Keeps Arabic out of the host's transcript, keeps the floor held, and lets the client draw the bubble from S</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> One multilingual stream for both (code-switch errors leak into the host's input); client-side recording and upload (adds 1 to 2 s)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D6</span>
+<div class="dec-body">
+<h4>Word-or-hint is decided by code from the Salma talkback brief (produced-word set), not by the model [DECISION, PRD 5.4.5 rule 4]</h4>
+<p class="dec-why"><span class="lbl">Why</span> A rule with a lookup is exact; a model would sometimes give the word to a learner who has it</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Model decides from the brief in the prompt</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D7</span>
+<div class="dec-body">
+<h4>Host LLM: <code>claude-sonnet-5-5</code>, <code>output_config.effort: low</code>, <code>thinking: {type: "between_tools"}</code> (no tools, so no thinking before the reply), brief in the cached prefix, per-turn operator notes as mid-conversation system messages [DECISION, PRD 14.3]</h4>
+<p class="dec-why"><span class="lbl">Why</span> First token in 300 to 600 ms with the cache warm; mid-conversation system messages keep the cached history intact; Haiku 5.5 is the measured fallback if the 50-call test says quality holds</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Opus-class host (latency and cost); Haiku-class by default (quality in the recast moves unproven)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D8</span>
+<div class="dec-body">
+<h4>Call TTS is the episode vendor's streaming voice with the same <code>voice_id</code>; the pipeline's blind test only admits vendors whose streaming endpoint has a first-byte latency under 300 ms at p95 [DECISION, PRD 14.3, 7.1]</h4>
+<p class="dec-why"><span class="lbl">Why</span> "The host sounds the same" is a PRD rule; a vendor that cannot stream fast enough cannot be the episode vendor either</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Different vendor on the call with an "understudy" voice (Milestone 0 did this; the day-7 check-in asks whether it mattered, and the PRD chose sameness)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D9</span>
+<div class="dec-body">
+<h4>Each learner turn is uploaded as it ends (<code>call.turn_audio_ready</code>) and transcribed verbatim during the call; the full mixed recording is uploaded only when voice storage is on [DECISION, PRD 5.4.11, 10.2]</h4>
+<p class="dec-why"><span class="lbl">Why</span> Notes within 90 s need the verbatim text at call end, not 3 minutes later; the 15-minute deletion window is met with margin</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Transcribe the whole call after it ends (notes late; one big deletion race)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D10</span>
+<div class="dec-body">
+<h4>Voice-note fallback runs as the Inngest function <code>call/voice-note-reply</code> using the same brief, host prompt and voice; the client switches when the room is not joined within 3 s, on two pipeline errors, or on an ICE failure longer than 5 s [DECISION, PRD 5.4.10]</h4>
+<p class="dec-why"><span class="lbl">Why</span> One brief, one host, one thread; the learner's argument continues</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> A separate "voice note host" prompt (two hosts to keep in character)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D11</span>
+<div class="dec-body">
+<h4>The first host line of every call is synthesized at episode time by the pipeline and stored with the brief; the worker plays it while the vendor websockets open [DECISION, PRD 15 "call connect under 3 s"]</h4>
+<p class="dec-why"><span class="lbl">Why</span> The learner hears the host within the connect budget even on a cold worker</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Synthesize on connect (adds 0.5 to 1 s to the first sound)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D12</span>
+<div class="dec-body">
+<h4>Client audio: <code>getUserMedia</code> with echo cancellation, noise suppression and AGC on; Screen Wake Lock re-acquired on every <code>visibilitychange</code>; a backgrounded page is treated as an abandoned call after 10 s [DECISION, PRD 1.4]</h4>
+<p class="dec-why"><span class="lbl">Why</span> iOS Safari suspends WebRTC in the background with no fix (voice lens); pretending otherwise loses evidence</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Keep-alive tricks (unreliable, and they drain the battery)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D13</span>
+<div class="dec-body">
+<h4>The 30-clip test and the 50-call test run from one tool, <code>tools/call-bench</code>, against the staging worker with the Milestone 0 clips as the scripted caller [DECISION, PRD 10.14, 14.4]</h4>
+<p class="dec-why"><span class="lbl">Why</span> One harness measures recognizers, latency and the move contract on the same audio, and reruns on every prompt or vendor change</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Separate scripts per vendor (never rerun)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D14</span>
+<div class="dec-body">
+<h4>The observer (PRD 14.1, [LATER]) has a reserved slot: one mid-conversation system message per turn, keyed <code>whisper</code>; nothing in the beta depends on it [DECISION]</h4>
+<p class="dec-why"><span class="lbl">Why</span> Costs nothing now; prevents a redesign later</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Building it in the beta (PRD 17 excludes it)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D15</span>
+<div class="dec-body">
+<h4>Crisis protocol in the call: the host declares <code>crisis</code> in its header or a package keyword list fires on a learner turn; the worker then plays the pre-rendered package lines (English, then Arabic), sends the resources card to the client, logs <code>crisis_activation</code> and ends the argument [DECISION, PRD 7.9]</h4>
+<p class="dec-why"><span class="lbl">Why</span> Two independent triggers; fixed, counsel-reviewed lines rather than generated ones</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Model-only detection; generated crisis text</p>
+</div></li>
+</ol>
+  
+</section>
+
+<section class="block" id="open">
+  <h2>Open for Muath</h2>
+  <p class="muted">Section 10. Only you can settle these; the document says what each answer changes.</p>
+  <ol class="openitems"><li class="oi"><div><h4>The call-voice gate on the episode vendor (D8)</h4><div class="oi-b"><p>If the blind test's favourite voice (ElevenLabs is the likeliest, voice lens) is the only one that passes naturalness but its streaming price puts the call line at about $0.22 instead of $0.16, choose: keep sameness and accept about $0.06 more per session in the beta, or let the call use the runner-up vendor's closest voice with an on-air announcement, as Milestone 0 did. The M0 day-7 check-in ("does the different call voice bother you?") is the evidence; decide by 2026-11-15, when <code>vendors.yaml</code> freezes.</p></div></div></li>
+<li class="oi"><div><h4>Salma's Arabic variety and voice vendor</h4><div class="oi-b"><p>(PRD 18 #6). The talkback and onboarding pipeline is variety-agnostic; the blind test with 5 Saudi listeners needs to run by 2026-11-15 so the static intro and talkback clips can be rendered in week 3.</p></div></div></li>
+<li class="oi"><div><h4>Vendor contracts for concurrency</h4><div class="oi-b"><p>Soniox, the TTS vendor(s) and AssemblyAI or ElevenLabs need paid tiers with at least 50 concurrent streams before the beta; ElevenLabs' concurrency sits on its plan tier. Approve the spend (roughly $100 to $300 a month in minimums during the beta, on top of usage) or name the cap.</p></div></div></li>
+<li class="oi"><div><h4>Crisis protocol lines and resources</h4><div class="oi-b"><p>(PRD 7.9, with counsel). The worker plays fixed package clips in English and Arabic and shows a resources card; the text, the Saudi resources and whether the keyword list may trigger on its own (false positives step the host out of the show) need counsel's review before 2026-12-07. Milestone 0's "call 911" line is a placeholder.</p></div></div></li>
+<li class="oi"><div><h4>Processors for audio</h4><div class="oi-b"><p>The security domain lists them; the ones specific to this domain are LiveKit Cloud (media in transit), the streaming recognizer (audio in transit, no retention to be confirmed in the contract), the verbatim recognizer (audio held for the transcription job) and the pronunciation vendor (a 15-second clip). Any "no" names a replacement in section 4.14's secondary column.</p></div></div></li>
+<li class="oi"><div><h4>The dial-in experiment's number and telephony provider</h4><div class="oi-b"><p>[P1]: a Saudi number through a SIP provider into LiveKit, roughly $5 to $20 a month plus per-minute rates; it also needs the PDPL view on phone audio. Not needed before 2026-12-07.</p></div></div></li>
+<li class="oi"><div><h4>Haiku 5.5 as the host at scale</h4><div class="oi-b"><p>This document keeps Sonnet 5.5 for the beta and makes Haiku the measured fallback. If the week-5 run shows Haiku meets the move-contract and violation gates on the M0 scripts, switching saves about $0.03 a session and is one line in <code>vendors.yaml</code>; it is the owner's call because the host's quality is the product's voice.</p></div></div></li></ol>
+</section>
+
+<section class="block" id="build">
+  <h2>Build plan, 2026-11-02 to 2026-12-06</h2>
+  <div class="prose"><p>The call pipeline is scheduled for week 4 in PRD 19.2, but the vendor tests (week 1 to 2) and Salma's onboarding voice (week 3) need parts of it earlier. This plan front-loads the skeleton so that nothing in week 3 or 4 is built on untested vendors.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Dates</th>
+<th>Ships</th>
+<th>Priority</th>
+<th>What the Milestone 0 data lets you test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2026-11-02 to 11-08</td>
+<td><code>call-worker</code> skeleton on LiveKit Agents (<code>AgentSession</code> with Silero VAD, the multilingual turn detector, Soniox and Deepgram STT plugins, Anthropic LLM plugin, two TTS plugins for the two voice vendors in play, Salma TTS plugin); the <code>CallBundle</code> route returning a hand-written bundle; <code>tools/call-bench recognizers</code> run on the 30 clips, results and the confidence threshold written into the language package; <code>tools/call-bench calls</code> v0 (scripted caller from M0 audio) against the skeleton with a stub host prompt; TTS streaming first-byte measured per vendor (the D8 gate, handed to the pipeline domain before its blind test)</td>
+<td>P0</td>
+<td>The 30 consented clips and Muath's tags are the test set; M0 call audio is the scripted caller's voice</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2026-11-09 to 11-15</td>
+<td>Recognizer decision frozen in <code>vendors.yaml</code>; host prompt layers A and B from M0 prompt H plus the bible drafts; the governor with budgets, the <code>@moves</code> header and re-request; operator notes; per-turn recorder and upload with SSE-C; <code>call.turn_audio_ready</code> and <code>call/verbatim-turn</code> with the verbatim adapter; 50-call run #1 (latency only); Salma persona (<code>salma_live</code>) with the onboarding contract and fact-card header</td>
+<td>P0</td>
+<td>M0 call transcripts replayed through the governor to count violations before any live call</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2026-11-16 to 11-22</td>
+<td>Onboarding A3 live end to end (static intro clips, Type mode, fact cards, <code>onboarding.intake_completed</code>); kind <code>first</code> with its budgets and the talkback intro clip; captions over the data channel; the client audio contract (4.11) in <code>web</code> with the client domain; backchannel clips rendered per host voice by the voice studio; opening-line clip stored with the brief (D11)</td>
+<td>P0</td>
+<td>A3 transcripts from M0 intakes become the onboarding fixture set</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2026-11-23 to 11-29</td>
+<td>The full main call: adaptive patience from the pause profile, hold-to-talk, talkback with the reverse gloss index and the Haiku resolver, word-or-hint, retell ring, silence offers, anxiety mode, timers and goodbyes, <code>resumed_after_drop</code>, repair phrases, driving phrase; voice-note fallback end to end (<code>call/voice-note-reply</code>); <code>audio/expire</code> wiring; <code>calls.metrics</code>; worker autoscaling; 50-call run #2 with the full gates; per-call cost visible in <code>vendor_calls</code></td>
+<td>P0</td>
+<td>M0's evidence on call timing (how long learners search for words) sets the first <code>p</code> distribution and the retell window</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2026-11-30 to 12-06</td>
+<td>Pronunciation on say-it-once (<code>call/pronunciation-score</code>); recordings route for the first then-and-now and the small door; crisis protocol with the package clips and keyword list; <code>learner/purge-audio</code> and deletion verification with the security domain; load test at 15 concurrent calls; 50-call run #3 after prompt tuning; end-to-end with Milestone 0 learners on staging; runbook for <code>/admin/vendors</code> failover</td>
+<td>P0</td>
+<td>The M0 learners' real calls on the real pipeline are the exit evidence: measured cost per call and the latency gates</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>2026-12-07 to 2027-01-10</td>
+<td>Round two (kind <code>round_two</code>, offered from Today); shadow lines with pronunciation; the dial-in experiment (LiveKit SIP ingress, 8 kHz flag <code>low_confidence</code>, no talkback, no claims); the observer slot test behind a flag; the simulated-caller half of the offline suite (PRD 6.7) built on <code>call-bench</code>; Deepgram as a hot secondary exercised weekly by a canary call</td>
+<td>P1</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Too much for one to two engineers, and the cut:</strong> the two-track Salma audio (play Salma on the host track instead and show the bubble; loses the "closer" mix, keeps the function); word-level captions (sentence captions only; the recast word is still bold); the reverse gloss index for talkback (Haiku resolves everything; adds 400 ms, still under 2 s); in-call adaptation of <code>p</code> (keep the profile value only); the headphone-button mappings on the call; <code>tools/call-bench</code> as a CI job (run it by hand before each release); the understudy-voice mid-call switch (end the call and fall back to voice notes instead). Do not cut: per-turn upload and verbatim (notes and the deletion window depend on it), the governor (law 7), hold-to-talk (the one feature Duolingo's own research says users demanded), the voice-note fallback (PRD 15), the 50-call test (PRD 14.4).</p>
+<hr /></div>
+</section>
+
+<section class="block" id="reviews">
+  <h2>Review findings</h2>
+  <p class="rv-note warnnote">These findings are <strong>not fixed</strong> in the text below. Where a finding names a section, the fix it proposes is the better guide.</p>
+<section class="rv"><header class="rv-h"><div><h3>Conformance review</h3><p class="muted">Checked the draft against PRD-v2, concept v2 and the decisions. Verdict: needs-revision.</p></div><div class="rv-counts"><span class="cnt blocker">0 blocker</span><span class="cnt major">11 major</span><span class="cnt minor">13 minor</span></div></header><div class="sevbar"><span class="seg major" style="flex:11" title="11 major"></span><span class="seg minor" style="flex:13" title="13 minor"></span></div>
+<details class="rv-list" open><summary>11 blocker and major findings</summary><ol class="findings">
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">The header cost is under-counted by 3 to 5x, which puts the PRD 15 median gate (1.5 s) at risk.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.15 Latency budget, row '@moves header parsed: 120 ms p50 / 250 ms p95 (about 40 tokens at streaming speed)' and 4.3 'The worker buffers tokens until the first newline (about 40 tokens, 100 to 200 ms)'</p><p>The header cost is under-counted by 3 to 5x, which puts the PRD 15 median gate (1.5 s) at risk. The example header <code>@moves {"recast":{"heard":"I go","form":"went"},"clarify":false,"nudge":false,"recall_gap":"rg2","retell":false,"praise":false,"close":false,"goodbye":false,"crisis":false,"ai_disclosure":false}</code> is about 60 to 70 tokens, and 40 tokens in 120 ms implies 330 tokens/s, far above a Sonnet-class streaming rate (roughly 70 to 120 tokens/s). First audio therefore waits 0.5 to 0.9 s for the header alone, so the honest p50 is about 1.3 to 1.7 s, not 0.95 s, before the vendor round trips that 01 §3.6 adds (0.4 to 0.55 s from me-central-1).</p><p><span class="lbl">Evidence</span> PRD 15 'Host reply after end of learner turn under 1.5 s (median), under 2.5 s (p95)'; PRD 14.4 #3 [P0]; arithmetic on the header in 4.3 at 70 to 120 tokens/s; 01-system-topology.md §3.6 'Summed honestly the median is 1.1 to 1.6 s with little headroom' and its CALL_WORKER_REGION test, which this document neither adopts nor rejects.</p><p><span class="lbl">Fix</span> Shrink the header to a positive-only, single-letter form of about 8 to 15 tokens (for example <code>@m r=went&lt;I go g=rg2</code> with absent keys meaning false; <code>crisis</code> and <code>ai_disclosure</code> as bare flags), measure header tokens in the 50-call test, and rebuild the 4.15 table with a measured tokens/s figure plus the 01 §3.6 vendor round-trip row and the region decision; state the margin honestly rather than 'about 950 ms'.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">The phase machine always ends the call on crisis, the failure table says the learner may continue, and D15 says the argument ends.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.3 Phase machine 'any ─(crisis)─► CRISIS ─► ENDED(reason=crisis)' versus section 5 row 'Crisis: the session continues only if the learner chooses (the screen offers continue or stop)' and D15 'ends the argument'</p><p>The phase machine always ends the call on crisis, the failure table says the learner may continue, and D15 says the argument ends. PRD 7.9.2 requires that the character steps out, says it is an AI and cannot help, shows resources, and that the session continues only if the learner chooses, so continuation must exist as a path. The document also does not say what the host knows or does after a 'continue' (back in character, the crisis turn quarantined per 07 D9, no return to the topic).</p><p><span class="lbl">Evidence</span> PRD 7.9.2 'The session continues only if the learner chooses'; 07-security-privacy-and-compliance.md D9 quarantine; internal contradiction between 4.3, 5 and D15.</p><p><span class="lbl">Fix</span> Add <code>CRISIS ─(client crisis.continue)─► ARGUE_AFTER</code> with the host told via operator note to resume the argument without referring to the crisis turn, keyword/header re-triggers ending the call on a second activation; <code>CRISIS ─(client crisis.stop | 60 s no answer)─► ENDED(reason=crisis)</code>; add <code>crisis.continue</code>/<code>crisis.stop</code> to the client-to-worker protocol in 4.12 and make D15 and the section 5 row agree.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">The host's streaming recognizer is configured for English only, so Arabic repair phrases (PRD 5.4.4 rule 6 'in either language') and Arabic crisis keywords (PRD 7.9.1 'in either language') spoken on the open mic will never appear in the streaming final and cannot be matched.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.4 'Learner "sorry?", "slower", "again" and the Arabic equivalents in language.repair_phrases are matched by code on the streaming final' and D15 'a package keyword list fires on a learner turn' together with D5/4.9 (the host stream is English-only; Arabic is kept out of the host's transcript)</p><p>The host's streaming recognizer is configured for English only, so Arabic repair phrases (PRD 5.4.4 rule 6 'in either language') and Arabic crisis keywords (PRD 7.9.1 'in either language') spoken on the open mic will never appear in the streaming final and cannot be matched. The two PRD rules are silently unmet for the Arabic case; only words said while holding S reach an Arabic-capable stream.</p><p><span class="lbl">Evidence</span> PRD 5.4.4 rule 6; PRD 7.9.1 'Every live role ... watch for statements of self-harm intent or crisis, in either language'; D5 rationale 'keeps Arabic out of the host's transcript'; 4.9 'the recognizer is the talkback configuration (Arabic plus English) on the main stream' only for onboarding.</p><p><span class="lbl">Fix</span> Decide explicitly: either run the host stream on Soniox with <code>[en, ar]</code> and code-switch on, strip Arabic spans from the text sent to the host and the English verbatim pass (so D5's isolation is preserved by code, not by vendor config), and match repair and crisis phrases on the raw stream; or declare in 4.4 and D15 that Arabic detection on the open mic is not possible in the beta, tag it [OPEN for Muath] because it narrows PRD 7.9.1, and give counsel the narrowed scope before 2026-12-07.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">With <code>api</code> down, no <code>media_objects</code> row is written and no <code>call.turn_audio_ready</code> reaches Inngest, so neither <code>call/verbatim-turn</code> nor <code>audio/expire</code> runs;</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">Section 5 row '<code>api</code> unreachable: events and turn_audio_ready spooled to forone-voice/spool/{callId}.ndjson (encrypted) and ingested by retention/daily'</p><p>With <code>api</code> down, no <code>media_objects</code> row is written and no <code>call.turn_audio_ready</code> reaches Inngest, so neither <code>call/verbatim-turn</code> nor <code>audio/expire</code> runs; the spool is read by a daily job and the S3 lifecycle backstop is 1 day. For a storage-off learner the turn audio can therefore survive up to 24 hours, breaching the 15-minute rule in that failure mode. Also the <code>calls</code> row end state (<code>POST /internal/calls/{id}/end</code>) is lost in the same case and is not mentioned in the spool.</p><p><span class="lbl">Evidence</span> PRD 5.4.11 'in any case within 15 minutes of the call ending'; PRD 12.5.2; PRD 15 'Audio deleted when voice storage is off: within 15 min of the call'; 01-system-topology.md §4.3 <code>audio/expire</code> is triggered by <code>media.object_created</code>, which <code>api</code> emits.</p><p><span class="lbl">Fix</span> Give the worker a local deletion duty: when any <code>turn_audio_ready</code> post has failed and <code>voice_storage</code> is false, the worker (which holds the S3 credentials and the key) deletes the call's turn objects itself at call end + 14 min before exiting the job (or hands a delete list to a sidecar timer if the task is draining); spool into a <code>spool/</code> prefix polled every minute by a small Inngest cron (<code>spool/ingest</code>), not <code>retention/daily</code>; include the <code>calls</code> end record in the spool; add this case to 07's <code>privacy/verify</code> checks.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">PRD 5.4.7 names three triggers;</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.3 Governor: <code>__init__(self, kind, budgets, limits, anxiety_prior)</code> and <code>ANXIETY_OVERRIDE</code>; CallMetrics <code>anxiety_mode: null|"prior"|"short_turns"|"two_silences"</code>; prompt layer A (no anxiety-mode instruction)</p><p>PRD 5.4.7 names three triggers; the code wires two in-call triggers plus a prior, but the bundle's <code>anxiety.last_call_abandoned</code> flag is never read by the governor (only <code>anxiety_prior</code> is), and the metrics enum has no value for it. Separately, 'more backchannel' is implemented (1.0 s threshold) but 'simpler questions' exists nowhere: the operator note carries <code>mode=anxiety</code> and the system prompt never says what anxiety mode means for the host, so the model has to guess. 'The correction moves to Salma's notes' is also not signalled to the assessment domain on the event.</p><p><span class="lbl">Evidence</span> PRD 5.4.7 'or the learner's last call was abandoned ... no nudge, at most one recall gap, recasts kept, more backchannel, simpler questions. The correction moves to Salma's notes.'</p><p><span class="lbl">Fix</span> Enter anxiety mode when <code>anxiety.prior or anxiety.last_call_abandoned</code>, add <code>"last_call_abandoned"</code> to the <code>anxiety_mode</code> enum and the <code>call_ended</code> metrics; add one paragraph to layer A defining anxiety mode (shorter, yes/no or either/or questions, one idea per turn, no nudge, keep recasts) and render <code>mode=anxiety</code> in the note as 'anxiety mode: simpler questions'; carry <code>anxiety_mode</code> and <code>why_anxiety</code> on <code>call_ended</code> so 05 can move the correction to the notes.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">The governor enforces only maxima.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc"><ol>
+<li>Summary 'Code, not the model, enforces every budget in the host's move contract' and 4.3 <code>check()</code> / <code>allowances()</code></li>
+</ol></p><p>The governor enforces only maxima. PRD 5.4.6 also has minima: recall gaps 2 to 4 per call, retell once per call, position 'pushes back at least once'. A host that never uses a recall gap, never asks for the retell and never pushes back passes the governor; nothing in the operator note or the phase clock pushes the host toward the unmet minima before the close, and the retell window (2:00 to 4:30, gated on one recall gap) is an untagged assumption that can silently prevent the retell altogether.</p><p><span class="lbl">Evidence</span> PRD 5.4.6 rows 'Position', 'Recall gaps 2 to 4 per call', 'Retell once per call'; PRD 6.7 gates 'nudge budget, recall-gap count'.</p><p><span class="lbl">Fix</span> Add a 'due' side to <code>Allowances</code> (for example <code>must: ["recall_gap"]</code> when <code>t &gt;= 150 s and recall_gaps == 0</code>, <code>must: ["retell"]</code> at the window's end, <code>pushback</code> tracked by a header flag and nudged after minute 2); render it in the operator note ('do this turn: a recall gap'); log <code>minima_unmet</code> on <code>call_ended</code>; tag the retell window [ASSUMPTION] with the M0 timing evidence that sets it; make <code>violations</code> and <code>minima_unmet</code> both 50-call gates.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">PRD 14.4 places the vendor tests, including the 50 scripted calls, in the first two weeks of the build (so the vendor and region choices can be frozen by 2026-11-15);</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.13 'The 50-call latency test (PRD 14.4 #3, [P0], staging, build week 4, rerun in week 5 ...)' versus section 7 week 2 '50-call run #1 (latency only)' and 2. Requirements table row 14.4</p><p>PRD 14.4 places the vendor tests, including the 50 scripted calls, in the first two weeks of the build (so the vendor and region choices can be frozen by 2026-11-15); 4.13 schedules the first run in week 4. The document contradicts itself and the PRD on a dated P0 item. 01 §7 plans a minimal worker in week 2 for exactly this reason.</p><p><span class="lbl">Evidence</span> PRD 14.4 'Vendor tests [P0, in the beta build's first two weeks] ... 3. Call latency: 50 scripted test calls'; PRD 18 #7 'Beta build weeks 1 to 2'; 01-system-topology.md 'minimal call-worker in week 2 so the 50 scripted calls run inside PRD 14.4's two weeks'.</p><p><span class="lbl">Fix</span> Rewrite 4.13 to match section 7: run #1 by 2026-11-15 on the week-2 skeleton (latency, connect, TTS first-byte gate, both worker regions), run #2 in week 4 with the full move-contract gates, run #3 in week 5; state which gates apply to which run.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">The secondary cannot do the job: the voice lens states Deepgram's code-switching covers 10 languages and not Arabic.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.14 <code>talkback_stt: {vendor: soniox, secondary: deepgram, languages: [ar, en], code_switch: true}</code> and 4.9 (onboarding uses the same configuration on the main stream)</p><p>The secondary cannot do the job: the voice lens states Deepgram's code-switching covers 10 languages and not Arabic. A Soniox outage therefore takes down talkback and the whole A3 onboarding conversation, contrary to PRD 15 'voice vendor outage covered the same day' and the standing rule of two wired vendors per role; the 30-clip test's code-switch metric would also show this only after the choice is written as a default.</p><p><span class="lbl">Evidence</span> voice-speech.md 'Deepgram's covers 10 languages and not Arabic'; PRD 14.3 'Soniox by default (covers Arabic and code-switching, for talkback)'; PRD 15 'Voice vendor outage: second vendor within the same day's production'.</p><p><span class="lbl">Fix</span> Name an Arabic-capable secondary for <code>talkback_stt</code> and the onboarding stream (AssemblyAI Universal realtime or Gladia, both claimed code-switching in the lens), include it in the 30-clip code-switch test, and keep Deepgram as the secondary only for the English host stream; add 'both Arabic-capable recognizers down' to the failure table (talkback degrades to the typed ask over the data channel).</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">The topology hands the worker a per-call key <code>HKDF(DEK, "call:" + call_id)</code> and records <code>media_objects.key_derivation</code>, explicitly 'never the learner DEK';</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.2 <code>crypto: { dek: string /* base64, 32 bytes, memory only */ }</code>, 4.10 'uploads it with SSE-C under the learner's DEK', 3.3 and 9.1 (deviations list)</p><p>The topology hands the worker a per-call key <code>HKDF(DEK, "call:" + call_id)</code> and records <code>media_objects.key_derivation</code>, explicitly 'never the learner DEK'; 07 §4.9 says the worker 'receives the bytes' from <code>api</code>. This document uses the raw DEK, which widens the blast radius of a worker compromise and makes the object rows unreadable by <code>api</code>'s re-derivation path, and section 9 does not record it as a deviation.</p><p><span class="lbl">Evidence</span> 01-system-topology.md 'per-call key (32 bytes, in memory only, zeroized at call end; never the learner DEK)' and <code>media_objects.key_derivation = 'call:{call_id}'</code>; this document's section 9 claims to list every deviation from 01.</p><p><span class="lbl">Fix</span> Replace <code>crypto.dek</code> with <code>crypto.call_key</code> derived as in 01, write <code>key_derivation</code> on every <code>media_objects</code> row the worker causes, keep the spool file under the environment CMK as 07 states, and either adopt 01's <code>call_turn_verbatim</code> append (04 D2) in 4.10 and 4.12 or list the update-in-place as a deviation.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">The document never says whether the audio spoken while S is held is part of the learner turn's PCM that is uploaded and sent to the English verbatim pass.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.7 talkback flow 'host STT frames muted' and 4.10 'The recorder keeps the learner's decoded PCM ... per turn'; <code>CallTurnAudioReady.language: Literal["en", "ar"]</code></p><p>The document never says whether the audio spoken while S is held is part of the learner turn's PCM that is uploaded and sent to the English verbatim pass. If it is, Arabic speech lands inside the English verbatim transcript and the error profile; if it is not, the <code>language: "ar"</code> value has no producer and the retention status of talkback audio (learner voice under PRD 12.5) is undefined. 05 §4.1 assumes talkback clips 'never come here'.</p><p><span class="lbl">Evidence</span> PRD 5.4.5 rule 2 'That audio goes to the Arabic-capable recognizer, not to the host'; PRD 12.5 rules 1 and 2 apply to all learner voice; 05-assessment-and-after-session.md 4.1.</p><p><span class="lbl">Fix</span> State that the recorder drops frames between <code>talkback.down</code> (minus the 400 ms pre-roll) and <code>talkback.up</code> from the turn PCM and from the full mix when storage is off, that talkback audio is streamed only (no object, no retention beyond the vendor's in-transit processing), and remove <code>"ar"</code> from <code>CallTurnAudioReady.language</code> or give it a producer; add <code>talkback_ms_excluded</code> to the <code>call_turn</code> payload so fluency measures are not distorted.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">When the learner tells the host a callback is wrong, PRD 8.4 rule 7 requires the character to say so plainly, the fact to be fixed and a <code>wrong_memory_flag</code> event to be logged;</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.4 host prompt and 4.12 event list (no wrong-memory path)</p><p>When the learner tells the host a callback is wrong, PRD 8.4 rule 7 requires the character to say so plainly, the fact to be fixed and a <code>wrong_memory_flag</code> event to be logged; PRD 16.1 gates on 'wrong memories under 1 in 100 callbacks'. The host prompt, the header and the event list have no way to detect, acknowledge or log this, so the metric cannot be computed from calls and the host may argue back from the brief.</p><p><span class="lbl">Evidence</span> PRD 8.4.7; PRD 1.3 promise 7 'A wrong memory is a bug ... counted as a quality metric (Part 16.2)'; PRD 8.2 lists <code>wrong_memory_flag</code>; PRD 16.1.</p><p><span class="lbl">Fix</span> Add <code>wrong_memory: {fact_id|null, quote}</code> to the header keys with the instruction 'if the listener says something you were told about them is wrong, say "My mistake, noted", declare wrong_memory and do not use that fact again'; the worker emits <code>wrong_memory_flag {fact_id, learner_quote, turn_n, door: "call"}</code> and adds 'do not mention: <fact>' to the next operator notes; the memory keeper handles the fix after the call.</p></details></div></li>
+</ol></details>
+<details class="rv-list"><summary>13 minor findings</summary><ul class="minors">
+<li>PRD 5.4.4 rule 3 bounds end-of-turn silence to 1.0 to 2.5 s;</li>
+<li>Two places where the learner can be cut off are unspecified: the host 'replying' at 90 s while the learner is still mid-retell (PRD 5.4.6 'never cuts the learner off'), and the hard end at 8:00 arriving during a learner turn (law 7 'nobody interrupts a…</li>
+<li>The same request body includes <code>thinking: {type: "between_tools"}</code>, which only Claude Sonnet 5.5 accepts;</li>
+<li>The table sums to about $0.12 for the live main call with Inworld (0.014+0.001+0.034+0.015+0.002+0.029+0.001+0.005+0.015+0.004) plus about $0.05 for round two, so the Inworld case is about $0.17, slightly over the $0.16 line, not under it;</li>
+<li>The topology serves typed onboarding (A2 'Type', or mic denied) through <code>POST /v1/onboarding/{id}/messages</code> without a LiveKit room;</li>
+<li>Pre-account learners have <code>voice_storage = false</code>, so <code>call/verbatim-turn</code> deletes the name turn the moment its verbatim succeeds, possibly seconds after it was spoken, while 02 §4.9 reads the clip at <code>onboarding.intake_completed</code> for name pronunciation.</li>
+<li>04 §4.3.4 specifies a different formula (<code>clamp(1000, 2500, median(last 30 end-of-turn silences) + 300)</code>).</li>
+<li>'Motion hints' means reading device motion sensors, which on iOS needs an explicit permission prompt and is not in the client domain's spec;</li>
+<li>PRD 5.4.6 requires the corrected word to be 'stressed in the voice, declarative intonation';</li>
+<li>The PRD only names the metrics;</li>
+<li>PRD 5.4.9 makes round two available any time after the main call until the session closes and only suggests it on Today the next day;</li>
+<li>Earphones are 'not reliably detectable on iOS' (same table), so on iOS this mute fires on every host sentence and can clip the first 150 ms of a learner's barge-in or answer;</li>
+<li><code>meaning_lost</code> is a function input that nothing in the document computes;</li>
+</ul></details>
+</section>
+<section class="rv"><header class="rv-h"><div><h3>Skeptic review</h3><p class="muted">Looked for what breaks: failure paths, cost, timing, things a small team cannot build. Verdict: needs-revision.</p></div><div class="rv-counts"><span class="cnt blocker">2 blocker</span><span class="cnt major">7 major</span><span class="cnt minor">10 minor</span></div></header><div class="sevbar"><span class="seg blocker" style="flex:2" title="2 blocker"></span><span class="seg major" style="flex:7" title="7 major"></span><span class="seg minor" style="flex:10" title="10 minor"></span></div>
+<details class="rv-list" open><summary>9 blocker and major findings</summary><ol class="findings">
+<li class="fd blocker"><span class="sev">blocker</span><div class="fd-b"><p class="fd-s">The latency arithmetic is wrong by roughly a factor of two on the one P0 gate this document owns.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.15 Latency budget, host reply: "<code>@moves</code> header parsed | 120 ms | 250 ms | about 40 tokens at streaming speed" and "Total | about 950 ms | about 2.0 s"</p><p>The latency arithmetic is wrong by roughly a factor of two on the one P0 gate this document owns. (a) The example header in 4.3 (<code>@moves {"recast":{"heard":"I go","form":"went"},"clarify":false,...,"ai_disclosure":false}</code>) is about 55 to 65 tokens, not 40, and 40 tokens in 120 ms implies 330 tokens/s; a Sonnet-class model streams at roughly 60 to 90 tokens/s, so the header alone costs 650 to 1,000 ms before the first word reaches TTS. (b) The table omits the vendor round trips that 01 §3.6 counts explicitly ("vendor round trips 3 × 120 to 180 ms = 400 to 550 ms from me-central-1"); 01 sums the same path to "1.1 to 1.6 s with little headroom" before the header cost. (c) The 350 ms p50 first-token figure is the bottom of D7's own "300 to 600 ms" range. Summed honestly: 150 + 10 + 500 + 800 + 200 + 120 + 450 = about 2.2 s p50 against the 1.5 s gate, and that is before the governor's 600 ms re-request on some turns. The same header inflates host output tokens (90 per turn, not 60) and risks <code>max_tokens: 120</code> truncating the spoken sentence (<code>stop_reason: max_tokens</code> is not handled anywhere).</p><p><span class="lbl">Evidence</span> PRD-v2 15 ("Host reply after end of learner turn: under 1.5 s median, under 2.5 s p95"), PRD-v2 14.4 #3; 01-system-topology.md §3.6 latency row; token count of the 4.3 example header; typical Sonnet-class output throughput (to be measured in week 1, but nowhere near 330 tok/s).</p><p><span class="lbl">Fix</span> Replace the full JSON header with a sparse one that names only the moves used and defaults everything else to false, for example <code>@m recast="I go"&gt;went gap=rg2</code> (8 to 14 tokens, 100 to 200 ms) with an explicit grammar in layer A; raise <code>max_tokens</code> to 200 and specify the <code>max_tokens</code> stop-reason path (speak what was produced, log <code>truncated</code>). Add a vendor-RTT row to 4.15 and adopt 01's <code>CALL_WORKER_REGION</code> choice (worker next to the STT/LLM/TTS endpoints). Add preemptive generation: start the host request on the interim transcript when VAD silence reaches about 600 ms and the end-of-utterance probability is high, cancel if speech resumes (LiveKit documents preemptive generation; verify the option in week 1). Rewrite the table with measured Sonnet 5.5 time-to-first-token and tokens/s from the week-1 quickstart, not list figures.</p></details></div></li>
+<li class="fd blocker"><span class="sev">blocker</span><div class="fd-b"><p class="fd-s">The plan needs one engineer full time on the call for all five weeks (week 1 worker skeleton plus <code>call-bench</code> plus five vendor plugins;</p><details><summary>Where, evidence and fix</summary><p class="fd-loc"><ol start="7">
+<li>Build plan for 2026-11-02 to 2026-12-06 (weeks 1 to 5) and "Too much for one to two engineers, and the cut"</li>
+</ol></p><p>The plan needs one engineer full time on the call for all five weeks (week 1 worker skeleton plus <code>call-bench</code> plus five vendor plugins; week 2 governor, recorder, verbatim path, Salma persona; week 3 live onboarding, captions, client audio contract; week 4 the entire main call plus voice-note fallback plus autoscaling; week 5 pronunciation, recordings, crisis, load test). 01 §7, the agreed two-engineer critical path, gives the call half of E2, who in the same weeks ships the web shell (week 2), onboarding screens A1 to A10 and the player (week 3), the full call pipeline (week 4) and Controls plus the recording screen (week 5). 01 also puts the throwaway 30-clip scripts in week 1 and a minimal worker in week 2 with the 50 calls due 2026-11-15; this document builds a production worker skeleton in week 1 for a test that needs no LiveKit at all, and runs the gated 50-call test in week 4. The cut list is honest but too shallow: everything it keeps as P0 still does not fit.</p><p><span class="lbl">Evidence</span> 01-system-topology.md §7 ("Team assumption: two engineers (E1 backend...; E2 web and call)"; week 1 "Throwaway scripts on the vendor SDKs under tools/vendor-lab (not production adapters)"; week 2 "Minimal call-worker on staging ... the 50 scripted calls by 2026-11-15"); 01 §9 item 2 ("the 50-call test runs in week 2 on the minimal worker, not week 4 (03 schedules it in week 4...)"); PRD-v2 14.4 ("in the beta build's first two weeks"), 19.2.</p><p><span class="lbl">Fix</span> Rewrite section 7 against 01 §7's E2 column: week 1 = LiveKit quickstart locally plus the 30-clip scripts (no worker, no call-bench); week 2 = minimal worker (stock plugins, static brief, no governor, no talkback) and the 50-call run on it by 2026-11-15; week 3 = A3/A7 on the minimal worker; week 4 = governor, per-turn upload, talkback, hold-to-talk, patience; week 5 = fallback, crisis, cost. Move to P1 or cut outright: the second Salma audio track, word-level captions, the reverse gloss index, in-call <code>p</code> adaptation, headphone-button mappings, the understudy mid-call switch (already listed), plus <code>resumed_after_drop</code> gap clip variants, the retell ring, the driving-phrase path, autoscaling (fixed 2 tasks, as 01's one-engineer row says), <code>calls.metrics</code> percentiles beyond reply latency, and the headless-WebRTC scripted caller (feed M0 audio files into the AgentSession input in-process instead). State plainly which PRD 5.4 rules ship after 2026-12-07.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">The turn-taking design is written against an API that does not match current LiveKit Agents documentation, and it has two owners of end-of-turn.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.5 Endpointing: "LiveKit's <code>AgentSession</code> is configured with <code>min_endpointing_delay = p</code>, <code>max_endpointing_delay = p + max_extend</code>, the multilingual turn detector, <code>min_interruption_duration = 0.5 s</code>, <code>min_interruption_words = 2</code>, and <code>allow_interruptions = true</code>" and "the <code>turn-controller</code> flips <code>session.input.audio</code> to a buffering mode where frames still reach STT but end-of-turn is suppressed"; D1: "LiveKit's multilingual turn model covers Arabic for talkback"</p><p>The turn-taking design is written against an API that does not match current LiveKit Agents documentation, and it has two owners of end-of-turn. The current option names are <code>min_delay</code>/<code>max_delay</code> under <code>turn_handling</code>, <code>InterruptionOptions.min_duration</code>/<code>min_words</code>, and interruption enablement on <code>turn_handling.interruption</code>; there is no "buffering mode". More seriously, the text-based <code>MultilingualModel</code> turn detector is marked deprecated (removal in Agents 2.0) and its language list does not include Arabic; only the separate audio turn detector lists Arabic. So D1's justification is false, and 4.9's onboarding call (Arabic learner turns through the same endpointing) has no supported turn model. The custom table in 4.5 (backchannel at 1.2 s, hold state, retell extension, in-call <code>p</code> changes) cannot be expressed through the built-in endpointing; a developer cannot tell whether AgentSession or <code>turn-controller</code> decides end-of-turn.</p><p><span class="lbl">Evidence</span> docs.livekit.io/agents/build/turns/ (manual mode: <code>turn_detection="manual"</code>, <code>session.commit_user_turn()</code>, <code>session.clear_user_turn()</code>, <code>session.interrupt()</code>, <code>session.input.set_audio_enabled()</code>); docs.livekit.io/agents/build/turns/turn-detector/ (text model languages exclude Arabic; "deprecated, slated for removal in version 2.0"; audio detector supports Arabic; CPU inference about 50 to 160 ms, 396 MB model); PRD-v2 5.4.4 rules 2 to 4.</p><p><span class="lbl">Fix</span> Make <code>turn-controller</code> the single owner: run <code>AgentSession</code> with <code>turn_detection="manual"</code>, feed Silero VAD events and the audio turn detector's end-of-utterance probability into the controller, and have the controller call <code>commit_user_turn()</code> (with <code>stt_flush_duration</code> tuned) for end-of-turn, <code>clear_user_turn()</code> on talkback, and <code>interrupt()</code> on barge-in. Hold-to-talk becomes "never commit while <code>hold.down</code>". Pin the Agents SDK version in week 1 and record the option names verified against that version. For onboarding (Arabic), use VAD plus a fixed 1.8 s delay, no text turn model. Measure the detector's "incomplete" rate on the M0 learner transcripts in week 1 so <code>max_extend</code> is set from data, not 1.5 s by assumption.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">The document hands the raw per-learner DEK to the most exposed service, which the topology explicitly rejected ("handing the raw DEK to the worker (the first draft of this document)" is in 01's rejected column) in favour of a per-call key <code>HKDF(DEK, "call:" + call_id)</code> recorded in <code>media_objects.key_derivation</code>.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.2 <code>CallBundle</code>: "crypto: { dek: string /* base64, 32 bytes, memory only */; key_version: number }"; 3.2 step 6 "uploaded ... with SSE-C under the learner's DEK"; 4.10 "The worker holds the DEK in memory only"; 9.6 "<code>api</code> unwraps the DEK for the worker for the call's duration"</p><p>The document hands the raw per-learner DEK to the most exposed service, which the topology explicitly rejected ("handing the raw DEK to the worker (the first draft of this document)" is in 01's rejected column) in favour of a per-call key <code>HKDF(DEK, "call:" + call_id)</code> recorded in <code>media_objects.key_derivation</code>. It also leaves worker-to-<code>api</code> authentication unspecified: <code>GET /internal/calls/{callId}/brief</code> returns a learner's key material keyed only by a <code>callId</code> that sits in LiveKit dispatch metadata, and <code>POST /internal/events</code> carries no credential; 01 specifies a per-call JWT (5-minute TTL, audience <code>call-worker</code>) in the dispatch metadata and the <code>Authorization</code> header. Route names also diverge (<code>POST /internal/calls/{id}/end</code> here; <code>POST /internal/calls/{id}/turns</code> in 01), and the <code>media_objects</code> row shape omits <code>key_derivation</code>, so a Range read of <code>call_full</code> by the notes path (05 §4.7) could not re-derive the key.</p><p><span class="lbl">Evidence</span> 01-system-topology.md D7 and §3 interface table rows for LiveKit → call-worker and call-worker → api/S3 ("per-call JWT", "HKDF(DEK, \"call:\" + call_id)", "never holds ... a static secret that unwraps keys"); 07-security D2 (<code>keys.get_dek</code> "never <code>call-worker</code> (it receives the bytes)"); PRD-v2 12.6.</p><p><span class="lbl">Fix</span> Replace <code>crypto.dek</code> with <code>crypto: { call_key: base64, key_derivation: "call:{call_id}", key_version }</code> derived by <code>api</code>; add <code>jwt</code> to the dispatch metadata and require it on every <code>/internal/*</code> call from the worker; write <code>key_derivation</code> on every <code>media_objects</code> row the recorder creates; align route names with 01 (<code>/turns</code>), and record the deviation in section 9 if <code>/end</code> is kept. Specify how the S3 spool file (<code>forone-voice/spool/{callId}.ndjson</code>, "encrypted") is encrypted and who can read it back.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">The formula measures a censored distribution.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.5 Pause profile: "<code>p = clamp(P90 of within-turn pauses over the last 3 calls, 1.0, 2.5)</code> where a within-turn pause is a gap between two verbatim words inside one learner turn"</p><p>The formula measures a censored distribution. Any silence of at least <code>p</code> (or <code>p + max_extend</code>) ends the turn, so no within-turn pause longer than the current endpoint can ever be observed except inside a held floor. P90 of a distribution truncated at <code>p</code> is always below <code>p</code>, so the profile can only ratchet downward toward the 1.0 s floor, which is exactly the "host cuts the learner off" failure the voice lens warns about and PRD 5.4.6 forbids ("Never ... interrupts a learner mid-sentence"). The only upward force is the in-call cut-off rule, which section 7 lists as a cut candidate.</p><p><span class="lbl">Evidence</span> PRD-v2 5.4.4 rule 3 (adapt per learner within 1.0 to 2.5 s); voice-speech lens ("Learners pause inside sentences ... about 756 ms on average ... Many single pauses are much longer"); the formula's own definition of a within-turn pause.</p><p><span class="lbl">Fix</span> Use two signals with explicit direction: cut-offs (learner resumes speech within 700 ms of the host starting, gated by the 0.5 s / 2-word interruption threshold so echo does not count) push <code>p</code> up by 0.25 s per call; the P90 of pauses observed during held-floor turns and of pre-endpoint pauses between 0.6 s and <code>p</code> pushes it down only when no cut-off occurred in the last 3 calls. Keep the cut-off rule in P0 (it is a counter and one <code>+=</code>), and report both counts in <code>call_ended.metrics</code> so the learner-model domain can audit the direction of drift.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">The number the learner feels has no gate.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.15: "Measured from the end-of-turn decision. The silence window <code>p</code> is the learner's and is reported separately as <code>silence_to_sound</code>"; 4.5 table row "<code>s &gt;= p + max_extend</code> ... end of turn regardless"</p><p>The number the learner feels has no gate. With <code>p = 1.5 s</code> and the document's own 0.95 s (really about 2 s, see the blocker) reply, silence-to-sound is 2.5 to 3.5 s on a completed sentence; when the text detector judges the sentence incomplete (common for B1 learners whose finished sentences look unfinished: "I go to... the mall"), the turn waits <code>p + 1.5 s</code> = 3.0 s before the reply even starts, so those turns land at 4 to 5 s of silence. 01 accepted the end-of-turn-decision clock as the PRD 15 gate, but PRD 14.4 says "after end of turn" and no document commits to a ceiling on <code>silence_to_sound_ms</code>, and nothing in the plan measures how often the detector says "incomplete" on learner speech.</p><p><span class="lbl">Evidence</span> PRD-v2 15 and 14.4 #3; voice-speech lens ("A June 2026 study ... learners took fewer, longer turns ... needed longer to start speaking"); the 4.5 table; 01 §3.6 ("Clock starts at the end-of-turn decision ... adopted as the PRD 15 gate").</p><p><span class="lbl">Fix</span> Add a second gate to 4.13 and <code>call-bench</code>: <code>silence_to_sound_ms</code> p50 under 2.5 s and p95 under 4.0 s on completed sentences [OPEN for Muath: confirm which clock PRD 15 means]. Close the gap with preemptive generation (start the host request at about 600 ms of silence when the detector says complete; cancel on resumed speech), and cap the incomplete-sentence extension at 1.0 s for <code>p &gt;= 1.5</code>. In week 1, run the turn detector over the M0 learner transcripts and report the incomplete rate; if it is over 30%, drop the text detector and use VAD plus <code>p</code> only.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">None of these exist in 02-generation-pipeline.md: it has no opening-line clip, no backchannel clips, no <code>talkback_intro_ar</code>/crisis clips and no reverse gloss index (its voice studio renders episode segments, hello clips and name candidates only).</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">9.2 Episode generation pipeline: "the voice studio renders the opening-line clip (normal and <code>resumed_after_drop</code> variants) and the backchannel clips per host voice at casting time, and the package's static Salma and crisis clips once ... the gloss precompute also writes a reverse index ar→en for talkback"; D4, D11, 4.7.1 step 1</p><p>None of these exist in 02-generation-pipeline.md: it has no opening-line clip, no backchannel clips, no <code>talkback_intro_ar</code>/crisis clips and no reverse gloss index (its voice studio renders episode segments, hello clips and name candidates only). Three decisions this document relies on for connect-under-3-s (D11), zero-latency backchannels (D4) and 10 ms talkback resolution are therefore unowned work that no week in either plan contains.</p><p><span class="lbl">Evidence</span> 02-generation-pipeline.md §4.8 voice studio, D12 gloss cache (keyed lemma→gloss, no ar→en index), §9 assumptions about this domain (none of the clips named); grep of 02 for "opening", "backchannel", "reverse index" returns nothing.</p><p><span class="lbl">Fix</span> Own them here or cut them: (1) the recorder/worker renders the 8 to 10 backchannel clips and the two opening-line variants through <code>voice-studio.render(RenderJob)</code> (02's public API) the first time a <code>voice_id</code> is used and caches them in <code>forone-media/package/voices/{voice_id}/</code>, with a one-line [DECISION] and a week-4 task; (2) the opening line is rendered by the brief compiler at episode publish via the same API (add it to 02's <code>episode/produce</code> publish step as a named ask in section 9 with a date); (3) drop the reverse gloss index for the beta (Haiku resolves every ask, already in your cut list) and say so in D6.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">Two request-shape errors will 400 in production under exactly the conditions they are meant to handle.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">4.4: "Fallback order on a model error or a first-token wait over 1.2 s: retry once on the same model with a 1.5 s timeout; then <code>claude-haiku-5-5</code> with the same prompt"; 4.3: "appends a system message <code>Do not use: nudge. Reply again.</code> and re-requests once"</p><p>Two request-shape errors will 400 in production under exactly the conditions they are meant to handle. (a) <code>thinking: {type: "between_tools"}</code> is accepted only by Claude Sonnet 5.5; re-sending the same body to Haiku 5.5 is rejected, so the fallback path fails on its first use. (b) A mid-conversation <code>role: "system"</code> message must follow a <code>user</code> message and be either last or followed by an <code>assistant</code> turn; the re-request appends a second system message after the operator note (two consecutive system entries after one user turn), and if the aborted partial reply is kept as an assistant turn the system message after it is also disallowed. Also unspecified: how the operator notes are rendered for the Gemini fallback ("plain system prompt" loses the per-turn allowances, so the governor's contract is unenforced on that path), and effort on Haiku 5.5 (default <code>medium</code>, not <code>low</code>).</p><p><span class="lbl">Evidence</span> claude-api skill, Claude Sonnet 5.5 migration ("<code>between_tools</code> ... Claude Sonnet 5.5 only ... client-side code that re-sends the same body to another model ... must drop the field first"); mid-conversation system messages placement rule ("must follow a <code>user</code> message ... and must be either the last entry in <code>messages</code> or be followed by an <code>assistant</code> turn"); Haiku 5.5 effort default <code>medium</code>.</p><p><span class="lbl">Fix</span> Give the host adapter a per-model request builder: Sonnet 5.5 → <code>between_tools</code> + <code>effort: low</code>; Haiku 5.5 → omit <code>thinking</code>, <code>effort: low</code>; Gemini → fold the operator note into the user turn as a prefixed line. For the re-request, discard the partial reply and rebuild the single operator note with the prohibition (<code>allowed: ...; forbidden this turn: nudge (you declared it; reply again without it)</code>), never a second system entry. Add a 20-line fixture test that sends each shape to each model in week 2.</p></details></div></li>
+<li class="fd major"><span class="sev">major</span><div class="fd-b"><p class="fd-s">D7's latency and cost ("cache warm across the whole fleet", $0.034 input per call) depend on placing <code>cache_control</code> breakpoints at three specific positions, inserting <code>role: system</code> entries into <code>messages</code>, and passing <code>output_config.effort</code> and <code>thinking.between_tools</code>.</p><details><summary>Where, evidence and fix</summary><p class="fd-loc">3.1 "Host LLM adapter | LiveKit LLM plugin | Anthropic <code>claude-sonnet-5-5</code>"; 4.4 "cache breakpoints on the two system blocks and the last user turn" and "Operator notes are <code>{"role": "system"}</code> entries inside <code>messages</code>"</p><p>D7's latency and cost ("cache warm across the whole fleet", $0.034 input per call) depend on placing <code>cache_control</code> breakpoints at three specific positions, inserting <code>role: system</code> entries into <code>messages</code>, and passing <code>output_config.effort</code> and <code>thinking.between_tools</code>. The stock LiveKit Anthropic plugin converts LiveKit's <code>ChatContext</code> to the API itself and is unlikely to expose all four; nothing in the plan verifies it before week 2's governor work, and a custom <code>llm.LLM</code> node is not budgeted. If the breakpoints are not where the document says, every turn re-writes the whole history at $2.50/M and first-token latency rises.</p><p><span class="lbl">Evidence</span> claude-api skill, Prompt Caching ("Any byte change anywhere in the prefix invalidates everything after it"; "Verify with <code>usage.cache_read_input_tokens</code>"); section 6's cost assumes "cached reads about 90k tokens".</p><p><span class="lbl">Fix</span> Add to week 1: a 30-line probe through the plugin logging <code>usage.cache_read_input_tokens</code> and <code>cache_creation_input_tokens</code> per turn; if the plugin cannot place the breakpoints or the system entries, write a thin <code>llm.LLM</code> subclass over the Anthropic SDK (one file) and say so in 3.1. Add <code>cache_read_tokens</code> to <code>CallTurnPayload</code> so a silent cache miss is visible in <code>calls.metrics</code>.</p></details></div></li>
+</ol></details>
+<details class="rv-list"><summary>10 minor findings</summary><ul class="minors">
+<li>The diagram and the code describe different machines: the diagram moves to CLOSING on time, the code only when the host declares <code>close</code>;</li>
+<li>Both are already decided elsewhere and this document contradicts them: 04 D2 appends a separate <code>call_turn_verbatim</code> event joined on <code>(call_id, turn_index)</code> (nothing updates an event), and 01 serves typed onboarding from <code>api</code> (`POST…</li>
+<li>The lifecycle backstop applies to a prefix nothing is written under.</li>
+<li>Opening a vendor websocket on S-down puts 200 to 500 ms of connection setup on the critical path of a 1 to 2 s hold, and a short press can release before the stream is ready;</li>
+<li>Capturing a remote WebRTC track into a replayable buffer on iOS Safari (MediaRecorder or an AudioWorklet on a remote MediaStream) is unreliable and is work the client domain has not planned (06 only registers the handler).</li>
+<li>AgentSession publishes user and agent transcriptions to the room by default;</li>
+<li>With the JSON header the output is about 90 tokens per turn ($0.022, or $0.011 with a sparse header).</li>
+<li>01 and 08 already split this: <code>tools/vendor-lab</code> (throwaway scripts on vendor SDKs, week 1) for the 30 clips and the voice tests, <code>tools/call-bench</code> for the 50 calls;</li>
+<li>Two things the sibling documents require are absent from the turn path: 07's output guard on every host and Salma line (<code>forone.core.guard</code>, budgeted at under 20 ms) is never called before TTS;</li>
+<li>The talkback path's recognizer is tested only indirectly: the 30 clips are English learner speech with at least 6 code-switch spans, and the pass line is "Arabic spans transcribed as Arabic".</li>
+</ul></details>
+</section>
+</section>
+
+<section class="block" id="full">
+  <h2>The full document</h2>
+  <p class="muted">Every section as written, closed by default. Source file: <code>architecture/03-live-call-and-voice.md</code>.</p>
+  <ol class="toc"><li><a href="#s1-summary-and-the-decisions-in-one-table">1. Summary and the decisions in one table</a></li><li><a href="#s2-requirements-this-domain-implements">2. Requirements this domain implements</a></li><li><a href="#s3-architecture">3. Architecture</a></li><li><a href="#s4-detailed-design">4. Detailed design</a></li><li><a href="#s5-failure-modes-fallbacks-and-degraded-m">5. Failure modes, fallbacks and degraded modes</a></li><li><a href="#s6-cost-and-performance-against-the-budge">6. Cost and performance against the budgets</a></li><li><a href="#s7-build-plan-for-2026-11-02-to-2026-12-0">7. Build plan for 2026-11-02 to 2026-12-06</a></li><li><a href="#s8-alternatives-rejected">8. Alternatives rejected</a></li><li><a href="#s9-assumptions-about-other-domains">9. Assumptions about other domains</a></li><li><a href="#s10-open-for-muath">10. Open for Muath</a></li></ol>
+  <details class="fs"><summary><h3>Front matter</h3></summary><div class="prose"><p>Domain 3 of 9 of the For one technical architecture. Written 2026-10-16 against PRD-v2 (Implementation PRD v3.0, 2026-10-10), concept-v2 sections 7 to 10, decisions.md, the voice-speech, AI-architecture and UI-UX lenses, and the Milestone 0 kit (04-production.md, 05-prompts.md). "PRD x.y" means PRD-v2 part x.y. Tags: [DECISION] decided here; [ASSUMPTION] assumed because the spec is silent; [OPEN for Muath] only the owner can settle. Where this document names a service, table or event that the topology document (01-system-topology.md) or the pipeline document (02-generation-pipeline.md) already named, it uses their name; where it deviates, it says so in section 9.</p>
+<p>This document covers everything that happens between the learner's tap on "Call" and the moment the call's evidence is safely in the event log: the LiveKit Agents pipeline, the host's move contract as a state machine, hold-to-talk and adaptive patience, the Huh? signal on the call, talkback to Salma, Salma's voice at onboarding, the client's audio handling, recording and the deletion windows, verbatim re-transcription and pronunciation scoring, the two vendor tests, outage behaviour and cost. It does not design the after-session analyst, the learner model, the generation pipeline that writes the call brief, the client app beyond the call screen, or billing.</p></div></details>
+  <details class="fs" id="s1-summary-and-the-decisions-in-one-table"><summary><h3>1. Summary and the decisions in one table</h3><span class="wc">1,277 words</span></summary><div class="prose"><p>The call is one Python process per concurrent call inside the <code>call-worker</code> service (LiveKit Agents), fed by a streaming recognizer, a Sonnet-class host whose brief sits in a cached prompt prefix, and the episode vendor's streaming voice, so the host sounds like the episode. Code, not the model, enforces every budget in the host's move contract (PRD 5.4.6): the host declares its moves in a one-line header before it speaks, and a governor in the worker checks that header against the remaining budgets before any audio is synthesized. Turn-taking is a learner-specific setting, not a vendor default: end-of-turn silence starts at 1.5 s and comes from the pause profile within 1.0 to 2.5 s, the floor can be held with a pad, and the host backchannels from pre-rendered clips instead of waiting in silence. Talkback is a second recognizer stream (Arabic-capable) opened only while the S button is held, answered by Salma on a separate audio track in under 2 s. Every learner turn is uploaded as it ends and transcribed verbatim while the call continues, which is what makes Salma's notes possible 90 s after the call and makes the 15-minute deletion window safe to honour. When live voice fails, the same call thread continues as voice notes through one Inngest function and nothing is lost.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Reason</th>
+<th>Alternative rejected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td>Pipeline (streaming STT, text host, streaming TTS) on LiveKit Agents, one <code>AgentSession</code> per call [DECISION, PRD 14.3]</td>
+<td>The only design where the recast, the transcript and the voice are all under the product's control; LiveKit's multilingual turn model covers Arabic for talkback</td>
+<td>Speech-to-speech models (no custom voice, approximate transcripts, per-turn re-billing); Pipecat (English-only turn model)</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>Host declares moves in a header line before its reply text; a code governor enforces the PRD 5.4.6 budgets and can abort and re-request once [DECISION]</td>
+<td>Law 7 and the move caps are hard constraints; a prompt alone cannot be trusted to count</td>
+<td>Structured-output JSON for the whole reply (delays first audio until the JSON closes); post-hoc filtering of text (cannot remove a nudge once spoken)</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>End-of-turn silence <code>p</code> from the pause profile, 1.5 s for a new learner, clamp 1.0 to 2.5 s; when the turn model says the sentence is unfinished, wait up to <code>p + 1.5 s</code> with one backchannel at 1.2 s [DECISION, PRD 5.4.4]</td>
+<td>Learners pause mid-clause about three times as often as natives (voice lens); the vendor defaults of 0.5 to 0.8 s cut them off</td>
+<td>A fixed long silence (makes every reply slow); vendor semantic VAD only (not tunable per learner)</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>Backchannels are pre-rendered clips per host voice, chosen by code, never synthesized live [DECISION]</td>
+<td>Zero latency and zero cost at the moment latency matters most; the words never take the floor because the list is fixed</td>
+<td>Asking the model for a backchannel (adds a model round trip inside the learner's pause)</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>Talkback audio goes to a second recognizer stream (Soniox, <code>ar</code>+<code>en</code>) opened on S-down and closed on S-up; the host stream is paused and its turn detector frozen; Salma answers on a second published audio track [DECISION, PRD 5.4.5, 0.1 row 7]</td>
+<td>Keeps Arabic out of the host's transcript, keeps the floor held, and lets the client draw the bubble from S</td>
+<td>One multilingual stream for both (code-switch errors leak into the host's input); client-side recording and upload (adds 1 to 2 s)</td>
+</tr>
+<tr>
+<td>D6</td>
+<td>Word-or-hint is decided by code from the Salma talkback brief (produced-word set), not by the model [DECISION, PRD 5.4.5 rule 4]</td>
+<td>A rule with a lookup is exact; a model would sometimes give the word to a learner who has it</td>
+<td>Model decides from the brief in the prompt</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>Host LLM: <code>claude-sonnet-5-5</code>, <code>output_config.effort: low</code>, <code>thinking: {type: "between_tools"}</code> (no tools, so no thinking before the reply), brief in the cached prefix, per-turn operator notes as mid-conversation system messages [DECISION, PRD 14.3]</td>
+<td>First token in 300 to 600 ms with the cache warm; mid-conversation system messages keep the cached history intact; Haiku 5.5 is the measured fallback if the 50-call test says quality holds</td>
+<td>Opus-class host (latency and cost); Haiku-class by default (quality in the recast moves unproven)</td>
+</tr>
+<tr>
+<td>D8</td>
+<td>Call TTS is the episode vendor's streaming voice with the same <code>voice_id</code>; the pipeline's blind test only admits vendors whose streaming endpoint has a first-byte latency under 300 ms at p95 [DECISION, PRD 14.3, 7.1]</td>
+<td>"The host sounds the same" is a PRD rule; a vendor that cannot stream fast enough cannot be the episode vendor either</td>
+<td>Different vendor on the call with an "understudy" voice (Milestone 0 did this; the day-7 check-in asks whether it mattered, and the PRD chose sameness)</td>
+</tr>
+<tr>
+<td>D9</td>
+<td>Each learner turn is uploaded as it ends (<code>call.turn_audio_ready</code>) and transcribed verbatim during the call; the full mixed recording is uploaded only when voice storage is on [DECISION, PRD 5.4.11, 10.2]</td>
+<td>Notes within 90 s need the verbatim text at call end, not 3 minutes later; the 15-minute deletion window is met with margin</td>
+<td>Transcribe the whole call after it ends (notes late; one big deletion race)</td>
+</tr>
+<tr>
+<td>D10</td>
+<td>Voice-note fallback runs as the Inngest function <code>call/voice-note-reply</code> using the same brief, host prompt and voice; the client switches when the room is not joined within 3 s, on two pipeline errors, or on an ICE failure longer than 5 s [DECISION, PRD 5.4.10]</td>
+<td>One brief, one host, one thread; the learner's argument continues</td>
+<td>A separate "voice note host" prompt (two hosts to keep in character)</td>
+</tr>
+<tr>
+<td>D11</td>
+<td>The first host line of every call is synthesized at episode time by the pipeline and stored with the brief; the worker plays it while the vendor websockets open [DECISION, PRD 15 "call connect under 3 s"]</td>
+<td>The learner hears the host within the connect budget even on a cold worker</td>
+<td>Synthesize on connect (adds 0.5 to 1 s to the first sound)</td>
+</tr>
+<tr>
+<td>D12</td>
+<td>Client audio: <code>getUserMedia</code> with echo cancellation, noise suppression and AGC on; Screen Wake Lock re-acquired on every <code>visibilitychange</code>; a backgrounded page is treated as an abandoned call after 10 s [DECISION, PRD 1.4]</td>
+<td>iOS Safari suspends WebRTC in the background with no fix (voice lens); pretending otherwise loses evidence</td>
+<td>Keep-alive tricks (unreliable, and they drain the battery)</td>
+</tr>
+<tr>
+<td>D13</td>
+<td>The 30-clip test and the 50-call test run from one tool, <code>tools/call-bench</code>, against the staging worker with the Milestone 0 clips as the scripted caller [DECISION, PRD 10.14, 14.4]</td>
+<td>One harness measures recognizers, latency and the move contract on the same audio, and reruns on every prompt or vendor change</td>
+<td>Separate scripts per vendor (never rerun)</td>
+</tr>
+<tr>
+<td>D14</td>
+<td>The observer (PRD 14.1, [LATER]) has a reserved slot: one mid-conversation system message per turn, keyed <code>whisper</code>; nothing in the beta depends on it [DECISION]</td>
+<td>Costs nothing now; prevents a redesign later</td>
+<td>Building it in the beta (PRD 17 excludes it)</td>
+</tr>
+<tr>
+<td>D15</td>
+<td>Crisis protocol in the call: the host declares <code>crisis</code> in its header or a package keyword list fires on a learner turn; the worker then plays the pre-rendered package lines (English, then Arabic), sends the resources card to the client, logs <code>crisis_activation</code> and ends the argument [DECISION, PRD 7.9]</td>
+<td>Two independent triggers; fixed, counsel-reviewed lines rather than generated ones</td>
+<td>Model-only detection; generated crisis text</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div></details><details class="fs" id="s2-requirements-this-domain-implements"><summary><h3>2. Requirements this domain implements</h3><span class="wc">714 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>PRD part</th>
+<th>Requirement</th>
+<th>Where in this document</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.2 A2, A3</td>
+<td>Salma's voice in Arabic within 60 s of first open; at most 8 turns, two English lines, fact cards as she hears them; talk or type</td>
+<td>4.9</td>
+</tr>
+<tr>
+<td>2.2 A7</td>
+<td>First call 60 to 90 s; no recasts or nudges; Salma's one-line introduction of talkback before it rings</td>
+<td>4.3 (budgets by call kind), 4.9</td>
+</tr>
+<tr>
+<td>4 rule 4</td>
+<td>A call cannot resume; an interrupted call restarts fresh with a line that acknowledges the gap</td>
+<td>4.2 (<code>resumed_after_drop</code>)</td>
+</tr>
+<tr>
+<td>4 rule 3</td>
+<td>Planning card before Call when Read was skipped</td>
+<td>4.11 (client), the words come from the brief</td>
+</tr>
+<tr>
+<td>5.4.1</td>
+<td>One tap from the throw, Today or the feed link; screen awake; earphones suggested once</td>
+<td>4.11</td>
+</tr>
+<tr>
+<td>5.4.2</td>
+<td>Target 5 to 7 min; natural close from 6:30; end by 8:00; learner may end any time with an in-character close</td>
+<td>4.3 timers</td>
+</tr>
+<tr>
+<td>5.4.3</td>
+<td>Host share of talk at most 40%; short turns</td>
+<td>4.4 prompt, 4.3 governor, 6 metrics</td>
+</tr>
+<tr>
+<td>5.4.4</td>
+<td>Open mic; hold to keep the floor; adaptive patience 1.0 to 2.5 s from the pause profile; one backchannel per pause over 1.2 s; 8 s silence handling; "sorry?" and "slower"; previous-track replays the host's last line</td>
+<td>4.5, 4.6</td>
+</tr>
+<tr>
+<td>5.4.5</td>
+<td>Talkback to an Arabic-capable recognizer; the host waits; Salma's closer voice; word or hint; logged per word</td>
+<td>4.7</td>
+</tr>
+<tr>
+<td>5.4.6</td>
+<td>The move contract with its caps</td>
+<td>4.3, 4.4</td>
+</tr>
+<tr>
+<td>5.4.7</td>
+<td>Anxiety mode and its three triggers</td>
+<td>4.3</td>
+</tr>
+<tr>
+<td>5.4.8</td>
+<td>Host captions by default, recast word bold, learner never captioned live, no correction UI</td>
+<td>4.8, 4.11</td>
+</tr>
+<tr>
+<td>5.4.9 [P1]</td>
+<td>Round two: 2 to 3 min, same host and argument, a like-for-like retell sample</td>
+<td>4.3 (kind <code>round_two</code>), 7</td>
+</tr>
+<tr>
+<td>5.4.10</td>
+<td>Live voice failure falls back to voice notes in the same thread</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td>5.4.11, 12.5, 15</td>
+<td>Streaming transcript drives the call; verbatim re-transcription after; audio kept only with consent; deletion within 15 min when storage is off, within 24 h on revoke; transcripts always kept</td>
+<td>4.10</td>
+</tr>
+<tr>
+<td>5.4.12 [P1]</td>
+<td>Dial-in: 8 kHz, planning only, low confidence, no claims</td>
+<td>7</td>
+</tr>
+<tr>
+<td>5.5</td>
+<td>Notes within 90 s depend on the verbatim transcript being ready at call end</td>
+<td>4.10 (per-turn verbatim)</td>
+</tr>
+<tr>
+<td>7.3</td>
+<td>Salma's voice closer and drier than the hosts'; Arabic variety OPEN</td>
+<td>4.7, 4.9</td>
+</tr>
+<tr>
+<td>7.8, 7.9</td>
+<td>AI disclosure on request by every character; crisis protocol in live roles</td>
+<td>4.4, 4.3</td>
+</tr>
+<tr>
+<td>8.1, 14.2</td>
+<td>Live roles never write; the worker produces events only</td>
+<td>3.3</td>
+</tr>
+<tr>
+<td>8.2</td>
+<td>Events <code>call_turn</code>, <code>talkback</code>, <code>hold_floor</code>, <code>silence</code> with streaming and verbatim text, word timings, confidences</td>
+<td>4.12</td>
+</tr>
+<tr>
+<td>8.6</td>
+<td>The host's one-page brief; Salma's talkback brief (produced-word history)</td>
+<td>4.2</td>
+</tr>
+<tr>
+<td>10.2 step 1, 10.3</td>
+<td>Verbatim re-transcription of every learner audio turn (call, round two, shadow, say it once, small-door note); pronunciation on known sentences only, internal</td>
+<td>4.10</td>
+</tr>
+<tr>
+<td>10.14 [P0]</td>
+<td>The 30-clip recognizer test, before build week 2; confidence threshold from it</td>
+<td>4.13</td>
+</tr>
+<tr>
+<td>14.3</td>
+<td>LiveKit Agents; Soniox or Deepgram; AssemblyAI or ElevenLabs Scribe; Speechace or Microsoft; adapters; two voice vendors wired</td>
+<td>3, 4.14</td>
+</tr>
+<tr>
+<td>14.4 #3 [P0]</td>
+<td>50 scripted calls, median host reply under 1.5 s</td>
+<td>4.13</td>
+</tr>
+<tr>
+<td>14.5</td>
+<td>Call plus round two at about $0.16; re-transcription plus pronunciation $0.03</td>
+<td>6</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Call connect under 3 s; host reply median under 1.5 s and p95 under 2.5 s; talkback under 2 s; voice-vendor outage covered by the second vendor the same day</td>
+<td>4.15, 5</td>
+</tr>
+<tr>
+<td>16.2</td>
+<td>Talkback use per call; recognizer error by first language; calls abandoned on the move; feed-to-call handoff</td>
+<td>4.12, 6</td>
+</tr>
+<tr>
+<td>1.2 laws 1, 5, 7, 8, 12</td>
+<td>No game furniture on the call screen; honesty; conversational corrections only; conversations end like conversations; no claims from the live path</td>
+<td>throughout; 3.3</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div></details><details class="fs" id="s3-architecture"><summary><h3>3. Architecture</h3><span class="wc">1,212 words</span></summary><div class="prose"><h3>3.1 Components</h3>
+<p>Draw as four columns, left to right: the phone, LiveKit Cloud, the <code>call-worker</code> process, and the vendors; with <code>api</code>, Postgres, S3 and Inngest as a row underneath.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Runs in</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Call screen (<code>web</code>, client domain; the audio parts are specified in 4.11)</td>
+<td>the phone's browser</td>
+<td>Mints a call through <code>api</code>, joins the room, publishes the mic, plays two agent tracks (<code>host</code>, <code>salma</code>), sends control messages, renders captions and the bubbles, records voice notes in the fallback</td>
+</tr>
+<tr>
+<td>LiveKit Cloud</td>
+<td>managed</td>
+<td>WebRTC media between phone and worker, data channel, agent dispatch, room lifecycle, SIP ingress for the dial-in experiment [P1]</td>
+</tr>
+<tr>
+<td><code>call-worker</code></td>
+<td>ECS Fargate, Python 3.12, LiveKit Agents</td>
+<td>One job per call. Inside the job: <code>CallSession</code> (our wrapper around <code>AgentSession</code>), the turn-taking controller, the move governor, the talkback controller, the recorder, the event emitter</td>
+</tr>
+<tr>
+<td><code>turn-controller</code> (module)</td>
+<td>in the job</td>
+<td>Silero VAD, LiveKit multilingual turn detector, pause profile, hold-floor state, backchannel scheduler, silence timers</td>
+</tr>
+<tr>
+<td><code>host-governor</code> (module)</td>
+<td>in the job</td>
+<td>Budgets per call kind, phase clock (open, argue, retell, close), parses the <code>@moves</code> header, aborts and re-requests, anxiety mode, crisis switch</td>
+</tr>
+<tr>
+<td><code>talkback-controller</code> (module)</td>
+<td>in the job</td>
+<td>Opens the Arabic stream on S-down, resolves word-or-hint, synthesizes Salma on the <code>salma</code> track, logs <code>talkback</code></td>
+</tr>
+<tr>
+<td><code>recorder</code> (module)</td>
+<td>in the job</td>
+<td>Buffers each learner turn's PCM, encodes, uploads with SSE-C, emits <code>call.turn_audio_ready</code>; mixes the full recording when voice storage is on</td>
+</tr>
+<tr>
+<td><code>event-emitter</code> (module)</td>
+<td>in the job</td>
+<td><code>POST /internal/events</code> in batches of 20 or every 2 s; spools to S3 if <code>api</code> is unreachable</td>
+</tr>
+<tr>
+<td>Streaming recognizer adapter</td>
+<td>LiveKit STT plugin</td>
+<td>Soniox primary, Deepgram secondary, chosen by <code>vendors.yaml</code> role <code>streaming_stt</code>; a second instance for talkback (<code>talkback_stt</code>)</td>
+</tr>
+<tr>
+<td>Host LLM adapter</td>
+<td>LiveKit LLM plugin</td>
+<td>Anthropic <code>claude-sonnet-5-5</code>; fallback <code>claude-haiku-5-5</code>, then the second vendor</td>
+</tr>
+<tr>
+<td>Call TTS adapter</td>
+<td>LiveKit TTS plugin</td>
+<td>The episode vendor's streaming endpoint with the casting's <code>voice_id</code>; the understudy vendor during failover</td>
+</tr>
+<tr>
+<td>Salma TTS adapter</td>
+<td>LiveKit TTS plugin</td>
+<td>The Arabic voice from the 7.3 test, role <code>salma_tts</code></td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td>ECS</td>
+<td><code>POST /v1/calls</code>, <code>GET /internal/calls/{id}/brief</code>, <code>POST /internal/events</code>, <code>POST /v1/calls/{id}/voicenotes</code>, <code>POST /v1/calls/{id}/end</code></td>
+</tr>
+<tr>
+<td>Inngest functions</td>
+<td><code>workflows</code></td>
+<td><code>call/verbatim-turn</code>, <code>call/voice-note-reply</code>, <code>call/pronunciation-score</code>, <code>audio/expire</code> (topology), and the hooks into <code>session/after-pass</code> (assessment)</td>
+</tr>
+<tr>
+<td><code>tools/call-bench</code></td>
+<td>developer laptop or CI</td>
+<td>The scripted caller for the 30-clip and 50-call tests, and the simulated caller of the P1 offline suite</td>
+</tr>
+</tbody>
+</table></div>
+<h3>3.2 Data flow for one main call (draw as a sequence diagram with the five lanes above)</h3>
+<ol>
+<li>The learner taps Call. <code>web</code> calls <code>POST /v1/calls {sessionId, kind: "main"}</code>. <code>api</code> checks the door rules (PRD 4), writes the <code>calls</code> row, creates room <code>call-{callId}</code> with agent dispatch metadata <code>{callId}</code>, and returns <code>{callId, roomUrl, token, openingClipUrl}</code>.</li>
+<li><code>web</code> joins the room and publishes the mic. In parallel, the worker accepts the job, calls <code>GET /internal/calls/{callId}/brief</code>, receives the <code>CallBundle</code> (4.2), opens the STT websocket and the TTS websocket, and publishes the <code>host</code> and <code>salma</code> tracks. The moment the learner's mic track is subscribed, the worker plays the pre-rendered opening line from the bundle on the <code>host</code> track (D11) and sends <code>state {phase: "opening"}</code>.</li>
+<li>The learner speaks. VAD frames and STT partials flow; the turn controller decides end-of-turn (4.5). On end-of-turn the worker has the final streaming text with word timings; it emits <code>call_turn</code> (speaker <code>learner</code>, streaming text), hands the turn's PCM to the recorder, and asks the governor for this turn's allowances.</li>
+<li>The governor appends a mid-conversation system note (allowances, clock, mode) and the learner's text to the conversation and calls the host LLM with streaming. The first line of the reply is the <code>@moves</code> header; the governor parses it, checks it, and either lets the rest stream into TTS or aborts and re-requests once (4.3).</li>
+<li>The TTS stream plays on the <code>host</code> track; caption segments go to the client over the data channel with the recast span marked. When the host finishes, the worker emits <code>call_turn</code> (speaker <code>host</code>, text, moves, <code>reply_latency_ms</code>) and the turn controller returns to listening.</li>
+<li>Meanwhile the recorder has encoded the learner's turn, uploaded it to <code>forone-voice/learners/{lid}/calls/{callId}/turn-{n}.ogg</code> with SSE-C under the learner's DEK and emitted <code>call.turn_audio_ready</code>. Inngest runs <code>call/verbatim-turn</code>: verbatim transcription with disfluencies and confidences, written back as an update to that <code>call_turn</code> event; if voice storage is off, the turn object is deleted when the verbatim write succeeds.</li>
+<li>If the learner holds S: the talkback controller freezes the turn detector, opens the Arabic stream, and on release resolves the ask and speaks Salma's answer on the <code>salma</code> track within 2 s; <code>talkback</code> is logged with the word, the mode (word or hint) and the latency.</li>
+<li>At 6:30 the governor tells the host to begin the close; at 7:40 to say goodbye in one line; at 8:00 the worker ends the session after the current sentence. Or the learner taps ✕: the worker lets the host say one in-character line, then ends. The worker emits <code>call.ended {end_reason, voice_storage, turns, learner_speech_ms, host_speech_ms}</code>, closes the vendor streams and leaves the room. If voice storage is on, it uploads the full mixed recording as <code>call_full</code>.</li>
+<li><code>session/after-pass</code> (assessment domain) starts on <code>call.ended</code>; stage 1 waits only for the last turn's verbatim result, so the notes are ready within 90 s. <code>audio/expire</code> (topology) sleeps 14 minutes and deletes whatever ephemeral audio remains when storage is off.</li>
+</ol>
+<h3>3.3 Boundaries and the writing rule</h3>
+<p>The worker never reads the learner model and never writes a store. It receives one <code>CallBundle</code> at dispatch, keeps everything in memory for the call, and emits events. The only durable writes it causes are <code>events</code> rows (through <code>api</code>), <code>media_objects</code> rows (through the upload path) and the <code>calls</code> row's <code>ended_at</code>, <code>end_reason</code>, <code>vendors</code> and <code>metrics</code> columns (through <code>POST /internal/calls/{id}/end</code>). This is PRD 8.1 rule 3 and 14.2 made structural: there is no code path from the worker to the nine stores, so a host cannot "remember" what it misheard.</p>
+<h3>3.4 Interfaces to other domains</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Direction</th>
+<th>Interface</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>in</td>
+<td><code>episode_artifacts(kind=call_brief)</code> with the <code>CallBrief</code> type, <code>voice_casting</code> for the learner, the opening-line clip ref</td>
+<td>pipeline domain</td>
+</tr>
+<tr>
+<td>in</td>
+<td>Compiled <code>HostBrief</code> and <code>SalmaTalkbackBrief</code> (4.2) built by the host brief compiler, which this domain owns as a module in <code>forone.core.briefs</code> but which runs inside <code>episode/make</code> at publish time and again at <code>POST /v1/calls</code> when the learner model version has changed since</td>
+<td>this domain (module), pipeline domain (call site)</td>
+</tr>
+<tr>
+<td>in</td>
+<td><code>vendors.yaml</code> and <code>vendor_config</code> rows; the learner's DEK unwrapped by <code>api</code></td>
+<td>topology, security domains</td>
+</tr>
+<tr>
+<td>in</td>
+<td>Pause profile, anxiety prior, last-call-abandoned flag, produced-word set</td>
+<td>learner model domain (Skills and Word bank stores)</td>
+</tr>
+<tr>
+<td>out</td>
+<td>Events <code>call_turn</code>, <code>talkback</code>, <code>hold_floor</code>, <code>silence</code>, <code>replay_line</code> (door <code>call</code>), <code>crisis_activation</code>, <code>call_started</code>, <code>call_ended</code>; Inngest events <code>call.turn_audio_ready</code>, <code>call.ended</code>, <code>voicenote.received</code>, <code>pronunciation.requested</code></td>
+<td>data domain (event log), topology (Inngest shells)</td>
+</tr>
+<tr>
+<td>out</td>
+<td><code>media_objects</code> of kinds <code>call_turn</code>, <code>call_full</code>, <code>voice_note</code>, <code>say_it_once</code>, <code>shadow</code>, <code>recording</code></td>
+<td>security and data domains</td>
+</tr>
+<tr>
+<td>out</td>
+<td>Per-call metrics in <code>calls.metrics</code> and <code>vendor_calls</code> rows per adapter call</td>
+<td>cost and evaluation domains</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div></details><details class="fs" id="s4-detailed-design"><summary><h3>4. Detailed design</h3><span class="wc">6,810 words</span></summary><div class="prose"><h3>4.1 Call kinds and the <code>calls</code> row</h3>
+<p>The <code>calls</code> table is the topology's (01-system-topology.md 4.2). This domain adds two columns and fixes the enums:</p>
+<pre><code class="language-sql">alter table calls add column metrics jsonb not null default '{}';   -- CallMetrics (4.12)
+alter table calls add column bundle_version int not null default 1; -- which HostBrief compile was used
+-- kind: onboarding | first | main | round_two | small_door | then_and_now
+-- mode: live | voice_notes
+-- end_reason: natural_close | learner_ended | timeout_8m | pipeline_error | fallback | crisis | abandoned | driving
+</code></pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>kind</th>
+<th>PRD</th>
+<th>Persona</th>
+<th>Length</th>
+<th>Budgets (4.3)</th>
+<th>Enters the after-session pass as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>onboarding</code></td>
+<td>2.2 A3</td>
+<td>Salma, Arabic</td>
+<td>about 3 min, at most 8 Salma turns</td>
+<td>n/a (Salma has her own contract, 4.9)</td>
+<td>intake facts, two English moments</td>
+</tr>
+<tr>
+<td><code>first</code></td>
+<td>2.2 A7</td>
+<td>throwing host</td>
+<td>60 to 90 s</td>
+<td>no recast, no nudge, clarify only if meaning is lost, no recall gaps, no retell, praise 1 at the end</td>
+<td>first speaking estimate</td>
+</tr>
+<tr>
+<td><code>main</code></td>
+<td>5.4</td>
+<td>throwing host</td>
+<td>close from 6:30, end 8:00</td>
+<td>full contract</td>
+<td>the main call</td>
+</tr>
+<tr>
+<td><code>round_two</code> [P1]</td>
+<td>5.4.9</td>
+<td>same host</td>
+<td>close from 2:00, end 3:00</td>
+<td>retell first, 1 recall gap, recasts kept, no nudge</td>
+<td>fluency sample</td>
+</tr>
+<tr>
+<td><code>small_door</code></td>
+<td>3.7</td>
+<td>none live</td>
+<td>one voice note up to 60 s</td>
+<td>n/a</td>
+<td>voice note</td>
+</tr>
+<tr>
+<td><code>then_and_now</code></td>
+<td>10.9.2</td>
+<td>Salma narrates from pre-rendered clips</td>
+<td>about 3 min</td>
+<td>no live model; the client records three tasks</td>
+<td>recording</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>small_door</code> and <code>then_and_now</code> are not live calls: they are recordings captured by the client and uploaded through the same <code>/voicenotes</code> and <code>/recordings</code> routes, listed here because the recorder, the verbatim path and the deletion rules are shared.</p>
+<h3>4.2 The call bundle and the host brief</h3>
+<p><code>GET /internal/calls/{callId}/brief</code> returns one object. It is compiled by <code>forone.core.briefs.compile_call_bundle(call_id)</code>; the compile is cheap (one Postgres read per store) and runs at <code>POST /v1/calls</code>, so a veto in the notebook an hour before the call is honoured.</p>
+<pre><code class="language-ts">type CallBundle = {
+  call: { id: string; kind: CallKind; learner_id: string; session_id: string|null; episode_id: string|null;
+          resumed_after_drop: boolean; started_by: &quot;throw&quot;|&quot;today&quot;|&quot;feed&quot;|&quot;onboarding&quot; };
+  host_brief: HostBrief | null;                  // null for onboarding, small_door, then_and_now
+  salma_brief: SalmaTalkbackBrief | null;        // null when talkback is unavailable (onboarding)
+  salma_onboarding: SalmaOnboardingBrief | null; // only kind = onboarding (4.9)
+  turn_taking: { endpoint_ms: number; max_extend_ms: number; backchannel_after_ms: number;
+                 silence_offer_ms: number; interruption_min_ms: number; interruption_min_words: number };
+  anxiety: { prior: boolean; last_call_abandoned: boolean };
+  voice: { host: &quot;karim&quot;|&quot;mona&quot;|null; vendor: string; voice_id: string; rate: number; understudy: { vendor: string; voice_id: string };
+           salma: { vendor: string; voice_id: string; variety: &quot;gulf&quot;|&quot;white&quot; };
+           backchannel_clips: { id: string; url: string; duration_ms: number }[];   // pre-rendered per host voice
+           opening_clip: { url: string; text: string; duration_ms: number } | null;
+           package_clips: { crisis_en: string; crisis_ar: string; talkback_intro_ar: string } };
+  vendors: { streaming_stt: string; talkback_stt: string; host_llm: { vendor: string; model: string; fallback: { vendor: string; model: string } };
+             call_tts: string; salma_tts: string };
+  consent: { voice_storage: boolean };
+  crypto: { dek: string /* base64, 32 bytes, memory only */; key_version: number };
+  language: { repair_phrases: string[]; crisis_keywords: string[]; name: { display: string; respelling: string } };
+  limits: { close_begin_s: number; hard_end_s: number };
+  bundle_version: number; learner_model_version: number; prompt_version: string;
+};
+
+type HostBrief = {                                 // PRD 8.6: one page; target under 900 tokens
+  host: &quot;karim&quot;|&quot;mona&quot;; learner_name: { display: string; respelling: string; pronouns: &quot;he&quot;|&quot;she&quot;|null };
+  episode_in_3_lines: string[]; question: string; planted_phrases: string[];
+  position: string; pushback: string[];
+  targets: { grammar: { id: string; label: string; necessity_moves: string[]; recast_list: { expected_error: string; recast_form: string }[] };
+             words: { lemma: string; move: string }[] };
+  recall_gaps: { id: string; line: string; expected: string }[];     // 2 to 4
+  retell_prompt: string;
+  callback: { text: string; fact_id: string } | null;               // exactly one, confirmed
+  never_mention: string[];
+  budgets: Budgets;                                                 // from the kind table, adjusted by anxiety.prior
+  style: { accent: &quot;british&quot;|&quot;american&quot;; max_words_per_turn: number /* 25 */ };
+  day_type: &quot;first&quot;|&quot;main&quot;|&quot;round_two&quot;|&quot;return&quot;|&quot;rehearsal&quot;;
+  rehearsal: { role: string; scene: string } | null;                // PRD 7.6 rule 5: the host plays the other person
+};
+
+type SalmaTalkbackBrief = {
+  produced_lemmas: Record&lt;string, { count: number; last_session_label: string /* &quot;Tuesday, about your manager&quot; */ }&gt;;
+  active_targets: { id: string; label: string }[];
+  english_share: number;                                            // PRD 7.3: 0.2 in season 1
+};
+
+type Budgets = { clarify: number; recast_per_turn: number; nudge: number; recall_gaps_min: number; recall_gaps_max: number;
+                 retell: number; praise: number; silence_offers: number };
+</code></pre>
+<p>The <code>HostBrief</code> is assembled from <code>CallBrief</code> (pipeline) plus four learner-model reads: name and respelling from <code>voice_casting.name</code>, the pause profile and anxiety prior from Skills, the <code>never_mention</code> list from Life ("don't bring up") and <code>working_on</code> vetoes, and <code>callbacks_allowed</code> filtered again at compile time against the fact's current status (a fact deleted in the notebook after the brief was written is dropped here; PRD 8.4 rule 7).</p>
+<h3>4.3 The host move contract as a state machine</h3>
+<p>Two machines run together: the call phase machine (time and content) and the turn machine (who has the floor). The governor owns the phase machine and the budgets; the turn controller owns the turn machine.</p>
+<p><strong>Phase machine (per call, kind <code>main</code>; <code>first</code> and <code>round_two</code> use the same states with the timers from 4.1):</strong></p>
+<pre><code>CONNECTING ─(mic subscribed)─► OPENING ─(host opening line done)─► ARGUE
+ARGUE ─(host declares retell, window 2:00..4:30 and recall_gaps_used &gt;= 1)─► RETELL
+RETELL ─(learner turn ends, or 90 s)─► ARGUE_AFTER
+ARGUE | ARGUE_AFTER ─(t &gt;= close_begin_s)─► CLOSING
+CLOSING ─(host declares close, or t &gt;= hard_end_s - 20 s)─► GOODBYE
+GOODBYE ─(host line done)─► ENDED
+any ─(learner ✕)─► GOODBYE(reason=learner_ended)        one in-character line, then end
+any ─(crisis)─► CRISIS ─► ENDED(reason=crisis)
+any ─(driving phrase)─► GOODBYE(reason=driving)         &quot;Call me back when you've parked.&quot;
+any ─(pipeline failure x2 | room lost &gt; 5 s)─► FALLBACK ─► ENDED(reason=fallback)
+</code></pre>
+<p><strong>Turn machine:</strong></p>
+<pre><code>HOST_SPEAKING ─(TTS done)─► LISTENING
+LISTENING ─(speech starts)─► LEARNER_SPEAKING
+LEARNER_SPEAKING ─(silence &gt;= endpoint, turn complete)─► TURN_ENDED ─► THINKING ─► HOST_SPEAKING
+LEARNER_SPEAKING ─(silence &gt;= 1.2 s, turn incomplete, no backchannel yet this pause)─► BACKCHANNEL ─► LEARNER_SPEAKING
+LEARNER_SPEAKING ─(silence &gt;= endpoint + max_extend)─► TURN_ENDED
+LISTENING ─(silence &gt;= 8 s)─► SILENT ─(governor: smaller question)─► HOST_SPEAKING
+any listening state ─(hold.down)─► FLOOR_HELD ─(hold.up, 300 ms grace)─► LEARNER_SPEAKING | TURN_ENDED
+any listening state ─(talkback.down)─► TALKBACK ─(talkback.up, Salma answered)─► FLOOR_HELD (if pad still held) | LISTENING
+HOST_SPEAKING ─(learner speech &gt;= interruption_min_ms and &gt;= 2 words)─► LEARNER_SPEAKING   (host stops; the cut text is logged as unsaid)
+</code></pre>
+<p><strong>Budgets and the governor.</strong> Before each host turn the governor computes <code>Allowances</code> from the budgets, the phase, the mode and the counters, writes them into the operator note (4.4), and after the reply checks the header against them.</p>
+<pre><code class="language-python"># apps/call-worker/forone_call/governor.py
+from dataclasses import dataclass, field
+
+@dataclass
+class Counters:
+    clarify: int = 0; nudge: int = 0; recall_gaps: int = 0; retell: int = 0; praise: int = 0
+    silence_offers: int = 0; recasts_this_turn: int = 0; violations: int = 0
+
+@dataclass
+class Allowances:
+    recast: bool; clarify: bool; nudge: bool; recall_gap: bool; retell: bool; praise: bool
+    close: bool; goodbye: bool; smaller_question: bool; wrap_offer: bool
+
+BUDGETS = {
+  &quot;first&quot;:     dict(clarify=1, recast_per_turn=0, nudge=0, recall_gaps_min=0, recall_gaps_max=0, retell=0, praise=1, silence_offers=2),
+  &quot;main&quot;:      dict(clarify=3, recast_per_turn=1, nudge=1, recall_gaps_min=2, recall_gaps_max=4, retell=1, praise=1, silence_offers=2),
+  &quot;round_two&quot;: dict(clarify=2, recast_per_turn=1, nudge=0, recall_gaps_min=0, recall_gaps_max=1, retell=1, praise=1, silence_offers=2),
+}
+ANXIETY_OVERRIDE = dict(nudge=0, recall_gaps_max=1)          # PRD 5.4.7: recasts kept, more backchannel, simpler questions
+
+class Governor:
+    def __init__(self, kind, budgets, limits, anxiety_prior):
+        self.b = dict(budgets); self.c = Counters(); self.phase = &quot;CONNECTING&quot;; self.mode = &quot;normal&quot;
+        self.limits = limits; self.turn_words = []           # learner words per turn in the first 2 min
+        self.silences_8s = 0
+        if anxiety_prior: self.enter_anxiety(&quot;prior&quot;)
+
+    def enter_anxiety(self, why):
+        if self.mode == &quot;anxiety&quot;: return
+        self.mode = &quot;anxiety&quot;; self.b.update(ANXIETY_OVERRIDE); self.why_anxiety = why   # logged on call_turn
+
+    def observe_learner_turn(self, words: int, t_s: float):
+        if t_s &lt;= 120: self.turn_words.append(words)
+        if t_s &gt;= 120 and self.turn_words and median(self.turn_words) &lt; 4: self.enter_anxiety(&quot;short_turns&quot;)
+
+    def observe_silence_8s(self):
+        self.silences_8s += 1
+        if self.silences_8s &gt;= 2: self.enter_anxiety(&quot;two_silences&quot;)
+
+    def allowances(self, t_s: float, in_retell_window: bool, meaning_lost: bool) -&gt; Allowances:
+        b, c = self.b, self.c
+        return Allowances(
+            recast=b[&quot;recast_per_turn&quot;] &gt; 0,
+            clarify=c.clarify &lt; b[&quot;clarify&quot;] and (meaning_lost or self.mode == &quot;normal&quot;),
+            nudge=c.nudge &lt; b[&quot;nudge&quot;] and self.mode == &quot;normal&quot; and self.phase in (&quot;ARGUE&quot;, &quot;ARGUE_AFTER&quot;),
+            recall_gap=c.recall_gaps &lt; b[&quot;recall_gaps_max&quot;] and self.phase in (&quot;ARGUE&quot;, &quot;ARGUE_AFTER&quot;),
+            retell=c.retell &lt; b[&quot;retell&quot;] and in_retell_window and c.recall_gaps &gt;= 1 and self.phase == &quot;ARGUE&quot;,
+            praise=c.praise &lt; b[&quot;praise&quot;] and self.phase in (&quot;CLOSING&quot;, &quot;GOODBYE&quot;),
+            close=t_s &gt;= self.limits[&quot;close_begin_s&quot;],
+            goodbye=t_s &gt;= self.limits[&quot;hard_end_s&quot;] - 20 or self.phase == &quot;GOODBYE&quot;,
+            smaller_question=self.phase == &quot;SILENT&quot; and c.silence_offers &lt; b[&quot;silence_offers&quot;],
+            wrap_offer=self.phase == &quot;SILENT&quot; and c.silence_offers &gt;= b[&quot;silence_offers&quot;],
+        )
+
+    def check(self, moves: dict, a: Allowances) -&gt; list[str]:
+        bad = []
+        if moves.get(&quot;recast&quot;) and not a.recast: bad.append(&quot;recast&quot;)
+        if moves.get(&quot;clarify&quot;) and not a.clarify: bad.append(&quot;clarify&quot;)
+        if moves.get(&quot;nudge&quot;) and not a.nudge: bad.append(&quot;nudge&quot;)
+        if moves.get(&quot;recall_gap&quot;) and not a.recall_gap: bad.append(&quot;recall_gap&quot;)
+        if moves.get(&quot;retell&quot;) and not a.retell: bad.append(&quot;retell&quot;)
+        if moves.get(&quot;praise&quot;) and not a.praise: bad.append(&quot;praise&quot;)
+        if moves.get(&quot;grades&quot;) or moves.get(&quot;explains_grammar&quot;): bad.append(&quot;never&quot;)
+        return bad
+
+    def commit(self, moves: dict):
+        c = self.c
+        c.clarify += bool(moves.get(&quot;clarify&quot;)); c.nudge += bool(moves.get(&quot;nudge&quot;))
+        c.recall_gaps += bool(moves.get(&quot;recall_gap&quot;)); c.retell += bool(moves.get(&quot;retell&quot;)); c.praise += bool(moves.get(&quot;praise&quot;))
+        if moves.get(&quot;retell&quot;): self.phase = &quot;RETELL&quot;
+        if moves.get(&quot;close&quot;) and self.phase in (&quot;ARGUE&quot;, &quot;ARGUE_AFTER&quot;, &quot;CLOSING&quot;): self.phase = &quot;CLOSING&quot;
+        if moves.get(&quot;goodbye&quot;): self.phase = &quot;GOODBYE&quot;
+</code></pre>
+<p><strong>The declare-then-speak protocol.</strong> The host's reply begins with one line:</p>
+<pre><code>@moves {&quot;recast&quot;:{&quot;heard&quot;:&quot;I go&quot;,&quot;form&quot;:&quot;went&quot;},&quot;clarify&quot;:false,&quot;nudge&quot;:false,&quot;recall_gap&quot;:&quot;rg2&quot;,&quot;retell&quot;:false,&quot;praise&quot;:false,&quot;close&quot;:false,&quot;goodbye&quot;:false,&quot;crisis&quot;:false,&quot;ai_disclosure&quot;:false}
+You WENT to the derby with your manager? With who else?
+</code></pre>
+<p>The worker buffers tokens until the first newline (about 40 tokens, 100 to 200 ms), parses the JSON, runs <code>check()</code>. On an empty <code>bad</code> list it streams the rest of the text into TTS sentence by sentence and marks the recast span for the caption. On a violation it cancels the stream, appends a system message <code>Do not use: nudge. Reply again.</code> and re-requests once (measured cost about 600 ms, expected on well under 5% of turns after prompt tuning; <code>violations</code> is a quality metric and the offline suite's first regression check). A second violation is spoken anyway and logged as <code>move_violation</code>; the call never stalls on the governor. A missing or malformed header is treated as <code>{}</code> and logged as <code>header_missing</code>.</p>
+<p><strong>Timers.</strong> <code>t</code> is seconds since the opening line started. At <code>close_begin_s</code> (390 for main) the operator note says "begin a natural close"; at <code>hard_end_s - 20</code> (460) it says "say goodbye now in one line"; at <code>hard_end_s</code> (480) the worker ends after the current TTS sentence, even mid-reply. For <code>first</code>: 60 and 90. For <code>round_two</code>: 120 and 180. The learner's ✕ sends <code>end_call</code>; the worker lets the current learner turn finish (at most 3 s), requests one host line with <code>goodbye</code> allowed only, speaks it, ends. Round two is offered on Today the next day by the client domain from <code>calls</code> (kind <code>main</code> done, no <code>round_two</code> row).</p>
+<p><strong>Retell.</strong> When the host declares <code>retell</code>, the worker sends <code>retell_ring {seconds: 75}</code> to the client (a soft ring, never red), sets the turn controller's max extension to 2.5 s for the retell turn and disables the 8 s silence offer until the first speech; the retell ends when the learner's turn ends or at 90 s, when the host simply replies.</p>
+<p><strong>Interrupted call.</strong> A call cannot resume (PRD 4 rule 4). If <code>web</code> reconnects to a room whose job has ended, or the learner returns after an abandoned call, <code>POST /v1/calls</code> creates a new call with <code>resumed_after_drop: true</code>; the bundle's opening clip is then the pre-rendered "gap" variant ("You left me hanging. Where were we?"), and the previous call's turns are still in the event log for assessment.</p>
+<h3>4.4 The host prompt and the request shape</h3>
+<p>The request to the host model has three layers, rendered in cache order (tools, system, messages). Layer A is identical for every learner of one host and accent, so it is cache-warm across the whole fleet; layer B is per call and warm from the second turn; the messages carry a cache breakpoint on the last learner turn so the growing history is read from cache.</p>
+<pre><code>[SYSTEM, breakpoint 1: static per host and accent, about 1,800 tokens]
+You are {Mona|Karim}, co-host of &quot;For one&quot;, on a short voice call with one listener who has just heard today's episode. {host bible, authored: values, humour, speech patterns, what you never do, stance toward the listener}
+You are an AI host. If asked whether you are real, say so plainly in one short sentence and carry on. Your storylines are the show's fiction; you never claim to exist outside the show or to miss the listener.
+HOW YOU TALK: English only; one or two sentences, under {max_words_per_turn} words; one question at a time; the listener should talk at least twice as much as you; never finish their sentence; never grade, explain grammar, mention progress or levels, guilt, or say you will miss them; no homework.
+HOW YOU HELP (the listener must never feel tested): clarification request when meaning is lost (&quot;Sorry, you went, or you're going?&quot;); recast one error at most per reply, only on the target or on an error that blurred meaning, the corrected word stressed, inside a reply with its own point; one nudge per call (&quot;Wait, yesterday you...?&quot;) then wait; recall gaps from the brief: start the line and stop; hints before answers: &quot;how do I say X&quot; gets a hint, the word only on a second ask; &quot;what does X mean&quot; gets a plain answer; absorb side-switching, rejected premises, off-topic turns and early endings without steering back to a script.
+IF THE LISTENER IS IN DANGER OR DISTRESS: declare crisis in the header and say nothing else; the producer takes over.
+IF THEY SAY THEY ARE DRIVING: &quot;Call me back when you've parked. I'll be here.&quot; and declare goodbye.
+OUTPUT FORMAT: first line exactly `@moves {json}` with keys recast{heard,form}|null, clarify, nudge, recall_gap (id|null), retell, praise, close, goodbye, crisis, ai_disclosure (booleans). Then a newline, then only what you say aloud. No stage directions, no markdown. The operator note before each listener turn tells you which moves are allowed; a move that is not allowed must not be used.
+
+[SYSTEM, breakpoint 2: per call, the HostBrief rendered as text, about 700 tokens]
+LISTENER: Faisal (FY-sal), he. EPISODE IN 3 LINES: ... THE QUESTION: ... PHRASES THE EPISODE PLANTED: ...
+YOUR POSITION: ... PUSHBACK: ... GRAMMAR TARGET: past simple in narratives. MOVES THAT MAKE IT NECESSARY: &quot;Walk me through exactly what happened on Saturday.&quot; ... RECAST LIST: &quot;I go&quot; -&gt; &quot;went&quot; ... WORDS: line-up (&quot;ask who starts&quot;) ... RECALL GAPS: rg1 &quot;Karim said the plan was a bit too... what was the word?&quot; (expected: ambitious) ... RETELL: &quot;Mona missed it. Sixty seconds: what happened at the derby?&quot; CALLBACK ALLOWED: &quot;the manager who supports Al Hilal&quot; (one use). NEVER MENTION: ... DAY TYPE: main.
+
+[MESSAGES]
+user: (the listener's first turn, streaming text)
+system: {&quot;note&quot;:&quot;t=0:41 mode=normal allowed: recast clarify(3 left) recall_gap(2..4, used 0) ; not allowed: nudge retell praise close ; listener held floor: no&quot;}   &lt;- mid-conversation operator note, every turn
+assistant: @moves {...}\nYou WENT to the derby...
+user: ...
+system: {&quot;note&quot;:&quot;t=2:14 ... allowed: retell ...&quot;,&quot;whisper&quot;:null}                                 &lt;- the observer's slot (D14), null in the beta
+</code></pre>
+<p>Request parameters: <code>model: claude-sonnet-5-5</code>, <code>max_tokens: 120</code>, <code>output_config: {effort: "low"}</code>, <code>thinking: {type: "between_tools"}</code> (the host has no tools, so the reply starts at once; <code>effort</code> is <code>low</code> because the reply is one or two sentences; the 50-call test compares <code>low</code> with adaptive thinking at <code>low</code> and keeps whichever meets the latency gate with the better move-contract score), <code>stream: true</code>, cache breakpoints on the two system blocks and the last user turn. Operator notes are <code>{"role": "system"}</code> entries inside <code>messages</code>, which Sonnet 5.5 accepts without a beta header and which leave the cached prefix intact. The host never uses prefill (removed on this model family) and never uses forced tool choice. On a <code>refusal</code> stop reason (rare on this content) the worker speaks a neutral in-character line from the package ("Hang on, say that again?") and logs it.</p>
+<p>Fallback order on a model error or a first-token wait over 1.2 s: retry once on the same model with a 1.5 s timeout; then <code>claude-haiku-5-5</code> with the same prompt; then the second vendor from <code>vendors.yaml</code> (<code>google/gemini-3.8-flash</code>) with the same prompt text rendered as a plain system prompt (no cache). The fallback used is recorded on the <code>call_turn</code> event and in <code>calls.vendors</code>.</p>
+<p>Learner "sorry?", "slower", "again" and the Arabic equivalents in <code>language.repair_phrases</code> are matched by code on the streaming final; the operator note then says <code>listener did not understand: rephrase your last line more simply, shorter, no new question</code>, and the turn is logged as <code>repair_request</code>. Previous-track (Media Session) on the call replays the host's last TTS audio from the client's buffer and logs <code>replay_line {door: "call"}</code>; the host is not told.</p>
+<h3>4.5 Turn-taking: adaptive patience, hold-to-talk, backchannels, silence</h3>
+<p><strong>Pause profile.</strong> Stored in the Skills store by code after each call (learner model domain writes it; this domain specifies the formula): <code>p = clamp(P90 of within-turn pauses over the last 3 calls, 1.0, 2.5)</code> where a within-turn pause is a gap between two verbatim words inside one learner turn, in seconds. A new learner has <code>p = 1.5</code>. During a call the worker adapts within the call: each time the learner resumes speech within 700 ms of the host starting to speak (a cut-off), <code>p += 0.25</code> for the rest of the call (cap 2.5); each cut-off is logged on the <code>call_turn</code> as <code>cut_off: true</code>. The adapted value is reported in <code>call_ended.metrics.endpoint_ms_final</code> so the profile converges.</p>
+<p><strong>Endpointing.</strong> The turn controller combines three signals: Silero VAD (speech or silence per 20 ms frame), the LiveKit multilingual turn detector's end-of-utterance probability on the running transcript, and the hold state.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Condition at a silence of length <code>s</code></th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>s &gt;= 1.2 s</code>, turn incomplete (EOU probability under 0.5), no backchannel yet in this pause, floor not held or held</td>
+<td>play one backchannel clip (4.5 below); keep listening</td>
+</tr>
+<tr>
+<td><code>s &gt;= p</code> and EOU probability at least 0.5</td>
+<td>end of turn</td>
+</tr>
+<tr>
+<td><code>s &gt;= p + max_extend</code> (max_extend 1.5 s; during the retell 2.5 s)</td>
+<td>end of turn regardless</td>
+</tr>
+<tr>
+<td>floor held</td>
+<td>never end the turn; backchannel allowed once per pause as above</td>
+</tr>
+<tr>
+<td><code>hold.up</code> received</td>
+<td>300 ms grace; if speech resumes, continue; else end of turn</td>
+</tr>
+<tr>
+<td><code>s &gt;= 8 s</code> in <code>LISTENING</code> (the learner has not started)</td>
+<td><code>SILENT</code>: the governor allows <code>smaller_question</code>; after two offers, <code>wrap_offer</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>LiveKit's <code>AgentSession</code> is configured with <code>min_endpointing_delay = p</code>, <code>max_endpointing_delay = p + max_extend</code>, the multilingual turn detector, <code>min_interruption_duration = 0.5 s</code>, <code>min_interruption_words = 2</code>, and <code>allow_interruptions = true</code> so an open-mic learner can cut the host off with real speech but not with "mm". The hold state is applied by pausing the session's end-of-turn (the <code>turn-controller</code> flips <code>session.input.audio</code> to a buffering mode where frames still reach STT but end-of-turn is suppressed).</p>
+<p><strong>Backchannels (D4).</strong> The package holds a list per host of 8 to 10 short lines ("mm", "go on", "yeah?", "right", "okay", a breath) rendered once per host voice at casting time by the voice studio and cached under <code>voice.backchannel_clips</code>. The controller picks one at random excluding the last two, plays it on the <code>host</code> track at -6 dB, and never plays more than one per pause or more than one per 10 s. In anxiety mode the threshold drops to 1.0 s. Backchannels are logged inside the learner's <code>call_turn</code> payload (<code>backchannels: [{t_ms, clip_id}]</code>) and never count as host talk time.</p>
+<p><strong>Hold-to-talk.</strong> The pad sends <code>hold.down</code> and <code>hold.up</code> over the data channel (reliable). <code>hold_floor</code> events are logged with the duration. Holding is also how a learner reads from the planning card without being interrupted.</p>
+<h3>4.6 The Huh? signal on the call</h3>
+<p>On the call screen the Huh? affordance of the player maps to "repeat what you just said": previous-track on the headphones or a small ⟲ under the caption. [DECISION] It replays the host's last line from the client's audio buffer (no vendor call, no delay), logs <code>replay_line {door:"call", host_line_id}</code>, and does not inform the host; if the learner then says "sorry?" the repair path in 4.4 handles rephrasing. The learner's own Huh? taps during the call feed the teacher's difficulty dial like the player's (PRD 9.6) through the same event type.</p>
+<h3>4.7 Talkback to Salma</h3>
+<pre><code>S down ─► client: talkback.down {t_client}     worker: freeze turn detector; mark floor held; open talkback STT stream (Soniox, languages [ar, en], code-switch on);
+                                                       feed frames from (t_down - 400 ms pre-roll buffer) onward; host STT frames muted
+S up   ─► client: talkback.up                  worker: finalize talkback stream (&lt;= 400 ms); resolve (4.7.1); synthesize Salma; play on `salma` track;
+                                                       send ui.talkback {text_ar, word_en, mode}; log talkback; unfreeze (floor stays held if pad is down)
+</code></pre>
+<p><strong>4.7.1 Resolution.</strong> Code first, then one small model call.</p>
+<ol>
+<li>Normalize the Arabic transcript; match the three package patterns for "how do you say X" (كيف أقول, وش أقول, إيش معنى بالإنجليزي ...). If X is a single token with an entry in the gloss cache's reverse index (ar→en, built by the pipeline's gloss precompute for every gloss ever produced), the candidate word is known in under 10 ms.</li>
+<li>Otherwise, or when the ask is a phrase, a question about meaning, or anything else: <code>claude-haiku-5-5</code>, Salma's talkback prompt (Arabic persona excerpt, 300 tokens cached), input: the transcript, the produced-lemma list (names only), the active targets. Output schema (structured output): <code>{kind: "word"|"phrase"|"meaning"|"other", en: string, ar_answer: string, lemma: string|null}</code>. Timeout 800 ms; on timeout Salma says, in Arabic, "say it again, slower" and the ask is logged as <code>unresolved</code>.</li>
+<li>Word-or-hint (D6): <code>mode = "word"</code> if <code>lemma not in produced_lemmas</code> or this is the second ask for the same lemma in this call; else <code>mode = "hint"</code> and the hint is the first sound of the word plus, when <code>last_session_label</code> exists, "you used it on {label}". The hint text comes from a template in the package, not the model.</li>
+<li>Salma's line: <code>{ar_answer}</code> with the English word embedded (for example "لاين-أب... line-up"); the English share of her words follows <code>english_share</code> only in the framing, never in the word itself.</li>
+</ol>
+<p><strong>4.7.2 Voice.</strong> Salma's talkback uses <code>salma_tts</code> with the casting's Salma voice and <code>style: "close"</code>: the adapter maps this to the vendor's lowest-energy, intimate delivery where style tags exist, and in every case the worker applies a 3 dB level reduction and a high-shelf cut at 8 kHz on the <code>salma</code> track so she sits "closer and drier" than the host (PRD 7.3). The host track is silent during talkback because the floor is held, so no ducking is needed.</p>
+<p><strong>4.7.3 Latency.</strong> Budget under 2 s from S-up: STT finalization 300 ms, resolution 10 ms (cache hit) or 400 to 700 ms (Haiku), Salma TTS first byte 200 to 400 ms, network 100 to 200 ms. Measured <code>talkback_ms</code> on every <code>talkback</code> event.</p>
+<p><strong>4.7.4 Host isolation.</strong> The host receives nothing about the talkback (PRD 5.4.5: the audio goes to the Arabic recognizer, not the host). The learner's next English turn arrives as usual. The worker only adds <code>listener held floor: yes</code> to the operator note so the host does not comment on the pause.</p>
+<p><strong>4.7.5 Logged.</strong> <code>talkback {t_ms, ask_ar, kind, lemma, mode, resolved_by: "cache"|"model"|"none", talkback_ms, cost_usd}</code>. Talkback asks per call by lemma is a PRD 16.2 measure and a PRD 5.4.5 progress signal; the Word bank's <code>lookups</code> per lemma are updated from this event by the data domain.</p>
+<h3>4.8 Captions</h3>
+<p>Host captions are built from the TTS stream: when the adapter returns word timings (ElevenLabs and Cartesia do; Inworld and Gemini are verified in week 1), the client receives <code>ui.caption {host_line_id, words: [{w, s_ms, e_ms}], recast_span: [i, j] | null, final}</code> and renders word by word; otherwise one <code>ui.caption</code> per sentence as that sentence's audio starts, with the recast word bold from the header's <code>form</code> string matched in the text. The learner's words are never sent to the client as captions (PRD 5.4.8); the client does not even subscribe to the worker's learner transcription events. The Controls switch for captions lives on the client; the worker always sends them (cheap) so turning them on mid-call is instant.</p>
+<h3>4.9 Salma at onboarding (PRD 2.2 A3) and the first call (A7)</h3>
+<p>The same worker runs a second persona, chosen by <code>call.kind</code>. The pipeline is the same with three differences: the recognizer is the talkback configuration (Arabic plus English) on the main stream; the model is <code>claude-sonnet-5-5</code> with Salma's bible and the onboarding contract; the voice is <code>salma_tts</code>.</p>
+<p><strong>First sound under 60 s.</strong> <code>POST /v1/onboarding/start</code> (client domain) creates the pre-account learner and the room before the mic prompt; the worker's first two Salma lines are static package clips (<code>salma_intro_1_ar</code>, the AI disclosure, and <code>salma_intro_2_ar</code>, the first question) played the moment the learner's track is subscribed, which covers the 1 to 2 s of vendor websocket setup. Measured <code>first_sound_ms</code> is reported on <code>call_ended</code> for <code>onboarding</code>.</p>
+<p><strong>The onboarding contract (code-enforced like the host's).</strong> <code>turns_max = 8</code>; fields <code>name</code>, <code>talk_for_an_hour</code>, <code>need_english_for</code>; two English lines, one comprehension ("tell me what you heard, in any language"), one production ("say anything back in English"), each used exactly once and placed by the governor (after field 1 and after field 3); each field gets one re-ask then is marked <code>sparse</code>; a dated event in an answer becomes a follow-up candidate with a date. Salma's reply header:</p>
+<pre><code>@salma {&quot;fact&quot;:{&quot;field&quot;:&quot;name&quot;,&quot;value&quot;:&quot;Faisal&quot;,&quot;quote&quot;:&quot;اسمي فيصل&quot;}|null,&quot;english_line&quot;:&quot;comprehension&quot;|&quot;production&quot;|null,&quot;followup&quot;:{&quot;text&quot;:&quot;interview&quot;,&quot;date&quot;:&quot;2026-11-27&quot;}|null,&quot;done&quot;:false}
+</code></pre>
+<p>The worker turns <code>fact</code> into <code>ui.fact_card {field, value, quote, card_id}</code> at once (the card appears under Salma as she hears it), and the client's ✎ and ✕ send <code>fact_card.edit</code> and <code>fact_card.remove</code>, which the worker folds into the next operator note and logs as <code>fact_card_edit</code>. "Type" mode sends <code>text.turn {text}</code> over the data channel; the worker injects it as the learner turn without STT. At <code>done</code> or turn 8 the worker emits <code>onboarding.intake_completed {learner_id, intake_facts, name_clip_ref, english_moments: [...]}</code> (the pipeline's trigger for the pilot) and ends. The name clip is the learner's turn audio for the <code>name</code> field, uploaded like any turn and referenced by <code>name_clip_ref</code> for the voice studio's name pronunciation step.</p>
+<p><strong>The first call (A7).</strong> Kind <code>first</code>: the throwing host, budgets from 4.1 (no recast, no nudge), the Salma talkback introduction played as the package clip <code>talkback_intro_ar</code> on the <code>salma</code> track before the host's opening clip ("If you're stuck, hold the S button and ask me in Arabic"), close at 60 s, end at 90 s. The host's opening line is the pilot's throw question re-asked.</p>
+<p>Salma's Arabic variety (Gulf or neutral) is the 7.3 blind test's choice and is a <code>voice_casting.salma.variety</code> value; this domain reads it. [OPEN for Muath] see section 10.</p>
+<h3>4.10 Recording, verbatim re-transcription, pronunciation, deletion</h3>
+<p><strong>Capture.</strong> The recorder keeps the learner's decoded PCM (48 kHz mono from WebRTC, downsampled to 16 kHz) per turn in memory. At end of turn it encodes the turn as Opus in Ogg at 24 kHz (the topology's chosen format; 16 kHz FLAC would serve ASR equally and is the swap if a verbatim vendor rejects Opus) and uploads it with SSE-C under the learner's DEK to <code>forone-voice/learners/{lid}/calls/{callId}/turn-{n}.ogg</code>, writing a <code>media_objects</code> row <code>{kind: "call_turn", call_id, turn_n, duration_ms, ephemeral: !voice_storage, expires_at: voice_storage ? null : call_end + 15m}</code>, then emits:</p>
+<pre><code class="language-python">class CallTurnAudioReady(BaseModel):   # &quot;call.turn_audio_ready&quot;  sender: call-worker (through api)
+    learner_id: UUID; call_id: UUID; turn_n: int; media_id: UUID; event_id: UUID   # the call_turn event to update
+    duration_ms: int; voice_storage: bool; is_last: bool; language: Literal[&quot;en&quot;, &quot;ar&quot;]
+</code></pre>
+<p><strong><code>call/verbatim-turn</code></strong> (Inngest; shell in the topology, step bodies shared between this domain and the assessment domain): <code>verbatim_stt.transcribe(audio, language="en", disfluencies=True, word_timings=True)</code> through the <code>VerbatimRecognizer</code> adapter (AssemblyAI primary, ElevenLabs Scribe secondary, decided by the 30-clip test); the result updates the <code>call_turn</code> event's payload with <code>verbatim_text</code>, <code>words[{text, start_ms, end_ms, confidence}]</code>, <code>vendor</code>, <code>disfluencies_kept</code>; emits <code>verbatim.turn_completed</code>. If <code>voice_storage</code> is false the step then deletes the turn's object and marks <code>media_objects.deleted_at</code>. Concurrency 20 global; retries 2 with the secondary vendor on the second retry; a turn that still fails is marked <code>verbatim_failed</code> and its evidence is low confidence (PRD 5.4.11).</p>
+<p><strong>The full recording.</strong> When voice storage is on, the worker also mixes both sides (learner mono plus host plus Salma) into one Ogg Opus file at call end and uploads <code>call_full</code> (not ephemeral). It is what the archive plays (PRD 12.2) and what the polish card's ▶ plays by range. When storage is off, no full recording is ever written; the polish card plays nothing and shows the text (PRD 5.5).</p>
+<p><strong>Say it once, shadow lines [P1], small-door voice note, then-and-now.</strong> The client records with <code>MediaRecorder</code> (<code>audio/mp4</code> on Safari, <code>audio/webm;codecs=opus</code> on Chrome; at most 60 s for the small door, 20 s for say-it-once, 90 s per then-and-now task) and uploads to <code>POST /v1/calls/{id}/voicenotes</code> or <code>POST /v1/recordings</code> with the reference text where one exists. Every upload is a <code>media_objects</code> row under the same rules and a <code>call.turn_audio_ready</code>-shaped event (<code>recording.turn_audio_ready</code>) so the verbatim path is one function.</p>
+<p><strong>Pronunciation.</strong> <code>call/pronunciation-score</code> runs on <code>pronunciation.requested {media_id, reference_text}</code> for say-it-once and shadow lines only (PRD 10.3): <code>Pronunciation.score(audio, reference_text)</code> on Speechace (secondary Microsoft), stores <code>{sentence_score, word_scores[], vendor, version}</code> as a <code>say_it_once</code> or <code>shadow</code> event payload update. Nothing is shown to the learner; the client gets no response body beyond <code>202</code>. Dial-in audio [P1] never reaches this function.</p>
+<p><strong>Deletion windows.</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Mechanism</th>
+<th>Backstop</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Storage off: audio deleted when verbatim succeeds, and in any case within 15 min of call end (PRD 5.4.11)</td>
+<td>per-turn delete in <code>call/verbatim-turn</code>; <code>audio/expire</code> (topology) at <code>call.ended + 14 min</code> deletes anything with <code>ephemeral = true</code></td>
+<td>S3 lifecycle on the <code>ephemeral/</code> prefix at 1 day; <code>retention/daily</code> reports leftovers</td>
+</tr>
+<tr>
+<td>Revoke: all stored audio within 24 h (PRD 12.5 rule 3)</td>
+<td><code>learner/purge-audio</code> (topology) on <code>learner.consent_changed {voice_storage: false}</code>; a call in progress reads the flag at <code>call.ended</code> and treats the call as storage-off</td>
+<td>key destruction on account deletion</td>
+</tr>
+<tr>
+<td>Transcripts always kept</td>
+<td><code>call_turn</code> events are never deleted while the account exists</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>Then-and-now with storage off: kept only if the learner explicitly keeps that one (PRD 12.5 rule 2)</td>
+<td>the client's "keep this recording" sets <code>media_objects.ephemeral = false</code> for that object only</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>The worker holds the DEK in memory only, zeroes it at job end, and never logs it; the full recording's mix happens in the worker's memory, not on disk.</p>
+<h3>4.11 Client-side audio (the call screen's audio contract; the screen itself is the client domain's)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mic</td>
+<td><code>getUserMedia({audio: {echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1}})</code>, requested only at A2 "Talk" or at the first Call tap (PRD 2.2 A2)</td>
+</tr>
+<tr>
+<td>Playback</td>
+<td>Two <code>HTMLAudioElement</code>s attached to the <code>host</code> and <code>salma</code> tracks with <code>playsinline</code>; the <code>AudioContext</code> is resumed in the tap handler that starts the call (iOS requires a user gesture); a 100 ms "studio" sting from the package plays on connect to prove the output route works</td>
+</tr>
+<tr>
+<td>Echo</td>
+<td>Hardware AEC through the constraints above; the worker's interruption threshold (0.5 s and 2 words) absorbs residual echo; the client additionally mutes the mic track for 150 ms after each host sentence starts when no earphones are detected</td>
+</tr>
+<tr>
+<td>Earphones</td>
+<td>Not reliably detectable on iOS; the client checks <code>enumerateDevices()</code> labels and <code>MediaTrackSettings.deviceId</code> on Chrome and suggests earphones once on the first call either way (PRD 5.4.1); the suggestion never blocks</td>
+</tr>
+<tr>
+<td>Screen Wake Lock</td>
+<td><code>navigator.wakeLock.request("screen")</code> on call start; re-request on <code>visibilitychange</code> to visible; if the API is missing (older Safari) the screen shows a one-line notice and keeps a silent <code>&lt;video&gt;</code> loop playing</td>
+</tr>
+<tr>
+<td>Background</td>
+<td>On <code>visibilitychange</code> to hidden the client sends <code>client.hidden</code>; the worker waits 10 s for <code>client.visible</code>, then ends the call with <code>end_reason: abandoned</code> (iOS suspends WebRTC in the background, voice lens). The learner returns to a fresh call (4.3). <code>calls abandoned on the move</code> is computed from this reason plus motion hints</td>
+</tr>
+<tr>
+<td>Headphone buttons</td>
+<td>Media Session actions: <code>pause</code>/<code>play</code> toggles mute; <code>previoustrack</code> replays the host's last line (4.6); <code>nexttrack</code> triggers talkback for 5 s (an Ears-mode press-and-release equivalent; the S bubble still shows)</td>
+</tr>
+<tr>
+<td>Route changes</td>
+<td>On <code>devicechange</code> (AirPods connect or disconnect) the client re-attaches the audio elements; LiveKit's reconnect handles the transport</td>
+</tr>
+<tr>
+<td>Bandwidth</td>
+<td>Opus 48 kHz, 32 kbps, DTX on, FEC on; LiveKit adaptive stream off for audio (there is no video)</td>
+</tr>
+<tr>
+<td>Pad and S button</td>
+<td>Pointer events (<code>pointerdown</code>, <code>pointerup</code>, <code>pointercancel</code>) with <code>touch-action: none</code>; <code>pointercancel</code> (a system gesture) is treated as release; messages carry the client timestamp so the worker can align the pre-roll</td>
+</tr>
+<tr>
+<td>Planning card</td>
+<td>Shown by the client before connecting when <code>Read</code> is <code>not_started</code> or <code>skipped</code> (PRD 4 rule 3) with the three <code>planning_words</code> from the brief; "Ready" starts <code>POST /v1/calls</code></td>
+</tr>
+<tr>
+<td>Feed entry</td>
+<td>The feed item's call link opens <code>/call/{episodeId}</code> which runs the same flow; the handoff time from link open to room joined is logged as <code>feed_to_call_ms</code> (PRD 16.2)</td>
+</tr>
+</tbody>
+</table></div>
+<h3>4.12 The message and event protocol</h3>
+<p><strong>Client to worker (data channel, reliable, topic <code>forone.ctrl</code>, JSON <code>{v:1, t: client_ms, type, ...}</code>):</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>type</th>
+<th>payload</th>
+<th>effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hold.down</code> / <code>hold.up</code></td>
+<td></td>
+<td>floor held or released (4.5)</td>
+</tr>
+<tr>
+<td><code>talkback.down</code> / <code>talkback.up</code></td>
+<td></td>
+<td>talkback window (4.7)</td>
+</tr>
+<tr>
+<td><code>end_call</code></td>
+<td></td>
+<td>goodbye line then end</td>
+</tr>
+<tr>
+<td><code>text.turn</code></td>
+<td><code>{text}</code></td>
+<td>onboarding Type mode</td>
+</tr>
+<tr>
+<td><code>fact_card.edit</code> / <code>fact_card.remove</code></td>
+<td><code>{card_id, value?}</code></td>
+<td>onboarding fact cards</td>
+</tr>
+<tr>
+<td><code>client.hidden</code> / <code>client.visible</code></td>
+<td></td>
+<td>background handling</td>
+</tr>
+<tr>
+<td><code>planning.ready</code></td>
+<td></td>
+<td>logged; the pilot's call starts</td>
+</tr>
+<tr>
+<td><code>replay.host_line</code></td>
+<td><code>{host_line_id}</code></td>
+<td>logged only (the client replays locally)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Worker to client (topic <code>forone.ui</code>):</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>type</th>
+<th>payload</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>state</code></td>
+<td><code>{phase, turn: "host_speaking"|"listening"|"learner_speaking"|"floor_held"|"talkback"|"silent", t_s}</code></td>
+</tr>
+<tr>
+<td><code>caption</code></td>
+<td><code>{host_line_id, words?, text?, recast_span?, final}</code></td>
+</tr>
+<tr>
+<td><code>talkback</code></td>
+<td><code>{text_ar, word_en, mode: "word"|"hint"|"none"}</code></td>
+</tr>
+<tr>
+<td><code>retell_ring</code></td>
+<td><code>{seconds}</code></td>
+</tr>
+<tr>
+<td><code>fact_card</code></td>
+<td><code>{card_id, field, value, quote}</code></td>
+</tr>
+<tr>
+<td><code>crisis</code></td>
+<td><code>{resources_ref}</code> (the client shows the package's resources card)</td>
+</tr>
+<tr>
+<td><code>fallback_required</code></td>
+<td><code>{reason}</code></td>
+</tr>
+<tr>
+<td><code>ended</code></td>
+<td><code>{end_reason}</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Worker to <code>api</code> (<code>POST /internal/events</code>, batched):</strong> event rows per PRD 8.2 with <code>learner_id, session_id, door: "call", type, occurred_at, payload, model_version, prompt_version, cost_usd, call_id</code>.</p>
+<pre><code class="language-ts">type CallTurnPayload = {
+  turn_n: number; speaker: &quot;learner&quot;|&quot;host&quot;|&quot;salma&quot;; t_start_ms: number; t_end_ms: number;
+  // learner
+  streaming_text?: string; streaming_words?: {w: string; s: number; e: number; c: number}[]; streaming_vendor?: string;
+  verbatim_text?: string; verbatim_words?: {w: string; s: number; e: number; c: number}[]; verbatim_vendor?: string; verbatim_status?: &quot;pending&quot;|&quot;done&quot;|&quot;failed&quot;;
+  speech_ms?: number; pauses_ms?: number[]; backchannels?: {t_ms: number; clip_id: string}[]; cut_off?: boolean; repair_request?: boolean; media_id?: string;
+  // host
+  text?: string; moves?: object; allowances?: object; violations?: string[]; reply_latency_ms?: number; first_token_ms?: number; tts_first_byte_ms?: number;
+  model?: string; fallback_used?: string|null; unsaid_text?: string|null; host_line_id?: string;
+};
+type CallMetrics = {                                   // calls.metrics, written at end
+  connect_ms: number; first_sound_ms: number; turns_learner: number; turns_host: number;
+  learner_speech_ms: number; host_speech_ms: number; host_talk_share: number;
+  reply_latency_p50_ms: number; reply_latency_p95_ms: number; silence_to_sound_p50_ms: number;
+  talkback_count: number; talkback_p50_ms: number; hold_count: number; hold_total_ms: number;
+  silences_8s: number; cut_offs: number; barge_ins: number; anxiety_mode: null|&quot;prior&quot;|&quot;short_turns&quot;|&quot;two_silences&quot;;
+  moves: {clarify: number; recasts: number; nudge: number; recall_gaps: number; retell: number; praise: number; violations: number};
+  endpoint_ms_initial: number; endpoint_ms_final: number; vendors: {stt: string; llm: string; tts: string; fallbacks: string[]};
+  cost_usd: number;
+};
+</code></pre>
+<p>Events <code>hold_floor {t_ms, duration_ms}</code>, <code>silence {t_ms, duration_ms, offer_n}</code>, <code>talkback</code> (4.7.5), <code>replay_line {door: "call", host_line_id}</code>, <code>crisis_activation {t_ms, trigger: "header"|"keywords", role: "host"|"salma"}</code>, <code>call_started {kind, started_by, resumed_after_drop}</code>, <code>call_ended {end_reason, metrics}</code>.</p>
+<p><strong>Inngest events emitted by this domain:</strong> <code>call.turn_audio_ready</code> (4.10), <code>call.ended {learner_id, call_id, session_id, kind, end_reason, voice_storage}</code>, <code>voicenote.received {learner_id, call_id, media_id, event_id}</code>, <code>pronunciation.requested {learner_id, media_id, reference_text, surface}</code>, <code>recording.turn_audio_ready</code> (same shape as the call one with <code>surface</code>), <code>onboarding.intake_completed</code>.</p>
+<h3>4.13 The two vendor tests</h3>
+<p><strong>The 30-clip recognizer test (PRD 10.14, [P0], done before 2026-11-09).</strong> Input: 30 Milestone 0 learner clips with consent, 20 to 60 s each, with Muath's hand-tagged verbatim transcript and error tags; at least 6 clips containing an Arabic code-switch and 6 containing a pause over 2 s. <code>tools/call-bench recognizers --clips m0/clips --tags m0/tags</code> runs each clip through every candidate in both roles (streaming: Soniox, Deepgram; verbatim: AssemblyAI, ElevenLabs Scribe) and reports per vendor:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Definition</th>
+<th>Pass line for the role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Error survival</td>
+<td>share of hand-tagged learner errors whose surface form appears unchanged in the output</td>
+<td>verbatim: at least 0.85; streaming: at least 0.70</td>
+</tr>
+<tr>
+<td>Filler retention</td>
+<td>share of hand-tagged fillers kept</td>
+<td>verbatim: at least 0.80</td>
+</tr>
+<tr>
+<td>Hallucination near pauses</td>
+<td>inserted words within 1 s of a pause over 2 s, per clip</td>
+<td>at most 0.1 per clip</td>
+</tr>
+<tr>
+<td>Code-switch handling</td>
+<td>Arabic spans transcribed as Arabic (not dropped, not transliterated as English)</td>
+<td>talkback stream: at least 0.8 of spans</td>
+</tr>
+<tr>
+<td>WER against the hand transcript</td>
+<td>standard</td>
+<td>reported, not gated</td>
+</tr>
+<tr>
+<td>Confidence threshold</td>
+<td>the per-word confidence below which error survival falls under 0.8, found by sweeping</td>
+<td>becomes <code>language_package.recognizer.confidence_threshold</code> (PRD 10.2 step 4)</td>
+</tr>
+<tr>
+<td>Streaming latency</td>
+<td>final-after-end-of-speech, p50 and p95</td>
+<td>streaming: p95 under 500 ms</td>
+</tr>
+</tbody>
+</table></div>
+<p>The winner for each role goes into <code>vendors.yaml</code>; the loser is the secondary. Recognizer error by first language is tracked from these numbers onward (PRD 16.2) by rerunning the tool monthly on new consented clips.</p>
+<p><strong>The 50-call latency test (PRD 14.4 #3, [P0], staging, build week 4, rerun in week 5 and on every host prompt or vendor change).</strong> <code>tools/call-bench calls --n 50 --script m0/scripted-calls</code> drives the staging worker from a headless LiveKit client that plays Milestone 0 learner turns (audio files) as the caller, following a script of 20 to 25 turns with realistic pauses (including mid-clause pauses of 1 to 2 s and two holds), and records per host turn <code>reply_latency_ms</code> (end-of-turn decision to first host audio frame received), <code>silence_to_sound_ms</code> (last learner speech frame to first host audio frame), <code>connect_ms</code>, <code>talkback_ms</code> for two scripted S presses, and the move-contract counters. Gates: reply latency median under 1.5 s and p95 under 2.5 s; connect under 3 s at p95; talkback p50 under 2 s; <code>violations</code> under 5% of turns; host talk share at most 40%; cut-offs at most 1 per call. The run also produces the per-call cost from <code>vendor_calls</code>. The tool keeps every run's report under <code>bench/reports/{date}-{git_sha}.json</code> so a regression is visible.</p>
+<h3>4.14 Vendor adapters for the live path</h3>
+<p>The interfaces are the topology's (<code>StreamingRecognizer.livekit_plugin</code>, <code>StreamingSpeechSynth.livekit_plugin</code>, <code>VerbatimRecognizer.transcribe</code>, <code>Pronunciation.score</code>). This domain adds the roles and keys it needs:</p>
+<pre><code class="language-yaml"># packages/adapters/vendors.yaml (additions)
+roles:
+  talkback_stt:   {vendor: soniox, secondary: deepgram, languages: [ar, en], code_switch: true}
+  talkback_resolver: {vendor: anthropic, model: claude-haiku-5-5, pricing: standard}
+  salma_live:     {vendor: anthropic, model: claude-sonnet-5-5, pricing: standard, fallback: {vendor: anthropic, model: claude-haiku-5-5}}
+  host:           {vendor: anthropic, model: claude-sonnet-5-5, pricing: standard,
+                   fallback: [{vendor: anthropic, model: claude-haiku-5-5}, {vendor: google, model: gemini-3.8-flash}]}
+call:
+  endpoint_ms_default: 1500
+  endpoint_ms_min: 1000
+  endpoint_ms_max: 2500
+  max_extend_ms: 1500
+  retell_extend_ms: 2500
+  backchannel_after_ms: 1200
+  backchannel_after_ms_anxiety: 1000
+  silence_offer_ms: 8000
+  interruption_min_ms: 500
+  interruption_min_words: 2
+  hold_release_grace_ms: 300
+  talkback_preroll_ms: 400
+  talkback_resolver_timeout_ms: 800
+  llm_first_token_timeout_ms: 1200
+  llm_retry_timeout_ms: 1500
+  hidden_abandon_s: 10
+  limits: {first: {close_begin_s: 60, hard_end_s: 90}, main: {close_begin_s: 390, hard_end_s: 480}, round_two: {close_begin_s: 120, hard_end_s: 180}}
+  tts_stream_tfb_gate_ms: 300       # D8: a call TTS vendor must beat this at p95 in the 50-call test
+  worker: {calls_per_task: 8, min_tasks: 1, max_tasks: 40}
+</code></pre>
+<p>Each TTS vendor's live plugin is configured with the casting's <code>voice_id</code>, <code>rate</code> (vendor rate control where supported; otherwise the host simply speaks at the voice's natural rate on the call, because resampling live audio costs latency), PCM 24 kHz output, and sentence-level chunking. Vendor-specific notes to verify in week 1: ElevenLabs streaming (Flash model, websocket with alignment) gives word timings; Cartesia gives them; Inworld's streaming timestamps and Gemini TTS's streaming first-byte latency are unverified (voice lens) and are measured by <code>call-bench</code> before the blind test is run (D8).</p>
+<h3>4.15 Latency budget, host reply (PRD 15)</h3>
+<p>Measured from the end-of-turn decision. The silence window <code>p</code> is the learner's and is reported separately as <code>silence_to_sound</code>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Budget p50</th>
+<th>Budget p95</th>
+<th>How it is held</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>STT final after end-of-turn</td>
+<td>150 ms</td>
+<td>400 ms</td>
+<td>streaming partials are already in hand; only the final is awaited</td>
+</tr>
+<tr>
+<td>Operator note and request build</td>
+<td>10 ms</td>
+<td>20 ms</td>
+<td>no I/O</td>
+</tr>
+<tr>
+<td>Host first token</td>
+<td>350 ms</td>
+<td>700 ms</td>
+<td>cached prefix (A and B), <code>effort: low</code>, no thinking, <code>max_tokens: 120</code></td>
+</tr>
+<tr>
+<td><code>@moves</code> header parsed</td>
+<td>120 ms</td>
+<td>250 ms</td>
+<td>about 40 tokens at streaming speed</td>
+</tr>
+<tr>
+<td>TTS first byte for sentence 1</td>
+<td>200 ms</td>
+<td>400 ms</td>
+<td>websocket pre-opened at job start; sentence flush on the first <code>.?!</code> or 12 words</td>
+</tr>
+<tr>
+<td>LiveKit and network to the phone</td>
+<td>120 ms</td>
+<td>250 ms</td>
+<td>LiveKit edge; Opus 20 ms frames</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>about 950 ms</strong></td>
+<td><strong>about 2.0 s</strong></td>
+<td>gates 1.5 s and 2.5 s leave margin for the governor's re-request on a few turns</td>
+</tr>
+</tbody>
+</table></div>
+<p>Connect: <code>POST /v1/calls</code> 100 ms, room join 500 to 1,500 ms, job accept under 500 ms on a warm task, bundle fetch under 100 ms, opening clip plays at track subscription: under 2.5 s typical, under 3 s at p95 with at least one warm worker task per environment.</p>
+<hr /></div></details><details class="fs" id="s5-failure-modes-fallbacks-and-degraded-m"><summary><h3>5. Failure modes, fallbacks and degraded modes</h3><span class="wc">887 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>Detected by</th>
+<th>Behaviour</th>
+<th>Learner sees</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Room not joined within 3 s, or two pipeline errors in one call, or ICE disconnected over 5 s</td>
+<td>client timers; worker error count</td>
+<td><strong>Voice-note fallback (5.1)</strong></td>
+<td>"Weak signal. Let's do voice notes." then the same argument in voice notes</td>
+<td>thread continues; <code>end_reason: fallback</code></td>
+</tr>
+<tr>
+<td>Streaming STT vendor error or no partial for 3 s while speech is detected</td>
+<td>worker</td>
+<td>reopen the stream on the secondary vendor (<code>vendor_config</code>), re-feed the last 2 s from the pre-roll buffer; second failure in the call triggers fallback</td>
+<td>nothing, or one lost half-turn</td>
+<td><code>vendors.fallbacks</code></td>
+</tr>
+<tr>
+<td>Host LLM slow (first token over 1.2 s) or error</td>
+<td>worker</td>
+<td>retry 1.5 s; then Haiku 5.5; then the second vendor (4.4)</td>
+<td>a slightly longer pause, filled by one backchannel at 1.2 s</td>
+<td><code>fallback_used</code> on the turn</td>
+</tr>
+<tr>
+<td>Call TTS error or first byte over 1.5 s</td>
+<td>worker</td>
+<td>the sentence is retried on the understudy voice and vendor from <code>voice.understudy</code>; the switch is announced on air by the pipeline next episode (PRD 7.1 rule 3)</td>
+<td>a voice change mid-call, once; rare</td>
+<td><code>vendors.fallbacks</code>, <code>vendor.degraded</code></td>
+</tr>
+<tr>
+<td>Both voice vendors down</td>
+<td><code>vendor/health</code></td>
+<td>fallback to voice notes with text replies from the host (no audio) for the rest of the day</td>
+<td>text bubbles instead of voice</td>
+<td>logged; PRD 15 "second vendor the same day" is met by the understudy path above</td>
+</tr>
+<tr>
+<td>Salma TTS down</td>
+<td>worker</td>
+<td>talkback answers as text in the bubble only</td>
+<td>word appears, no voice</td>
+<td><code>talkback.mode</code> unchanged</td>
+</tr>
+<tr>
+<td>Talkback resolver timeout</td>
+<td>worker</td>
+<td>Salma's package clip "قلها مرة ثانية ببطء" plays; ask logged as unresolved</td>
+<td></td>
+<td><code>resolved_by: none</code></td>
+</tr>
+<tr>
+<td><code>api</code> unreachable</td>
+<td>worker</td>
+<td>events and <code>turn_audio_ready</code> spooled to <code>forone-voice/spool/{callId}.ndjson</code> (encrypted) and ingested by <code>retention/daily</code>; audio uploads go straight to S3 and are unaffected</td>
+<td>nothing</td>
+<td>delayed events; notes may be late</td>
+</tr>
+<tr>
+<td>Postgres down</td>
+<td><code>api</code></td>
+<td><code>POST /v1/calls</code> fails: the client offers voice notes at once (they also need <code>api</code>, so it queues them in IndexedDB and shows "will send when back")</td>
+<td>"Weak signal"</td>
+<td>queued</td>
+</tr>
+<tr>
+<td>Worker task dies mid-call</td>
+<td>LiveKit job failure, client sees agent leave</td>
+<td>client offers a fresh call (4.3 <code>resumed_after_drop</code>) or voice notes</td>
+<td>"Lost you. Call again?"</td>
+<td>partial turns already uploaded</td>
+</tr>
+<tr>
+<td>LiveKit Cloud down</td>
+<td>client connect failure</td>
+<td>voice notes</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Verbatim vendor down</td>
+<td><code>call/verbatim-turn</code> retries exhaust</td>
+<td>secondary vendor; if both fail within 15 min and storage is off, the audio is deleted and the turn is <code>verbatim_failed</code>: planning signals only, no claims</td>
+<td>notes may show fewer cards</td>
+<td>PRD 5.4.11 honoured</td>
+</tr>
+<tr>
+<td>Learner backgrounds the app</td>
+<td><code>client.hidden</code></td>
+<td>end after 10 s as <code>abandoned</code>; a fresh call later</td>
+<td></td>
+<td>counted in "abandoned on the move"</td>
+</tr>
+<tr>
+<td>Learner says they are driving</td>
+<td>package phrase list on the streaming final, and the host's <code>goodbye</code></td>
+<td>"Call me back when you've parked." and end</td>
+<td></td>
+<td><code>end_reason: driving</code></td>
+</tr>
+<tr>
+<td>Crisis</td>
+<td>host header or keyword list</td>
+<td>CRISIS state (D15): package clips in English then Arabic, resources card, <code>crisis_activation</code> logged; the session continues only if the learner chooses (the screen offers "continue" or "stop")</td>
+<td></td>
+<td>SB 243 log</td>
+</tr>
+<tr>
+<td>Host move violation twice</td>
+<td>governor</td>
+<td>spoken anyway, logged</td>
+<td></td>
+<td>quality metric</td>
+</tr>
+<tr>
+<td>Hard end reached mid-sentence</td>
+<td>timer</td>
+<td>end after the current TTS sentence</td>
+<td>a short goodbye</td>
+<td><code>timeout_8m</code></td>
+</tr>
+<tr>
+<td>Cost runaway (a call over 12 minutes of vendor time, which cannot happen under the timers but could under a bug)</td>
+<td>worker watchdog</td>
+<td>end the job</td>
+<td></td>
+<td>paged</td>
+</tr>
+</tbody>
+</table></div>
+<h3>5.1 The voice-note fallback in detail</h3>
+<ol>
+<li>The client ends the live attempt, shows the line, and records a note (<code>MediaRecorder</code>, at most 90 s) with a single large button; sending uploads to <code>POST /v1/calls/{id}/voicenotes {media, duration_ms}</code>; <code>api</code> writes <code>media_objects {kind: voice_note}</code>, a <code>call_turn</code> event with <code>mode: voice_notes</code>, flips <code>calls.mode = voice_notes</code>, and emits <code>voicenote.received</code>.</li>
+<li><code>call/voice-note-reply</code> (Inngest, concurrency 1 per call): verbatim transcription of the note (the same adapter; this transcript is both the streaming and the verbatim text for this turn); the host LLM with the same system layers A and B and the thread so far, the operator note <code>mode=voice_notes</code> (no backchannels, no silence offers; the move contract still applies with the same counters, carried in <code>calls.metrics</code>); call TTS of the reply (non-streaming, the same voice); the reply audio is stored as a host <code>call_turn</code> with <code>media_id</code> and pushed to the thread; the client plays it. Each exchange takes 20 to 40 s.</li>
+<li>Talkback in this mode is a text ask to Salma in the thread (<code>POST /v1/calls/{id}/talkback {text_ar}</code>) answered by the same resolver, as text.</li>
+<li>The thread closes when the learner taps "done" or at the session's close; the after-session pass treats voice-note turns like call turns (lower weight for fluency because the learner could re-record, flagged <code>mode: voice_notes</code>).</li>
+<li>A call that started live and fell back keeps one <code>calls</code> row; its live turns and note turns are one thread in order.</li>
+</ol>
+<hr /></div></details><details class="fs" id="s6-cost-and-performance-against-the-budge"><summary><h3>6. Cost and performance against the budgets</h3><span class="wc">643 words</span></summary><div class="prose"><p>Estimates from list prices on 2026-10-09 (voice and AI-architecture lenses, the API reference for Anthropic models); measured cost replaces them from the first call through <code>vendor_calls</code>. Assumptions: a 6:30 main call, 25 learner turns averaging 9 s of speech, host share 35% (2.3 min, about 340 words, 1,900 characters), 3 talkback asks, cache warm.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Vendor and unit</th>
+<th>Estimate per main call</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Streaming STT, host stream</td>
+<td>Soniox $0.002/min × 7 min</td>
+<td>$0.014</td>
+</tr>
+<tr>
+<td>Streaming STT, talkback stream</td>
+<td>Soniox, about 0.5 min</td>
+<td>$0.001</td>
+</tr>
+<tr>
+<td>Host LLM input</td>
+<td>Sonnet 5.5: cached reads about 90k tokens over 25 turns × $0.20/M = $0.018; cache writes about 4k new tokens × $2.50/M = $0.010; uncached about 3k × $2/M = $0.006</td>
+<td>$0.034</td>
+</tr>
+<tr>
+<td>Host LLM output</td>
+<td>25 turns × 60 tokens (header plus text) = 1.5k × $10/M</td>
+<td>$0.015</td>
+</tr>
+<tr>
+<td>Governor re-requests</td>
+<td>1 per call on average, half the input again</td>
+<td>$0.002</td>
+</tr>
+<tr>
+<td>Call TTS</td>
+<td>Inworld TTS-2 Flash $15/M chars → $0.029; ElevenLabs Flash v2.5 $40/M → $0.076; Gemini 3.8 Flash TTS $9/M audio tokens × 3,500 tokens → $0.032 (doubling 2027-01-01)</td>
+<td>$0.03 to $0.08</td>
+</tr>
+<tr>
+<td>Talkback resolver</td>
+<td>Haiku 5.5, 3 × 600 input + 60 output tokens</td>
+<td>$0.001</td>
+</tr>
+<tr>
+<td>Salma TTS</td>
+<td>3 × 40 Arabic characters</td>
+<td>under $0.005</td>
+</tr>
+<tr>
+<td>Backchannels, opening line</td>
+<td>pre-rendered</td>
+<td>$0 live (about $0.002 at episode time for the opening line)</td>
+</tr>
+<tr>
+<td>LiveKit Cloud</td>
+<td>2 participants × 7 min at the Ship plan's per-minute rate</td>
+<td>about $0.01 to $0.02 [ASSUMPTION; the topology flags this rate for verification]</td>
+</tr>
+<tr>
+<td>Compute</td>
+<td>1/8 of a Fargate task (2 vCPU, 4 GB) for 8 min</td>
+<td>about $0.004</td>
+</tr>
+<tr>
+<td><strong>Live call total</strong></td>
+<td></td>
+<td><strong>$0.11 to $0.17</strong></td>
+</tr>
+<tr>
+<td>Verbatim re-transcription</td>
+<td>AssemblyAI, 7 min of learner audio at about $0.004/min (the lens range is $0.002 to $0.017)</td>
+<td>$0.03 at the top of the range</td>
+</tr>
+<tr>
+<td>Pronunciation</td>
+<td>Speechace $0.008 per 15 s, one say-it-once</td>
+<td>$0.008</td>
+</tr>
+<tr>
+<td>Round two [P1]</td>
+<td>the same pipeline at 2.5 min, no talkback</td>
+<td>about $0.05</td>
+</tr>
+<tr>
+<td>Onboarding Salma + first call</td>
+<td>about 4.5 min of Salma and host time; charged to the learner's first session once</td>
+<td>about $0.10</td>
+</tr>
+</tbody>
+</table></div>
+<p>Against PRD 14.5: "Call (main and round two) $0.16" holds at $0.16 to $0.22 with ElevenLabs on the call and $0.14 to $0.16 with Inworld or Gemini; "re-transcription and pronunciation $0.03" holds at about $0.035. The ElevenLabs case is the one that breaks the line, which is why D8 ties the call vendor to the episode vendor and why the blind test's "cheapest voice that passes" rule (PRD 14.5) matters here as much as for episodes. Levers in order if the measured number is high: shorter host turns (every 10% of host talk removed is 10% of TTS cost and more learner speech); Haiku 5.5 as host if the 50-call test's move-contract score holds (saves about $0.03); Inworld as the call voice with ElevenLabs as the episode voice only if a blind test says listeners cannot tell on a 6-minute call (gives up D8, needs the on-air announcement). The scale target of $0.30 to $0.35 per session needs the call at about $0.08: Haiku host, Inworld or Gemini voice, and 5-minute calls, all of which are configuration in this design.</p>
+<p>Performance: section 4.15 for latency; capacity is 8 calls per task [ASSUMPTION from the topology, measured in the week-4 load test], 1 warm task per environment, autoscaling to 40; the beta's peak of 15 concurrent calls fits on 2 tasks. The vendor concurrency limits (Soniox and the TTS vendor's concurrent streams) are the real ceiling and are requested in week 1 for 50 concurrent streams.</p>
+<hr /></div></details><details class="fs" id="s7-build-plan-for-2026-11-02-to-2026-12-0"><summary><h3>7. Build plan for 2026-11-02 to 2026-12-06</h3><span class="wc">732 words</span></summary><div class="prose"><p>The call pipeline is scheduled for week 4 in PRD 19.2, but the vendor tests (week 1 to 2) and Salma's onboarding voice (week 3) need parts of it earlier. This plan front-loads the skeleton so that nothing in week 3 or 4 is built on untested vendors.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Dates</th>
+<th>Ships</th>
+<th>Priority</th>
+<th>What the Milestone 0 data lets you test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2026-11-02 to 11-08</td>
+<td><code>call-worker</code> skeleton on LiveKit Agents (<code>AgentSession</code> with Silero VAD, the multilingual turn detector, Soniox and Deepgram STT plugins, Anthropic LLM plugin, two TTS plugins for the two voice vendors in play, Salma TTS plugin); the <code>CallBundle</code> route returning a hand-written bundle; <code>tools/call-bench recognizers</code> run on the 30 clips, results and the confidence threshold written into the language package; <code>tools/call-bench calls</code> v0 (scripted caller from M0 audio) against the skeleton with a stub host prompt; TTS streaming first-byte measured per vendor (the D8 gate, handed to the pipeline domain before its blind test)</td>
+<td>P0</td>
+<td>The 30 consented clips and Muath's tags are the test set; M0 call audio is the scripted caller's voice</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2026-11-09 to 11-15</td>
+<td>Recognizer decision frozen in <code>vendors.yaml</code>; host prompt layers A and B from M0 prompt H plus the bible drafts; the governor with budgets, the <code>@moves</code> header and re-request; operator notes; per-turn recorder and upload with SSE-C; <code>call.turn_audio_ready</code> and <code>call/verbatim-turn</code> with the verbatim adapter; 50-call run #1 (latency only); Salma persona (<code>salma_live</code>) with the onboarding contract and fact-card header</td>
+<td>P0</td>
+<td>M0 call transcripts replayed through the governor to count violations before any live call</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2026-11-16 to 11-22</td>
+<td>Onboarding A3 live end to end (static intro clips, Type mode, fact cards, <code>onboarding.intake_completed</code>); kind <code>first</code> with its budgets and the talkback intro clip; captions over the data channel; the client audio contract (4.11) in <code>web</code> with the client domain; backchannel clips rendered per host voice by the voice studio; opening-line clip stored with the brief (D11)</td>
+<td>P0</td>
+<td>A3 transcripts from M0 intakes become the onboarding fixture set</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2026-11-23 to 11-29</td>
+<td>The full main call: adaptive patience from the pause profile, hold-to-talk, talkback with the reverse gloss index and the Haiku resolver, word-or-hint, retell ring, silence offers, anxiety mode, timers and goodbyes, <code>resumed_after_drop</code>, repair phrases, driving phrase; voice-note fallback end to end (<code>call/voice-note-reply</code>); <code>audio/expire</code> wiring; <code>calls.metrics</code>; worker autoscaling; 50-call run #2 with the full gates; per-call cost visible in <code>vendor_calls</code></td>
+<td>P0</td>
+<td>M0's evidence on call timing (how long learners search for words) sets the first <code>p</code> distribution and the retell window</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2026-11-30 to 12-06</td>
+<td>Pronunciation on say-it-once (<code>call/pronunciation-score</code>); recordings route for the first then-and-now and the small door; crisis protocol with the package clips and keyword list; <code>learner/purge-audio</code> and deletion verification with the security domain; load test at 15 concurrent calls; 50-call run #3 after prompt tuning; end-to-end with Milestone 0 learners on staging; runbook for <code>/admin/vendors</code> failover</td>
+<td>P0</td>
+<td>The M0 learners' real calls on the real pipeline are the exit evidence: measured cost per call and the latency gates</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>2026-12-07 to 2027-01-10</td>
+<td>Round two (kind <code>round_two</code>, offered from Today); shadow lines with pronunciation; the dial-in experiment (LiveKit SIP ingress, 8 kHz flag <code>low_confidence</code>, no talkback, no claims); the observer slot test behind a flag; the simulated-caller half of the offline suite (PRD 6.7) built on <code>call-bench</code>; Deepgram as a hot secondary exercised weekly by a canary call</td>
+<td>P1</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Too much for one to two engineers, and the cut:</strong> the two-track Salma audio (play Salma on the host track instead and show the bubble; loses the "closer" mix, keeps the function); word-level captions (sentence captions only; the recast word is still bold); the reverse gloss index for talkback (Haiku resolves everything; adds 400 ms, still under 2 s); in-call adaptation of <code>p</code> (keep the profile value only); the headphone-button mappings on the call; <code>tools/call-bench</code> as a CI job (run it by hand before each release); the understudy-voice mid-call switch (end the call and fall back to voice notes instead). Do not cut: per-turn upload and verbatim (notes and the deletion window depend on it), the governor (law 7), hold-to-talk (the one feature Duolingo's own research says users demanded), the voice-note fallback (PRD 15), the 50-call test (PRD 14.4).</p>
+<hr /></div></details><details class="fs" id="s8-alternatives-rejected"><summary><h3>8. Alternatives rejected</h3><span class="wc">400 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>Alternative</th>
+<th>Why not</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Speech-to-speech (OpenAI gpt-realtime, Gemini 3.8 Live, Nova Sonic)</td>
+<td>No custom voice, so the host does not sound like the episode; input transcripts are approximate (the assessment domain needs the exact streaming text and the verbatim pass); per-turn re-billing makes cost follow turn count; patience is one setting per call</td>
+</tr>
+<tr>
+<td>Pipecat instead of LiveKit Agents</td>
+<td>Smart Turn is designed for English; LiveKit's turn detector covers Arabic for talkback; the topology already runs LiveKit Cloud</td>
+</tr>
+<tr>
+<td>ElevenLabs Agents (the Milestone 0 call)</td>
+<td>Hosted convenience, but the voice differs from the episode, the turn-taking is a global setting, the brief is pasted by hand, and the transcript smooths learner errors; right for a no-code pilot, wrong for the product</td>
+</tr>
+<tr>
+<td>Whole-reply structured output (JSON with <code>moves</code> and <code>text</code>)</td>
+<td>First audio waits for the JSON to close; the header line streams the same information in 100 to 200 ms</td>
+</tr>
+<tr>
+<td>A separate observer model in the beta</td>
+<td>PRD 17 excludes it; the brief already lists recasts and gaps; the slot is reserved (D14)</td>
+</tr>
+<tr>
+<td>Backchannels generated by the host model</td>
+<td>A model round trip inside the learner's pause is the latency the backchannel exists to hide</td>
+</tr>
+<tr>
+<td>One recognizer stream with code-switching for talkback</td>
+<td>Code-switch errors would leak Arabic into the host's input and into the error profile; the S button makes routing exact (PRD 0.1 row 7)</td>
+</tr>
+<tr>
+<td>Transcribing the whole call after it ends</td>
+<td>Notes within 90 s would need a 7-minute file transcribed in 60 s; the 15-minute deletion would race the transcription</td>
+</tr>
+<tr>
+<td>Live <code>p</code> learned by a model</td>
+<td>No model for L2 pauses exists (voice lens); P90 of measured pauses with in-call cut-off correction is honest and cheap</td>
+</tr>
+<tr>
+<td>Dial-in as the P0 hands-free answer</td>
+<td>8 kHz audio, no talkback, no pronunciation; PRD makes it a P1 experiment</td>
+</tr>
+<tr>
+<td>Client-side recording of the whole call (MediaRecorder) as the evidence source</td>
+<td>Browser recording of a WebRTC call is unreliable on iOS; the worker already has the decoded frames</td>
+</tr>
+<tr>
+<td>Opus-class host</td>
+<td>Latency and cost; the host's job is short turns from a brief, not reasoning</td>
+</tr>
+<tr>
+<td>Haiku-class host by default</td>
+<td>Unproven on the recast moves; kept as the measured fallback and the scale lever</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div></details><details class="fs" id="s9-assumptions-about-other-domains"><summary><h3>9. Assumptions about other domains</h3><span class="wc">500 words</span></summary><div class="prose"><ol>
+<li><strong>System topology.</strong> <code>call-worker</code> on Fargate with LiveKit Cloud, <code>POST /v1/calls</code>, <code>GET /internal/calls/{id}/brief</code>, <code>POST /internal/events</code>, room naming <code>call-{callId}</code>, dispatch metadata <code>{callId}</code>, the <code>calls</code> table, <code>audio/expire</code>, <code>learner/purge-audio</code>, <code>vendor/health</code> and <code>/admin/vendors</code> exist as the topology describes. Deviations recorded here: the host's fallback chain is Haiku 5.5 first, then Gemini 3.8 Flash (the topology lists Gemini only); <code>calls</code> gains <code>metrics</code> and <code>bundle_version</code>; the <code>CallBundle</code> is compiled at <code>POST /v1/calls</code> (not only at episode time) so notebook vetoes are honoured; the worker publishes two audio tracks.</li>
+<li><strong>Episode generation pipeline.</strong> <code>CallBrief</code> has the fields in 02-generation-pipeline.md 4.4; the voice studio renders the opening-line clip (normal and <code>resumed_after_drop</code> variants) and the backchannel clips per host voice at casting time, and the package's static Salma and crisis clips once; the blind test admits only vendors that pass the streaming first-byte gate (D8), and <code>voice_casting.hosts.*.understudy</code> is the mid-call failover voice; the gloss precompute also writes a reverse index ar→en for talkback.</li>
+<li><strong>Learner model, event log and data platform.</strong> <code>events</code> accepts <code>call_turn</code> updates in place for the verbatim fields (an append-only log with one allowed late-binding update per turn event, or a second event <code>call_turn_verbatim</code> keyed to the first; either satisfies this domain, the data domain chooses); the Skills store holds <code>pause_profile.endpoint_ms</code> computed by the formula in 4.5 and the anxiety prior; the Word bank exposes the produced-lemma set for the talkback brief; <code>media_objects</code> has <code>ephemeral</code>, <code>expires_at</code>, <code>deleted_at</code>.</li>
+<li><strong>Assessment engine.</strong> <code>session/after-pass</code> stage 1 waits for <code>verbatim.turn_completed</code> of the last turn, not for a whole-call transcript; the recognizer confidence threshold is read from the language package where <code>call-bench</code> writes it; voice-note turns are weighted down for fluency; dial-in turns carry <code>low_confidence</code> and never feed claims; the first "then" recording arrives through <code>/v1/recordings</code> with task ids.</li>
+<li><strong>Client app and delivery.</strong> The call screen implements 4.11 and 4.12; the planning card, the earphones suggestion, the captions switch, the "keep this recording" control, the crisis resources card and the Today-screen round-two offer are client surfaces; the feed item's call link opens <code>/call/{episodeId}</code>.</li>
+<li><strong>Security, privacy, consent and compliance.</strong> <code>api</code> unwraps the DEK for the worker for the call's duration; SSE-C uploads from the worker are approved; LiveKit Cloud, Soniox, Deepgram, AssemblyAI or ElevenLabs, Speechace or Microsoft, and the TTS vendors are approved processors for audio in transit (and, for the verbatim vendor, at rest for the minutes of transcription), or replacements are named; the consent flag's semantics at <code>call.ended</code> are as in 4.10.</li>
+<li><strong>Cost model, vendor strategy and tracing.</strong> Every adapter call from the worker writes a <code>vendor_calls</code> row through the shared middleware with <code>call_id</code>; <code>prices.yaml</code> carries the per-minute, per-character and per-token rates used in section 6 and the 2027-01-01 Gemini row; Langfuse spans carry <code>call_id</code> and <code>turn_n</code>.</li>
+<li><strong>Evaluation, observability and operations.</strong> <code>calls.metrics</code> and the <code>call-bench</code> reports are the inputs for the latency, talk-share, violation and talkback dashboards; the "calls abandoned on the move" and "feed-to-call handoff" measures are computed from <code>end_reason: abandoned</code> and <code>feed_to_call_ms</code>; the weekly canary call per voice vendor is scheduled by operations.</li>
+</ol>
+<hr /></div></details><details class="fs" id="s10-open-for-muath"><summary><h3>10. Open for Muath</h3><span class="wc">436 words</span></summary><div class="prose"><ol>
+<li><strong>[OPEN for Muath] The call-voice gate on the episode vendor (D8).</strong> If the blind test's favourite voice (ElevenLabs is the likeliest, voice lens) is the only one that passes naturalness but its streaming price puts the call line at about $0.22 instead of $0.16, choose: keep sameness and accept about $0.06 more per session in the beta, or let the call use the runner-up vendor's closest voice with an on-air announcement, as Milestone 0 did. The M0 day-7 check-in ("does the different call voice bother you?") is the evidence; decide by 2026-11-15, when <code>vendors.yaml</code> freezes.</li>
+<li><strong>[OPEN for Muath] Salma's Arabic variety and voice vendor</strong> (PRD 18 #6). The talkback and onboarding pipeline is variety-agnostic; the blind test with 5 Saudi listeners needs to run by 2026-11-15 so the static intro and talkback clips can be rendered in week 3.</li>
+<li><strong>[OPEN for Muath] Vendor contracts for concurrency.</strong> Soniox, the TTS vendor(s) and AssemblyAI or ElevenLabs need paid tiers with at least 50 concurrent streams before the beta; ElevenLabs' concurrency sits on its plan tier. Approve the spend (roughly $100 to $300 a month in minimums during the beta, on top of usage) or name the cap.</li>
+<li><strong>[OPEN for Muath] Crisis protocol lines and resources</strong> (PRD 7.9, with counsel). The worker plays fixed package clips in English and Arabic and shows a resources card; the text, the Saudi resources and whether the keyword list may trigger on its own (false positives step the host out of the show) need counsel's review before 2026-12-07. Milestone 0's "call 911" line is a placeholder.</li>
+<li><strong>[OPEN for Muath] Processors for audio.</strong> The security domain lists them; the ones specific to this domain are LiveKit Cloud (media in transit), the streaming recognizer (audio in transit, no retention to be confirmed in the contract), the verbatim recognizer (audio held for the transcription job) and the pronunciation vendor (a 15-second clip). Any "no" names a replacement in section 4.14's secondary column.</li>
+<li><strong>[OPEN for Muath] The dial-in experiment's number and telephony provider</strong> [P1]: a Saudi number through a SIP provider into LiveKit, roughly $5 to $20 a month plus per-minute rates; it also needs the PDPL view on phone audio. Not needed before 2026-12-07.</li>
+<li><strong>[OPEN for Muath] Haiku 5.5 as the host at scale.</strong> This document keeps Sonnet 5.5 for the beta and makes Haiku the measured fallback. If the week-5 run shows Haiku meets the move-contract and violation gates on the M0 scripts, switching saves about $0.03 a session and is one line in <code>vendors.yaml</code>; it is the owner's call because the host's quality is the product's voice.</li>
+</ol></div></details>
+</section>
+
+<footer class="foot">
+  <a href="https://claude.ai/artifact/C3oRETQgDsX3X6dv8VjdP5">Back to all nine domains</a>
+  <span class="muted">For one · architecture set, 2026-10-23</span>
+</footer>
+</div>
+<script>
+document.querySelectorAll('.toc a').forEach(a => a.addEventListener('click', () => {
+  const d = document.querySelector(a.getAttribute('href')); if (d) d.open = true;
+}));
+</script>
+

@@ -1,0 +1,2020 @@
+<title>Cost model and vendors architecture</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (72ch prose) inside a 1080px frame; diagrams and decision cards use the full frame. */
+:root {
+  --paper: #F1F4F3; --surface: #FFFFFF; --ink: #142128; --muted: #55656C; --line: #D3DCDA;
+  --accent: #0D6A68; --accent-soft: #DDEDEA; --flag: #A86A12; --flag-soft: #F6EBD6;
+  --ok: #2E7A4E; --warn: #A86A12; --risk: #B0452C; --none: #6E7C83;
+  --blocker: #B0452C; --major: #C9842A; --minor: #A9B6B9;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0E1618; --surface: #152024; --ink: #E2EAE9; --muted: #95A6AA; --line: #28373B;
+  --accent: #5CC0B9; --accent-soft: #17332F; --flag: #E2A94C; --flag-soft: #352914;
+  --ok: #6BC08D; --warn: #E2A94C; --risk: #E8836A; --none: #8C9A9F;
+  --blocker: #E8836A; --major: #E2A94C; --minor: #56676B; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0E1618; --surface: #152024; --ink: #E2EAE9; --muted: #95A6AA; --line: #28373B;
+  --accent: #5CC0B9; --accent-soft: #17332F; --flag: #E2A94C; --flag-soft: #352914;
+  --ok: #6BC08D; --warn: #E2A94C; --risk: #E8836A; --none: #8C9A9F;
+  --blocker: #E8836A; --major: #E2A94C; --minor: #56676B; color-scheme: dark }
+
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+.page { max-width: 1080px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 44px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+code { font-family: var(--mono); font-size: .86em; background: var(--accent-soft); padding: .08em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+h1, h2, h3, h4 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h2 { font-size: 1.7rem; font-weight: 700; letter-spacing: -.01em; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+h4 { font-size: 1.02rem; font-weight: 700; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.lbl { font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-right: .4em; }
+
+.crumbs { display: flex; gap: 8px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); font-family: var(--mono); }
+.crumbs a { text-decoration: none; }
+.hero { display: flex; flex-direction: column; gap: 14px; }
+.eyebrow { font-family: var(--mono); font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font-size: clamp(2rem, 5.2vw, 3.4rem); font-weight: 700; letter-spacing: -.02em; max-width: 20ch; }
+.lede { font-size: 1.2rem; max-width: 60ch; color: var(--ink); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip, .pill { font-family: var(--mono); font-size: .78rem; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; background: var(--surface); white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; }
+.pill i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.st-ok { color: var(--ok); } .st-warn { color: var(--warn); } .st-one { color: var(--risk); } .st-none { color: var(--none); }
+.statusbox { border-left: 4px solid currentColor; background: var(--surface); padding: 14px 18px; border-radius: 0 8px 8px 0; }
+.statusbox p { color: var(--ink); max-width: 75ch; }
+
+.block { display: flex; flex-direction: column; gap: 14px; }
+.block > .muted { max-width: 70ch; }
+.prose { max-width: 74ch; display: flex; flex-direction: column; gap: 12px; }
+.prose.big p { font-size: 1.08rem; line-height: 1.7; }
+.prose ul, .prose ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+.prose pre { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-size: .8rem; line-height: 1.5; margin: 0; }
+.prose pre code { background: none; padding: 0; overflow-wrap: normal; }
+.prose h3, .prose h4 { margin-top: 10px; }
+.prose blockquote { margin: 0; padding-left: 14px; border-left: 3px solid var(--line); color: var(--muted); }
+.tw { overflow-x: auto; max-width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.prose .tw { max-width: min(1080px, 100vw - 32px); width: max-content; min-width: 100%; }
+table { border-collapse: collapse; font-size: .84rem; line-height: 1.45; min-width: 560px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: var(--accent-soft); }
+tr:last-child td { border-bottom: 0; }
+td { min-width: 9ch; }
+
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; text-align: center; font-family: var(--body); }
+
+.decisions { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 12px; }
+.dec { display: flex; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+.dec-n { font-family: var(--mono); font-size: .8rem; color: var(--accent); font-weight: 500; min-width: 2.2ch; padding-top: 2px; }
+.dec-body { display: flex; flex-direction: column; gap: 7px; min-width: 0; font-size: .9rem; line-height: 1.5; }
+.dec-body h4 { font-size: 1rem; }
+.dec-chosen { color: var(--ink); }
+.dec-why { color: var(--ink); }
+.dec-rej { color: var(--muted); font-size: .84rem; }
+
+.openitems { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; counter-reset: oi; }
+.oi { counter-increment: oi; display: flex; gap: 14px; background: var(--flag-soft); border-radius: 10px; padding: 14px 18px; }
+.oi::before { content: counter(oi); font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--flag); min-width: 1.4ch; line-height: 1.2; }
+.oi > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.oi-b { font-size: .92rem; max-width: 80ch; }
+.oi-b p + p { margin-top: 8px; }
+
+.rv-note { max-width: 75ch; }
+.warnnote { border-left: 4px solid var(--warn); padding-left: 12px; }
+.nore { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 16px 18px; max-width: 75ch; }
+.rv { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.rv-h { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.rv-h > div:first-child { display: flex; flex-direction: column; gap: 4px; max-width: 60ch; }
+.rv-counts { display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-start; }
+.cnt { font-family: var(--mono); font-size: .74rem; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.cnt.blocker { color: var(--blocker); } .cnt.major { color: var(--major); } .cnt.minor { color: var(--muted); }
+.sevbar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px; }
+.seg.blocker { background: var(--blocker); } .seg.major { background: var(--major); } .seg.minor { background: var(--minor); }
+details > summary { cursor: pointer; }
+.rv-list > summary { font-weight: 600; font-size: .92rem; color: var(--accent); }
+.findings { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 10px; }
+.fd { display: flex; gap: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+.sev { font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; padding: 2px 7px; border-radius: 4px; height: fit-content; white-space: nowrap; border: 1px solid currentColor; }
+.fd.blocker .sev { color: var(--blocker); } .fd.major .sev { color: var(--major); }
+.fd-b { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: .9rem; }
+.fd-b details { font-size: .86rem; color: var(--ink); }
+.fd-b details > summary { color: var(--muted); font-size: .8rem; }
+.fd-b details[open] { display: flex; flex-direction: column; gap: 8px; }
+.fd-loc { font-family: var(--mono); font-size: .76rem; color: var(--muted); overflow-wrap: anywhere; }
+.minors { margin: 8px 0 0; padding-left: 1.2em; font-size: .86rem; display: flex; flex-direction: column; gap: 5px; color: var(--muted); }
+
+.toc { columns: 2 260px; margin: 0; padding-left: 1.3em; font-size: .9rem; }
+.toc li { break-inside: avoid; padding: 2px 0; }
+.fs { border-top: 1px solid var(--line); padding-block: 4px; }
+.fs > summary { list-style: none; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 0; }
+.fs > summary::-webkit-details-marker { display: none; }
+.fs > summary h3::before { content: "+"; font-family: var(--mono); color: var(--accent); display: inline-block; width: 1.4em; }
+.fs[open] > summary h3::before { content: "−"; }
+.wc { font-family: var(--mono); font-size: .74rem; color: var(--muted); white-space: nowrap; }
+.fs > .prose { padding-bottom: 18px; padding-left: 1.6em; }
+
+.foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--line); padding-top: 16px; font-size: .9rem; }
+
+/* cost chart (domain 08) */
+.costfig { margin: 6px 0 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+.costfig figcaption { display: flex; flex-direction: column; gap: 2px; }
+.cc { display: flex; flex-direction: column; gap: 8px; --lab: 120px; }
+.cc-scale { position: relative; height: 18px; margin-left: var(--lab); font-family: var(--mono); font-size: .7rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cc-scale span { position: absolute; transform: translateX(-50%); }
+.cc-scale span:first-child { transform: none; } .cc-scale span:last-child { transform: translateX(-100%); }
+.cc-plot { position: relative; display: flex; flex-direction: column; gap: 14px; padding-block: 18px 4px; }
+.refs { position: absolute; top: 0; bottom: 0; left: var(--lab); right: 0; pointer-events: none; }
+.ref { position: absolute; top: 0; bottom: 0; border-left: 1.5px dashed var(--muted); }
+.ref span { position: absolute; top: 0; left: 4px; font-family: var(--mono); font-size: .68rem; color: var(--muted); white-space: nowrap; }
+.ref.stop { border-color: var(--risk); } .ref.stop span { color: var(--risk); }
+.cc-row { display: flex; align-items: center; }
+.cc-l { width: var(--lab); flex: none; font-size: .84rem; }
+.cc-bars { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.bar { height: 16px; border-radius: 0 3px 3px 0; position: relative; }
+.bar b { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: .68rem; font-weight: 500; color: var(--paper); font-variant-numeric: tabular-nums; }
+.bar.now { background: var(--accent); }
+.bar.later { background: var(--flag); }
+.cc-key { display: flex; gap: 16px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); margin-left: var(--lab); }
+.k { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.k.now { background: var(--accent); } .k.later { background: var(--flag); }
+@media (max-width: 560px) { .cc { --lab: 92px; } .cc-l { font-size: .76rem; } }
+
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+
+</style>
+
+<div class="page">
+<nav class="crumbs"><a href="https://claude.ai/artifact/C3oRETQgDsX3X6dv8VjdP5">For one architecture</a><span>/</span><span>Domain 8 of 9</span></nav>
+<header class="hero">
+  <p class="eyebrow">Domain 08 · Technical architecture · written 2026-10-16</p>
+  <h1>Cost model, vendor strategy and tracing</h1>
+  <p class="lede">What one session costs on each vendor stack, how every vendor call is priced and traced, and which decisions move the number.</p>
+  <div class="meta">
+    <span class="pill st-none"><i></i>Unreviewed first draft</span>
+    <span class="chip">12 decisions</span>
+    <span class="chip">8 open for Muath</span>
+    <span class="chip">13,988 words, about 60 min</span>
+  </div>
+</header>
+
+<section class="statusbox st-none">
+  <p><strong>Unreviewed first draft.</strong> Nobody has checked this draft against the PRD yet. Treat every number as provisional.</p>
+</section>
+
+<section class="block" id="summary">
+  <h2>In one paragraph</h2>
+  <div class="prose big"><p>The beta cannot meet the $0.60 budget by accident, and the $0.30 to $0.35 scale target cannot be met at list prices after 2027-01-01. The arithmetic in section 6 says: the recommended beta stack lands at $0.57 to $0.67 a session depending on which voice vendor wins the blind test (Gemini with batch TTS at the bottom, Inworld at the top, ElevenLabs at list price at $0.85 and out). The Gemini price doubling on 2027-01-01 adds $0.18 to a Gemini-voiced session and $0.015 to any session (the editor), which is why the voice vendor decision on 2026-11-13 is the single most important cost decision in the beta. The floor stack reaches $0.33 to $0.36 before the doubling and $0.37 to $0.41 after it; the last $0.05 to the target comes from a negotiated voice rate, a cheaper voice tier that passes the blind test, or a scope change Muath must approve (section 6.4).</p>
+<p>Cost is traced the way the topology already specified: one middleware in <code>forone.adapters</code> writes one <code>vendor_calls</code> row and one Langfuse observation per vendor call, priced from a dated <code>price_book</code>. This document owns those two tables, the price file, the Langfuse conventions, the roll-ups, the weekly report, the alarms and the spend guard. Nothing about cost is shown to a learner (PRD-v2 law 1 and 16.2: "a warning light, never a goal").</p></div>
+</section>
+
+<section class="block" id="picture">
+  <h2>The picture</h2>
+  <p class="muted">Drawn from section 3 of the document. Boxes are the canonical names the other domains use.</p>
+  <div class="diagram"><pre class="mermaid">
+flowchart LR
+  C[&quot;Callers&lt;br/&gt;workflows, call-worker, api&quot;] --&gt; AD[&quot;adapters.for_role&lt;br/&gt;vendors.yaml + vendor_config&quot;]
+  AD --&gt; TR[&quot;tracing.traced&lt;br/&gt;time, units, price, spend guard&quot;]
+  PB[(&quot;price_book&lt;br/&gt;from prices.yaml&quot;)] --&gt; TR
+  TR --&gt; VC[(&quot;vendor_calls&lt;br/&gt;one row per call&quot;)]
+  TR -.-&gt; LF[&quot;Langfuse observation&quot;]
+  VC --&gt; RU[&quot;cost/rollup&lt;br/&gt;every 15 min&quot;]
+  RU --&gt; SC[(&quot;session_costs&lt;br/&gt;learner + role roll-ups&quot;)]
+  SC --&gt; AL[&quot;cost/alarms&quot;]
+  SC --&gt; WR[&quot;Weekly report&lt;br/&gt;Monday 06:00 Riyadh&quot;]
+  VC --&gt; RC[&quot;Monthly reconcile&lt;br/&gt;against vendor bills&quot;]
+</pre></div>
+  
+<figure class="costfig">
+  <figcaption><strong>Cost of one daily session by voice stack</strong><span class="muted">Section 6.1, list prices. Budget $0.60, stop line $1.00.</span></figcaption>
+  <div class="cc">
+    <div class="cc-scale"><span style="left:0%">$0</span><span style="left:20%">$0.25</span><span style="left:40%">$0.50</span><span style="left:60%">$0.75</span><span style="left:80%">$1.00</span><span style="left:100%">$1.25</span></div>
+    <div class="cc-plot">
+      <div class="refs"><div class="ref budget" style="left:48%"><span>budget $0.60</span></div><div class="ref stop" style="left:80%"><span>stop $1.00</span></div></div>
+      <div class="cc-row"><span class="cc-l">Gemini voice</span><div class="cc-bars"><div class="bar now" style="width:51.04%"><b>$0.64</b></div><div class="bar later" style="width:65.6%"><b>$0.82</b></div></div></div>
+      <div class="cc-row"><span class="cc-l">Inworld voice</span><div class="cc-bars"><div class="bar now" style="width:53.68%"><b>$0.67</b></div><div class="bar later" style="width:54.88%"><b>$0.69</b></div></div></div>
+      <div class="cc-row"><span class="cc-l">ElevenLabs list</span><div class="cc-bars"><div class="bar now" style="width:93.92%"><b>$1.17</b></div><div class="bar later" style="width:95.12%"><b>$1.19</b></div></div></div>
+    </div>
+    <div class="cc-key"><span><i class="k now"></i>Beta, standard TTS</span><span><i class="k later"></i>After 2027-01-01 (Gemini prices double)</span></div>
+  </div>
+  <p class="muted small">Gemini with batch TTS reaches $0.57. The voice vendor decision on 2026-11-13 is the largest single cost decision in the beta.</p>
+</figure>
+
+</section>
+
+<section class="block" id="decisions">
+  <h2>The decisions</h2>
+  <p class="muted">Section 1's table, one card per decision. "Rejected" is what was considered and turned down.</p>
+  <ol class="decisions">
+<li class="dec">
+<span class="dec-n">D1</span>
+<div class="dec-body">
+<h4>Single source of cost truth</h4>
+<p class="dec-chosen"><code>vendor_calls</code> table in Postgres, one row per vendor call, written by the adapter middleware; <code>pipeline_steps.cost_usd</code> (02) and <code>episodes.cost_usd</code>, <code>calls.metrics.cost_usd</code>, <code>events.cost_usd</code> (04) are denormalized sums of it [DECISION, PRD-v2 14.5]</p>
+<p class="dec-why"><span class="lbl">Why</span> One table answers "per role, per vendor, per learner, per session" with one <code>GROUP BY</code>; roll-ups can be rebuilt from it</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Cost only in <code>events</code> (sample episodes, canaries and vendor tests have no learner); cost only in Langfuse (a processor, sampled at scale, outside our region)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D2</span>
+<div class="dec-body">
+<h4>Price source</h4>
+<p class="dec-chosen"><code>packages/adapters/prices.yaml</code>, checked in, dated rows with <code>valid_from</code>, loaded into the <code>price_book</code> table by migration; the middleware prices from the table, never from the YAML at runtime [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> 01 named the file and 02 named the table; both are right: the file is reviewed in a pull request, the table is joinable in SQL</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Prices hard-coded in adapters; prices fetched from vendor APIs (none publish a machine-readable price list)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D3</span>
+<div class="dec-body">
+<h4>Tracing tool</h4>
+<p class="dec-chosen">Langfuse Cloud EU, one trace per unit of work, <code>user_id</code> = learner id, 100% sampling in the beta [DECISION, PRD-v2 14.3]</p>
+<p class="dec-why"><span class="lbl">Why</span> Prompts and completions next to cost and latency is what debugging a bad episode needs; managed; EU region is already in the topology's processor list</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> OpenTelemetry to Grafana only (no prompt views); Helicone-style proxy (a hop in the live path); self-hosted Langfuse (operations for a two-person team; kept as the PDPL fallback)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D4</span>
+<div class="dec-body">
+<h4>Budget enforcement in code</h4>
+<p class="dec-chosen">A <code>cost_guard</code> with three spend modes (<code>normal</code>, <code>conserve</code>, <code>halt</code>) switched by daily spend and per-session alarms; the stop line ($1.00) pages and opens a 48-hour plan window, it does not stop service [DECISION, PRD-v2 1.4, 16.1]</p>
+<p class="dec-why"><span class="lbl">Why</span> PRD-v2 says "over $1.00 with no costed plan" is the stop signal; the plan is a human decision, the alarms are not</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Hard per-learner cut-off (breaks law 4 and the trust contract: a learner would lose a session for our budgeting)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D5</span>
+<div class="dec-body">
+<h4>Beta voice rule</h4>
+<p class="dec-chosen">The blind test picks the cheapest vendor that passes (PRD-v2 14.5); ElevenLabs can win only at a negotiated rate at or below $25 per million characters [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> At $80 per million characters the voice line alone is $0.66 and the session is over the stop line</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> ElevenLabs at list price (quality is not in doubt; the price is)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D6</span>
+<div class="dec-body">
+<h4>Text model tiering, beta</h4>
+<p class="dec-chosen">Exactly the PRD classes: Opus 5.5 teacher (batch), Sonnet 5.5 writer (batch), host, Salma, chat, proof; Haiku 5.5 fitter, analyst, memory keeper, talkback resolver; Gemini 3.8 Flash editor [DECISION, PRD-v2 14.3]</p>
+<p class="dec-why"><span class="lbl">Why</span> The text lines sum to about $0.21 of the session; the levers are elsewhere until measured</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Haiku host from day one (a quality decision the 50-call test must make, section 6.3)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D7</span>
+<div class="dec-body">
+<h4>Batch everywhere nobody waits</h4>
+<p class="dec-chosen">Teacher and writer on the Message Batches API with 02's cut lines from week 2; batch TTS where the vendor offers it from P1; after-session roles stay standard (cents) [DECISION, PRD-v2 3.2, 14.5]</p>
+<p class="dec-why"><span class="lbl">Why</span> Batch halves the two biggest text lines ($0.11 saved); TTS batch saves $0.07 only on Gemini and its turnaround is unverified</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Batch for the analyst and memory keeper (saves under $0.002 and delays notes)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D8</span>
+<div class="dec-body">
+<h4>Prompt caching contract</h4>
+<p class="dec-chosen">Every role has a <code>cache_prefix</code> (package prompt, bible, brief) and the middleware records <code>cache_read_input_tokens</code>; an alarm fires when a role's cache hit rate falls under 85% over 24 hours [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> A silent cache invalidator costs about $0.03 a session on the host alone and shows nowhere else</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Trusting the prompt layout without measuring it</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D9</span>
+<div class="dec-body">
+<h4>Vendor tests as code</h4>
+<p class="dec-chosen"><code>vendor-lab</code> (01) runs the 14.4 and 10.14 tests through the production adapters and writes scoring sheets as CSV; the decision rules are in this document, section 4.6 [DECISION, PRD-v2 14.4, 10.14]</p>
+<p class="dec-why"><span class="lbl">Why</span> The winners drop into <code>vendors.yaml</code> with no new code; the sheets are the evidence Muath signs</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Listening in vendor playgrounds (different voices, no timestamps, no cost rows)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D10</span>
+<div class="dec-body">
+<h4>Two voice vendors wired, one contract first</h4>
+<p class="dec-chosen">Both blind-test finalists are implemented in week 1 (pipeline D9); a paid tier is bought only for the winner, the runner-up stays on pay-as-you-go until the first failover proves it [DECISION, PRD-v2 14.3]</p>
+<p class="dec-why"><span class="lbl">Why</span> Two minimum commitments for a product with 100 learners is waste; pay-as-you-go keeps the understudy warm</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Two enterprise contracts (year two, at 10,000 learners)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D11</span>
+<div class="dec-body">
+<h4>Reconciliation</h4>
+<p class="dec-chosen">A monthly job compares <code>vendor_calls</code> sums with each vendor's billing (Anthropic through the Usage and Cost Admin API; others by CSV upload) and alerts above 5% variance [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> Without it, a wrong row in <code>prices.yaml</code> goes unnoticed for a quarter</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Trusting the price file</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D12</span>
+<div class="dec-body">
+<h4>What the learner sees</h4>
+<p class="dec-chosen">Nothing. No cost, no "heavy user" message, no throttle text; the allowance (PRD-v2 3.6) is the only learner-facing limit and it is a product rule, not a cost rule [DECISION, law 1, 11]</p>
+<p class="dec-why"><span class="lbl">Why</span> Cost is ours to manage</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Any cost-driven message to a learner</p>
+</div></li>
+</ol>
+  
+</section>
+
+<section class="block" id="open">
+  <h2>Open for Muath</h2>
+  <p class="muted">Section 10. Only you can settle these; the document says what each answer changes.</p>
+  <ol class="openitems"><li class="oi"><div><h4>The voice contract, by 2026-11-20</h4><div class="oi-b"><p>If ElevenLabs wins the blind test, it can be primary only at a negotiated rate at or below $25 per million characters (D5); if Gemini wins, decide the January plan now: swap the episode voice to the runner-up on 2027-01-01 with the on-air announcement, or ask Google for a rate. Either way the scale target needs a voice rate near $12 to $15 per million characters at about 2 billion characters a month; that conversation can start in December with the measured volumes.</p></div></div></li>
+<li class="oi"><div><h4>Which of the three last levers to $0.35 (6.4)</h4><div class="oi-b"><p>a negotiated voice rate (no product change), read-aloud and recap rendered on first tap (a PRD change to 3.7 and 6.1 and a 2 to 4 second wait), or 5-minute calls (inside PRD-v2 5.4.2 but in tension with the 4-minute speech gate). The exit document on 2026-12-06 will carry the measured numbers; the choice is yours and can wait until then.</p></div></div></li>
+<li class="oi"><div><h4>Haiku 5.5 as the call host</h4><div class="oi-b"><p>if the week-4 50-call comparison shows no difference in move-contract violations, talk share and the human read. It is worth $0.046 a session and is the single largest configuration lever on the call.</p></div></div></li>
+<li class="oi"><div><h4>Langfuse Cloud EU as a processor of learner text</h4><div class="oi-b"><p>(shared with 01 #2 and 04 #3). If refused: self-hosted Langfuse in the home region, about $150 a month and two engineer-days in week 1, and the deletion question disappears because the data is ours.</p></div></div></li>
+<li class="oi"><div><h4>Budget approvals</h4><div class="oi-b"><p>vendor minimums for the beta (the voice winner's paid tier, about $100 to $330 a month depending on vendor; LiveKit Ship $50; Langfuse Core up to $59; Speechace developer plan), the Anthropic prepaid balance for the beta (about $1,500 for December at 100 learners on the text lines plus tests), and the rater fees for the blind test (10 raters, about one hour each).</p></div></div></li>
+<li class="oi"><div><h4>The daily spend cap formula</h4><div class="oi-b"><p><code>max($50, learners × $1.50)</code> and the stop-line plan window of 48 hours. Both are policy, not engineering.</p></div></div></li>
+<li class="oi"><div><h4>Whether cost figures may appear in the monthly human review packet</h4><div class="oi-b"><p>(6.8), so the reviewer sees the cost of an episode next to its quality. Internal only; never a learner surface. Default here: yes.</p></div></div></li>
+<li class="oi"><div><h4>Whether the Milestone 0 clips may be sent to all four recognizer vendors and all three voice vendors</h4><div class="oi-b"><p>under the Milestone 0 consent (the clips contain learners' voices). The security domain and counsel decide what the consent covers; if not, the 10.14 test needs a re-consent of the 30 clips' owners by 2026-11-04.</p></div></div></li></ol>
+</section>
+
+<section class="block" id="build">
+  <h2>Build plan, 2026-11-02 to 2026-12-06</h2>
+  <div class="prose"><p>Team: the topology's E1 builds the middleware and tables in week 1 alongside the adapters (the two are one piece of work); Muath runs the vendor tests with <code>vendor-lab</code> and writes the truth file; E2 is not needed by this domain until the admin page in week 5. If there is one engineer, the cuts are in the last row.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Dates</th>
+<th>This domain ships (P0 unless marked)</th>
+<th>What the pilot data lets you test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2026-11-02 to 11-08</td>
+<td><code>prices.yaml</code> v2026-11-02 and the <code>price_book</code> migration; <code>vendor_calls</code> DDL with partitions and RLS; <code>tracing.traced</code>, <code>UnitUsage</code>, <code>price_for</code>, <code>record_external</code>, the live-path buffer and spool; Langfuse SDK wiring with the trace conventions and the PII scrub call; <code>SPEND_CAP_USD_PER_DAY</code> enforced; <code>vendor-lab tts render/sheet</code> and <code>vendor-lab stt run/decide</code> with the CSV sheets; Hume lockfile check in CI; quota requests sent (4.9); Langfuse per-user deletion verified with a test user</td>
+<td>The 30 Milestone 0 clips and Muath's truth file run the 10.14 test by 2026-11-08; the two-host script renders on all three voice vendors for the blind test playlists; every test render is a priced <code>vendor_calls</code> row, so the first "cost per 10 minutes of audio" number is real before any episode exists</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2026-11-09 to 11-15</td>
+<td>Blind test listening sessions (Muath, 10 raters) and <code>vendor-lab decide tts</code>; <code>vendors.yaml</code> committed with winners by 11-13; paid tier for the winner; <code>cost/rollup</code> into <code>session_costs</code> and the role-vendor table; <code>episodes.cost_usd</code> fed from <code>session_costs</code> for 02's publisher; <code>kind_ceiling</code>, <code>unpriced</code>, <code>cache_hit_low</code>, <code>escalation_rate</code> alarms; <code>tools/cost-model/estimate.py</code> with <code>--measured</code> against the week's 20 test episodes</td>
+<td>20 test episodes from the Milestone 0 learner files give the first measured teacher, writer, editor and voice lines; the Milestone 0 scripts' character counts calibrate <code>chars_per_minute</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>2026-11-16 to 11-22</td>
+<td>Pre-account learner id carried in <code>CallMeta</code> for onboarding and sample traces, re-keyed at A9; sample episode ceiling alarm on the live endpoint; payment processor fee row after the 11-16 decision; <code>learner_costs_daily</code> with the acquisition line</td>
+<td>The sample landing page's first real renders measure the $0.05 ceiling</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2026-11-23 to 11-29</td>
+<td>Call-worker buffered writer and <code>record_external</code> for LiveKit minutes; <code>call-bench</code> cost and cache-hit columns; <code>calls.metrics.cost_usd</code> fed; <code>session_over_alert</code>, <code>vendor_error_rate</code>, <code>daily_spend_*</code> alarms and <code>spend_mode</code> with the <code>conserve</code> and <code>halt</code> paths wired into 02's and 03's config reads; the Haiku-host comparison inside the 50-call run (lever 6)</td>
+<td>Milestone 0 call transcripts replayed through the worker give per-call cost and the host cache hit rate before any live learner</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2026-11-30 to 12-06</td>
+<td><code>cost/weekly-report</code> with all eight sections and <code>/admin/cost</code>; <code>cost/reconcile-monthly</code> skeleton with the Anthropic Admin API pull and the CSV upload; proof-share division; <code>learner/delete</code> aggregation hook; the end-to-end run with the Milestone 0 learners produces the first weekly report; <strong>the exit document: measured cost per session and the costed path (6.4) with measured first column</strong></td>
+<td>The 15 Milestone 0 learners' week on prod is the measurement the exit criterion asks for; their heavy-use spread tests the outlier rule</td>
+</tr>
+<tr>
+<td>P1 (beta)</td>
+<td>2026-12-07 to 2027-01-10</td>
+<td>Batch TTS (lever 3) if Gemini is primary; Langfuse sampling switch (off in the beta); automated invoice ingestion for one more vendor; the 2026-12-28 next-week-prices report; the January voice plan executed (6.1 note 3)</td>
+<td></td>
+</tr>
+<tr>
+<td>Cuts if one engineer</td>
+<td></td>
+<td>No <code>/admin/cost</code> page (the weekly report Markdown and SQL suffice); reconciliation fully manual (a notebook, monthly); <code>vendor_invoices</code> table dropped; <code>conserve</code> mode dropped (only <code>halt</code> on the cap); <code>vendor-lab</code> reduced to render and run commands with decisions in a spreadsheet</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>What is too much for this team and is cut or deferred: self-hosted Langfuse (kept only as the PDPL fallback), per-vendor invoice scrapers, a cost dashboard beyond one admin page, multi-currency (USD only; SAR revenue is the processor's report), margin-per-learner analytics (one SQL query in the report), a budget forecasting model (the next-week-prices column is enough).</p>
+<p>Milestone 0 to code: the kit's evening cycle (04-production.md) maps onto roles as step 1 → <code>verbatim_stt</code>, step 2 → <code>analyst</code> and <code>salma_text</code>, step 5 → <code>teacher</code> and <code>writer</code>, step 6 → <code>fitter</code>, step 7 → <code>editor</code>, step 9 → <code>episode_tts</code>, step 10 → <code>host</code> brief. Milestone 0 itself is untraced (Claude Max, AI Studio, ElevenLabs Pro at $99 a month, about $7 a learner for the fortnight); its only cost artifacts worth importing are the character counts of its scripts and the minutes of its calls, which <code>tools/m0_import.py</code> (04) can copy into <code>assumptions.yaml</code>.</p>
+<hr /></div>
+</section>
+
+<section class="block" id="reviews">
+  <h2>Review findings</h2>
+  <div class="nore"><p><strong>No review ran on this document.</strong> The workflow stopped before its two reviewers reached it. It is a complete first draft written against PRD-v2 and the other eight domains, but nothing in it has been checked.</p></div>
+</section>
+
+<section class="block" id="full">
+  <h2>The full document</h2>
+  <p class="muted">Every section as written, closed by default. Source file: <code>architecture/08-cost-model-and-vendors.md</code>.</p>
+  <ol class="toc"><li><a href="#s1-summary-and-the-decisions-in-one-table">1. Summary and the decisions in one table</a></li><li><a href="#s2-requirements-this-domain-implements">2. Requirements this domain implements</a></li><li><a href="#s3-architecture">3. Architecture</a></li><li><a href="#s4-detailed-design">4. Detailed design</a></li><li><a href="#s5-failure-modes-fallbacks-and-degraded-m">5. Failure modes, fallbacks and degraded modes</a></li><li><a href="#s6-cost-and-performance-against-the-budge">6. Cost and performance against the budgets</a></li><li><a href="#s7-build-plan-for-2026-11-02-to-2026-12-0">7. Build plan for 2026-11-02 to 2026-12-06</a></li><li><a href="#s8-alternatives-rejected">8. Alternatives rejected</a></li><li><a href="#s9-assumptions-about-other-domains">9. Assumptions about other domains</a></li><li><a href="#s10-open-for-muath">10. Open for Muath</a></li></ol>
+  <details class="fs"><summary><h3>Front matter</h3></summary><div class="prose"><p>Domain 08 of the For one technical architecture. Written 2026-10-17 against PRD-v2 (Implementation PRD v3.0, 2026-10-10). Implements PRD-v2 1.4 (AI cost line), 14.3 (stack, adapters, two voice vendors, price events), 14.4 (vendor tests), 14.5 (cost per session), 10.14 (recognizer test), 16.1 (cost gate) and 16.2 (heavy-use outliers). It reuses the names the topology (01), pipeline (02), call (03), data (04), assessment (05) and client (06) documents already introduced; where two of them named the same thing differently, this document rules, because cost tracing is this domain's.</p>
+<p>Every price in this document is a list price with its date. Anthropic prices are from the API reference cached 2026-10-06; every other vendor's price is from the lens documents' vendor-page reads of 2026-10-09 unless marked [ASSUMPTION]. None is a measurement. The first measurement replaces them on 2026-12-06 (PRD-v2 19.2 exit criterion).</p></div></details>
+  <details class="fs" id="s1-summary-and-the-decisions-in-one-table"><summary><h3>1. Summary and the decisions in one table</h3><span class="wc">1,104 words</span></summary><div class="prose"><p>The beta cannot meet the $0.60 budget by accident, and the $0.30 to $0.35 scale target cannot be met at list prices after 2027-01-01. The arithmetic in section 6 says: the recommended beta stack lands at $0.57 to $0.67 a session depending on which voice vendor wins the blind test (Gemini with batch TTS at the bottom, Inworld at the top, ElevenLabs at list price at $0.85 and out). The Gemini price doubling on 2027-01-01 adds $0.18 to a Gemini-voiced session and $0.015 to any session (the editor), which is why the voice vendor decision on 2026-11-13 is the single most important cost decision in the beta. The floor stack reaches $0.33 to $0.36 before the doubling and $0.37 to $0.41 after it; the last $0.05 to the target comes from a negotiated voice rate, a cheaper voice tier that passes the blind test, or a scope change Muath must approve (section 6.4).</p>
+<p>Cost is traced the way the topology already specified: one middleware in <code>forone.adapters</code> writes one <code>vendor_calls</code> row and one Langfuse observation per vendor call, priced from a dated <code>price_book</code>. This document owns those two tables, the price file, the Langfuse conventions, the roll-ups, the weekly report, the alarms and the spend guard. Nothing about cost is shown to a learner (PRD-v2 law 1 and 16.2: "a warning light, never a goal").</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Chosen</th>
+<th>Reason in one line</th>
+<th>Rejected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td>Single source of cost truth</td>
+<td><code>vendor_calls</code> table in Postgres, one row per vendor call, written by the adapter middleware; <code>pipeline_steps.cost_usd</code> (02) and <code>episodes.cost_usd</code>, <code>calls.metrics.cost_usd</code>, <code>events.cost_usd</code> (04) are denormalized sums of it [DECISION, PRD-v2 14.5]</td>
+<td>One table answers "per role, per vendor, per learner, per session" with one <code>GROUP BY</code>; roll-ups can be rebuilt from it</td>
+<td>Cost only in <code>events</code> (sample episodes, canaries and vendor tests have no learner); cost only in Langfuse (a processor, sampled at scale, outside our region)</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>Price source</td>
+<td><code>packages/adapters/prices.yaml</code>, checked in, dated rows with <code>valid_from</code>, loaded into the <code>price_book</code> table by migration; the middleware prices from the table, never from the YAML at runtime [DECISION]</td>
+<td>01 named the file and 02 named the table; both are right: the file is reviewed in a pull request, the table is joinable in SQL</td>
+<td>Prices hard-coded in adapters; prices fetched from vendor APIs (none publish a machine-readable price list)</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>Tracing tool</td>
+<td>Langfuse Cloud EU, one trace per unit of work, <code>user_id</code> = learner id, 100% sampling in the beta [DECISION, PRD-v2 14.3]</td>
+<td>Prompts and completions next to cost and latency is what debugging a bad episode needs; managed; EU region is already in the topology's processor list</td>
+<td>OpenTelemetry to Grafana only (no prompt views); Helicone-style proxy (a hop in the live path); self-hosted Langfuse (operations for a two-person team; kept as the PDPL fallback)</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>Budget enforcement in code</td>
+<td>A <code>cost_guard</code> with three spend modes (<code>normal</code>, <code>conserve</code>, <code>halt</code>) switched by daily spend and per-session alarms; the stop line ($1.00) pages and opens a 48-hour plan window, it does not stop service [DECISION, PRD-v2 1.4, 16.1]</td>
+<td>PRD-v2 says "over $1.00 with no costed plan" is the stop signal; the plan is a human decision, the alarms are not</td>
+<td>Hard per-learner cut-off (breaks law 4 and the trust contract: a learner would lose a session for our budgeting)</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>Beta voice rule</td>
+<td>The blind test picks the cheapest vendor that passes (PRD-v2 14.5); ElevenLabs can win only at a negotiated rate at or below $25 per million characters [DECISION]</td>
+<td>At $80 per million characters the voice line alone is $0.66 and the session is over the stop line</td>
+<td>ElevenLabs at list price (quality is not in doubt; the price is)</td>
+</tr>
+<tr>
+<td>D6</td>
+<td>Text model tiering, beta</td>
+<td>Exactly the PRD classes: Opus 5.5 teacher (batch), Sonnet 5.5 writer (batch), host, Salma, chat, proof; Haiku 5.5 fitter, analyst, memory keeper, talkback resolver; Gemini 3.8 Flash editor [DECISION, PRD-v2 14.3]</td>
+<td>The text lines sum to about $0.21 of the session; the levers are elsewhere until measured</td>
+<td>Haiku host from day one (a quality decision the 50-call test must make, section 6.3)</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>Batch everywhere nobody waits</td>
+<td>Teacher and writer on the Message Batches API with 02's cut lines from week 2; batch TTS where the vendor offers it from P1; after-session roles stay standard (cents) [DECISION, PRD-v2 3.2, 14.5]</td>
+<td>Batch halves the two biggest text lines ($0.11 saved); TTS batch saves $0.07 only on Gemini and its turnaround is unverified</td>
+<td>Batch for the analyst and memory keeper (saves under $0.002 and delays notes)</td>
+</tr>
+<tr>
+<td>D8</td>
+<td>Prompt caching contract</td>
+<td>Every role has a <code>cache_prefix</code> (package prompt, bible, brief) and the middleware records <code>cache_read_input_tokens</code>; an alarm fires when a role's cache hit rate falls under 85% over 24 hours [DECISION]</td>
+<td>A silent cache invalidator costs about $0.03 a session on the host alone and shows nowhere else</td>
+<td>Trusting the prompt layout without measuring it</td>
+</tr>
+<tr>
+<td>D9</td>
+<td>Vendor tests as code</td>
+<td><code>vendor-lab</code> (01) runs the 14.4 and 10.14 tests through the production adapters and writes scoring sheets as CSV; the decision rules are in this document, section 4.6 [DECISION, PRD-v2 14.4, 10.14]</td>
+<td>The winners drop into <code>vendors.yaml</code> with no new code; the sheets are the evidence Muath signs</td>
+<td>Listening in vendor playgrounds (different voices, no timestamps, no cost rows)</td>
+</tr>
+<tr>
+<td>D10</td>
+<td>Two voice vendors wired, one contract first</td>
+<td>Both blind-test finalists are implemented in week 1 (pipeline D9); a paid tier is bought only for the winner, the runner-up stays on pay-as-you-go until the first failover proves it [DECISION, PRD-v2 14.3]</td>
+<td>Two minimum commitments for a product with 100 learners is waste; pay-as-you-go keeps the understudy warm</td>
+<td>Two enterprise contracts (year two, at 10,000 learners)</td>
+</tr>
+<tr>
+<td>D11</td>
+<td>Reconciliation</td>
+<td>A monthly job compares <code>vendor_calls</code> sums with each vendor's billing (Anthropic through the Usage and Cost Admin API; others by CSV upload) and alerts above 5% variance [DECISION]</td>
+<td>Without it, a wrong row in <code>prices.yaml</code> goes unnoticed for a quarter</td>
+<td>Trusting the price file</td>
+</tr>
+<tr>
+<td>D12</td>
+<td>What the learner sees</td>
+<td>Nothing. No cost, no "heavy user" message, no throttle text; the allowance (PRD-v2 3.6) is the only learner-facing limit and it is a product rule, not a cost rule [DECISION, law 1, 11]</td>
+<td>Cost is ours to manage</td>
+<td>Any cost-driven message to a learner</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div></details><details class="fs" id="s2-requirements-this-domain-implements"><summary><h3>2. Requirements this domain implements</h3><span class="wc">397 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>PRD-v2 part</th>
+<th>Requirement</th>
+<th>Where in this document</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.4</td>
+<td>Budget about $0.60 per session in the beta; scale target $0.30 to $0.35; stop line $1.00 with no plan; cost tracing on every model, voice and recognition call from the first learner</td>
+<td>4.1 to 4.4 (tracing), 4.5 (alarms), 6 (model)</td>
+</tr>
+<tr>
+<td>14.1</td>
+<td>Cost tracing is code, not AI</td>
+<td>3, 4</td>
+</tr>
+<tr>
+<td>14.3</td>
+<td>Stack defaults; thin adapters; two voice vendors wired from the start; Gemini 3.8 doubling 2027-01-01; Hume shutdown 2026-11-13; Langfuse logging every call with cost and learner-model version</td>
+<td>4.2 (price book), 4.7 (adapters and fallback), 4.8 (risk calendar), 4.3 (Langfuse)</td>
+</tr>
+<tr>
+<td>14.4</td>
+<td>Voice blind test (5 Saudi, 5 native English listeners), the 30-clip recognizer test, 50 scripted calls</td>
+<td>4.6 (procedures and scoring sheets)</td>
+</tr>
+<tr>
+<td>14.5</td>
+<td>Cost per session = teacher share, writing, fitting, editing, all audio, call and round two, re-transcription, notes, chat, after-session pass, a quarter of the weekly proof; traced per role, per vendor, per learner; reported weekly; next to heavy-use outliers</td>
+<td>4.4 (roll-ups and the weekly report), 6 (the itemized model)</td>
+</tr>
+<tr>
+<td>10.14</td>
+<td>30 real-learner clips through each streaming and batch recognizer; error survival, filler retention, hallucinations near pauses, code-switch handling; winner per role and the confidence threshold</td>
+<td>4.6.3</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Voice vendor outage: second vendor within the same day's production</td>
+<td>4.7 (fallback order), 5</td>
+</tr>
+<tr>
+<td>16.1</td>
+<td>Gate: cost per session under $0.60; stop and rethink over $1.00 with no plan</td>
+<td>4.5</td>
+</tr>
+<tr>
+<td>16.2</td>
+<td>Minutes per day: heavy-use outliers flagged, a warning light never a goal</td>
+<td>4.4.3</td>
+</tr>
+<tr>
+<td>19.2</td>
+<td>Week 1: cost tracing; exit: measured cost per session and a costed path to $0.35 or less</td>
+<td>7, 6.4</td>
+</tr>
+<tr>
+<td>2.1</td>
+<td>Sample episode cost ceiling $0.05</td>
+<td>4.5 (per-kind ceilings)</td>
+</tr>
+<tr>
+<td>12.5, 12.6</td>
+<td>Data rules for a processor holding learner text (Langfuse); deletion</td>
+<td>4.3.4</td>
+</tr>
+<tr>
+<td>Laws 1, 11; trust 2</td>
+<td>No cost-driven surface or message to the learner</td>
+<td>D12</td>
+</tr>
+</tbody>
+</table></div>
+<p>Laws that bind the design directly: law 1 (no numbers that fill or target; cost dashboards are internal only), law 11 (the allowance is the only cap; cost never shortens a learner's day), trust promise 2 (no cost-driven re-engagement or throttling messages).</p>
+<hr /></div></details><details class="fs" id="s3-architecture"><summary><h3>3. Architecture</h3><span class="wc">872 words</span></summary><div class="prose"><h3>3.1 Components</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Kind</th>
+<th>Owner</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>forone.adapters.tracing</code></td>
+<td>Python module (middleware)</td>
+<td>this domain</td>
+<td>Wraps every adapter call: times it, extracts units, prices them from <code>price_book</code>, writes <code>vendor_calls</code>, emits the Langfuse observation, enforces the spend guard</td>
+</tr>
+<tr>
+<td><code>forone.adapters.prices</code></td>
+<td>Python module plus <code>prices.yaml</code></td>
+<td>this domain</td>
+<td>Loads the price file into <code>price_book</code>; <code>price_for(vendor, model, unit, pricing_mode, at)</code></td>
+</tr>
+<tr>
+<td><code>price_book</code></td>
+<td>Postgres table</td>
+<td>this domain</td>
+<td>Dated unit prices</td>
+</tr>
+<tr>
+<td><code>vendor_calls</code></td>
+<td>Postgres table (monthly partitions)</td>
+<td>this domain</td>
+<td>One row per vendor call</td>
+</tr>
+<tr>
+<td><code>session_costs</code>, <code>learner_costs_daily</code>, <code>role_vendor_costs_daily</code></td>
+<td>Postgres tables, filled by <code>cost/rollup</code></td>
+<td>this domain</td>
+<td>Roll-ups per session, per learner-day, per role-vendor-day</td>
+</tr>
+<tr>
+<td><code>cost_guard</code></td>
+<td>One row in <code>vendor_config</code> (<code>key='spend_mode'</code>) plus the <code>cost/alarms</code> function</td>
+<td>this domain</td>
+<td>Spend modes and alarms</td>
+</tr>
+<tr>
+<td><code>cost/rollup</code>, <code>cost/alarms</code>, <code>cost/weekly-report</code>, <code>cost/reconcile-monthly</code></td>
+<td>Inngest functions in <code>workflows</code></td>
+<td>this domain</td>
+<td>Roll-ups every 15 minutes; alarms every 15 minutes; report Mondays 06:00 Asia/Riyadh; reconciliation on the 2nd of each month</td>
+</tr>
+<tr>
+<td><code>vendor-lab</code></td>
+<td>CLI in the monorepo (01)</td>
+<td>this domain with the call and pipeline domains</td>
+<td>Runs the 14.4 and 10.14 tests through the production adapters, writes scoring sheets</td>
+</tr>
+<tr>
+<td><code>/admin/cost</code></td>
+<td>One <code>sqladmin</code> page in <code>api</code> (01's admin pages)</td>
+<td>this domain</td>
+<td>Last 7 days by role, vendor, learner; outliers; spend mode; price book version</td>
+</tr>
+<tr>
+<td>Langfuse Cloud EU</td>
+<td>Managed</td>
+<td>this domain owns conventions; the security domain approves the processor</td>
+<td>Traces with prompts, completions, usage, cost, learner-model version</td>
+</tr>
+<tr>
+<td>Anthropic Usage and Cost Admin API</td>
+<td>Vendor API</td>
+<td>this domain</td>
+<td>Monthly reconciliation for the Anthropic lines</td>
+</tr>
+</tbody>
+</table></div>
+<h3>3.2 Data flow, described as a diagram</h3>
+<p>Draw four lanes left to right: <strong>callers</strong>, <strong>adapter layer</strong>, <strong>cost stores</strong>, <strong>consumers</strong>.</p>
+<ol>
+<li>Callers: <code>workflows</code> (teacher, writer, fitter, editor, voice studio, re-listen, analyst, memory keeper, Salma notes, proof producer, rater), <code>call-worker</code> (streaming STT, host LLM, call TTS, talkback resolver, Salma TTS), <code>api</code> (sample episode trigger, gloss misses). Each caller constructs a <code>CallMeta</code> (01's dataclass) carrying <code>learner_id</code>, <code>role</code>, <code>episode_id</code>, <code>call_id</code>, <code>session_id</code>, <code>learner_model_version</code>, <code>prompt_version</code>, <code>inngest_run_id</code>.</li>
+<li>Adapter layer: <code>adapters.for_role(role)</code> returns the adapter chosen by <code>vendors.yaml</code> and overridden by <code>vendor_config</code>. Every public method is wrapped by <code>tracing.traced</code>. The wrapper starts a timer and a Langfuse observation, calls the vendor, reads the usage the adapter returns (<code>UnitUsage</code>), prices it with <code>price_for</code>, and writes one <code>vendor_calls</code> row in the same transaction as the caller's own write when there is one (the pipeline's <code>pipeline_steps</code> row, the worker's event batch) or in its own short transaction otherwise. On vendor error it writes the row with <code>outcome='error'</code> and the fallback adapter's call writes a second row with <code>fallback_from_vendor</code> set. Live-path rows are buffered in the worker and flushed every 5 seconds or at call end so the call never waits on Postgres.</li>
+<li>Cost stores: <code>vendor_calls</code> (raw), then <code>cost/rollup</code> every 15 minutes into <code>session_costs</code> (keyed by <code>session_id</code>, with <code>cost_by_role</code> jsonb), <code>learner_costs_daily</code>, <code>role_vendor_costs_daily</code>. The pipeline's publisher reads <code>session_costs</code> for <code>episodes.cost_usd</code> and emits <code>episode.cost_recorded</code> (02); the call worker reads its own buffered sum into <code>calls.metrics.cost_usd</code> (03). <code>events.vendor_call_id</code> (04) points back to the row for model-produced events.</li>
+<li>Consumers: <code>cost/alarms</code> (reads the roll-ups and <code>vendor_calls</code> for the last 15 minutes), <code>cost/weekly-report</code> (reads the roll-ups, writes a Markdown report to the ops channel and <code>/admin/cost</code>), <code>cost/reconcile-monthly</code> (reads <code>vendor_calls</code> and the vendors' billing), Langfuse (receives the same observation with the prompt and completion text; never audio).</li>
+</ol>
+<p>A fifth element sits above the lanes: <code>price_book</code>, read by the adapter layer and written only by migrations from <code>prices.yaml</code>.</p>
+<h3>3.3 Where the cost of one session comes from</h3>
+<p>One daily session on the recommended stack produces about 60 <code>vendor_calls</code> rows: 1 teacher, 1 writer, 1 to 3 rewrites, 2 fitter, 1 to 2 editor, 1 embedding, 4 to 6 TTS jobs (scenes, article, recap), 1 alignment (if needed), 1 re-listen ASR, 0 to 10 gloss misses, about 25 host turns (each a <code>text</code> row), 1 streaming STT row per stream (2), 25 call TTS rows, 0 to 3 talkback rows, about 25 verbatim rows (per turn, 05), 1 pronunciation, 2 analyst, 1 memory keeper, 1 Salma notes, 1 to 2 polish TTS, 3 to 5 chat host, 0 to 1 margin note. All carry <code>session_id</code>, so <code>session_costs</code> is one aggregate.</p>
+<h3>3.4 Interfaces this domain exposes</h3>
+<pre><code class="language-python"># packages/adapters/forone/adapters/tracing.py (public surface)
+from forone.adapters.interfaces import CallMeta
+
+class UnitUsage(TypedDict, total=False):
+    input_tokens: int; cache_read_tokens: int; cache_write_tokens: int; output_tokens: int
+    chars: int; audio_seconds: float; utterances: int; requests: int
+
+def traced(capability: str):
+    &quot;&quot;&quot;Decorator for every adapter method. The adapter returns (result, UnitUsage, vendor_request_id).&quot;&quot;&quot;
+
+async def record_external(meta: CallMeta, *, vendor: str, capability: str, units: UnitUsage,
+                          cost_usd: float | None = None, outcome: str = &quot;ok&quot;) -&gt; str:
+    &quot;&quot;&quot;For costs that are not adapter calls but belong to a session: LiveKit participant minutes,
+    media egress. Returns vendor_calls.id.&quot;&quot;&quot;
+
+def spend_mode() -&gt; Literal[&quot;normal&quot;, &quot;conserve&quot;, &quot;halt&quot;]:
+    &quot;&quot;&quot;Cached 60 s from vendor_config. Callers that can degrade read it (section 4.5).&quot;&quot;&quot;
+
+def price_for(vendor: str, model: str, unit: str, pricing_mode: str, at: datetime) -&gt; Decimal: ...
+</code></pre>
+<pre><code class="language-sql">-- what other domains read
+select cost_usd, cost_by_role from session_costs where session_id = $1;
+select learner_id, day, cost_usd, sessions, minutes_heard, minutes_spoken from learner_costs_daily where day &gt;= $1;
+</code></pre>
+<hr /></div></details><details class="fs" id="s4-detailed-design"><summary><h3>4. Detailed design</h3><span class="wc">6,030 words</span></summary><div class="prose"><h3>4.1 <code>vendor_calls</code></h3>
+<pre><code class="language-sql">create table vendor_calls (
+  id                    uuid primary key default gen_random_uuid(),
+  occurred_at           timestamptz not null default now(),
+  env                   text not null,                        -- dev | staging | prod
+  service               text not null,                        -- api | workflows | call-worker | vendor-lab
+  learner_id            uuid,                                  -- null for sample, canary, vendor tests
+  session_id            uuid,
+  episode_id            uuid,
+  call_id               uuid,
+  inngest_run_id        text,
+  langfuse_trace_id     text,
+  role                  text not null,                        -- vendors.yaml role: teacher, writer, host, episode_tts ...
+  capability            text not null,                        -- text | batch_text | tts | tts_stream | stt_stream | stt_verbatim | pronunciation | align | embed | media | external
+  vendor                text not null,
+  model                 text,                                  -- model id, voice id, or recognizer model
+  pricing_mode          text not null,                        -- standard | batch | on_demand
+  prompt_version        text,
+  learner_model_version int,
+  units                 jsonb not null,                        -- UnitUsage
+  cost_usd              numeric(10,6) not null,
+  price_book_ids        int[] not null,                        -- the rows used to price this call
+  latency_ms            int,
+  outcome               text not null,                        -- ok | error | timeout | cancelled | fallback_used
+  error_code            text,
+  fallback_from_vendor  text,
+  vendor_request_id     text,
+  episode_kind          text                                   -- daily | swap | return | pilot | sample | fallback | proof | canary
+) partition by range (occurred_at);
+-- monthly partitions created by retention/daily (01), same as events
+create index on vendor_calls (session_id) where session_id is not null;
+create index on vendor_calls (learner_id, occurred_at);
+create index on vendor_calls (role, vendor, occurred_at);
+create index on vendor_calls (occurred_at) where outcome &lt;&gt; 'ok';
+</code></pre>
+<p>Rules:
+- Row-level security by <code>learner_id</code> as in 04, with a <code>forone_cost</code> role allowed to read across learners for roll-ups and reports (the only cross-learner read path besides the gloss cache and opt-in research set; the security domain approves it).
+- <code>units</code> is the raw usage the vendor reported, never derived. Where a vendor reports nothing (streaming TTS by the second), the adapter counts the unit itself and sets <code>units.estimated = true</code>.
+- Deletion: <code>learner/delete</code> (04) aggregates a learner's rows into <code>learner_costs_daily</code> with <code>learner_id = null, deleted_learner_bucket = true</code> before deleting them, so totals survive.
+- Retention: raw rows 13 months (one year of comparisons plus one), roll-ups forever.</p>
+<h3>4.2 <code>prices.yaml</code> and <code>price_book</code></h3>
+<pre><code class="language-yaml"># packages/adapters/prices.yaml  (every row: who, what, unit, price, dated; the file is the pull-request surface)
+version: 2026-10-17
+rows:
+  # Anthropic, API reference cached 2026-10-06. Cache write = 1.25x input (5-minute TTL); batch = 50% of every token.
+  - {vendor: anthropic, model: claude-opus-5-5,   unit: input_tokens,       usd_per_million: 4.00,  valid_from: 2026-10-06, source: anthropic-pricing}
+  - {vendor: anthropic, model: claude-opus-5-5,   unit: output_tokens,      usd_per_million: 20.00, valid_from: 2026-10-06}
+  - {vendor: anthropic, model: claude-opus-5-5,   unit: cache_read_tokens,  usd_per_million: 0.20,  valid_from: 2026-10-06}
+  - {vendor: anthropic, model: claude-opus-5-5,   unit: cache_write_tokens, usd_per_million: 5.00,  valid_from: 2026-10-06}
+  - {vendor: anthropic, model: claude-sonnet-5-5, unit: input_tokens,       usd_per_million: 2.00,  valid_from: 2026-10-06}
+  - {vendor: anthropic, model: claude-sonnet-5-5, unit: output_tokens,      usd_per_million: 10.00, valid_from: 2026-10-06}
+  - {vendor: anthropic, model: claude-sonnet-5-5, unit: cache_read_tokens,  usd_per_million: 0.20,  valid_from: 2026-10-06}
+  - {vendor: anthropic, model: claude-sonnet-5-5, unit: cache_write_tokens, usd_per_million: 2.50,  valid_from: 2026-10-06}
+  - {vendor: anthropic, model: claude-haiku-5-5,  unit: input_tokens,       usd_per_million: 0.10,  valid_from: 2026-10-06, note: &quot;prompts up to 100K tokens; 0.50 above&quot;}
+  - {vendor: anthropic, model: claude-haiku-5-5,  unit: output_tokens,      usd_per_million: 0.50,  valid_from: 2026-10-06}
+  - {vendor: anthropic, model: claude-haiku-5-5,  unit: cache_read_tokens,  usd_per_million: 0.01,  valid_from: 2026-10-06, assumption: &quot;0.1x input; verify&quot;}
+  - {vendor: anthropic, model: claude-haiku-5-5,  unit: cache_write_tokens, usd_per_million: 0.125, valid_from: 2026-10-06}
+  - {vendor: anthropic, model: &quot;*&quot;, pricing_mode: batch, multiplier: 0.5, valid_from: 2026-10-06}
+  # Google, Gemini API pricing page 2026-10-09; several prices double 2027-01-01 (second dated row)
+  - {vendor: google, model: gemini-3.8-flash, unit: input_tokens,  usd_per_million: 0.75, valid_from: 2026-10-09}
+  - {vendor: google, model: gemini-3.8-flash, unit: output_tokens, usd_per_million: 3.75, valid_from: 2026-10-09}
+  - {vendor: google, model: gemini-3.8-flash, unit: input_tokens,  usd_per_million: 1.50, valid_from: 2027-01-01}
+  - {vendor: google, model: gemini-3.8-flash, unit: output_tokens, usd_per_million: 7.50, valid_from: 2027-01-01}
+  - {vendor: google, model: gemini-3.8-flash-tts, unit: audio_tokens, usd_per_million: 9.00,  valid_from: 2026-10-09, note: &quot;25 audio tokens per second = 1,500 per minute&quot;}
+  - {vendor: google, model: gemini-3.8-flash-tts, unit: audio_tokens, usd_per_million: 18.00, valid_from: 2027-01-01}
+  - {vendor: google, model: &quot;*-tts&quot;, pricing_mode: batch, multiplier: 0.5, valid_from: 2026-10-09}
+  - {vendor: google, model: gemini-3.8-flash-lite-tts, unit: audio_minutes, usd_per_unit: 0.00875, valid_from: 2026-10-09, assumption: &quot;lens: about $0.07 per 8-minute episode; verify the token rate and whether it doubles&quot;}
+  # Voice vendors (vendor pages 2026-10-09)
+  - {vendor: inworld,    model: tts-2,        unit: chars, usd_per_million: 25.00, valid_from: 2026-10-09}
+  - {vendor: inworld,    model: tts-2-flash,  unit: chars, usd_per_million: 15.00, valid_from: 2026-10-09}
+  - {vendor: elevenlabs, model: v4,           unit: chars, usd_per_million: 80.00, valid_from: 2026-10-12, note: &quot;list after the promotion that ended 2026-10-12&quot;}
+  - {vendor: elevenlabs, model: v4-turbo,     unit: chars, usd_per_million: 40.00, valid_from: 2026-10-12}
+  - {vendor: elevenlabs, model: flash-v2.5,   unit: chars, usd_per_million: 40.00, valid_from: 2026-10-09}
+  - {vendor: elevenlabs, model: forced-alignment, unit: audio_minutes, usd_per_unit: 0.0037, valid_from: 2026-10-09, note: &quot;about $0.026 per 7-minute episode&quot;}
+  - {vendor: cartesia,   model: sonic-3.6,    unit: chars, usd_per_million: 45.00, valid_from: 2026-10-09, assumption: &quot;mid of the $37 to $50 range&quot;}
+  # Recognition (vendor pages 2026-10-09)
+  - {vendor: soniox,     model: stt-rt-v5,              unit: audio_minutes, usd_per_unit: 0.0020, valid_from: 2026-10-09}
+  - {vendor: deepgram,   model: nova-3-multilingual,    unit: audio_minutes, usd_per_unit: 0.0058, valid_from: 2026-10-09, note: &quot;promotional; may end&quot;}
+  - {vendor: assemblyai, model: universal-3.6-realtime, unit: audio_minutes, usd_per_unit: 0.0075, valid_from: 2026-10-09}
+  - {vendor: assemblyai, model: universal-3.6-batch,    unit: audio_minutes, usd_per_unit: 0.0040, valid_from: 2026-10-09, assumption: &quot;batch verbatim; lens range $0.002 to $0.017; verify&quot;}
+  - {vendor: elevenlabs_scribe, model: scribe-v2,       unit: audio_minutes, usd_per_unit: 0.0067, valid_from: 2026-10-09, assumption: &quot;verify&quot;}
+  - {vendor: speechace,  model: pronunciation,          unit: utterances,    usd_per_unit: 0.0080, valid_from: 2026-10-09, note: &quot;per 15-second utterance&quot;}
+  - {vendor: microsoft,  model: pronunciation,          unit: audio_minutes, usd_per_unit: 0.0170, valid_from: 2026-10-09, assumption: &quot;about $1 per hour, unverified&quot;}
+  # Other
+  - {vendor: openai,  model: text-embedding-3-small, unit: input_tokens, usd_per_million: 0.02, valid_from: 2026-10-09}
+  - {vendor: livekit, model: cloud-ship, unit: participant_minutes, usd_per_unit: 0.0010, valid_from: 2026-10-16, assumption: &quot;01 flags this rate for verification&quot;}
+  - {vendor: aws,     model: s3-egress,  unit: gigabytes, usd_per_unit: 0.09, valid_from: 2026-10-16}
+</code></pre>
+<pre><code class="language-sql">create table price_book (
+  id serial primary key, vendor text not null, model text not null, unit text not null,
+  pricing_mode text not null default 'standard', usd_per_unit numeric(14,9) not null,
+  multiplier numeric(6,4), valid_from date not null, valid_to date, source text, note text,
+  file_version text not null, unique (vendor, model, unit, pricing_mode, valid_from));
+</code></pre>
+<p><code>price_for</code> picks the row with the greatest <code>valid_from &lt;= at</code> and applies the vendor's <code>pricing_mode</code> multiplier row when the call's mode is <code>batch</code>. A call priced with a row older than 120 days raises a <code>price_stale</code> warning in the weekly report; a call with no matching row is priced at zero, written with <code>outcome='ok'</code> and <code>error_code='unpriced'</code>, and counted in the alarms (section 4.5) so a new model never silently costs nothing.</p>
+<p>The 2027-01-01 doubling is represented exactly as 01 and 02 asked: a second dated row. The weekly report of 2026-12-28 carries a "what this week would have cost at next week's prices" column so the jump is seen before it happens.</p>
+<h3>4.3 Langfuse conventions</h3>
+<p><strong>4.3.1 Trace identity.</strong> One trace per unit of work, named and keyed so a trace can be found from any id in Postgres:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Unit of work</th>
+<th>Trace name</th>
+<th><code>trace_id</code></th>
+<th><code>session_id</code></th>
+<th><code>user_id</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Episode production</td>
+<td><code>episode</code></td>
+<td><code>episode_id</code></td>
+<td><code>session_id</code></td>
+<td><code>learner_id</code></td>
+</tr>
+<tr>
+<td>Live call</td>
+<td><code>call</code></td>
+<td><code>call_id</code></td>
+<td><code>session_id</code></td>
+<td><code>learner_id</code></td>
+</tr>
+<tr>
+<td>After-session pass</td>
+<td><code>after_pass</code></td>
+<td><code>{session_id}:after</code></td>
+<td><code>session_id</code></td>
+<td><code>learner_id</code></td>
+</tr>
+<tr>
+<td>Onboarding (A3 to A8)</td>
+<td><code>onboarding</code></td>
+<td>the pre-account session id (06)</td>
+<td>same</td>
+<td>the pre-account learner id, re-keyed at A9</td>
+</tr>
+<tr>
+<td>Weekly proof</td>
+<td><code>proof</code></td>
+<td><code>proof_id</code></td>
+<td>null</td>
+<td><code>learner_id</code></td>
+</tr>
+<tr>
+<td>Sample episode</td>
+<td><code>sample</code></td>
+<td><code>sample_id</code></td>
+<td>null</td>
+<td>null (anonymous)</td>
+</tr>
+<tr>
+<td>Canary, vendor-lab</td>
+<td><code>canary</code>, <code>vendor_lab</code></td>
+<td>run id</td>
+<td>null</td>
+<td>null</td>
+</tr>
+</tbody>
+</table></div>
+<p>Observations are named <code>{role}.{capability}</code> (<code>host.text</code>, <code>episode_tts.tts</code>, <code>verbatim_stt.stt_verbatim</code>). LLM calls are Langfuse generations with <code>usage</code> and <code>cost</code> set from the same numbers as <code>vendor_calls</code> (so the two never disagree), plus <code>metadata</code>: <code>learner_model_version</code>, <code>prompt_version</code>, <code>vendors_yaml_sha</code>, <code>price_book_ids</code>, <code>pricing_mode</code>, <code>episode_kind</code>, <code>spend_mode</code>. Tags: <code>env</code>, <code>role</code>, <code>vendor</code>, <code>pricing_mode</code>.</p>
+<p><strong>4.3.2 What is logged.</strong> Prompts and completions in full for text roles (the point of the tool); for TTS the input text and the voice id, never the audio; for STT the output text, never the audio; for pronunciation the reference sentence and the score object. The learner's name appears inside prompts (the host brief carries it); that is learner content, allowed under the topology's processor approval (open item 01 #2).</p>
+<p><strong>4.3.3 Scrubbing.</strong> Before emission the middleware runs <code>forone.learner.pii.scrub_for_processor</code> (04) over metadata and over any field classified as identity: email, phone, birth date, payment ids never leave. Prompt text is not scrubbed (it would destroy the debugging value); it is covered by the processor approval.</p>
+<p><strong>4.3.4 Sampling and deletion.</strong> Beta: 100% of observations. Scale (10,000 learners, about 400,000 observations a day): 20% of <code>episode</code> and <code>call</code> traces, 100% of <code>after_pass</code>, <code>proof</code>, <code>onboarding</code> and anything whose role is <code>analyst</code>, <code>memory_keeper</code>, <code>rater</code> or <code>proof_producer</code> (these feed claims; PRD-v2 10.10 "openable" evidence must be debuggable). Sampling is by trace, decided once at trace start from a hash of the trace id, so a sampled episode is complete. Deletion: <code>learner/delete</code> (04) calls Langfuse's deletion by <code>user_id</code>; this domain owns the adapter <code>langfuse_admin.delete_user(user_id)</code> and the daily retry until <code>deletion_ledger.verified_empty</code> (04). [ASSUMPTION] Langfuse Cloud exposes per-user deletion through its API in the plan we buy; verified in week 1 with a test user, and if it does not, the fallback is self-hosting (section 8).</p>
+<p><strong>4.3.5 Cost of Langfuse itself.</strong> Beta: Core plan, $0 to $59 a month (01). At 10,000 learners with the sampling above: about 100,000 observations a day, inside a Pro or Team plan at a few hundred dollars a month; the 01 estimate of $500 a month stands.</p>
+<h3>4.4 Roll-ups, the weekly report and outliers</h3>
+<p><strong>4.4.1 Roll-up tables.</strong></p>
+<pre><code class="language-sql">create table session_costs (
+  session_id uuid primary key, learner_id uuid not null, episode_id uuid, local_date date not null,
+  episode_kind text not null, cost_usd numeric(10,6) not null,
+  cost_by_role jsonb not null,            -- {&quot;teacher&quot;:0.0812,&quot;writer&quot;:0.0540,...}
+  cost_by_vendor jsonb not null,
+  cost_by_line jsonb not null,            -- the nine PRD 14.5 lines, section 6.1 mapping
+  pricing_escalated bool not null default false,   -- batch cancelled at a cut line (02)
+  fallback_used bool not null default false,
+  minutes_heard numeric(6,2), minutes_spoken numeric(6,2),
+  updated_at timestamptz not null default now());
+
+create table learner_costs_daily (
+  learner_id uuid, day date, cost_usd numeric(10,6) not null, sessions int not null,
+  calls int not null, swaps int not null, minutes_heard numeric(6,2), minutes_spoken numeric(6,2),
+  deleted_learner_bucket bool not null default false, primary key (learner_id, day));
+
+create table role_vendor_costs_daily (
+  day date, role text, vendor text, pricing_mode text, calls int, errors int, cost_usd numeric(12,6),
+  units jsonb, cache_hit_rate numeric(5,4), p95_latency_ms int, primary key (day, role, vendor, pricing_mode));
+</code></pre>
+<p><code>cost/rollup</code> runs every 15 minutes (Inngest cron), takes <code>vendor_calls</code> rows with <code>occurred_at &gt; last_watermark</code>, and upserts the three tables. A session's cost is final 24 hours after the session closes (the proof share and late verbatim rows arrive after the call); <code>session_costs.updated_at</code> says when it last moved. The weekly proof's cost is divided by the learner's sessions in that week and added to each session's <code>cost_by_line.proof_share</code> (PRD-v2 14.5 "a quarter of the weekly proof" assumes four sessions; dividing by the actual count is the same rule applied honestly).</p>
+<p>The nine PRD lines are computed from roles by this mapping, which is also what the report prints:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>PRD-v2 14.5 line</th>
+<th>Roles summed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Teacher</td>
+<td><code>teacher</code></td>
+</tr>
+<tr>
+<td>Writer</td>
+<td><code>writer</code> (including rewrites)</td>
+</tr>
+<tr>
+<td>Fitter, glosses, editor</td>
+<td><code>fitter</code>, <code>gloss</code>, <code>editor</code>, <code>embeddings</code></td>
+</tr>
+<tr>
+<td>Voice studio</td>
+<td><code>episode_tts</code>, <code>aligner</code>, <code>relisten_stt</code>, media mix</td>
+</tr>
+<tr>
+<td>Call (main and round two)</td>
+<td><code>streaming_stt</code>, <code>talkback_stt</code>, <code>host</code>, <code>call_tts</code>, <code>talkback_resolver</code>, <code>salma_live</code>, <code>salma_tts</code> (in-call), <code>livekit</code>, worker compute</td>
+</tr>
+<tr>
+<td>Re-transcription and pronunciation</td>
+<td><code>verbatim_stt</code>, <code>pronunciation</code></td>
+</tr>
+<tr>
+<td>Salma's notes and chat</td>
+<td><code>salma_text</code>, <code>chat_host</code>, polish-line <code>salma_tts</code>, <code>margin_note</code></td>
+</tr>
+<tr>
+<td>Analyst and memory keeper</td>
+<td><code>analyst</code>, <code>memory_keeper</code>, <code>rater</code> (amortized), conversation-chunk <code>embeddings</code></td>
+</tr>
+<tr>
+<td>Proof share and hosting</td>
+<td><code>proof_producer</code>, proof <code>salma_tts</code> (divided), <code>s3_egress</code>, feed encode</td>
+</tr>
+</tbody>
+</table></div>
+<p>Onboarding (Salma A3, pilot, first call) and the sample episode are not sessions. They are rolled into <code>learner_costs_daily</code> on the day they happen and reported as <strong>acquisition cost per learner</strong> on a separate line (about $0.45 at list prices: Salma and first call $0.10 from 03, pilot about $0.30 at standard pricing from 02, sample $0.035). They are deliberately not divided into the per-session number, so the per-session gate (PRD-v2 16.1) measures the steady state.</p>
+<p><strong>4.4.2 The weekly report.</strong> <code>cost/weekly-report</code> runs Mondays 06:00 Asia/Riyadh for the previous Monday-to-Sunday week, writes Markdown to the ops channel (through the evaluation domain's <code>ops.notify</code>) and stores it at <code>cost_reports(week, body, csv)</code> for <code>/admin/cost</code>. Sections, in order, each a table:</p>
+<ol>
+<li><strong>Headline:</strong> sessions, mean cost per session, median, p90, against $0.60 and $1.00; the same four numbers for the previous week; the share of sessions over $1.00.</li>
+<li><strong>By PRD line</strong> (the nine lines plus acquisition and fixed infrastructure): mean per session this week, last week, the PRD estimate (section 6.1) and the delta.</li>
+<li><strong>By role and vendor:</strong> calls, errors, cost, units, cache hit rate, p95 latency, share of calls on batch, share escalated at a cut line.</li>
+<li><strong>By episode kind:</strong> daily, swap, return, pilot, fallback: count and mean cost.</li>
+<li><strong>Heavy-use outliers</strong> (4.4.3).</li>
+<li><strong>Vendor health:</strong> failovers this week (<code>voice.vendor_failover</code>, STT secondary use), unpriced calls, stale prices, Langfuse sampling rate.</li>
+<li><strong>Next week's prices:</strong> from 2026-12-07, the headline recomputed with every <code>price_book</code> row whose <code>valid_from</code> is within 30 days (the 2027-01-01 doubling shows here four weeks early).</li>
+<li><strong>Reconciliation status</strong> (monthly, 4.4.4).</li>
+</ol>
+<p>The query behind section 2, so Muath can run it by hand:</p>
+<pre><code class="language-sql">select line, round(avg((cost_by_line-&gt;&gt;line)::numeric), 4) as mean_usd, count(*) as sessions
+from session_costs, jsonb_object_keys(cost_by_line) as line
+where local_date between $1 and $2 and episode_kind in ('daily','swap','return','fallback')
+group by line order by mean_usd desc;
+</code></pre>
+<p><strong>4.4.3 Heavy-use outliers (PRD-v2 16.2).</strong> A learner is flagged in the report when, over the trailing 7 days, any of: <code>cost_usd</code> above 3 times the cohort median, minutes heard above 3 times the cohort median, or any single day above <code>cost.daily_learner_cap_usd</code> ($2.50). The flag goes to the report and to <code>/admin/cost</code> only. It triggers no message, no throttle and no change in the learner's allowance (law 11: what is already made can be heard as often as wanted; re-listens cost egress only, about $0.001 each). The one action it can lead to is a human reading the trace to check for a bug (a loop in the chat, a swap storm), because a heavy user in this product is a success, not a problem.</p>
+<p><strong>4.4.4 Reconciliation.</strong> <code>cost/reconcile-monthly</code> on the 2nd of each month: pulls the Anthropic Usage and Cost report for the organization through the Admin API (an admin key, <code>ANTHROPIC_ADMIN_API_KEY</code>, read-only, stored in Secrets Manager) and compares it to <code>sum(cost_usd) where vendor='anthropic'</code> by model; for Google, ElevenLabs, Inworld, Soniox, Deepgram, AssemblyAI, Speechace and LiveKit, reads a CSV Muath uploads at <code>/admin/cost/invoices</code> (vendor, period, usd) within 10 days of each invoice. Writes <code>vendor_invoices(vendor, period, invoiced_usd, traced_usd, variance_pct)</code>; variance above 5% raises a <code>cost.alarm_raised{kind: reconciliation}</code>. [ASSUMPTION] the Admin API's cost report groups by model and workspace, which is enough; per-key grouping is not needed because the beta runs one workspace per environment. Automating the other vendors' invoices is P1 or later; eight CSV uploads a month is cheaper than eight scrapers.</p>
+<h3>4.5 Alarms, the spend guard and the stop line</h3>
+<p><strong>4.5.1 Alarm catalog.</strong> <code>cost/alarms</code> runs every 15 minutes; each alarm is an event <code>cost.alarm_raised {kind, severity, value, threshold, learner_id?, role?, vendor?}</code> consumed by the evaluation domain's paging (<code>ops.page</code> for <code>page</code>, <code>ops.notify</code> for <code>notify</code>). Every alarm is idempotent per (kind, subject, day).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Condition</th>
+<th>Severity</th>
+<th>Config key (default)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>session_over_alert</code></td>
+<td>A <code>session_costs.cost_usd</code> crosses the alert line</td>
+<td>notify</td>
+<td><code>SESSION_COST_ALERT_USD</code> (1.00, from 01)</td>
+</tr>
+<tr>
+<td><code>session_over_budget_trend</code></td>
+<td>Trailing 7-day mean per daily session above budget</td>
+<td>notify (weekly repeat)</td>
+<td><code>cost.session_budget_usd</code> (0.60)</td>
+</tr>
+<tr>
+<td><code>session_warn_trend</code></td>
+<td>Trailing 7-day mean above the warning line</td>
+<td>page (once a week)</td>
+<td><code>cost.session_warn_usd</code> (0.80)</td>
+</tr>
+<tr>
+<td><code>stop_line</code></td>
+<td>Trailing 7-day mean above the stop line, or 20% of sessions above it</td>
+<td>page; opens a 48-hour plan window (4.5.3)</td>
+<td><code>cost.stop_line_usd</code> (1.00)</td>
+</tr>
+<tr>
+<td><code>daily_spend_80</code></td>
+<td>Environment spend today above 80% of the daily cap</td>
+<td>notify; <code>spend_mode</code> → <code>conserve</code></td>
+<td><code>SPEND_CAP_USD_PER_DAY</code> (50 beta; recomputed as learners × $1.50 from 2026-12-07)</td>
+</tr>
+<tr>
+<td><code>daily_spend_100</code></td>
+<td>Spend above the cap</td>
+<td>page; <code>spend_mode</code> → <code>halt</code> for new on-demand generation only</td>
+<td>same</td>
+</tr>
+<tr>
+<td><code>kind_ceiling</code></td>
+<td>A sample episode over $0.05, a pilot over $0.40, a swap over $0.60</td>
+<td>notify</td>
+<td><code>cost.kind_ceilings</code></td>
+</tr>
+<tr>
+<td><code>cache_hit_low</code></td>
+<td>A text role's <code>cache_read_tokens / (cache_read + input + cache_write)</code> under 85% over 24 h, at least 50 calls</td>
+<td>notify</td>
+<td><code>cost.cache_hit_floor</code> (0.85)</td>
+</tr>
+<tr>
+<td><code>unpriced</code></td>
+<td>Any <code>error_code='unpriced'</code> row</td>
+<td>notify</td>
+<td></td>
+</tr>
+<tr>
+<td><code>price_stale</code></td>
+<td>A price row older than 120 days used</td>
+<td>notify (weekly)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>escalation_rate</code></td>
+<td>More than 20% of daily episodes escalated from batch at a cut line in a day</td>
+<td>notify</td>
+<td><code>cost.escalation_rate_max</code> (0.20)</td>
+</tr>
+<tr>
+<td><code>vendor_error_rate</code></td>
+<td>A vendor's error rate above 5% over 10 minutes (shared with <code>vendor/health</code>, 01)</td>
+<td>page</td>
+<td></td>
+</tr>
+<tr>
+<td><code>learner_daily_cap</code></td>
+<td>A learner's day above <code>cost.daily_learner_cap_usd</code></td>
+<td>notify (report only)</td>
+<td>2.50</td>
+</tr>
+<tr>
+<td><code>reconciliation</code></td>
+<td>Monthly variance above 5%</td>
+<td>notify</td>
+<td><code>reconcile.variance_alert_pct</code> (5)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>4.5.2 Spend modes.</strong> <code>spend_mode</code> lives in <code>vendor_config</code> (<code>key='spend_mode'</code>), read by callers through <code>tracing.spend_mode()</code> (cached 60 seconds), set by <code>cost/alarms</code> and by hand from <code>/admin/vendors</code>. It returns to <code>normal</code> at the start of the next day in the environment's clock unless an alarm holds it.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Pipeline (02)</th>
+<th>Call (03)</th>
+<th>After-session (05)</th>
+<th>Client-visible effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>normal</code></td>
+<td>as designed</td>
+<td>as designed</td>
+<td>as designed</td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>conserve</code></td>
+<td>teacher falls to <code>claude-sonnet-5-5</code> batch; writer rewrites capped at 1 round; batch TTS forced where available; swap and return episodes still made; canary episodes skipped</td>
+<td>host falls to <code>claude-haiku-5-5</code>; round two (P1) not offered on Today</td>
+<td>unchanged (claims and notes are never degraded for cost)</td>
+<td>none the learner can tell; a human reads the week's episodes (6.8) with extra care</td>
+</tr>
+<tr>
+<td><code>halt</code></td>
+<td>tomorrow's episodes already queued finish; no new on-demand generation except return episodes (a returning learner must get a show, PRD-v2 3.8); the sample endpoint returns the cached sample text route with a plain "try again tomorrow" page (06 owns the copy)</td>
+<td>calls continue (a learner mid-day is never cut off)</td>
+<td>unchanged</td>
+<td>a swap request shows Salma's one plain sentence already specified for the allowance (PRD-v2 3.6 #6 wording, reused: "One new episode a day...") and no swap; nothing else</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>halt</code> is for a runaway (a bug generating in a loop), not for budgeting; in three weeks of beta it should never fire. If it fires on a normal day, the cap is wrong and is raised.</p>
+<p><strong>4.5.3 The stop line (PRD-v2 1.4, 16.1).</strong> The stop line is a rule about plans, not about service. When <code>stop_line</code> fires, the on-call engineer and Muath get the page with the week's section-2 table attached. Within 48 hours Muath records a plan in <code>cost_reports</code> (<code>plan_text</code>, <code>plan_by</code>) naming which levers of section 6.3 are pulled and the expected per-session effect; the next weekly report prints the plan and the measured effect. If no plan is recorded within 48 hours, the alarm repeats daily. This is the "no costed plan to reduce it" condition made operational; the decision to stop and rethink stays with Muath, as PRD-v2 16.1 says.</p>
+<h3>4.6 Vendor tests as runnable procedures (PRD-v2 14.4, 10.14)</h3>
+<p>All three tests run from <code>vendor-lab</code>, use the production adapters (so every render and transcription is also a <code>vendor_calls</code> row tagged <code>service='vendor-lab'</code>), and write CSV scoring sheets under <code>vendor-lab/results/{date}/</code>. The decision rules are code (<code>vendor-lab decide</code>) so the winner is reproducible from the sheets. Muath signs the result by committing <code>vendors.yaml</code> with the winners by 2026-11-13.</p>
+<p><strong>4.6.1 Voice blind test (14.4 #1), build week 1 to 2.</strong></p>
+<p>Materials: the Milestone 0 two-host sample script (05-prompts.md, 10 lines, about 650 characters) extended to 90 seconds with four more lines in the same register, in both accents; three candidate voices per host per accent per vendor from the package voice pools (PRD-v2 7.1), rendered with the same speech rate (1.0) and no style tags; one 20-second Salma passage (Arabic, the A3 opening lines) rendered on each Arabic voice candidate: Gulf-dialect voices and neutral educated voices (PRD-v2 7.3).</p>
+<pre><code>vendor-lab tts render --script lang/ar-en/tests/two-host-90s.{british,american}.txt \
+    --vendors gemini,inworld,elevenlabs --voices-from lang/ar-en/voices.yaml --rate 1.0 --out results/2026-11-05/tts/
+vendor-lab tts render --script lang/ar-en/tests/salma-20s.ar.txt --vendors gemini,inworld,elevenlabs --voices-from lang/ar-en/voices.yaml --out results/2026-11-05/salma/
+vendor-lab tts sheet  --from results/2026-11-05/tts/ --raters 10 --design latin-square   # prints 10 playlists and the blank sheet
+</code></pre>
+<p>Technical gate, run first, automatic (a vendor that fails any row is excluded before anyone listens):</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Gate</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Two-speaker or per-line rendering of a full scene</td>
+<td>works</td>
+<td>pipeline 4.8</td>
+</tr>
+<tr>
+<td>Word timestamps returned, or alignment cost booked</td>
+<td>either</td>
+<td>02 D10</td>
+</tr>
+<tr>
+<td>Rate control between 0.85 and 1.0</td>
+<td>vendor or <code>atempo</code></td>
+<td>PRD-v2 5.1</td>
+</tr>
+<tr>
+<td>Render p95 for a 90-second scene</td>
+<td>under 20 s</td>
+<td>on-demand kinds, 02 4.13</td>
+</tr>
+<tr>
+<td>Streaming TTFB p95 (call voice)</td>
+<td>under 300 ms</td>
+<td>03 D8 <code>tts_stream_tfb_gate_ms</code></td>
+</tr>
+<tr>
+<td>Concurrent streams on the tier we would buy</td>
+<td>at least 20</td>
+<td>beta peak of 15 concurrent calls</td>
+</tr>
+<tr>
+<td>Name respelling or phoneme tag accepted</td>
+<td>one of them</td>
+<td>02 name pronunciation</td>
+</tr>
+<tr>
+<td>Batch endpoint</td>
+<td>noted, not gated</td>
+<td>lever 6.3 #3</td>
+</tr>
+<tr>
+<td>Cost per 10 minutes of episode audio at list</td>
+<td>printed</td>
+<td>D5</td>
+</tr>
+</tbody>
+</table></div>
+<p>Listening protocol: 10 raters (5 Saudi learners from the Milestone 0 pool who are not in the beta cohort, 5 native English speakers, paid), each hears every vendor's rendering of one accent (British and American split 5 and 5 across raters) in a Latin-square order with vendor names hidden, on earphones, on a phone. Per rendering they answer: naturalness 1 to 5; "would you listen to this on your commute?" yes or no; for native raters, accent authenticity 1 to 5; one free-text line. Then one forced pairwise choice between each pair of vendors (3 pairs). Salma: 5 Saudi raters, same form, plus "which Arabic sounds like someone who would produce my show?" forced choice between the best Gulf and the best neutral voice.</p>
+<p>Scoring sheet columns (<code>tts-sheet.csv</code>): <code>rater_id, rater_group(saudi|native), accent, vendor_blind_code, voice_candidate, naturalness_1_5, commute_yes_no, accent_1_5, pairwise_wins, free_text</code>. <code>vendor-lab decide tts</code> computes per vendor: mean naturalness (both groups), commute-yes share, mean accent (native group), pairwise win rate, list cost per 10 minutes.</p>
+<p>Decision rule (D5, PRD-v2 14.5 "the cheapest voice that passes"): a vendor passes if commute-yes is at least 60% and its mean naturalness is within 0.3 of the best vendor's. Among passing vendors the cheapest at list price wins; the next cheapest passing vendor is the runner-up and provides the understudy voices (02 D9); if only one passes, the runner-up is the best non-passing vendor and the on-air announcement text for a failover is written to say the voice is temporary. If ElevenLabs is the only passing vendor, the win is conditional on a negotiated rate at or below $25 per million characters by 2026-11-20 [OPEN for Muath]; until then Gemini (the cheapest) is configured as primary and ElevenLabs as runner-up. Salma's voice is chosen by the forced choice (majority of 5), ties to neutral Arabic because it ages better across the Gulf and Levant markets (PRD-v2 19.4).</p>
+<p><strong>4.6.2 Call latency (14.4 #3).</strong> Owned by the call domain's <code>tools/call-bench</code> (03, 4.13). This domain adds two columns to its report, read from <code>vendor_calls</code>: cost per call by line, and the cache hit rate of the host role across the 50 calls (gate: at least 90%, since every turn after the first should read the cached brief). A run whose host cache hit rate is under 90% fails the cost gate even if latency passes, because the $0.034 host input line in 03's estimate assumes it.</p>
+<p><strong>4.6.3 The recognizer test (10.14), before build week 2 (deadline 2026-11-08).</strong></p>
+<p>Materials from Milestone 0 (PRD-v2 19.1 #7): 30 clips of real Saudi learners, 20 to 90 seconds each, with consent, chosen to cover at least 10 clips with mid-clause pauses over 1.5 s, at least 8 with Arabic code-switching, at least 5 with fillers and restarts, and the rest ordinary turns. Ground truth per clip, hand-made by Muath: a verbatim human transcript (fillers kept), the list of learner errors with their exact span (from the Milestone 0 tags), the filler spans, the Arabic spans.</p>
+<pre><code>vendor-lab stt run --clips m0/clips/ --truth m0/truth.jsonl \
+    --streaming soniox,deepgram,assemblyai --batch assemblyai,elevenlabs_scribe \
+    --out results/2026-11-06/stt/
+vendor-lab stt decide --from results/2026-11-06/stt/
+</code></pre>
+<p>Per clip and vendor the runner records (<code>stt-sheet.csv</code>): <code>clip_id, vendor, mode(streaming|batch), wer_vs_human, errors_total, errors_survived, errors_corrected_silently, fillers_total, fillers_kept, hallucinated_phrases, hallucinated_near_pause, code_switch_words_total, code_switch_words_correct_language, word_timings(bool), confidences(bool), streaming_final_latency_ms, cost_usd</code>. "Survived" means the learner's error appears verbatim in the transcript; "corrected silently" means the transcript shows the correct form where the learner was wrong (the failure mode the voice lens warned about). Hallucination near a pause is a phrase in the transcript with no counterpart in the human transcript, inside or right after a pause over 1.5 s.</p>
+<p>Decision rules:
+- <strong>Batch verbatim winner:</strong> highest mean error survival rate among vendors with filler retention at least 80% and at most 1 hallucinated phrase per 30 clips; ties broken by cost. Minimum to be usable at all: error survival at least 85%; if no vendor reaches it, the assessment domain's confidence filter must be stricter and the claim gate stays on first-ever events and words owned until a second test (PRD-v2 10.10 already allows this).
+- <strong>Streaming winner:</strong> lowest WER with code-switch words in the correct language at least 80% and final-after-end-of-speech p95 under 400 ms (03's STT budget); ties by cost. The talkback stream (<code>talkback_stt</code>) can use a different vendor from the host stream if code-switch handling differs.
+- <strong>Confidence threshold</strong> (PRD-v2 10.2 #4, Part 18 #10): on the batch winner, sort every tagged error by the recognizer's mean word confidence over its span and find the lowest threshold at which the precision of "a transcribed deviation is a real learner error" reaches 0.8; written to <code>packages/language/ar-en/recognizer.yaml</code> as <code>confidence_threshold</code> with the test date. The streaming winner's threshold is computed the same way but used only for planning signals.
+- The recognizer error by first language (PRD-v2 10.14 last sentence) starts here: the clips' WER by vendor is the day-one baseline the evaluation domain tracks.</p>
+<h3>4.7 Adapter interfaces and the fallback order</h3>
+<p>The interfaces are the topology's (01, 4.5: <code>TextModel</code>, <code>BatchTextModel</code>, <code>SpeechSynth</code>, <code>StreamingSpeechSynth</code>, <code>StreamingRecognizer</code>, <code>VerbatimRecognizer</code>, <code>Pronunciation</code>, <code>Aligner</code>, <code>Embeddings</code>) and the pipeline's <code>TtsAdapter</code> capabilities (02, 4.8). This domain adds what the middleware needs from every adapter and the fallback semantics in <code>vendors.yaml</code>.</p>
+<pre><code class="language-python"># packages/adapters/forone/adapters/base.py
+class Adapter(Protocol):
+    vendor: str
+    capability: str
+    def usage_of(self, raw_response) -&gt; UnitUsage: ...          # the vendor's own counts; never estimated when the vendor reports
+    def price_model_id(self) -&gt; str: ...                         # the price_book.model this adapter bills under
+    async def health(self) -&gt; HealthResult: ...                  # ok, p95_ms, concurrency_remaining if the vendor reports it
+    def is_retryable(self, exc: Exception) -&gt; bool: ...          # 429, 5xx, timeouts: yes; 4xx validation: no
+
+@dataclass(frozen=True)
+class FallbackStep:
+    vendor: str; model: str | None; pricing_mode: str; note: str | None   # note is logged, e.g. &quot;breaks second-vendor rule&quot;
+
+# vendors.yaml semantics (additions to 01 and 03):
+#   fallback: a list of FallbackStep tried in order after `retries` retryable failures on the primary;
+#   `degrade: &lt;name&gt;` names the code path when every step fails (owned by the calling domain);
+#   `pricing_escalation: [batch, standard]` for batch roles (02's cut lines drive it, the middleware records it).
+</code></pre>
+<p>The middleware's retry policy is the same for every capability: up to <code>retries</code> (default 2) on retryable errors with exponential backoff capped at the role's <code>timeout_ms</code>, then the fallback chain, each step with 1 retry; every attempt is a <code>vendor_calls</code> row (<code>outcome='error'</code> or <code>'fallback_used'</code>); the live path uses <code>retries: 0</code> and goes straight to the chain, because a retry costs latency.</p>
+<pre><code class="language-yaml"># packages/adapters/vendors.yaml (this domain's view of every role's chain; models as 01 and 03 spell them)
+roles:
+  teacher:          {vendor: anthropic, model: claude-opus-5-5,   pricing: batch, pricing_escalation: [batch, standard],
+                     fallback: [{vendor: anthropic, model: claude-sonnet-5-5, pricing: standard}], degrade: rule_based_brief}        # PRD 9.8
+  writer:           {vendor: anthropic, model: claude-sonnet-5-5, pricing: batch, pricing_escalation: [batch, standard],
+                     fallback: [{vendor: google, model: gemini-3.8-flash, pricing: standard, note: &quot;editor must switch to anthropic&quot;}], degrade: fallback_episode}   # PRD 6.3
+  fitter:           {vendor: anthropic, model: claude-haiku-5-5, fallback: [{vendor: google, model: gemini-3.8-flash}], degrade: code_only_coverage}
+  gloss:            {vendor: anthropic, model: claude-haiku-5-5, fallback: [{vendor: google, model: gemini-3.8-flash}], degrade: ship_without_gloss_mark_miss}
+  editor:           {vendor: google, model: gemini-3.8-flash, fallback: [{vendor: anthropic, model: claude-haiku-5-5, note: &quot;breaks second-vendor rule; review item&quot;}], degrade: code_checks_only}
+  embeddings:       {vendor: openai, model: text-embedding-3-small, fallback: [], degrade: skip_similarity_check_review_item}
+  episode_tts:      {vendor: VOICE_WINNER, fallback: [{vendor: VOICE_RUNNER_UP, note: &quot;understudy voice; on-air announcement&quot;}], degrade: wait_and_retry_until_t_switch_then_yesterday_stays}
+  aligner:          {vendor: elevenlabs_alignment, fallback: [{vendor: whisperx_local}], degrade: sentence_level_timings}
+  relisten_stt:     {vendor: VERBATIM_WINNER, fallback: [{vendor: VERBATIM_RUNNER_UP}], degrade: ship_unchecked_mark_review}
+  host:             {vendor: anthropic, model: claude-sonnet-5-5, retries: 0,
+                     fallback: [{vendor: anthropic, model: claude-haiku-5-5}, {vendor: google, model: gemini-3.8-flash}], degrade: voice_notes}   # PRD 5.4.10
+  call_tts:         {vendor: VOICE_WINNER, retries: 0, fallback: [{vendor: VOICE_RUNNER_UP, note: &quot;understudy&quot;}], degrade: voice_notes}
+  salma_tts:        {vendor: SALMA_WINNER, fallback: [{vendor: SALMA_RUNNER_UP}], degrade: text_bubble_only}
+  streaming_stt:    {vendor: STREAM_WINNER, retries: 0, fallback: [{vendor: STREAM_RUNNER_UP}], degrade: voice_notes}
+  talkback_stt:     {vendor: STREAM_WINNER, languages: [ar, en], code_switch: true, fallback: [{vendor: STREAM_RUNNER_UP}], degrade: talkback_unavailable_bubble}
+  talkback_resolver:{vendor: anthropic, model: claude-haiku-5-5, retries: 0, fallback: [], degrade: cache_only}
+  salma_live:       {vendor: anthropic, model: claude-sonnet-5-5, retries: 0, fallback: [{vendor: anthropic, model: claude-haiku-5-5}], degrade: typed_intake}
+  verbatim_stt:     {vendor: VERBATIM_WINNER, fallback: [{vendor: VERBATIM_RUNNER_UP}], degrade: low_confidence_no_claims}   # PRD 5.4.11
+  pronunciation:    {vendor: speechace, fallback: [{vendor: microsoft}], degrade: score_null}
+  analyst:          {vendor: anthropic, model: claude-haiku-5-5, fallback: [{vendor: google, model: gemini-3.8-flash}], degrade: notes_header_only_retry_later}
+  memory_keeper:    {vendor: anthropic, model: claude-haiku-5-5, fallback: [{vendor: google, model: gemini-3.8-flash}], degrade: retry_next_pass}
+  salma_text:       {vendor: anthropic, model: claude-sonnet-5-5, fallback: [{vendor: anthropic, model: claude-haiku-5-5}], degrade: notes_header_only}
+  chat_host:        {vendor: anthropic, model: claude-sonnet-5-5, fallback: [{vendor: anthropic, model: claude-haiku-5-5}], degrade: opener_only_then_quiet}
+  proof_producer:   {vendor: anthropic, model: claude-sonnet-5-5, pricing: batch, fallback: [{vendor: anthropic, model: claude-sonnet-5-5, pricing: standard}], degrade: slow_week_template}
+  rater:            {vendor: anthropic, model: claude-sonnet-5-5, pinned_until: 2026-12-31, fallback: [], degrade: code_metrics_only}   # PRD 10.11, 05
+</code></pre>
+<p>Two rules the middleware enforces regardless of the file: a <code>pinned_until</code> role refuses any fallback or <code>vendor_config</code> override while pinned (05); and the writer and editor may not resolve to the same vendor in one run unless the row carries a <code>note</code> (PRD-v2 6.1), in which case the middleware tags the episode <code>review_items(kind='same_vendor_edit')</code> for the human reviewer (6.8).</p>
+<h3>4.8 Vendor risk calendar</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Event</th>
+<th>Exposure</th>
+<th>Action and owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-10-12</td>
+<td>ElevenLabs v4 launch promotion ended</td>
+<td>List price $80 per million characters applies to any ElevenLabs render</td>
+<td><code>prices.yaml</code> carries the list price; D5 rule</td>
+</tr>
+<tr>
+<td>2026-11-08</td>
+<td>10.14 recognizer test deadline (before build week 2)</td>
+<td>Verbatim and streaming winners unknown until then</td>
+<td><code>vendor-lab stt</code>; Muath's truth file by 2026-11-04</td>
+</tr>
+<tr>
+<td>2026-11-13</td>
+<td>Hume shuts its voice APIs</td>
+<td>None if nothing imports Hume</td>
+<td>CI check: no <code>hume</code> dependency in the lockfile; <code>vendors.yaml</code> schema rejects <code>vendor: hume</code></td>
+</tr>
+<tr>
+<td>2026-11-13</td>
+<td>Voice vendor decision (14.4) due</td>
+<td>The $0.18 voice line and the $0.03 to $0.08 call voice line</td>
+<td><code>vendors.yaml</code> committed with winners; paid tier bought for the winner only (D10)</td>
+</tr>
+<tr>
+<td>2026-11-16</td>
+<td>Payment processor decision (Part 18 #2)</td>
+<td>Processor fees (about 3 to 4% web) are outside the AI cost but in the margin report</td>
+<td>Fee schedule row in <code>prices.yaml</code> under <code>vendor: payments</code> for the margin section of the weekly report</td>
+</tr>
+<tr>
+<td>2026-11-17</td>
+<td>Google shuts older Cloud speech models</td>
+<td>None (Gemini 3.8 Flash TTS is not among them) [ASSUMPTION; verify in week 1]</td>
+<td>Week-1 check in <code>vendor-lab tts</code> against the deprecations page</td>
+</tr>
+<tr>
+<td>2026-11-20</td>
+<td>ElevenLabs negotiated-rate deadline if it won the blind test</td>
+<td>Whether ElevenLabs can be primary</td>
+<td>[OPEN for Muath]</td>
+</tr>
+<tr>
+<td>2026-12-07</td>
+<td>Beta starts; daily spend cap recomputed from learner count</td>
+<td>Cap too low halts; too high hides a loop</td>
+<td><code>SPEND_CAP_USD_PER_DAY = max(50, learners × 1.50)</code></td>
+</tr>
+<tr>
+<td>2026-12-28</td>
+<td>Weekly report prints next-week prices</td>
+<td>First sight of the 2027-01-01 jump</td>
+<td>Report section 7</td>
+</tr>
+<tr>
+<td>2026-12-31</td>
+<td>Rater pin window ends</td>
+<td>Re-pin for the next 4-week window (PRD-v2 10.11)</td>
+<td>Assessment domain updates <code>pinned_until</code>; calibration set re-run</td>
+</tr>
+<tr>
+<td>2027-01-01</td>
+<td>Gemini 3.8 prices double (Flash text, Flash TTS; Live)</td>
+<td>Editor +$0.015 a session; a Gemini-voiced session +$0.17 (episode voice +$0.135, call voice +$0.032)</td>
+<td>Second dated rows already in <code>prices.yaml</code>; the costed path (6.4) treats post-doubling prices as the base case</td>
+</tr>
+<tr>
+<td>2027-01-06</td>
+<td>OpenAI deprecates its text-to-speech models</td>
+<td>None (not used); the embeddings model is unaffected</td>
+<td>Note only</td>
+</tr>
+<tr>
+<td>2027-01-10</td>
+<td>Beta gate review</td>
+<td>Cost gate: under $0.60; stop over $1.00 with no plan</td>
+<td>Report of 2027-01-11 is the gate evidence</td>
+</tr>
+<tr>
+<td>Open-ended</td>
+<td>Deepgram's promotional rate ends; Inworld pricing is young; Anthropic Haiku 5.5 tier above 100K-token prompts</td>
+<td>Streaming STT, voice, and any prompt that grows past 100K tokens (the teacher brief must stay under it)</td>
+<td><code>price_stale</code> alarm after 120 days; <code>cache_hit_low</code> and a per-role input-token p95 in the report</td>
+</tr>
+</tbody>
+</table></div>
+<h3>4.9 Contracts and quotas at 100 and 10,000 learners</h3>
+<p>Volumes assume 20 sessions a learner a month, one 6:30 call a session, a 6-minute episode plus 2.5 minutes of read-aloud and 1.5 of recap (10 minutes of produced audio), 7 minutes of learner audio re-transcribed, and anchors clustering so that peak concurrency is about 15% of the day's calls in one hour.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Vendor</th>
+<th>Unit</th>
+<th>100 learners (2,000 sessions/month)</th>
+<th>10,000 learners (200,000 sessions/month)</th>
+<th>What to ask for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anthropic</td>
+<td>Tokens a day (all roles, cached reads included)</td>
+<td>about 17M</td>
+<td>about 1.7B; batch about 40% of it</td>
+<td>Beta: usage tier with 1M-token-a-minute Sonnet limits (self-serve). Scale: a committed-spend agreement, higher Batch API queue limits, and a workspace per environment; about $50,000 a month of text at the floor stack</td>
+</tr>
+<tr>
+<td>Voice vendor (winner)</td>
+<td>Characters a month (episodes, read-aloud, recap, proof, call host turns)</td>
+<td>about 20M</td>
+<td>about 2B</td>
+<td>Beta: the paid API tier that gives 20 concurrent streams (ElevenLabs Business or Inworld paid; Gemini paid tier with a TTS requests-per-minute quota raise). Scale: enterprise contract with a per-million-character rate; the voice line is the biggest negotiable line</td>
+</tr>
+<tr>
+<td>Voice vendor (runner-up)</td>
+<td>Same, only on failover and canaries</td>
+<td>under 1M</td>
+<td>about 50M (canaries plus failover days)</td>
+<td>Pay-as-you-go; one weekly canary keeps the account live</td>
+</tr>
+<tr>
+<td>Streaming STT</td>
+<td>Concurrent streams at peak; minutes a month</td>
+<td>15 concurrent; about 16,000 min (two streams per call)</td>
+<td>600 concurrent; 1.6M min</td>
+<td>Beta: a concurrency raise to 50 in week 1 (03). Scale: contract with concurrency 1,000</td>
+</tr>
+<tr>
+<td>Verbatim STT</td>
+<td>Minutes a month</td>
+<td>14,000 (calls) + 20,000 (re-listen)</td>
+<td>3.4M</td>
+<td>Scale: volume pricing below $0.003 a minute</td>
+</tr>
+<tr>
+<td>Pronunciation</td>
+<td>Utterances a month</td>
+<td>2,000 to 6,000</td>
+<td>200,000 to 600,000</td>
+<td>Speechace plan sized to utterances; Microsoft as the secondary needs an Azure Speech resource in the home region or EU</td>
+</tr>
+<tr>
+<td>LiveKit Cloud</td>
+<td>Participant minutes a month</td>
+<td>about 28,000</td>
+<td>about 2.8M</td>
+<td>Beta: Ship plan. Scale: enterprise; the per-minute rate is the largest infrastructure line (01)</td>
+</tr>
+<tr>
+<td>Langfuse</td>
+<td>Observations a day</td>
+<td>about 4,000</td>
+<td>about 100,000 after sampling</td>
+<td>Beta: Core. Scale: Pro or Team, or self-host</td>
+</tr>
+<tr>
+<td>Inngest</td>
+<td>Steps a day</td>
+<td>about 5,000</td>
+<td>about 500,000</td>
+<td>Beta: free or Pro. Scale: verify tier pricing; 01 names the switch rule (above $0.01 a session)</td>
+</tr>
+<tr>
+<td>Alignment (if the voice winner lacks timestamps)</td>
+<td>Minutes a month</td>
+<td>20,000</td>
+<td>2M</td>
+<td>Scale: a self-hosted aligner on one GPU task is cheaper than $0.0037 a minute above about 300,000 minutes a month (P1 or later)</td>
+</tr>
+<tr>
+<td>Payment processor</td>
+<td>Transactions</td>
+<td>100 to 350</td>
+<td>10,000 to 30,000</td>
+<td>Outside this document except the fee row</td>
+</tr>
+</tbody>
+</table></div>
+<p>Quotas to request in build week 1 (so no test or canary is throttled): Anthropic rate tier for 1M tokens a minute on Sonnet and 200K on Opus and the Batch API enabled; the voice finalists' 20-stream concurrency; Soniox and Deepgram 50 concurrent streams; AssemblyAI 50 concurrent batch jobs; Speechace a developer plan; LiveKit Ship.</p>
+<hr /></div></details><details class="fs" id="s5-failure-modes-fallbacks-and-degraded-m"><summary><h3>5. Failure modes, fallbacks and degraded modes</h3><span class="wc">508 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>Detection</th>
+<th>Automatic response</th>
+<th>What the learner notices</th>
+<th>What this domain records</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vendor rejects or times out (any role)</td>
+<td>middleware retry exhaustion</td>
+<td>fallback chain (4.7), then the calling domain's <code>degrade</code> path</td>
+<td>nothing, or the degraded surface that domain specifies</td>
+<td>rows with <code>outcome='error'</code> then <code>'fallback_used'</code>; <code>vendor_error_rate</code> alarm at 5%</td>
+</tr>
+<tr>
+<td>Both voice vendors down at production time</td>
+<td><code>episode_tts</code> chain exhausted</td>
+<td>retry every 5 minutes until <code>t_switch</code> (02); then the pipeline marks the run failed and yesterday's episode stays (PRD-v2 3.6 #2 behaviour reused); <code>pipeline.human_page</code></td>
+<td>no new episode today; no notification</td>
+<td><code>escalation_rate</code> and <code>vendor_error_rate</code> alarms</td>
+</tr>
+<tr>
+<td>Batch not back by a cut line</td>
+<td>02's poll loop</td>
+<td>cancel and run standard; <code>pricing_escalated=true</code></td>
+<td>nothing</td>
+<td><code>escalation_rate</code> alarm if above 20% of the day; the saving lost is printed in the report</td>
+</tr>
+<tr>
+<td>A price row missing for a new model or voice</td>
+<td><code>unpriced</code> rows</td>
+<td>priced at zero, alarm</td>
+<td>nothing</td>
+<td>report line until <code>prices.yaml</code> is fixed and <code>cost/rollup --reprice --since</code> is run (re-prices rows from <code>units</code>, the reason <code>units</code> is raw)</td>
+</tr>
+<tr>
+<td>Prompt cache silently broken (timestamp in a prefix, tool list reordered)</td>
+<td><code>cache_hit_low</code></td>
+<td>alarm with the role and the first hour it fell</td>
+<td>nothing</td>
+<td>the cost of the breakage computed as (expected cache reads × (input price − cache price))</td>
+</tr>
+<tr>
+<td>Spend loop (a bug re-running a step)</td>
+<td><code>daily_spend_80</code> then <code>_100</code></td>
+<td><code>conserve</code> then <code>halt</code>; page</td>
+<td>at most: no swap today</td>
+<td>spend mode changes as <code>cost.spend_mode_changed</code></td>
+</tr>
+<tr>
+<td>Postgres write of <code>vendor_calls</code> fails in the live path</td>
+<td>buffered writer error</td>
+<td>rows kept in the worker's memory and retried; after call end, flushed to a local file and re-ingested by <code>cost/rollup</code> (<code>vendor_calls_spool</code> bucket)</td>
+<td>nothing</td>
+<td>a <code>spool_recovered</code> count in the report</td>
+</tr>
+<tr>
+<td>Langfuse unreachable</td>
+<td>SDK async queue errors</td>
+<td>observations dropped after the queue fills (the SDK is fire-and-forget); <code>vendor_calls</code> is unaffected</td>
+<td>nothing</td>
+<td><code>langfuse_dropped</code> count; the trace is reconstructable from <code>vendor_calls</code> plus the artifacts the pipeline stored</td>
+</tr>
+<tr>
+<td>Langfuse deletion API fails for a deleted learner</td>
+<td><code>deletion_ledger.verified_empty=false</code> (04)</td>
+<td>daily retry 30 days; alert</td>
+<td>nothing</td>
+<td>[OPEN for Muath] in 04 whether the "deleted" email waits for it</td>
+</tr>
+<tr>
+<td>Reconciliation variance above 5%</td>
+<td><code>cost/reconcile-monthly</code></td>
+<td>alarm; the report names the vendor and the month</td>
+<td>nothing</td>
+<td><code>vendor_invoices</code> row</td>
+</tr>
+<tr>
+<td>Vendor announces a price change</td>
+<td>a person reads it</td>
+<td>a dated row in <code>prices.yaml</code> through a pull request; the weekly report's section 7 shows the effect before it lands</td>
+<td>nothing</td>
+<td></td>
+</tr>
+<tr>
+<td>A new learner cohort is heavier than modelled (more talk, longer calls)</td>
+<td><code>session_over_budget_trend</code></td>
+<td>nothing automatic; the levers in 6.3 are human decisions</td>
+<td>nothing</td>
+<td>the report shows which line moved</td>
+</tr>
+</tbody>
+</table></div>
+<p>The principle, repeated from 01: no learner ever sees a cost error. The cost domain degrades the product's own spending, never the learner's day.</p>
+<hr /></div></details><details class="fs" id="s6-cost-and-performance-against-the-budge"><summary><h3>6. Cost and performance against the budgets</h3><span class="wc">2,743 words</span></summary><div class="prose"><h3>6.1 The itemized model, beta stack, list prices</h3>
+<p>Unit assumptions behind every line (each is an <code>assumptions.yaml</code> key so Muath can recompute; section 6.5):</p>
+<ul>
+<li>Episode 6:00 min, article read-aloud 2:30, recap 1:30; 830 characters per minute of speech; 10 minutes of produced audio = 8,300 characters = 15,000 Gemini audio tokens (25 a second).</li>
+<li>Teacher: 14,000 input tokens (6,000 cache reads, 1,000 cache writes, 7,000 uncached), 6,000 output tokens including thinking. Writer: 12,000 input (7,000 cached), 6,000 output; rewrites 1.3 rounds of 9,000 input (7,000 cached) and 900 output at standard pricing. Fitter and gloss misses: 8,000 in, 3,000 out on Haiku. Editor: 1.2 calls of 9,000 in, 1,500 out on Gemini Flash. (All from 02, section 6, which this document adopts.)</li>
+<li>Call (03, section 6): 6:30 main call; 25 learner turns; host share 35% (1,900 characters); host cached reads 90,000 tokens, cache writes 4,000, uncached 3,000, output 1,500; 3 talkback asks; Soniox for 7 minutes on two streams; LiveKit 2 participants × 7 minutes.</li>
+<li>Round two [P1]: 2.5 minutes, used after 50% of sessions [ASSUMPTION].</li>
+<li>Verbatim: 7 minutes of learner audio; one pronunciation utterance.</li>
+<li>Notes and chat (05 and 03): Salma notes 3,000 in (2,000 cached), 400 out on Sonnet; two polish lines of 120 characters; chat host 5 messages of 4,000 in (3,000 cached), 150 out on Sonnet; one margin note.</li>
+<li>Analyst and memory keeper (05): $0.0035 of Haiku plus $0.0005 of embeddings plus the rater amortized.</li>
+<li>Proof (05): $0.06 a week divided by 4 sessions; hosting (06): $0.006 egress and feed encode.</li>
+<li>Swap: 5% of sessions have a swap at standard pricing, about $0.50 each [ASSUMPTION; 02 assumed 20% of learners, which is the same order].</li>
+</ul>
+<p>Arithmetic (standard rate unless noted; batch = half):</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Line</th>
+<th>Arithmetic</th>
+<th>Gemini voice</th>
+<th>Inworld voice</th>
+<th>ElevenLabs v4 list</th>
+<th>PRD-v2 14.5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Teacher (Opus 5.5, batch)</td>
+<td>standard: 7k × $4 + 6k × $0.20 + 1k × $5 + 6k × $20 per M = $0.028 + $0.0012 + $0.005 + $0.12 = $0.154; batch ÷ 2</td>
+<td>$0.077</td>
+<td>$0.077</td>
+<td>$0.077</td>
+<td>$0.08</td>
+</tr>
+<tr>
+<td>Writer (Sonnet 5.5, batch) + rewrites (standard)</td>
+<td>batch: (5k × $2 + 7k × $0.20 + 6k × $10) ÷ 2 = ($0.010 + $0.0014 + $0.06) ÷ 2 = $0.036; rewrites 1.3 × (2k × $2 + 7k × $0.20 + 0.9k × $10) = 1.3 × $0.0144 = $0.019</td>
+<td>$0.055</td>
+<td>$0.055</td>
+<td>$0.055</td>
+<td>$0.07</td>
+</tr>
+<tr>
+<td>Fitter, glosses, editor, embedding</td>
+<td>Haiku 8k × $0.10 + 3k × $0.50 = $0.0023; Gemini 1.2 × (9k × $0.75 + 1.5k × $3.75) = 1.2 × $0.0124 = $0.015; embedding under $0.001</td>
+<td>$0.018</td>
+<td>$0.018</td>
+<td>$0.018</td>
+<td>$0.03</td>
+</tr>
+<tr>
+<td>Voice studio: episode, read-aloud, recap</td>
+<td>Gemini: 15,000 tokens × $9/M = $0.135 + alignment 10 min × $0.0037 = $0.037; Inworld: 8,300 × $25/M = $0.208, timestamps included [unverified]; ElevenLabs: 8,300 × $80/M = $0.664; plus re-listen 10 min × $0.004 = $0.04 and mix under $0.005 for all</td>
+<td>$0.217 (batch TTS: $0.150)</td>
+<td>$0.253</td>
+<td>$0.709</td>
+<td>$0.18</td>
+</tr>
+<tr>
+<td>Call, main</td>
+<td>STT 7 min × $0.002 × 2 streams = $0.015 (talkback stream rounded in); host Sonnet 90k × $0.20 + 4k × $2.50 + 3k × $2 + 1.5k × $10 per M = $0.018 + $0.010 + $0.006 + $0.015 = $0.049, re-requests $0.002; call TTS 1,900 chars: Gemini 3,500 tokens × $9/M = $0.032, Inworld Flash × $15/M = $0.029, ElevenLabs Flash × $40/M = $0.076; talkback resolver $0.001; Salma TTS $0.005; LiveKit 14 min × $0.001 = $0.014; worker compute $0.004</td>
+<td>$0.122</td>
+<td>$0.119</td>
+<td>$0.166</td>
+<td>$0.16 (with round two)</td>
+</tr>
+<tr>
+<td>Round two [P1], 50% uptake</td>
+<td>about $0.05 × 0.5</td>
+<td>$0.025</td>
+<td>$0.025</td>
+<td>$0.025</td>
+<td>(in the line above)</td>
+</tr>
+<tr>
+<td>Re-transcription and pronunciation</td>
+<td>7 min × $0.004 = $0.028; Speechace $0.008</td>
+<td>$0.036</td>
+<td>$0.036</td>
+<td>$0.036</td>
+<td>$0.03</td>
+</tr>
+<tr>
+<td>Salma's notes and chat</td>
+<td>notes 1k × $2 + 2k × $0.20 + 0.4k × $10 = $0.0064; polish TTS 240 chars about $0.006; chat 5 × (1k × $2 + 3k × $0.20 + 150 × $10) = 5 × $0.0041 = $0.021; margin note $0.004</td>
+<td>$0.037</td>
+<td>$0.037</td>
+<td>$0.037</td>
+<td>$0.04</td>
+</tr>
+<tr>
+<td>Analyst and memory keeper</td>
+<td>$0.0035 + $0.0005 + $0.001</td>
+<td>$0.005</td>
+<td>$0.005</td>
+<td>$0.005</td>
+<td>$0.04</td>
+</tr>
+<tr>
+<td>Proof share and hosting</td>
+<td>$0.06 ÷ 4 = $0.015; hosting $0.006</td>
+<td>$0.021</td>
+<td>$0.021</td>
+<td>$0.021</td>
+<td>$0.03</td>
+</tr>
+<tr>
+<td>Swap allowance</td>
+<td>5% × $0.50</td>
+<td>$0.025</td>
+<td>$0.025</td>
+<td>$0.025</td>
+<td>(not itemized)</td>
+</tr>
+<tr>
+<td><strong>Per daily session, standard TTS</strong></td>
+<td></td>
+<td><strong>$0.638</strong></td>
+<td><strong>$0.671</strong></td>
+<td><strong>$1.174</strong></td>
+<td><strong>$0.66</strong></td>
+</tr>
+<tr>
+<td><strong>With batch TTS where offered</strong> (P1)</td>
+<td>Gemini only</td>
+<td><strong>$0.571</strong></td>
+<td>$0.671</td>
+<td>$1.174</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>After 2027-01-01</strong> (Gemini text and TTS doubled, standard TTS)</td>
+<td>editor +$0.015; Gemini voice +$0.135 episode, +$0.032 call</td>
+<td><strong>$0.820</strong></td>
+<td><strong>$0.686</strong></td>
+<td><strong>$1.189</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>What the table says:</p>
+<ol>
+<li>The PRD's $0.66 is reproduced within 2 cents on the Gemini and Inworld stacks. The voice studio line is $0.04 to $0.07 over the PRD's $0.18 because the PRD line was priced before read-aloud and recap were added to the voice studio (02 noted the same); the analyst line is $0.035 under. They net out.</li>
+<li>ElevenLabs at list price cannot be the beta voice: $1.17 a session is over the stop line before any lever. At v4 Turbo ($40 per million characters) the session is $0.85; at a negotiated $25 it is $0.67, the same as Inworld. Hence D5.</li>
+<li>The Gemini stack is cheapest until 2027-01-01 and the most expensive of the two viable stacks after it ($0.82 against $0.69). If Gemini wins the blind test, the runner-up must be Inworld and the January plan is a vendor swap for the episode voice with the on-air announcement (PRD-v2 7.1 #3), or a negotiated Google rate [OPEN for Muath].</li>
+<li>Fixed infrastructure (01) is on top of these numbers: about $1.30 a session at 15 learners, $0.25 at 100, $0.10 at 250, $0.05 to $0.06 at 10,000. The PRD's "hosting" sits inside its $0.03 line only at scale; in the beta the fixed cost is the research budget the business lens priced at about $2,000 a month. The weekly report prints it as its own line so the gate compares like with like.</li>
+</ol>
+<h3>6.2 Where the money goes and what the learner's behaviour does to it</h3>
+<p>On the Inworld stack: voice studio 38%, call 21%, teacher and writer 20%, everything else 21%. The lines that move with behaviour: the call and the verbatim lines grow with learner talk (the goal: every extra minute of learner speech costs about $0.006 of STT and verbatim and nothing else); the voice studio grows with episode length (about $0.03 a minute on Inworld, $0.017 on Gemini); chat grows with messages (capped at 5 host messages, PRD-v2 5.6); swaps and round two grow with uptake. The lines that do not move: teacher, writer, editor, analyst, proof. A learner who re-listens ten times a day costs $0.01 more than one who listens once (egress), which is the design intent of law 11.</p>
+<h3>6.3 Levers to the $0.60 beta budget</h3>
+<p>In the order they are pulled, with the arithmetic and who decides:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Lever</th>
+<th>Saving per session</th>
+<th>Status</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Batch for teacher and writer with 02's cut lines</td>
+<td>$0.11 (already in the table)</td>
+<td>week 2, in</td>
+<td>pipeline D2</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Episode default 6 → 5.5 minutes (PRD-v2 14.5 "5 to 6 minutes by default"; dial in 9.6)</td>
+<td>voice −8%: $0.012 Gemini, $0.017 Inworld; writer output −$0.004</td>
+<td>week 2, configuration <code>length.default_min</code></td>
+<td>[DECISION] 5.5 as the default dial for learners with no low-energy signal; 5 when one fires; the teacher's dial moves it ±1 within 4:00 to 8:00</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Batch TTS (Gemini only; Inworld and ElevenLabs have no batch tier on their pages) with the same cut lines</td>
+<td>$0.067 on Gemini</td>
+<td>P1 (turnaround unverified, 02)</td>
+<td>pipeline</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Cheapest voice that passes the blind test</td>
+<td>$0 to $0.50 depending on the winner</td>
+<td>week 2</td>
+<td>D5, the test</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Host cache hit at 90%+ verified by the 50-call test</td>
+<td>prevents a $0.03 loss</td>
+<td>week 4</td>
+<td>D8</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Haiku 5.5 as the call host if the 50-call test's move-contract score holds</td>
+<td>host text $0.049 → $0.003: $0.046</td>
+<td>week 4 test; a quality decision</td>
+<td>[OPEN for Muath] with the call domain: run 25 of the 50 calls on Haiku and compare <code>violations</code>, talk share and the human read; switch only if equal</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Round two uptake measured, not assumed</td>
+<td>up to $0.025</td>
+<td>beta</td>
+<td>none needed</td>
+</tr>
+<tr>
+<td>8</td>
+<td>One analyst call instead of fast plus full once notes latency is proven</td>
+<td>$0.0005</td>
+<td>P1</td>
+<td>assessment domain</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Re-listen ASR per line only on lines that changed after a resynthesis; never on the cached Salma feed tag or hello clips; the gloss cache shared across learners (02)</td>
+<td>about $0.005 a session plus $0.02 on every resynthesis</td>
+<td>week 2</td>
+<td>pipeline, already designed; this domain measures it</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Teacher effort <code>low</code> for ordinary nights, <code>high</code> on the nightly weekly-mix run and at season boundaries (Opus 5.5's effort is the only thinking control)</td>
+<td>output 6k → 3k tokens on 4 of 5 nights: $0.024</td>
+<td>week 2 configuration <code>roles.teacher.effort</code></td>
+<td>[DECISION] default <code>medium</code> kept in the beta; <code>low</code> is the first lever if the measured teacher line is over $0.09</td>
+</tr>
+</tbody>
+</table></div>
+<p>Stack after levers 1, 2, 5 and 9 (all in by week 2 at no quality cost): Gemini $0.62 standard TTS, $0.55 with batch TTS; Inworld $0.65. Lever 6 (Haiku host) takes Inworld to $0.60. So: the Gemini stack meets the budget before 2027-01-01 with configuration alone; the Inworld stack meets it only with the Haiku host or the 5-minute default, both of which are quality decisions for the 50-call test and Milestone 0's "worth it" data. This is the honest state of the budget on 2026-10-17.</p>
+<h3>6.4 The path to $0.30 to $0.35 at 10,000 learners (PRD-v2 1.4, 19.2 exit criterion)</h3>
+<p>Base case: list prices after 2027-01-01 (the scale target is a 2027 number). Each row is a configuration change unless marked.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Line</th>
+<th>Beta (Inworld)</th>
+<th>Floor at scale</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Teacher</td>
+<td>$0.077</td>
+<td>$0.045</td>
+<td>Opus 5.5 batch at effort <code>low</code> (3k output) on 4 nights in 5 ($0.047), effort <code>high</code> weekly ($0.08): (4 × 0.047 + 0.08) ÷ 5 = $0.054; minus 1,000 fewer input tokens as the brief compiler tightens: about $0.045. Sonnet 5.5 batch instead would be $0.024 (a quality decision for the offline suite, PRD-v2 6.7)</td>
+</tr>
+<tr>
+<td>Writer</td>
+<td>$0.055</td>
+<td>$0.040</td>
+<td>recap and shadow-line text from Haiku ($0.01 saved, 02 lever 4); rewrite rounds at 1.0 on average once the fitter's known-word list is mature ($0.005)</td>
+</tr>
+<tr>
+<td>Fitter, editor</td>
+<td>$0.018</td>
+<td>$0.030</td>
+<td>Gemini doubles; no lever (the editor must stay on a second vendor)</td>
+</tr>
+<tr>
+<td>Voice studio</td>
+<td>$0.253</td>
+<td>$0.140</td>
+<td>5-minute episode default plus 2.5 read-aloud plus 1.5 recap = 9 minutes = 7,500 characters; Inworld at a negotiated $15 per million (TTS-2 at the Flash price, plausible at 2B characters a month) = $0.113 + re-listen 9 min × $0.003 = $0.027; or Gemini Flash-Lite TTS batch post-doubling about $0.079 + alignment $0.033 + re-listen $0.027 = $0.139 if it passes a blind test</td>
+</tr>
+<tr>
+<td>Call</td>
+<td>$0.119</td>
+<td>$0.070</td>
+<td>Haiku host ($0.046 saved); 5.5-minute call; Inworld Flash or Gemini call voice; LiveKit enterprise rate</td>
+</tr>
+<tr>
+<td>Round two</td>
+<td>$0.025</td>
+<td>$0.015</td>
+<td>same levers at 2.5 minutes</td>
+</tr>
+<tr>
+<td>Verbatim, pronunciation</td>
+<td>$0.036</td>
+<td>$0.023</td>
+<td>volume rate $0.0025 a minute on 6 minutes; one utterance</td>
+</tr>
+<tr>
+<td>Notes and chat</td>
+<td>$0.037</td>
+<td>$0.025</td>
+<td>chat host kept on Sonnet (the host's voice in text matters), notes on Sonnet, margin note on Haiku; shorter cached prefixes</td>
+</tr>
+<tr>
+<td>Analyst, memory keeper</td>
+<td>$0.005</td>
+<td>$0.005</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Proof share and hosting</td>
+<td>$0.021</td>
+<td>$0.020</td>
+<td>CDN for produced audio once the security domain allows a service key (06)</td>
+</tr>
+<tr>
+<td>Swap allowance</td>
+<td>$0.025</td>
+<td>$0.015</td>
+<td>measured uptake; a swap at the floor stack costs $0.30</td>
+</tr>
+<tr>
+<td><strong>Total, list prices post-doubling</strong></td>
+<td><strong>$0.671</strong></td>
+<td><strong>$0.428</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>with Sonnet teacher</td>
+<td></td>
+<td>$0.407</td>
+<td>quality decision</td>
+</tr>
+<tr>
+<td>with a negotiated voice rate at $12 per million characters, or Flash-Lite at the pre-doubling rate</td>
+<td></td>
+<td>$0.385</td>
+<td>[OPEN for Muath]: contract</td>
+</tr>
+<tr>
+<td>with read-aloud and recap rendered on first tap instead of pre-rendered</td>
+<td></td>
+<td>$0.360</td>
+<td>[OPEN for Muath]: PRD-v2 3.7 says the recap is made in the same pipeline run and 6.1 pre-renders the read-aloud; rendering them on first tap (streamed, under 5 s to first sound) saves the audio for the 60 to 90% of sessions that never open them [ASSUMPTION on uptake], at the cost of a 2 to 4 s wait on the tap and a PRD change</td>
+</tr>
+<tr>
+<td>with 5-minute calls and the 4:30 close</td>
+<td></td>
+<td>$0.345</td>
+<td>PRD-v2 5.4.2 says 5 to 7 minutes target; a 5-minute default is inside it; the beta's "4+ minutes of learner speech" gate (16.1) must still be met</td>
+</tr>
+</tbody>
+</table></div>
+<p>Reading: at list prices after the doubling the floor stack is $0.39 to $0.43; before the doubling (the same stack on Gemini Flash TTS batch at $0.0068 a minute) it is $0.33 to $0.36, which is where the concept's "$0.25 to $0.36" range came from. The target of $0.30 to $0.35 in 2027 therefore needs, beyond configuration, one of three things Muath must choose: a voice contract (the cheapest and least visible), a scope change to on-tap rendering (visible as a short wait), or shorter calls (visible as less talking, and in tension with the speech gate). The "costed path to $0.35 or less" the exit criterion asks for is this table with measured numbers in the first column by 2026-12-06; the choice among the three is in section 10.</p>
+<p>Fixed infrastructure at 10,000 learners adds $0.05 to $0.06 (01), which the PRD's scale target absorbs inside its "hosting" line only if the CDN move happens; the report keeps it separate.</p>
+<h3>6.5 The estimate as code</h3>
+<p><code>tools/cost-model/</code> holds <code>assumptions.yaml</code> (every unit number in 6.1 as a key) and <code>estimate.py</code>, which loads <code>prices.yaml</code> and prints the tables of 6.1 and 6.4 for any <code>--at</code> date and <code>--stack</code> (gemini, inworld, elevenlabs, floor). It is also the test that <code>prices.yaml</code> parses and that every role in <code>vendors.yaml</code> has a price row. Muath recomputes with <code>python -I tools/cost-model/estimate.py --at 2027-01-02 --stack inworld --set call.minutes=5.5</code>. From 2026-12-07 a second mode, <code>--measured --week 2026-W50</code>, replaces assumptions with <code>session_costs</code> means and prints the deltas, which is section 2 of the weekly report.</p>
+<pre><code class="language-yaml"># tools/cost-model/assumptions.yaml (excerpt)
+episode: {minutes: 6.0, read_aloud_minutes: 2.5, recap_minutes: 1.5, chars_per_minute: 830, gemini_tokens_per_second: 25}
+teacher: {input_tokens: 14000, cache_read: 6000, cache_write: 1000, output_tokens: 6000, pricing: batch}
+writer:  {input_tokens: 12000, cache_read: 7000, output_tokens: 6000, pricing: batch, rewrite_rounds: 1.3, rewrite_input: 9000, rewrite_cache_read: 7000, rewrite_output: 900}
+call:    {minutes: 6.5, learner_turns: 25, host_share: 0.35, host_chars: 1900, host_cache_read: 90000, host_cache_write: 4000, host_uncached: 3000, host_output: 1500, talkback_asks: 3, stt_streams: 2, livekit_participants: 2}
+round_two: {minutes: 2.5, uptake: 0.5}
+verbatim: {learner_minutes: 7, pronunciation_utterances: 1}
+swap: {share_of_sessions: 0.05, cost_usd: 0.50}
+proof: {weekly_usd: 0.06, sessions_per_week: 4}
+hosting: {egress_usd: 0.006}
+</code></pre>
+<h3>6.6 Performance of the tracing itself</h3>
+<p>The middleware adds under 1 ms to a call in <code>workflows</code> (one insert, same transaction) and nothing measurable to the live path (buffered, flushed every 5 s off the audio thread; 03's latency budget is untouched). <code>cost/rollup</code> over a 15-minute window at 10,000 learners is about 60,000 rows, one aggregate query under 2 s. The weekly report at scale reads roll-ups only. <code>vendor_calls</code> grows about 60 rows a session: 120,000 a month at 100 learners (about 50 MB), 12M a month at 10,000 (about 5 GB a month, partitioned, 13 months kept).</p>
+<hr /></div></details><details class="fs" id="s7-build-plan-for-2026-11-02-to-2026-12-0"><summary><h3>7. Build plan for 2026-11-02 to 2026-12-06</h3><span class="wc">748 words</span></summary><div class="prose"><p>Team: the topology's E1 builds the middleware and tables in week 1 alongside the adapters (the two are one piece of work); Muath runs the vendor tests with <code>vendor-lab</code> and writes the truth file; E2 is not needed by this domain until the admin page in week 5. If there is one engineer, the cuts are in the last row.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Dates</th>
+<th>This domain ships (P0 unless marked)</th>
+<th>What the pilot data lets you test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2026-11-02 to 11-08</td>
+<td><code>prices.yaml</code> v2026-11-02 and the <code>price_book</code> migration; <code>vendor_calls</code> DDL with partitions and RLS; <code>tracing.traced</code>, <code>UnitUsage</code>, <code>price_for</code>, <code>record_external</code>, the live-path buffer and spool; Langfuse SDK wiring with the trace conventions and the PII scrub call; <code>SPEND_CAP_USD_PER_DAY</code> enforced; <code>vendor-lab tts render/sheet</code> and <code>vendor-lab stt run/decide</code> with the CSV sheets; Hume lockfile check in CI; quota requests sent (4.9); Langfuse per-user deletion verified with a test user</td>
+<td>The 30 Milestone 0 clips and Muath's truth file run the 10.14 test by 2026-11-08; the two-host script renders on all three voice vendors for the blind test playlists; every test render is a priced <code>vendor_calls</code> row, so the first "cost per 10 minutes of audio" number is real before any episode exists</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2026-11-09 to 11-15</td>
+<td>Blind test listening sessions (Muath, 10 raters) and <code>vendor-lab decide tts</code>; <code>vendors.yaml</code> committed with winners by 11-13; paid tier for the winner; <code>cost/rollup</code> into <code>session_costs</code> and the role-vendor table; <code>episodes.cost_usd</code> fed from <code>session_costs</code> for 02's publisher; <code>kind_ceiling</code>, <code>unpriced</code>, <code>cache_hit_low</code>, <code>escalation_rate</code> alarms; <code>tools/cost-model/estimate.py</code> with <code>--measured</code> against the week's 20 test episodes</td>
+<td>20 test episodes from the Milestone 0 learner files give the first measured teacher, writer, editor and voice lines; the Milestone 0 scripts' character counts calibrate <code>chars_per_minute</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>2026-11-16 to 11-22</td>
+<td>Pre-account learner id carried in <code>CallMeta</code> for onboarding and sample traces, re-keyed at A9; sample episode ceiling alarm on the live endpoint; payment processor fee row after the 11-16 decision; <code>learner_costs_daily</code> with the acquisition line</td>
+<td>The sample landing page's first real renders measure the $0.05 ceiling</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2026-11-23 to 11-29</td>
+<td>Call-worker buffered writer and <code>record_external</code> for LiveKit minutes; <code>call-bench</code> cost and cache-hit columns; <code>calls.metrics.cost_usd</code> fed; <code>session_over_alert</code>, <code>vendor_error_rate</code>, <code>daily_spend_*</code> alarms and <code>spend_mode</code> with the <code>conserve</code> and <code>halt</code> paths wired into 02's and 03's config reads; the Haiku-host comparison inside the 50-call run (lever 6)</td>
+<td>Milestone 0 call transcripts replayed through the worker give per-call cost and the host cache hit rate before any live learner</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2026-11-30 to 12-06</td>
+<td><code>cost/weekly-report</code> with all eight sections and <code>/admin/cost</code>; <code>cost/reconcile-monthly</code> skeleton with the Anthropic Admin API pull and the CSV upload; proof-share division; <code>learner/delete</code> aggregation hook; the end-to-end run with the Milestone 0 learners produces the first weekly report; <strong>the exit document: measured cost per session and the costed path (6.4) with measured first column</strong></td>
+<td>The 15 Milestone 0 learners' week on prod is the measurement the exit criterion asks for; their heavy-use spread tests the outlier rule</td>
+</tr>
+<tr>
+<td>P1 (beta)</td>
+<td>2026-12-07 to 2027-01-10</td>
+<td>Batch TTS (lever 3) if Gemini is primary; Langfuse sampling switch (off in the beta); automated invoice ingestion for one more vendor; the 2026-12-28 next-week-prices report; the January voice plan executed (6.1 note 3)</td>
+<td></td>
+</tr>
+<tr>
+<td>Cuts if one engineer</td>
+<td></td>
+<td>No <code>/admin/cost</code> page (the weekly report Markdown and SQL suffice); reconciliation fully manual (a notebook, monthly); <code>vendor_invoices</code> table dropped; <code>conserve</code> mode dropped (only <code>halt</code> on the cap); <code>vendor-lab</code> reduced to render and run commands with decisions in a spreadsheet</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>What is too much for this team and is cut or deferred: self-hosted Langfuse (kept only as the PDPL fallback), per-vendor invoice scrapers, a cost dashboard beyond one admin page, multi-currency (USD only; SAR revenue is the processor's report), margin-per-learner analytics (one SQL query in the report), a budget forecasting model (the next-week-prices column is enough).</p>
+<p>Milestone 0 to code: the kit's evening cycle (04-production.md) maps onto roles as step 1 → <code>verbatim_stt</code>, step 2 → <code>analyst</code> and <code>salma_text</code>, step 5 → <code>teacher</code> and <code>writer</code>, step 6 → <code>fitter</code>, step 7 → <code>editor</code>, step 9 → <code>episode_tts</code>, step 10 → <code>host</code> brief. Milestone 0 itself is untraced (Claude Max, AI Studio, ElevenLabs Pro at $99 a month, about $7 a learner for the fortnight); its only cost artifacts worth importing are the character counts of its scripts and the minutes of its calls, which <code>tools/m0_import.py</code> (04) can copy into <code>assumptions.yaml</code>.</p>
+<hr /></div></details><details class="fs" id="s8-alternatives-rejected"><summary><h3>8. Alternatives rejected</h3><span class="wc">407 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>Alternative</th>
+<th>Why rejected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cost in <code>events</code> only (04's <code>events.cost_usd</code>)</td>
+<td>Sample episodes, canaries, vendor tests and failed attempts have no learner or session; the log is append-only and learner-scoped, so repricing after a <code>prices.yaml</code> fix would be impossible. <code>events.vendor_call_id</code> keeps the link without the duplication</td>
+</tr>
+<tr>
+<td>Cost in Langfuse only</td>
+<td>A processor outside the home region, sampled at scale, with its own retention; a reconciliation against invoices needs rows we own</td>
+</tr>
+<tr>
+<td>OpenTelemetry to Grafana or Honeycomb instead of Langfuse</td>
+<td>No prompt and completion view, which is what debugging a wrong episode needs; the adapters still emit OTel spans (02 4.16) so a later move is additive</td>
+</tr>
+<tr>
+<td>A proxy gateway (Helicone, Portkey, LiteLLM) for tracing and routing</td>
+<td>Adds a network hop in the call path (03's 950 ms budget has no room), a second place where vendor keys live, and a dependency on its vendor list; our adapters already exist</td>
+</tr>
+<tr>
+<td>Vendor dashboards as the cost record</td>
+<td>No per-learner or per-session view; monthly granularity; a price change goes unnoticed for a quarter</td>
+</tr>
+<tr>
+<td>Hard per-learner spend cut-off</td>
+<td>Breaks law 4 and trust promise 2; a heavy user is the product working. Outliers are a warning light only</td>
+</tr>
+<tr>
+<td>Speech-to-speech for the call to save engineering</td>
+<td>More expensive per call ($0.18 to $0.50, lens), no verbatim transcript, no shared voice; rejected by the call domain for the same reasons</td>
+</tr>
+<tr>
+<td>One voice vendor with an enterprise contract from day one</td>
+<td>Two vendors are a PRD-v2 14.3 rule; a contract before the blind test buys the wrong vendor</td>
+</tr>
+<tr>
+<td>Two enterprise voice contracts</td>
+<td>Two minimums at 100 learners; the runner-up on pay-as-you-go costs under $20 a month in canaries</td>
+</tr>
+<tr>
+<td>Sonnet as the beta teacher to hit $0.60 on the Inworld stack</td>
+<td>The teacher is the product's brain and the PRD names the strongest class; the $0.05 is found in the host and the episode length first; Sonnet is measured in the offline suite before any switch</td>
+</tr>
+<tr>
+<td>Monthly instead of weekly cost reports</td>
+<td>PRD-v2 14.5 says weekly; the 2027-01-01 jump needs a four-week warning</td>
+</tr>
+<tr>
+<td>Computing cost client-side from token counts in the SDK responses only</td>
+<td>Streaming TTS and STT vendors report seconds, not tokens; one middleware with <code>usage_of</code> per adapter is the only way to one schema</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div></details><details class="fs" id="s9-assumptions-about-other-domains"><summary><h3>9. Assumptions about other domains</h3><span class="wc">524 words</span></summary><div class="prose"><p>Each is an [ASSUMPTION] the integrator should check against that domain's document.</p>
+<ol>
+<li><strong>System topology (01).</strong> The adapter middleware described in its 4.5 is this document's <code>tracing.traced</code>; <code>CallMeta</code> gains <code>session_id</code>, <code>prompt_version</code> and <code>inngest_run_id</code> (it has <code>learner_id</code>, <code>role</code>, <code>episode_id</code>, <code>call_id</code>, <code>learner_model_version</code>); <code>vendor_config</code> holds <code>spend_mode</code>; <code>SPEND_CAP_USD_PER_DAY</code> and <code>SESSION_COST_ALERT_USD</code> are read by this middleware with the defaults here; <code>retention/daily</code> creates <code>vendor_calls</code> partitions as it does for <code>events</code>; <code>/admin/cost</code> is one more <code>sqladmin</code> page; the <code>vendor-lab</code> CLI is built here on its adapter package; the weekly canary episode is tagged <code>episode_kind='canary'</code> and <code>learner_id=null</code>; LiveKit minutes are booked through <code>record_external</code> by the call worker; infrastructure cost stays in 01's section 6 and is printed as a separate line in the report.</li>
+<li><strong>Episode generation pipeline (02).</strong> <code>pipeline_steps.cost_usd</code> is a sum of this domain's <code>vendor_calls</code> rows for that step (via <code>pipeline_steps.vendor_call_ids uuid[]</code>), and <code>price_book</code> is loaded from <code>prices.yaml</code>, not maintained separately; the publisher reads <code>session_costs</code> (or sums <code>vendor_calls</code> by <code>episode_id</code> when the roll-up has not run) for <code>episodes.cost_usd</code> and <code>episode.cost_recorded</code>; its cut lines set <code>pricing_escalated</code>; the fallback episode and <code>review_items</code> exist as it describes; <code>length.default_min</code> is a dial the teacher reads; the 02 <code>TtsAdapter</code> capabilities include <code>batch</code> for lever 3.</li>
+<li><strong>Live call and voice stack (03).</strong> The worker writes <code>vendor_calls</code> through the buffered middleware with <code>call_id</code> and <code>turn_n</code> in <code>units</code>; <code>calls.metrics.cost_usd</code> is filled at call end from the buffer; <code>call-bench</code> accepts two extra report columns from this domain; the host role honours <code>spend_mode='conserve'</code> by selecting its first fallback (Haiku) at call start, never mid-call; the Haiku-host comparison can run inside the week-4 50-call test.</li>
+<li><strong>Learner model, event log and data platform (04).</strong> <code>events.vendor_call_id</code> references <code>vendor_calls.id</code>; <code>learner/delete</code> calls this domain's aggregation hook before deleting rows and this domain's <code>langfuse_admin.delete_user</code>; <code>forone.learner.pii.scrub_for_processor</code> exists for metadata; the pre-account learner id of onboarding is re-keyed to the real <code>learner_id</code> at A9 by an event this domain subscribes to (<code>learner.created {pre_session_id, learner_id}</code>).</li>
+<li><strong>Assessment engine (05).</strong> Its roles (<code>analyst</code>, <code>memory_keeper</code>, <code>salma_text</code>, <code>proof_producer</code>, <code>rater</code>, <code>verbatim_stt</code>, <code>pronunciation</code>) and per-turn verbatim calls go through the middleware; <code>rater.pinned_until</code> is enforced by the middleware's refusal of fallback and override; the confidence threshold from 4.6.3 is read from <code>packages/language/ar-en/recognizer.yaml</code>; claim-related traces are never sampled out of Langfuse.</li>
+<li><strong>Client app and delivery (06).</strong> <code>client_perf</code> values are not vendor calls (its assumption 7, accepted); media egress and the feed MP3 encode are booked by <code>record_external</code> from the feed and media routes, daily, as one row per learner-day (<code>capability='media'</code>), not per request; the sample endpoint reads <code>spend_mode</code> and shows its own "try again tomorrow" page in <code>halt</code>.</li>
+<li><strong>Security, privacy, consent and compliance (07).</strong> Approves Langfuse Cloud EU holding prompts and completions with learner text (01 open item 2) and the <code>forone_cost</code> cross-learner read role; approves the Anthropic Admin API key as a read-only secret; if Langfuse is refused, this domain's fallback is self-hosting (about $150 a month of Fargate and RDS plus two engineer-days; section 10).</li>
+<li><strong>Evaluation, observability and operations (09).</strong> Owns <code>ops.page</code> and <code>ops.notify</code>, the on-call rota that receives <code>cost.alarm_raised</code>, the ops channel the weekly report posts to, and the day-one "recognizer error by first language" metric seeded by 4.6.3; the offline test suite (P1) reuses <code>vendor-lab</code> fixtures.</li>
+</ol>
+<hr /></div></details><details class="fs" id="s10-open-for-muath"><summary><h3>10. Open for Muath</h3><span class="wc">448 words</span></summary><div class="prose"><ol>
+<li><strong>[OPEN for Muath] The voice contract, by 2026-11-20.</strong> If ElevenLabs wins the blind test, it can be primary only at a negotiated rate at or below $25 per million characters (D5); if Gemini wins, decide the January plan now: swap the episode voice to the runner-up on 2027-01-01 with the on-air announcement, or ask Google for a rate. Either way the scale target needs a voice rate near $12 to $15 per million characters at about 2 billion characters a month; that conversation can start in December with the measured volumes.</li>
+<li><strong>[OPEN for Muath] Which of the three last levers to $0.35 (6.4):</strong> a negotiated voice rate (no product change), read-aloud and recap rendered on first tap (a PRD change to 3.7 and 6.1 and a 2 to 4 second wait), or 5-minute calls (inside PRD-v2 5.4.2 but in tension with the 4-minute speech gate). The exit document on 2026-12-06 will carry the measured numbers; the choice is yours and can wait until then.</li>
+<li><strong>[OPEN for Muath] Haiku 5.5 as the call host</strong> if the week-4 50-call comparison shows no difference in move-contract violations, talk share and the human read. It is worth $0.046 a session and is the single largest configuration lever on the call.</li>
+<li><strong>[OPEN for Muath] Langfuse Cloud EU as a processor of learner text</strong> (shared with 01 #2 and 04 #3). If refused: self-hosted Langfuse in the home region, about $150 a month and two engineer-days in week 1, and the deletion question disappears because the data is ours.</li>
+<li><strong>[OPEN for Muath] Budget approvals:</strong> vendor minimums for the beta (the voice winner's paid tier, about $100 to $330 a month depending on vendor; LiveKit Ship $50; Langfuse Core up to $59; Speechace developer plan), the Anthropic prepaid balance for the beta (about $1,500 for December at 100 learners on the text lines plus tests), and the rater fees for the blind test (10 raters, about one hour each).</li>
+<li><strong>[OPEN for Muath] The daily spend cap formula</strong> <code>max($50, learners × $1.50)</code> and the stop-line plan window of 48 hours. Both are policy, not engineering.</li>
+<li><strong>[OPEN for Muath] Whether cost figures may appear in the monthly human review packet</strong> (6.8), so the reviewer sees the cost of an episode next to its quality. Internal only; never a learner surface. Default here: yes.</li>
+<li><strong>[OPEN for Muath] Whether the Milestone 0 clips may be sent to all four recognizer vendors and all three voice vendors</strong> under the Milestone 0 consent (the clips contain learners' voices). The security domain and counsel decide what the consent covers; if not, the 10.14 test needs a re-consent of the 30 clips' owners by 2026-11-04.</li>
+</ol></div></details>
+</section>
+
+<footer class="foot">
+  <a href="https://claude.ai/artifact/C3oRETQgDsX3X6dv8VjdP5">Back to all nine domains</a>
+  <span class="muted">For one · architecture set, 2026-10-23</span>
+</footer>
+</div>
+<script>
+document.querySelectorAll('.toc a').forEach(a => a.addEventListener('click', () => {
+  const d = document.querySelector(a.getAttribute('href')); if (d) d.open = true;
+}));
+</script>
+

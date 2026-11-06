@@ -1,0 +1,834 @@
+<title>For one feature map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a product walkthrough. Wide expanded headlines, real app screens in phone frames, and drawn diagrams for each mechanism. Three voice colors carry meaning everywhere: hosts (cobalt), producer Salma (saffron), you (pink). */
+:root {
+  --paper: #F2F3F6; --raise: #FFFFFF; --ink: #0E1014; --dim: #5A606C; --rule: #D9DDE4; --faint: #E8EAEF;
+  --host: #2446E8; --host-wash: #E2E7FD;
+  --salma: #B87400; --salma-wash: #FAEED6;
+  --you: #CC2C69; --you-wash: #FBE2EB;
+  --on: #FFFFFF; --bezel: #15171C; --scr: #FFFFFF;
+  --display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Atkinson Hyperlegible Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0C0D10; --raise: #15171C; --ink: #ECEEF2; --dim: #9EA3AE; --rule: #2A2E37; --faint: #1C1F26;
+  --host: #8098FF; --host-wash: #1A2253;
+  --salma: #F0B24A; --salma-wash: #38290B;
+  --you: #FF7BA9; --you-wash: #43192A;
+  --on: #0C0D10; --bezel: #2C3039; --scr: #111318; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0C0D10; --raise: #15171C; --ink: #ECEEF2; --dim: #9EA3AE; --rule: #2A2E37; --faint: #1C1F26;
+  --host: #8098FF; --host-wash: #1A2253;
+  --salma: #F0B24A; --salma-wash: #38290B;
+  --you: #FF7BA9; --you-wash: #43192A;
+  --on: #0C0D10; --bezel: #2C3039; --scr: #111318; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); font-stretch: 125%; margin: 0; text-wrap: balance; line-height: 1.02; letter-spacing: -.015em; }
+h2 { font-size: clamp(1.9rem, 4.6vw, 3.3rem); font-weight: 850; }
+h3 { font-size: 1.35rem; font-weight: 800; line-height: 1.1; }
+p { margin: 0; }
+ul { margin: 0; padding: 0; list-style: none; }
+a { color: var(--host); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--host); outline-offset: 3px; border-radius: 4px; }
+.h { color: var(--host); } .s { color: var(--salma); } .y { color: var(--you); }
+.kicker { font-family: var(--mono); font-size: .78rem; letter-spacing: .06em; color: var(--dim); }
+.lead { font-size: 1.2rem; max-width: 46ch; color: var(--dim); }
+.lead b { color: var(--ink); font-weight: 600; }
+section { padding-block: 96px 0; }
+.sec-head { display: flex; flex-direction: column; gap: 14px; margin-bottom: 44px; }
+figure { margin: 0; }
+figcaption { font-size: .92rem; color: var(--dim); max-width: 70ch; margin-top: 14px; }
+.diagram { overflow-x: auto; }
+.diagram svg { display: block; width: 100%; height: auto; }
+.diagram.wide svg { min-width: 720px; }
+
+/* ---------- hero ---------- */
+.hero { padding-block: 56px 0; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 56px; align-items: center; }
+.hero h1 { font-size: clamp(2.6rem, 7.4vw, 6rem); font-weight: 900; letter-spacing: -.035em; line-height: .95; }
+.hero h1 .one { color: var(--host); }
+.cast { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 34px; }
+.cast > div { display: flex; gap: 10px; align-items: center; font-size: .95rem; }
+.dot { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-family: var(--display); font-stretch: 100%; font-weight: 800; font-size: .78rem; color: var(--on); flex: none; }
+.dot.h { background: var(--host); } .dot.s { background: var(--salma); } .dot.y { background: var(--you); }
+.cast b { display: block; font-weight: 700; line-height: 1.2; }
+.cast span.t { color: var(--dim); font-size: .85rem; line-height: 1.2; display: block; }
+
+/* ---------- phone ---------- */
+.phone { width: 300px; max-width: 100%; background: var(--bezel); border-radius: 44px; padding: 10px; justify-self: center;
+  box-shadow: 0 40px 70px -40px rgba(10, 14, 30, .55); }
+.scr { background: var(--scr); border-radius: 35px; min-height: 560px; padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 11px; font-size: 13.5px; line-height: 1.4; overflow: hidden; }
+.bar { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--dim); padding: 0 6px 6px; }
+.lock { background: linear-gradient(170deg, #2446E8 0%, #101A55 100%); color: #fff; }
+.lock .bar { color: rgba(255,255,255,.8); }
+.lock .clock { font-family: var(--display); font-stretch: 110%; font-weight: 700; font-size: 64px; text-align: center; line-height: 1; margin-top: 28px; letter-spacing: -.02em; }
+.lock .date { text-align: center; font-size: 14px; opacity: .85; }
+.notif { margin-top: auto; background: rgba(255,255,255,.94); color: #0E1014; border-radius: 18px; padding: 12px 14px; display: grid; grid-template-columns: 32px minmax(0,1fr); gap: 3px 10px; }
+.notif .ic { grid-row: span 2; width: 32px; height: 32px; border-radius: 8px; background: #0E1014; color: #fff; display: grid; place-items: center; font-family: var(--display); font-weight: 900; font-size: 13px; }
+.notif .app { font-size: 11px; color: #5A606C; display: flex; justify-content: space-between; }
+.notif b { font-size: 14px; }
+.lock .hint { text-align: center; font-size: 12px; opacity: .75; margin-top: 10px; }
+
+.app-h { font-family: var(--display); font-stretch: 112%; font-weight: 800; font-size: 20px; padding: 0 4px; }
+.bub { border-radius: 16px; padding: 9px 12px; max-width: 88%; }
+.bub.s { background: var(--salma-wash); color: var(--ink); align-self: flex-start; border-bottom-left-radius: 5px; }
+.bub.h { background: var(--host-wash); color: var(--ink); align-self: flex-start; border-bottom-left-radius: 5px; }
+.bub.y { background: var(--you); color: var(--on); align-self: flex-end; border-bottom-right-radius: 5px; }
+.bub small { display: block; color: var(--dim); font-size: 11px; margin-top: 3px; }
+.who { font-size: 11px; font-family: var(--mono); color: var(--dim); padding: 0 4px; }
+.ar { direction: rtl; text-align: right; font-size: 14.5px; }
+.fact { display: flex; align-items: center; gap: 8px; border: 1px solid var(--rule); border-radius: 12px; padding: 8px 10px; background: var(--raise); }
+.fact span { flex: 1; min-width: 0; }
+.fact span i { display: block; font-style: normal; font-size: 10.5px; color: var(--dim); font-family: var(--mono); }
+.fact em { font-style: normal; color: var(--dim); font-size: 13px; }
+.mic { margin-top: auto; align-self: center; width: 64px; height: 64px; border-radius: 50%; background: var(--salma); display: grid; place-items: center; }
+.mic::before { content: ""; width: 14px; height: 24px; border-radius: 8px; border: 3px solid var(--on); }
+
+.memo { display: flex; gap: 8px; align-items: flex-start; padding: 0 4px; }
+.memo .dot { width: 24px; height: 24px; font-size: 10px; }
+.cover { background: var(--host); color: var(--on); border-radius: 20px; padding: 18px 16px; display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden; }
+.cover::after { content: ""; position: absolute; right: -34px; bottom: -34px; width: 130px; height: 130px; border-radius: 50%; border: 18px solid color-mix(in srgb, var(--on) 16%, transparent); }
+.cover .k { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; opacity: .85; }
+.cover .t { font-family: var(--display); font-stretch: 118%; font-weight: 900; font-size: 23px; line-height: 1.02; max-width: 11ch; }
+.cover .m { font-size: 12px; opacity: .9; }
+.cover .pl { align-self: flex-start; background: var(--on); color: var(--host); border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: 13px; margin-top: 4px; }
+.doors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.doors span { text-align: center; font-size: 11.5px; padding: 8px 2px; border-radius: 10px; background: var(--faint); }
+.doors span.on { background: var(--host-wash); color: var(--host); font-weight: 700; }
+.link { font-size: 12.5px; color: var(--host); text-decoration: underline; text-underline-offset: 3px; padding: 0 4px; }
+.tabs { margin-top: auto; display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; font-size: 11.5px; color: var(--dim); border-top: 1px solid var(--rule); padding-top: 10px; }
+.tabs b { color: var(--ink); }
+.small-door { border: 1px dashed var(--rule); border-radius: 12px; padding: 8px 10px; font-size: 12px; color: var(--dim); }
+
+.tr { padding: 0 4px; display: flex; flex-direction: column; gap: 10px; font-size: 14.5px; }
+.tr p { color: var(--dim); }
+.tr p.cur { color: var(--ink); background: var(--host-wash); border-radius: 10px; padding: 8px 10px; margin: 0 -10px; }
+.gl { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.1; vertical-align: top; }
+.gl small { font-size: 10.5px; color: var(--host); }
+.scrub { height: 4px; background: var(--faint); border-radius: 4px; position: relative; margin: 4px 4px 0; }
+.scrub i { position: absolute; inset: 0 60% 0 0; background: var(--host); border-radius: 4px; }
+.scrub-t { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10.5px; color: var(--dim); padding: 0 4px; }
+.ctrls { display: grid; grid-template-columns: repeat(4, 1fr); align-items: center; gap: 6px; margin-top: auto; }
+.ctrls span { text-align: center; font-size: 12px; color: var(--dim); }
+.ctrls .huh { background: var(--ink); color: var(--paper); border-radius: 999px; padding: 10px 0; font-weight: 700; font-size: 14px; }
+.ctrls .pp { width: 52px; height: 52px; border-radius: 50%; background: var(--host); justify-self: center; display: grid; place-items: center; }
+.ctrls .pp::before { content: ""; width: 14px; height: 18px; border-left: 5px solid var(--on); border-right: 5px solid var(--on); box-sizing: border-box; }
+
+.call-top { text-align: center; display: flex; flex-direction: column; gap: 2px; align-items: center; padding-top: 6px; }
+.call-top .dot { width: 58px; height: 58px; font-size: 18px; }
+.call-top b { font-size: 16px; margin-top: 6px; }
+.call-top span { font-family: var(--mono); font-size: 11.5px; color: var(--dim); }
+.cap { font-size: 15px; line-height: 1.45; padding: 0 4px; }
+.cap b { color: var(--host); }
+.pad { margin-top: auto; border-radius: 22px; background: var(--you-wash); border: 2px solid var(--you); color: var(--you); text-align: center; padding: 22px 10px; font-weight: 700; font-size: 14px; }
+.pad small { display: block; font-weight: 400; color: var(--dim); font-size: 11.5px; margin-top: 2px; }
+.callrow { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.wordbtn { border: 1.5px solid var(--ink); border-radius: 999px; padding: 7px 12px; font-size: 12px; font-weight: 700; }
+.endbtn { width: 40px; height: 40px; border-radius: 50%; background: var(--faint); display: grid; place-items: center; font-weight: 700; color: var(--dim); }
+.wordbub { align-self: center; background: var(--raise); border: 1px solid var(--rule); border-radius: 999px; padding: 5px 12px; font-size: 12px; }
+
+.idea { border: 1px solid var(--rule); border-radius: 14px; padding: 11px 12px; background: var(--raise); display: flex; flex-direction: column; gap: 3px; }
+.idea.pick { border: 2px solid var(--host); }
+.idea i { font-style: normal; font-family: var(--mono); font-size: 10.5px; color: var(--dim); }
+.tell { border-radius: 14px; padding: 11px 12px; background: var(--salma-wash); display: flex; gap: 8px; align-items: center; font-weight: 600; }
+.tell .dot { width: 22px; height: 22px; font-size: 10px; }
+
+.nb-sec { display: flex; flex-direction: column; gap: 6px; }
+.nb-sec > b { font-family: var(--display); font-stretch: 110%; font-size: 14px; }
+.nb-item { border-top: 1px solid var(--rule); padding-top: 6px; display: flex; gap: 8px; justify-content: space-between; align-items: baseline; font-size: 13px; }
+.nb-item span { min-width: 0; }
+.nb-item i { font-style: normal; color: var(--dim); font-size: 12px; display: block; }
+.nb-item em { font-style: normal; color: var(--dim); font-size: 12px; white-space: nowrap; }
+.hours { font-family: var(--mono); font-size: 12px; color: var(--dim); padding: 0 4px; }
+
+.proof { background: var(--salma-wash); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.proof .k { font-family: var(--mono); font-size: 10.5px; color: var(--salma); letter-spacing: .05em; }
+.proof b { font-size: 15.5px; line-height: 1.3; }
+.tape { display: flex; flex-direction: column; gap: 4px; }
+.tape span { font-family: var(--mono); font-size: 10.5px; color: var(--dim); }
+.tape svg { width: 100%; height: 30px; }
+.wv-then rect { fill: var(--dim); opacity: .55; }
+.wv-now rect { fill: var(--you); }
+.worth { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.worth span { text-align: center; border: 1px solid var(--rule); border-radius: 999px; padding: 6px 0; font-size: 12px; }
+
+/* ---------- walkthrough ---------- */
+.walk { display: flex; flex-direction: column; gap: 88px; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 64px; align-items: center; }
+.row.flip { grid-template-columns: 320px minmax(0, 1fr); }
+.row.flip .phone { order: -1; }
+.row .txt { display: flex; flex-direction: column; gap: 16px; max-width: 54ch; }
+.row .txt h3 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 850; }
+.row .txt p { font-size: 1.08rem; }
+.also { display: flex; flex-direction: column; gap: 8px; border-left: 2px solid var(--rule); padding-left: 16px; font-size: .97rem; color: var(--dim); }
+.also b { color: var(--ink); font-weight: 600; }
+.when { display: inline-flex; gap: 8px; align-items: center; font-family: var(--mono); font-size: .78rem; }
+.when i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.chip { font-family: var(--mono); font-size: .7rem; border-radius: 999px; padding: 2px 8px; margin-left: 6px; white-space: nowrap; vertical-align: 2px; }
+.chip.later { background: var(--faint); color: var(--dim); }
+.chip.p1 { background: var(--host-wash); color: var(--host); }
+
+/* ---------- svg classes ---------- */
+.sv-ink { fill: var(--ink); } .sv-dim { fill: var(--dim); } .sv-host { fill: var(--host); } .sv-salma { fill: var(--salma); } .sv-you { fill: var(--you); } .sv-raise { fill: var(--raise); }
+.sv-wash-h { fill: var(--host-wash); } .sv-wash-y { fill: var(--you-wash); } .sv-wash-s { fill: var(--salma-wash); } .sv-faint { fill: var(--faint); }
+.st-rule { stroke: var(--rule); } .st-ink { stroke: var(--ink); } .st-dim { stroke: var(--dim); }
+svg text { font-family: var(--body); font-size: 14px; fill: var(--ink); }
+svg text.lbl { font-family: var(--mono); font-size: 11.5px; fill: var(--dim); letter-spacing: .02em; }
+svg text.big { font-family: var(--display); font-stretch: 125%; font-weight: 900; font-size: 30px; }
+svg text.b { font-weight: 700; }
+svg text.m { fill: var(--dim); font-size: 13px; }
+svg text.on { fill: var(--on); font-weight: 700; }
+svg text.ty { fill: var(--you); }
+svg text.th { fill: var(--host); }
+svg text.ts { fill: var(--salma); }
+svg text.tp { fill: var(--paper); font-weight: 700; }
+
+/* ---------- never vs instead ---------- */
+.vs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
+.vs > div { border-radius: 28px; padding: 28px; display: flex; flex-direction: column; gap: 18px; }
+.vs .no { background: var(--faint); }
+.vs .yes { background: var(--raise); border: 1px solid var(--rule); }
+.vs h3 { font-size: 1.5rem; }
+.game { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; opacity: .6; }
+.game > div { background: var(--raise); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-size: .85rem; font-weight: 700; color: var(--dim); }
+.game svg { width: 44px; height: 44px; }
+.game .xp { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; gap: 12px; }
+.game .xp i { flex: 1; height: 12px; border-radius: 99px; background: var(--rule); position: relative; overflow: hidden; }
+.game .xp i::after { content: ""; position: absolute; inset: 0 35% 0 0; background: var(--dim); }
+.game .strike { position: absolute; inset: 0; pointer-events: none; background: none; padding: 0; }
+.game .strike svg { width: 100%; height: 100%; }
+.nolist { font-size: .95rem; color: var(--dim); }
+.yeslist { display: flex; flex-direction: column; gap: 14px; }
+.yeslist li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 12px; align-items: start; }
+.yeslist li > i { width: 26px; height: 26px; border-radius: 50%; display: block; margin-top: 1px; }
+.yeslist b { display: block; }
+.yeslist span span { color: var(--dim); font-size: .95rem; }
+
+/* ---------- plans ---------- */
+.plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--ink); }
+.plan { padding: 28px 24px 30px; display: flex; flex-direction: column; gap: 14px; border-right: 1px solid var(--rule); }
+.plan:last-child { border-right: 0; }
+.plan.rec { background: var(--host); color: var(--on); border-radius: 0 0 28px 28px; border-right: 0; }
+.plan .nm { font-family: var(--mono); font-size: .85rem; letter-spacing: .04em; }
+.plan .pr { font-family: var(--display); font-stretch: 125%; font-weight: 900; font-size: clamp(2.6rem, 5vw, 3.8rem); line-height: 1; letter-spacing: -.03em; }
+.plan .pr small { font-family: var(--body); font-weight: 400; font-size: 1rem; letter-spacing: 0; opacity: .75; }
+.plan .eps { display: flex; gap: 6px; }
+.plan .eps i { width: 26px; height: 36px; border-radius: 6px; background: var(--host); }
+.plan.rec .eps i { background: var(--on); }
+.plan dl { margin: 0; display: grid; grid-template-columns: auto auto; gap: 6px 16px; font-size: .97rem; }
+.plan dt { opacity: .7; }
+.plan dd { margin: 0; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.plan .tagline { font-size: .95rem; opacity: .85; }
+.terms { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 40px; }
+.terms div { display: flex; flex-direction: column; gap: 4px; font-size: .95rem; color: var(--dim); }
+.terms b { color: var(--ink); font-size: 1rem; }
+
+/* ---------- open ---------- */
+.open { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; border-top: 2px solid var(--ink); }
+.oq { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 18px 0; border-bottom: 1px solid var(--rule); }
+.oq b { font-size: 1.05rem; }
+.oq em { font-style: normal; font-family: var(--mono); font-size: .76rem; color: var(--dim); white-space: nowrap; padding-top: 3px; }
+.oq p { grid-column: 1 / -1; color: var(--dim); font-size: .95rem; }
+.risk { margin-top: 48px; display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 28px; background: var(--you-wash); border-radius: 28px; padding: 28px; }
+.risk h3 { color: var(--you); font-size: 1.4rem; }
+.risk p { max-width: 70ch; }
+
+/* ---------- appendix ---------- */
+details.all { margin-top: 96px; border-top: 2px solid var(--ink); padding-top: 20px; }
+details.all summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+details.all summary::-webkit-details-marker { display: none; }
+details.all summary::after { content: "+"; font-family: var(--mono); font-size: 1.8rem; line-height: 1; }
+details.all[open] summary::after { content: "−"; }
+.sum-t { font-family: var(--display); font-stretch: 125%; font-weight: 850; font-size: 1.5rem; display: block; }
+.sum-s { display: block; font-size: .95rem; color: var(--dim); }
+.cols { columns: 3 260px; column-gap: 40px; margin-top: 28px; }
+.cols > div { break-inside: avoid; margin-bottom: 26px; }
+.cols h4 { font-family: var(--mono); font-size: .78rem; letter-spacing: .06em; color: var(--dim); margin: 0 0 8px; font-weight: 500; }
+.cols li { font-size: .93rem; padding: 4px 0; border-bottom: 1px solid var(--faint); }
+
+footer { margin-top: 96px; padding-block: 24px 64px; border-top: 1px solid var(--rule); font-size: .88rem; color: var(--dim); }
+
+@media (max-width: 900px) {
+  .hero, .row, .row.flip { grid-template-columns: 1fr; gap: 36px; }
+  .row.flip .phone { order: 0; }
+  .vs { grid-template-columns: 1fr; }
+  .terms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .risk { grid-template-columns: 1fr; gap: 10px; }
+}
+@media (max-width: 680px) {
+  body { font-size: 16px; }
+  section { padding-block: 72px 0; }
+  .walk { gap: 64px; }
+  .plans { grid-template-columns: 1fr; }
+  .plan { border-right: 0; border-bottom: 1px solid var(--rule); }
+  .plan.rec { border-radius: 24px; border-bottom: 0; }
+  .open { grid-template-columns: 1fr; }
+  .terms { grid-template-columns: 1fr; }
+  .vs > div { padding: 22px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pulse { animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+}
+</style>
+
+<main>
+<div class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <div>
+      <div class="kicker">FOR ONE · WHAT WE AGREED, AS OF 5 NOV 2026</div>
+      <h1 style="margin-top:18px">A new show every day, made for <span class="one">one person.</span></h1>
+      <p class="lead" style="margin-top:26px">You listen to an episode written about your life, then the host calls you to argue about it. Behind the show, a teacher tracks every word you know and every mistake you make. <b>Nobody ever tells you that you were wrong, and there is nothing to win.</b></p>
+      <div class="cast">
+        <div><span class="dot h">K·M</span><span><b>Karim &amp; Mona</b><span class="t">Hosts, in the language you learn</span></span></div>
+        <div><span class="dot s">S</span><span><b>Salma</b><span class="t">Producer, in your own language</span></span></div>
+        <div><span class="dot y">You</span><span><b>You</b><span class="t">4+ minutes of talking a day</span></span></div>
+      </div>
+    </div>
+    <div class="phone" role="img" aria-label="Lock screen at 7:40 with one notification: Karim vs Mona, the interview, 6 minutes">
+      <div class="scr lock">
+        <div class="bar"><span>For one</span><span>●●●</span></div>
+        <div class="clock">7:40</div>
+        <div class="date">Tuesday, on the bus</div>
+        <div class="notif">
+          <span class="ic">1</span>
+          <span class="app"><span>FOR ONE</span><span>now</span></span>
+          <b>Karim vs Mona: the interview (6 min)</b>
+        </div>
+        <div class="hint">The only daily notification you get.</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= A DAY ================= -->
+  <section id="day">
+    <div class="sec-head">
+      <div class="kicker">THE DAILY RHYTHM</div>
+      <h2>One day, on the clock</h2>
+      <p class="lead">Your episode is written overnight from what you chose the evening before. It drops at a time you picked in life terms, like "on my commute".</p>
+    </div>
+    <figure class="diagram wide">
+      <svg viewBox="-190 30 980 560" role="img" aria-label="24-hour clock. From 21:00 to 7:40 the episode is made overnight. At 7:40 it drops and you listen on the bus, at lunch you read the article, at 18:30 you call the host, at 21:00 you chat and pick tomorrow's episode.">
+        <circle cx="300" cy="300" r="190" fill="none" class="st-rule" stroke-width="2"/>
+        <path d="M154.3 154.3 A206 206 0 0 1 486.7 387.1" fill="none" class="st-dim" stroke-width="10" stroke-linecap="round" stroke-dasharray="1 16" opacity=".55"/>
+        <text x="300" y="72" text-anchor="middle" class="lbl">MADE OVERNIGHT, JUST FOR YOU</text>
+        <text x="300" y="134" text-anchor="middle" class="lbl">00:00</text>
+        <text x="458" y="304" text-anchor="end" class="lbl">06:00</text>
+        <text x="300" y="474" text-anchor="middle" class="lbl">12:00</text>
+        <text x="142" y="304" text-anchor="start" class="lbl">18:00</text>
+        <text x="300" y="292" text-anchor="middle" class="big">A day</text>
+        <text x="300" y="320" text-anchor="middle" class="m">on the 1 a day plan, about 25 min</text>
+        <circle cx="472.2" cy="380.3" r="12" class="sv-host"/>
+        <text x="512" y="384" class="b">07:40 · Listen</text>
+        <text x="512" y="404" class="m">Episode drops in your podcast app.</text>
+        <text x="512" y="422" class="m">5 to 7 minutes on the bus.</text>
+        <circle cx="275.2" cy="488.4" r="10" class="sv-host" opacity=".7"/>
+        <text x="275" y="534" text-anchor="middle" class="b">12:30 · Read</text>
+        <text x="275" y="554" text-anchor="middle" class="m">The article that arms you for the call</text>
+        <circle cx="111.6" cy="275.2" r="12" class="sv-you"/>
+        <text x="72" y="262" text-anchor="end" class="b">18:30 · Call</text>
+        <text x="72" y="282" text-anchor="end" class="m">Argue with Mona for</text>
+        <text x="72" y="300" text-anchor="end" class="m">5 to 7 minutes</text>
+        <circle cx="165.6" cy="165.6" r="10" class="sv-salma"/>
+        <text x="128" y="122" text-anchor="end" class="b">21:00 · Chat, then choose</text>
+        <text x="128" y="142" text-anchor="end" class="m">A few messages, then pick</text>
+        <text x="128" y="160" text-anchor="end" class="m">tomorrow from 3 ideas</text>
+      </svg>
+      <figcaption>The times are Faisal's, the example learner: 27, a sales engineer with a job interview in six weeks. Every door is optional and works in any order. On a bad day, a 90-second recap and one voice note count as a full day.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ================= WALKTHROUGH ================= -->
+  <section id="walk">
+    <div class="sec-head">
+      <div class="kicker">WHAT YOU SEE, SCREEN BY SCREEN</div>
+      <h2>The app, in seven screens</h2>
+      <p class="lead">Three tabs only: Today, Show and Notebook. No mascot, no feed, no settings maze.</p>
+    </div>
+
+    <div class="walk">
+
+      <div class="row">
+        <div class="txt">
+          <span class="when s"><i></i>FIRST 10 MINUTES</span>
+          <h3>Salma talks with you before you make an account</h3>
+          <p>You hear her voice in your own language within a minute. She asks three things: what to call you, what you could talk about for an hour, and why you need the language. Every fact she hears appears as a card you can fix or delete.</p>
+          <div class="also">
+            <span><b>Then a 2 to 3 minute pilot episode</b> about your topic, and a 60 to 90 second first call.</span>
+            <span><b>Optional 60-second word check</b> to set the level. Skip is as big as Start.</span>
+            <span><b>Account comes last</b>, with your drop time and a 7-day trial. No card.</span>
+          </div>
+        </div>
+        <div class="phone" role="img" aria-label="Onboarding: Salma speaks in Arabic; three fact cards appear: name, football, job interview">
+          <div class="scr">
+            <div class="bar"><span>Salma</span><span>1:12</span></div>
+            <div class="bub s ar">أهلاً، أنا سلمى، المنتجة الذكية لبرنامجك. وش تحب نسميك؟<small style="direction:ltr;text-align:left">"Hi, I'm Salma, the AI producer of your show. What should we call you?"</small></div>
+            <div class="bub y">فيصل</div>
+            <div class="who">WHAT SALMA HEARD</div>
+            <div class="fact"><span><i>NAME</i>Faisal</span><em>✎ ✕</em></div>
+            <div class="fact"><span><i>COULD TALK FOR AN HOUR ABOUT</i>Al Hilal and football tactics</span><em>✎ ✕</em></div>
+            <div class="fact"><span><i>NEEDS ENGLISH FOR</i>A job interview in 6 weeks</span><em>✎ ✕</em></div>
+            <div class="bub s">Now in English: say anything back to me.</div>
+            <div class="mic" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row flip">
+        <div class="phone" role="img" aria-label="Today screen: a memory line from Karim, the episode cover, four doors, and the three tabs">
+          <div class="scr">
+            <div class="bar"><span>Today</span><span>7:40</span></div>
+            <div class="memo"><span class="dot h">K</span><span>"You said the interview is on the 14th. Let's get you ready."</span></div>
+            <div class="cover">
+              <span class="k">SEASON 1 · INTERVIEW SEASON</span>
+              <span class="t">Karim vs Mona: the interview</span>
+              <span class="m">6 min · article · call</span>
+              <span class="pl">▶ Play</span>
+            </div>
+            <div class="doors"><span class="on">Listen</span><span>Read</span><span>Call</span><span>Chat</span></div>
+            <span class="link">Why this episode?</span>
+            <div class="small-door">Rough day? Hear a 90-second recap and send one voice note.</div>
+            <div class="tabs"><b>Today</b><span>Show</span><span>Notebook</span></div>
+          </div>
+        </div>
+        <div class="txt">
+          <span class="when h"><i></i>EVERY MORNING</span>
+          <h3>One episode, waiting for you</h3>
+          <p>Today has one thing on it: your episode. It also arrives in Apple Podcasts or any podcast app through a private feed, so you can listen with the phone locked.</p>
+          <div class="also">
+            <span><b>Four doors</b> instead of a progress bar: Listen, Read, Call, Chat. Use them in any order.</span>
+            <span><b>Skipped yesterday?</b> Nothing new is made, nothing piles up, and no reminder is sent.</span>
+            <span><b>"Why this episode?"</b> shows the teacher's reasons if you want them.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="txt">
+          <span class="when h"><i></i>LISTEN · 5 TO 7 MIN</span>
+          <h3>A show about you, at the edge of what you understand</h3>
+          <p>About 95% of the words are ones you already know. The new ones sit inside the jokes and the personal moments. Each episode opens by reusing yesterday's words and ends by throwing a question to you by name.</p>
+          <div class="also">
+            <span><b>"Huh?"</b> replays the last sentence slower, with the meaning under the hard words.</span>
+            <span><b>Audio first.</b> The transcript stays folded on first play; tap any word to hear it and keep it.</span>
+            <span><b>Shadowing:</b> say two lines along with the host. <span class="chip p1">during beta</span></span>
+          </div>
+        </div>
+        <div class="phone" role="img" aria-label="Player: transcript with the current sentence highlighted and glosses under hard words, a large Huh? button">
+          <div class="scr">
+            <div class="bar"><span>Listening</span><span>0.85×</span></div>
+            <div class="app-h">The interview</div>
+            <div class="tr">
+              <p>Mona: So the manager asks you about your weakness.</p>
+              <p class="cur">Karim: Don't say perfectionism. Everyone says it. Tell him about a <span class="gl">deadline<small>موعد نهائي</small></span> you <span class="gl">missed<small>فاتك</small></span>.</p>
+              <p>Mona: That's terrible advice.</p>
+            </div>
+            <div class="scrub"><i></i></div>
+            <div class="scrub-t"><span>2:31</span><span>6:04</span></div>
+            <div class="ctrls"><span>⟲ line</span><span class="pp" aria-hidden="true"></span><span class="huh">Huh?</span><span>Aa</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row flip">
+        <div class="phone" role="img" aria-label="Call screen with Mona: caption shows a recast with the word went in bold; a large hold-to-talk pad and a word button">
+          <div class="scr">
+            <div class="call-top"><span class="dot h">M</span><b>Mona</b><span>3:12 · you've spoken 1:48</span></div>
+            <div class="bub y">I go there yesterday and the manager was very nice</div>
+            <div class="cap">"Oh, you <b>went</b> there yesterday? Nice how? Nice like he'll hire you, or nice like he feels sorry for you?"</div>
+            <div class="wordbub">Word button: تشكيلة → <b>line-up</b></div>
+            <div class="pad">Hold to keep talking<small>Mona waits as long as you need</small></div>
+            <div class="callrow"><span class="wordbtn">Word in my language</span><span class="endbtn">✕</span></div>
+          </div>
+        </div>
+        <div class="txt">
+          <span class="when y"><i></i>THE CALL · 5 TO 7 MIN</span>
+          <h3>A real argument, with a host who waits for you</h3>
+          <p>The host takes a side and pushes back. When you get something wrong, she says it back the right way and keeps the conversation going, like a friend would. When a word won't come, you hold one button and say it in your own language.</p>
+          <div class="also">
+            <span><b>The goal is 4+ minutes of your own speech</b>; the host talks at most 40% of the time.</span>
+            <span><b>Recall moments and a 60-second retell</b> make you pull last week's words back out.</span>
+            <span><b>If you freeze</b>, she gets gentler and simpler. Bad signal turns it into voice notes.</span>
+            <span><b>Round two:</b> the same argument again, shorter and faster. <span class="chip p1">during beta</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="txt">
+          <span class="when s"><i></i>EVERY EVENING</span>
+          <h3>You choose tomorrow's episode tonight</h3>
+          <p>The chat ends with three ideas: usually one from your life, one surprise, and at most one that continues a story. Or tell Salma your own idea. If you don't pick, the teacher's choice waits for you.</p>
+          <div class="also">
+            <span><b>You own the topic, the format and the cast.</b> The teacher fits the lesson into whatever you choose.</span>
+            <span><b>One swap a day</b> if the dropped episode doesn't appeal.</span>
+            <span><b>2 and 3 a day plans</b> get the other ideas made on demand, the same day.</span>
+          </div>
+        </div>
+        <div class="phone" role="img" aria-label="Three idea cards for tomorrow, one selected, and a Tell Salma an idea button">
+          <div class="scr">
+            <div class="bar"><span>Chat · Mona</span><span>21:04</span></div>
+            <div class="bub h">Fine, you win this one. But tomorrow I'm the interviewer. What do you want?</div>
+            <div class="who">TOMORROW AT 7:40</div>
+            <div class="idea pick"><i>FROM YOUR LIFE · INTERVIEW, PART 2</i>Mona interviews you for the job, and she is not nice.</div>
+            <div class="idea"><i>WILDCARD</i>Karim tries to explain offside to his grandmother.</div>
+            <div class="idea"><i>FROM YOUR LIFE</i>Your manager's terrible team-building trip.</div>
+            <div class="tell"><span class="dot s">S</span>Tell Salma an idea</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row flip">
+        <div class="phone" role="img" aria-label="Salma's notebook: what I'm working on with you, words you own, about you, and hours">
+          <div class="scr">
+            <div class="bar"><span>Notebook</span><span>Salma's</span></div>
+            <div class="nb-sec"><b>What I'm working on with you</b>
+              <div class="nb-item"><span>Talking about the past<i>"I go there yesterday"</i></span><em>✕</em></div>
+              <div class="nb-item"><span>Interview phrases<i>"I'm responsible of the team"</i></span><em>✕</em></div>
+            </div>
+            <div class="nb-sec"><b>Words you own · 214</b>
+              <div class="nb-item"><span>deadline<i>"We missed the deadline but saved the client."</i></span><em>▶ Oct 30</em></div>
+              <div class="nb-item"><span>line-up<i>"The line-up was a mistake from the start."</i></span><em>▶ Nov 2</em></div>
+            </div>
+            <div class="nb-sec"><b>About you</b>
+              <div class="nb-item"><span>Interview on the 14th<i>You said on Oct 31</i></span><em>✎ ✕</em></div>
+            </div>
+            <div class="hours">About 9 hours heard · 1 h 40 spoken</div>
+            <div class="tabs"><span>Today</span><span>Show</span><b>Notebook</b></div>
+          </div>
+        </div>
+        <div class="txt">
+          <span class="when s"><i></i>ANY TIME</span>
+          <h3>Everything the show knows, in Salma's notebook</h3>
+          <p>The teacher is invisible, but nothing is hidden. The notebook shows what it is working on with you, each with one of your own sentences, the words you now use yourself, and every fact it remembers about you with where it came from.</p>
+          <div class="also">
+            <span><b>Veto or add</b> to what the teacher works on. It changes the next day.</span>
+            <span><b>A wrong memory is a bug.</b> Fix it and it is fixed at once.</span>
+            <span><b>Counts only grow:</b> words you own, hours heard. Nothing resets, nothing has a target.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="txt">
+          <span class="when y"><i></i>EVERY WEEK · EVERY 4 WEEKS</span>
+          <h3>Proof you can hear, in your own voice</h3>
+          <p>Every week Salma sends a 2-minute episode with one piece of evidence you can check, and what comes next. Every four weeks you record the same 3-minute task and hear it next to the last one.</p>
+          <div class="also">
+            <span><b>Code checks every claim</b> before you hear it. A flat week says so, and names what the teacher is changing.</span>
+            <span><b>Seasons last 4 weeks</b>, each with one real goal in your words, like "get through the interview without freezing".</span>
+            <span><b>Season finale</b> with both recordings side by side. <span class="chip p1">during beta</span></span>
+          </div>
+        </div>
+        <div class="phone" role="img" aria-label="Weekly proof from Salma with one headline claim, then-and-now waveforms, and a was this week worth it question">
+          <div class="scr">
+            <div class="bar"><span>Weekly proof</span><span>2:04</span></div>
+            <div class="proof">
+              <span class="k">FROM SALMA · WEEK 2</span>
+              <b>On Tuesday you told the whole story in the past tense, without stopping.</b>
+              <span class="link" style="padding:0">How we know</span>
+            </div>
+            <div class="tape"><span>THEN · 1 NOV · 3:00</span>
+              <svg class="wv-then" viewBox="0 0 230 36" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="13.5" width="3" height="9" rx="1.5"/><rect x="5" y="17" width="3" height="2" rx="1.5"/><rect x="10" y="14" width="3" height="8" rx="1.5"/><rect x="15" y="9" width="3" height="18" rx="1.5"/><rect x="20" y="17" width="3" height="2" rx="1.5"/><rect x="25" y="3" width="3" height="30" rx="1.5"/><rect x="30" y="7" width="3" height="22" rx="1.5"/><rect x="35" y="17" width="3" height="2" rx="1.5"/><rect x="40" y="12.5" width="3" height="11" rx="1.5"/><rect x="45" y="17" width="3" height="2" rx="1.5"/><rect x="50" y="15" width="3" height="6" rx="1.5"/><rect x="55" y="17" width="3" height="2" rx="1.5"/><rect x="60" y="17" width="3" height="2" rx="1.5"/><rect x="65" y="17" width="3" height="2" rx="1.5"/><rect x="70" y="10.5" width="3" height="15" rx="1.5"/><rect x="75" y="3.5" width="3" height="29" rx="1.5"/><rect x="80" y="17" width="3" height="2" rx="1.5"/><rect x="85" y="17" width="3" height="2" rx="1.5"/><rect x="90" y="5.5" width="3" height="25" rx="1.5"/><rect x="95" y="9" width="3" height="18" rx="1.5"/><rect x="100" y="17" width="3" height="2" rx="1.5"/><rect x="105" y="7.5" width="3" height="21" rx="1.5"/><rect x="110" y="6.5" width="3" height="23" rx="1.5"/><rect x="115" y="17" width="3" height="2" rx="1.5"/><rect x="120" y="10.5" width="3" height="15" rx="1.5"/><rect x="125" y="17" width="3" height="2" rx="1.5"/><rect x="130" y="17" width="3" height="2" rx="1.5"/><rect x="135" y="17" width="3" height="2" rx="1.5"/><rect x="140" y="17" width="3" height="2" rx="1.5"/><rect x="145" y="5.5" width="3" height="25" rx="1.5"/><rect x="150" y="8" width="3" height="20" rx="1.5"/><rect x="155" y="10.5" width="3" height="15" rx="1.5"/><rect x="160" y="14.5" width="3" height="7" rx="1.5"/><rect x="165" y="8" width="3" height="20" rx="1.5"/><rect x="170" y="17" width="3" height="2" rx="1.5"/><rect x="175" y="6.5" width="3" height="23" rx="1.5"/><rect x="180" y="17" width="3" height="2" rx="1.5"/><rect x="185" y="17" width="3" height="2" rx="1.5"/><rect x="190" y="4.5" width="3" height="27" rx="1.5"/><rect x="195" y="8.5" width="3" height="19" rx="1.5"/><rect x="200" y="17" width="3" height="2" rx="1.5"/><rect x="205" y="17" width="3" height="2" rx="1.5"/><rect x="210" y="12.5" width="3" height="11" rx="1.5"/><rect x="215" y="3.5" width="3" height="29" rx="1.5"/><rect x="220" y="17" width="3" height="2" rx="1.5"/><rect x="225" y="17" width="3" height="2" rx="1.5"/></svg>
+            </div>
+            <div class="tape"><span>NOW · 29 NOV · 3:00</span>
+              <svg class="wv-now" viewBox="0 0 230 36" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="10" width="3" height="16" rx="1.5"/><rect x="5" y="14.5" width="3" height="7" rx="1.5"/><rect x="10" y="11" width="3" height="14" rx="1.5"/><rect x="15" y="5.5" width="3" height="25" rx="1.5"/><rect x="20" y="17" width="3" height="2" rx="1.5"/><rect x="25" y="12.5" width="3" height="11" rx="1.5"/><rect x="30" y="15" width="3" height="6" rx="1.5"/><rect x="35" y="4" width="3" height="28" rx="1.5"/><rect x="40" y="10.5" width="3" height="15" rx="1.5"/><rect x="45" y="10" width="3" height="16" rx="1.5"/><rect x="50" y="10.5" width="3" height="15" rx="1.5"/><rect x="55" y="13" width="3" height="10" rx="1.5"/><rect x="60" y="8.5" width="3" height="19" rx="1.5"/><rect x="65" y="17" width="3" height="2" rx="1.5"/><rect x="70" y="17" width="3" height="2" rx="1.5"/><rect x="75" y="14" width="3" height="8" rx="1.5"/><rect x="80" y="12" width="3" height="12" rx="1.5"/><rect x="85" y="17" width="3" height="2" rx="1.5"/><rect x="90" y="11" width="3" height="14" rx="1.5"/><rect x="95" y="12.5" width="3" height="11" rx="1.5"/><rect x="100" y="15" width="3" height="6" rx="1.5"/><rect x="105" y="8" width="3" height="20" rx="1.5"/><rect x="110" y="9.5" width="3" height="17" rx="1.5"/><rect x="115" y="17" width="3" height="2" rx="1.5"/><rect x="120" y="8" width="3" height="20" rx="1.5"/><rect x="125" y="17" width="3" height="2" rx="1.5"/><rect x="130" y="12" width="3" height="12" rx="1.5"/><rect x="135" y="14.5" width="3" height="7" rx="1.5"/><rect x="140" y="12.5" width="3" height="11" rx="1.5"/><rect x="145" y="13" width="3" height="10" rx="1.5"/><rect x="150" y="6.5" width="3" height="23" rx="1.5"/><rect x="155" y="11.5" width="3" height="13" rx="1.5"/><rect x="160" y="14.5" width="3" height="7" rx="1.5"/><rect x="165" y="7" width="3" height="22" rx="1.5"/><rect x="170" y="8.5" width="3" height="19" rx="1.5"/><rect x="175" y="12" width="3" height="12" rx="1.5"/><rect x="180" y="11.5" width="3" height="13" rx="1.5"/><rect x="185" y="7.5" width="3" height="21" rx="1.5"/><rect x="190" y="8.5" width="3" height="19" rx="1.5"/><rect x="195" y="5" width="3" height="26" rx="1.5"/><rect x="200" y="17" width="3" height="2" rx="1.5"/><rect x="205" y="7.5" width="3" height="21" rx="1.5"/><rect x="210" y="14.5" width="3" height="7" rx="1.5"/><rect x="215" y="11.5" width="3" height="13" rx="1.5"/><rect x="220" y="3" width="3" height="30" rx="1.5"/><rect x="225" y="11" width="3" height="14" rx="1.5"/></svg>
+            </div>
+            <div class="who">FEWER PAUSES, SAME TASK</div>
+            <div class="nb-item" style="padding:6px 4px 0"><span>Next week<i>Interview phrases, and talking about your plans</i></span><em>change</em></div>
+            <div class="who" style="margin-top:auto">WAS THIS WEEK WORTH YOUR TIME?</div>
+            <div class="worth"><span>Yes</span><span>Mostly</span><span>No</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= INVISIBLE TEACHING ================= -->
+  <section id="teaching">
+    <div class="sec-head">
+      <div class="kicker">YOUR DECISION: TEACHING IS INVISIBLE</div>
+      <h2>How one mistake disappears without anyone saying "wrong"</h2>
+      <p class="lead">The correction happens in the conversation and in the next episodes. Follow one mistake through four weeks.</p>
+    </div>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 1100 330" role="img" aria-label="Four-week timeline in three lanes. You: day 1 say I go there yesterday; day 9 say we went there; day 28 recording. Hosts: day 1 recast you went there; days 2 to 8 the word went appears often in episodes; day 6 a call question that needs the past tense. Teacher: day 1 logs the error; day 9 sees it used and eases off; day 28 checks the recording.">
+        <text x="0" y="78" class="lbl">YOU</text>
+        <text x="0" y="168" class="lbl">HOSTS</text>
+        <text x="0" y="258" class="lbl">TEACHER</text>
+        <text x="0" y="272" class="lbl">(UNSEEN)</text>
+        <line x1="110" y1="74" x2="1090" y2="74" class="st-rule" stroke-width="1"/>
+        <line x1="110" y1="164" x2="1090" y2="164" class="st-rule" stroke-width="1"/>
+        <line x1="110" y1="254" x2="1090" y2="254" class="st-rule" stroke-width="1" stroke-dasharray="4 5"/>
+        <text x="120" y="318" text-anchor="middle" class="lbl">DAY 1</text>
+        <text x="365" y="318" text-anchor="middle" class="lbl">DAY 8</text>
+        <text x="610" y="318" text-anchor="middle" class="lbl">DAY 15</text>
+        <text x="855" y="318" text-anchor="middle" class="lbl">DAY 22</text>
+        <text x="1065" y="318" text-anchor="middle" class="lbl">DAY 28</text>
+        <rect x="110" y="44" width="200" height="34" rx="17" class="sv-wash-y"/>
+        <text x="124" y="66" class="ty">"I go there yesterday"</text>
+        <circle cx="120" cy="164" r="8" class="sv-host"/>
+        <text x="134" y="146">"Oh, you <tspan class="b th">went</tspan> there?"</text>
+        <circle cx="120" cy="254" r="6" class="sv-dim"/>
+        <text x="134" y="276" class="m">logs it, plans the right form</text>
+        <line x1="120" y1="84" x2="120" y2="154" class="st-dim" stroke-width="1.2" stroke-dasharray="3 4"/>
+        <line x1="120" y1="174" x2="120" y2="246" class="st-dim" stroke-width="1.2" stroke-dasharray="3 4"/>
+        <g class="sv-host">
+          <circle cx="155" cy="184" r="4"/><circle cx="155" cy="196" r="4"/><circle cx="155" cy="208" r="4"/><circle cx="155" cy="220" r="4"/>
+          <circle cx="190" cy="184" r="4"/><circle cx="190" cy="196" r="4"/><circle cx="190" cy="208" r="4"/><circle cx="190" cy="220" r="4"/><circle cx="190" cy="232" r="4"/>
+          <circle cx="225" cy="184" r="4"/><circle cx="225" cy="196" r="4"/><circle cx="225" cy="208" r="4"/><circle cx="225" cy="220" r="4"/>
+          <circle cx="260" cy="184" r="4"/><circle cx="260" cy="196" r="4"/><circle cx="260" cy="208" r="4"/><circle cx="260" cy="220" r="4"/><circle cx="260" cy="232" r="4"/>
+          <circle cx="330" cy="184" r="4"/><circle cx="330" cy="196" r="4"/><circle cx="330" cy="208" r="4"/>
+          <circle cx="365" cy="184" r="4"/><circle cx="365" cy="196" r="4"/><circle cx="365" cy="208" r="4"/>
+        </g>
+        <text x="155" y="298" class="m">each blue dot: "went" said by a host in an episode</text>
+        <circle cx="295" cy="164" r="8" class="sv-you"/>
+        <text x="280" y="106" text-anchor="middle" class="b" style="font-size:12.5px">Day 6 call:</text>
+        <text x="280" y="122" text-anchor="middle" style="font-size:12.5px">"Walk me through what happened"</text>
+        <rect x="390" y="44" width="200" height="34" rx="17" class="sv-you"/>
+        <text x="404" y="66" class="on">"we went there after"</text>
+        <line x1="400" y1="84" x2="400" y2="246" class="st-dim" stroke-width="1.2" stroke-dasharray="3 4"/>
+        <circle cx="400" cy="254" r="6" class="sv-dim"/>
+        <text x="414" y="276" class="m">sees it used, unprompted; brings it back less often</text>
+        <g class="sv-host" opacity=".75">
+          <circle cx="505" cy="184" r="4"/><circle cx="505" cy="196" r="4"/>
+          <circle cx="645" cy="184" r="4"/>
+          <circle cx="820" cy="184" r="4"/>
+        </g>
+        <text x="520" y="200" class="m">spaced reminders</text>
+        <rect x="900" y="44" width="190" height="34" rx="17" class="sv-wash-y"/>
+        <text x="914" y="66" class="ty">4-week recording</text>
+        <line x1="1065" y1="84" x2="1065" y2="246" class="st-dim" stroke-width="1.2" stroke-dasharray="3 4"/>
+        <circle cx="1065" cy="254" r="6" class="sv-dim"/>
+        <text x="1050" y="242" text-anchor="end" class="m">compares with week 0; if the mistake survives, it raises the dose</text>
+      </svg>
+      <figcaption>An illustration of how the plan works, not data. The same thing happens for each mistake that matters, at most three at a time. No screen ever shows a red mark, a "correct answer", or your sentence next to a fixed one.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ================= NEVER / INSTEAD ================= -->
+  <section id="instead">
+    <div class="sec-head">
+      <div class="kicker">YOUR DECISION: EVIDENCE, NOT GAMES</div>
+      <h2>Nothing to win. Something to hear.</h2>
+    </div>
+    <div class="vs">
+      <div class="no">
+        <h3>Not in the app, anywhere</h3>
+        <div class="game" aria-hidden="true">
+          <div><svg viewBox="0 0 44 44"><path d="M22 4c3 8 12 12 12 23a12 12 0 0 1-24 0c0-6 4-9 5-14 2 4 4 5 5 5 0-5-1-9 2-14z" class="sv-dim"/></svg>12-day streak</div>
+          <div><svg viewBox="0 0 44 44"><circle cx="22" cy="18" r="13" class="sv-dim"/><path d="M14 28l-4 14 12-6 12 6-4-14z" class="sv-dim"/></svg>Badge unlocked</div>
+          <div><svg viewBox="0 0 44 44"><rect x="4" y="6" width="36" height="32" rx="8" class="sv-dim"/><text x="22" y="28" text-anchor="middle" class="tp" style="font-size:15px">L7</text></svg>Level 7</div>
+          <div class="xp"><span>+50 XP</span><i></i><span>#3 this week</span></div>
+          <div class="strike"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="2" y1="98" x2="98" y2="2" class="st-ink" stroke-width="3" vector-effect="non-scaling-stroke"/></svg></div>
+        </div>
+        <p class="nolist">Also never: confetti, percentages, charts, reward sounds, leaderboards, "we miss you", guilt, autoplay, a next-episode button, fake countdowns, or a hard way to cancel.</p>
+      </div>
+      <div class="yes">
+        <h3>What you get instead</h3>
+        <ul class="yeslist">
+          <li><i style="background:var(--you)"></i><span><b>Your voice, then and now</b><span>The same task every 4 weeks, played side by side.</span></span></li>
+          <li><i style="background:var(--host)"></i><span><b>Words you own</b><span>Each one in a sentence you actually said.</span></span></li>
+          <li><i style="background:var(--salma)"></i><span><b>One specific win, said out loud</b><span>"You argued for four minutes in the past tense."</span></span></li>
+          <li><i style="background:var(--ink)"></i><span><b>Real-world tries</b><span>"I had the interview" goes in the notebook and is celebrated above everything.</span></span></li>
+          <li><i style="background:var(--dim)"></i><span><b>An honest flat week</b><span>Said plainly, with the one thing the teacher changes.</span></span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PLANS ================= -->
+  <section id="plans">
+    <div class="sec-head">
+      <div class="kicker">YOUR DECISION: MONTHLY, BY EPISODES A DAY</div>
+      <h2>Three plans. The only difference is how many new episodes a day.</h2>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <span class="nm">1 A DAY</span>
+        <div class="eps" aria-hidden="true"><i></i></div>
+        <span class="pr">$19.99<small> /mo</small></span>
+        <dl><dt>Per episode</dt><dd>$0.67</dd><dt>Practice a day</dt><dd>20–25 min</dd></dl>
+      </div>
+      <div class="plan rec">
+        <span class="nm">2 A DAY · RECOMMENDED</span>
+        <div class="eps" aria-hidden="true"><i></i><i></i></div>
+        <span class="pr">$29.99<small> /mo</small></span>
+        <dl><dt>Per episode</dt><dd>$0.50</dd><dt>Practice a day</dt><dd>40–50 min</dd></dl>
+        <span class="tagline">About $1 a day. Every trial starts here.</span>
+      </div>
+      <div class="plan">
+        <span class="nm">3 A DAY</span>
+        <div class="eps" aria-hidden="true"><i></i><i></i><i></i></div>
+        <span class="pr">$44.99<small> /mo</small></span>
+        <dl><dt>Per episode</dt><dd>$0.50</dd><dt>Practice a day</dt><dd>about 1 hour</dd></dl>
+        <span class="tagline">Your own 1-hour routine.</span>
+      </div>
+    </div>
+    <div class="terms">
+      <div><b>Unlimited on every plan</b>Re-listening, the article, the chat, round two and the archive.</div>
+      <div><b>7-day trial, no card</b>Payment is asked once, plainly, on day 7. No free tier.</div>
+      <div><b>First 100 keep their price</b>For as long as they stay subscribed. Cancel in one tap.</div>
+      <div><b>Priced from cost</b>No plan loses money at $0.35 a session. The beta runs at about $0.60; above $1.00, stop and rethink.</div>
+    </div>
+  </section>
+
+  <!-- ================= LANGUAGES ================= -->
+  <section id="languages">
+    <div class="sec-head">
+      <div class="kicker">YOUR DECISION: ANYONE, ANYWHERE</div>
+      <h2>No target country. A language opens when it passes five tests.</h2>
+      <p class="lead">Each show is built from one person's life, so nothing is tuned to a market. The real limit is quality per language, so a test decides, not a vendor's list.</p>
+    </div>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 1110 200" role="img" aria-label="A candidate language passes five gates in order: voices, your speech, writing, call speed, grammar map. Then it opens for learners.">
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="sv-ink"/></marker></defs>
+        <text x="0" y="96" class="b">A language</text>
+        <text x="0" y="116" class="m">e.g. Spanish</text>
+        <line x1="100" y1="100" x2="1004" y2="100" class="st-ink" stroke-width="2" marker-end="url(#ar)"/>
+        <rect x="164" y="64" width="32" height="72" rx="6" class="sv-raise st-ink" stroke-width="2"/><text x="180" y="106" text-anchor="middle" class="b">1</text>
+        <text x="180" y="40" text-anchor="middle" class="b">Voices</text>
+        <text x="180" y="164" text-anchor="middle" class="m">5 native listeners</text><text x="180" y="182" text-anchor="middle" class="m">pick one, blind</text>
+        <rect x="324" y="64" width="32" height="72" rx="6" class="sv-raise st-ink" stroke-width="2"/><text x="340" y="106" text-anchor="middle" class="b">2</text>
+        <text x="340" y="40" text-anchor="middle" class="b">Your speech</text>
+        <text x="340" y="164" text-anchor="middle" class="m">30 learner clips: keeps</text><text x="340" y="182" text-anchor="middle" class="m">your mistakes, unfixed</text>
+        <rect x="484" y="64" width="32" height="72" rx="6" class="sv-raise st-ink" stroke-width="2"/><text x="500" y="106" text-anchor="middle" class="b">3</text>
+        <text x="500" y="40" text-anchor="middle" class="b">Writing</text>
+        <text x="500" y="164" text-anchor="middle" class="m">a native speaker</text><text x="500" y="182" text-anchor="middle" class="m">approves 10 scripts</text>
+        <rect x="644" y="64" width="32" height="72" rx="6" class="sv-raise st-ink" stroke-width="2"/><text x="660" y="106" text-anchor="middle" class="b">4</text>
+        <text x="660" y="40" text-anchor="middle" class="b">Call speed</text>
+        <text x="660" y="164" text-anchor="middle" class="m">host answers in</text><text x="660" y="182" text-anchor="middle" class="m">about a second</text>
+        <rect x="804" y="64" width="32" height="72" rx="6" class="sv-raise st-ink" stroke-width="2"/><text x="820" y="106" text-anchor="middle" class="b">5</text>
+        <text x="820" y="40" text-anchor="middle" class="b">Grammar map</text>
+        <text x="820" y="164" text-anchor="middle" class="m">checked by a</text><text x="820" y="182" text-anchor="middle" class="m">native teacher</text>
+        <rect x="1012" y="76" width="96" height="48" rx="24" class="sv-host"/>
+        <text x="1060" y="106" text-anchor="middle" class="on">Opens</text>
+      </svg>
+      <figcaption>Likely order, as an estimate: English first, then Spanish, French, German, Italian, Portuguese, Japanese, Korean, Mandarin, Arabic, Hindi, Turkish and Russian. Your own language is a lower bar: the app's text, word meanings and Salma's voice. Any native language pairs with any target, including right-to-left ones.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ================= BEHIND THE SCENES ================= -->
+  <section id="behind">
+    <div class="sec-head">
+      <div class="kicker">HOW IT IS MADE</div>
+      <h2>One teacher, many hands, and only one of them in a hurry</h2>
+      <p class="lead">Only the host on the call has to be fast. Everything that needs deep thinking happens the night before or right after, where it can be slow, cheap and checked.</p>
+    </div>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 1000 430" role="img" aria-label="Your learner model feeds the teacher, which briefs the writer; the fitter checks the level; the editor approves; the voice studio records; the episode reaches you at 7:40. You call the host; the recording goes to the analyst, who writes every word and mistake into the learner model; the memory keeper adds life facts with your exact quote. Salma talks with you about the notebook and the weekly proof.">
+        <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="sv-dim"/></marker></defs>
+        <text x="30" y="30" class="lbl">THE NIGHT BEFORE</text>
+        <text x="30" y="360" class="lbl">RIGHT AFTER</text><text x="30" y="375" class="lbl">YOUR CALL</text>
+        <rect x="30" y="50" width="140" height="50" rx="10" class="sv-raise st-ink" stroke-width="1.5"/><text x="100" y="81" text-anchor="middle" class="b">Teacher</text>
+        <rect x="210" y="50" width="140" height="50" rx="10" class="sv-raise st-rule" stroke-width="1.5"/><text x="280" y="81" text-anchor="middle" class="b">Writer</text>
+        <rect x="390" y="50" width="140" height="50" rx="10" class="sv-faint st-dim" stroke-width="1.5" stroke-dasharray="5 4"/><text x="460" y="81" text-anchor="middle" class="b">Fitter</text>
+        <rect x="570" y="50" width="140" height="50" rx="10" class="sv-raise st-rule" stroke-width="1.5"/><text x="640" y="81" text-anchor="middle" class="b">Editor</text>
+        <rect x="750" y="50" width="140" height="50" rx="10" class="sv-raise st-rule" stroke-width="1.5"/><text x="820" y="81" text-anchor="middle" class="b">Voice studio</text>
+        <line x1="170" y1="75" x2="208" y2="75" class="st-dim" stroke-width="1.5" marker-end="url(#a2)"/><text x="190" y="120" text-anchor="middle" class="lbl">brief</text>
+        <line x1="350" y1="75" x2="388" y2="75" class="st-dim" stroke-width="1.5" marker-end="url(#a2)"/><text x="370" y="120" text-anchor="middle" class="lbl">script</text>
+        <line x1="530" y1="75" x2="568" y2="75" class="st-dim" stroke-width="1.5" marker-end="url(#a2)"/><text x="550" y="120" text-anchor="middle" class="lbl">95% known</text>
+        <line x1="710" y1="75" x2="748" y2="75" class="st-dim" stroke-width="1.5" marker-end="url(#a2)"/><text x="730" y="120" text-anchor="middle" class="lbl">approved</text>
+        <text x="460" y="142" text-anchor="middle" class="m">code, not AI</text>
+        <text x="640" y="142" text-anchor="middle" class="m">a second AI vendor</text>
+        <rect x="30" y="190" width="140" height="70" rx="10" class="sv-ink"/>
+        <text x="100" y="221" text-anchor="middle" class="tp">Your learner</text>
+        <text x="100" y="240" text-anchor="middle" class="tp">model</text>
+        <line x1="100" y1="190" x2="100" y2="102" class="st-dim" stroke-width="1.5" marker-end="url(#a2)"/><text x="110" y="156" class="lbl">every word you know,</text><text x="110" y="171" class="lbl">every mistake</text>
+        <rect x="750" y="190" width="140" height="70" rx="35" class="sv-you"/>
+        <text x="820" y="230" text-anchor="middle" class="on">You</text>
+        <line x1="820" y1="100" x2="820" y2="188" class="st-dim" stroke-width="1.5" marker-end="url(#a2)"/><text x="830" y="150" class="lbl">episode, 7:40</text>
+        <rect x="570" y="340" width="140" height="50" rx="10" class="sv-host"/><text x="640" y="371" text-anchor="middle" class="on">Host (live)</text>
+        <rect x="750" y="340" width="140" height="50" rx="10" class="sv-salma"/><text x="820" y="371" text-anchor="middle" class="on">Salma</text>
+        <rect x="390" y="340" width="140" height="50" rx="10" class="sv-raise st-rule" stroke-width="1.5"/><text x="460" y="371" text-anchor="middle" class="b">Analyst</text>
+        <rect x="210" y="340" width="140" height="50" rx="10" class="sv-raise st-rule" stroke-width="1.5"/><text x="280" y="371" text-anchor="middle" class="b">Memory keeper</text>
+        <line x1="790" y1="262" x2="680" y2="338" class="st-dim" stroke-width="1.5" marker-end="url(#a2)"/><text x="712" y="292" class="lbl">call</text>
+        <line x1="820" y1="262" x2="820" y2="338" class="st-dim" stroke-width="1.5" marker-end="url(#a2)"/><text x="830" y="298" class="lbl">notebook,</text><text x="830" y="312" class="lbl">weekly proof</text>
+        <line x1="570" y1="365" x2="532" y2="365" class="st-dim" stroke-width="1.5" marker-end="url(#a2)"/><text x="551" y="410" text-anchor="middle" class="lbl">recording</text>
+        <line x1="390" y1="365" x2="352" y2="365" class="st-dim" stroke-width="1.5" marker-end="url(#a2)"/><text x="371" y="410" text-anchor="middle" class="lbl">life facts</text>
+        <path d="M450 338 C 430 290, 240 262, 173 240" fill="none" class="st-dim" stroke-width="1.5" marker-end="url(#a2)"/><text x="330" y="272" class="lbl">every word, mistakes kept</text>
+        <line x1="236" y1="338" x2="158" y2="264" class="st-dim" stroke-width="1.5" marker-end="url(#a2)"/><text x="40" y="300" class="lbl">your exact quote</text>
+      </svg>
+      <figcaption>Eleven roles in the beta. Live roles never write memory; only after-call roles do, so a bad guess in the moment never becomes a "fact" about you. The dashed box is code, as are the review schedule, the variety check and the claim check behind every weekly proof.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ================= TIMELINE ================= -->
+  <section id="when">
+    <div class="sec-head">
+      <div class="kicker">THE PLAN</div>
+      <h2>Pilot by hand, then build, then charge</h2>
+      <p class="lead">Each step has a gate. If one fails, find out which belief failed (nobody wants the show, nobody feels the teacher, or the price is wrong) before writing more code.</p>
+    </div>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 1000 210" role="img" aria-label="Pilot from 24 October to 18 November, building from 18 November to 22 December, paid founding beta from 23 December to 26 January. Today is 5 November, inside the pilot.">
+        <rect x="20" y="70" width="252" height="56" rx="10" class="sv-wash-y"/>
+        <text x="34" y="94" class="b ty">Pilot, by hand</text><text x="34" y="113" class="m">15 people · WhatsApp</text>
+        <rect x="278" y="70" width="341" height="56" rx="10" class="sv-wash-s"/>
+        <text x="292" y="94" class="b ts">Build the beta</text><text x="292" y="113" class="m">5 weeks · web app + podcast feed</text>
+        <rect x="633" y="70" width="347" height="56" rx="10" class="sv-wash-h"/>
+        <text x="647" y="94" class="b th">Paid founding beta</text><text x="647" y="113" class="m">~50 new learners a week</text>
+        <path d="M275 136 l-7 12 h14 z" class="sv-ink"/><text x="275" y="168" text-anchor="middle" class="lbl">GATE 18 NOV</text>
+        <path d="M976 136 l-7 12 h14 z" class="sv-ink"/><text x="972" y="168" text-anchor="end" class="lbl">GATE 26 JAN</text>
+        <text x="20" y="200" class="lbl">24 OCT</text>
+        <text x="102" y="200" text-anchor="middle" class="lbl">1 NOV</text>
+        <text x="408" y="200" text-anchor="middle" class="lbl">1 DEC</text>
+        <text x="725" y="200" text-anchor="middle" class="lbl">1 JAN</text>
+        <line x1="143" y1="34" x2="143" y2="132" class="st-ink" stroke-width="2"/>
+        <circle cx="143" cy="34" r="5" class="sv-ink pulse"/>
+        <text x="153" y="38" class="b" style="font-size:13px">Today, 5 Nov</text>
+      </svg>
+      <figcaption>After the beta: public launch worldwide in months 4 to 6, native apps and paid ads in months 6 to 9, more languages and regional prices in months 9 to 12, company and university seats in year 2.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ================= OPEN ================= -->
+  <section id="open">
+    <div class="sec-head">
+      <div class="kicker">NOT DECIDED YET</div>
+      <h2>What you still need to call</h2>
+    </div>
+    <div class="open">
+      <div class="oq"><b>Web or native app for the beta</b><em>before 18 Nov</em><p>Plan: web app plus podcast feed, native later. The UI review preferred native because web calls stop when an iPhone locks.</p></div>
+      <div class="oq"><b>Who writes the hosts and Salma</b><em>by 18 Nov</em><p>They are written by people: one host pair per language you learn, one producer per native language. You, or writers you hire.</p></div>
+      <div class="oq"><b>Company and payment provider</b><em>by 2 Dec</em><p>Recommended: a "merchant of record" that sells on your behalf and handles tax in every country.</p></div>
+      <div class="oq"><b>Which countries the beta invites from</b><em>by 2 Dec</em><p>Default: wherever the waitlist is, within what the legal review clears.</p></div>
+      <div class="oq"><b>Legal review</b><em>before 23 Dec</em><p>Voice recordings and privacy law (GDPR, Saudi PDPL and others), where data is stored, AI disclosure, subscription rules.</p></div>
+      <div class="oq"><b>Confirm the three prices</b><em>before 23 Dec</em><p>$19.99, $29.99 and $44.99 follow from the cost rule. Keep them, or change the rule.</p></div>
+    </div>
+    <div class="risk">
+      <h3>The bet to watch</h3>
+      <p>Every expert review recommended telling learners their mistakes after the call. You chose invisible teaching. Saying it back the right way is the easiest kind of feedback to miss, so the plan repeats the right form often, makes the call need it, and measures accuracy in every 4-week recording. If accuracy stays flat for most learners after a season, the beta gate will show it.</p>
+    </div>
+  </section>
+
+  <!-- ================= APPENDIX ================= -->
+  <details class="all">
+    <summary><span><span class="sum-t">Every feature in the spec</span><span class="sum-s">The full checklist behind the screens above, grouped by moment.</span></span></summary>
+    <div class="cols">
+      <div><h4>BEFORE SIGNUP</h4><ul><li>90-second sample episode about you</li><li>Waitlist, invites ~50 a week</li><li>7-day trial on 2 a day, no card</li></ul></div>
+      <div><h4>FIRST 10 MINUTES</h4><ul><li>Salma's voice within a minute</li><li>3-minute talk with fact cards</li><li>Optional 60-second word check</li><li>Casting: swap a voice, pick an accent</li><li>Pilot episode and 60–90 s first call</li><li>Account, drop time, voice consent last</li></ul></div>
+      <div><h4>LISTEN</h4><ul><li>New 5–7 min episode, ~95% known words</li><li>Cold open with yesterday's words</li><li>"Huh?" button and line replay</li><li>Folded transcript, tap any word</li><li>Keep a word for later</li><li>Private podcast feed, lock-screen control</li><li>Shadowing <span class="chip p1">during beta</span></li></ul></div>
+      <div><h4>READ AND CHAT</h4><ul><li>Article sized to your level</li><li>"Read it to me"</li><li>Chat of 3–5 host messages</li><li>Three ideas for tomorrow, or tell Salma</li><li>Remix an idea; one swap a day</li></ul></div>
+      <div><h4>THE CALL</h4><ul><li>Host takes a side, talks ≤40%</li><li>Hold to keep the floor</li><li>Word button in your own language</li><li>"You mean…" recasts, clarifications</li><li>Recall moments, 60-second retell</li><li>Gentler mode if you freeze</li><li>Voice-note fallback on bad signal</li><li>Round two <span class="chip p1">during beta</span></li><li>Dial-in number test <span class="chip p1">during beta</span></li></ul></div>
+      <div><h4>PROOF</h4><ul><li>Weekly proof from Salma, every week</li><li>Then-and-now recording every 4 weeks</li><li>Wins named by a host in the next episode</li><li>Season finale <span class="chip p1">during beta</span></li><li>Full claim check on fluency <span class="chip p1">during beta</span></li></ul></div>
+      <div><h4>NOTEBOOK</h4><ul><li>What I'm working on with you (veto, add)</li><li>About you, each fact with its source</li><li>Words you own, with your sentences</li><li>Out in the world log</li><li>Hours heard and spoken</li><li>Why this episode</li><li>The tape <span class="chip p1">during beta</span></li></ul></div>
+      <div><h4>RHYTHM AND SEASONS</h4><ul><li>Drop time tied to your day</li><li>Weekly rhythm with spare days</li><li>4-week seasons with one real goal</li><li>Stories that wait for you</li><li>Mid-season rehearsal of the real scene</li><li>Return episode after a gap</li><li>Opt-in note from your past self</li></ul></div>
+      <div><h4>TRUST AND CONTROL</h4><ul><li>Short controls sheet; the rest is a sentence to Salma</li><li>See, export, delete everything</li><li>Recordings only with your yes</li><li>Every character says it is AI</li><li>Crisis protocol with local help</li><li>Only 3 kinds of messages ever sent</li></ul></div>
+      <div><h4>AFTER THE BETA</h4><ul><li>Native apps <span class="chip later">later</span></li><li>Create your own characters <span class="chip later">later</span></li><li>News on your interests <span class="chip later">later</span></li><li>Live helper whispering to the host <span class="chip later">later</span></li><li>Rehearsal on demand, your own input <span class="chip later">later</span></li><li>Regional prices, company seats <span class="chip later">later</span></li></ul></div>
+    </div>
+  </details>
+
+  <footer>Built from concept v2, the decision list, the build spec (v3.1), the eleven expert reviews, the architecture pages and the pilot kit. Where they differ, your 23 October answers win. The screens are sketches of the agreed behaviour, not final design. Prices in US dollars; costs are estimates.</footer>
+</div>
+</main>

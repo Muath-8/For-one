@@ -1,0 +1,2376 @@
+<title>Evaluation and operations architecture</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (72ch prose) inside a 1080px frame; diagrams and decision cards use the full frame. */
+:root {
+  --paper: #F1F4F3; --surface: #FFFFFF; --ink: #142128; --muted: #55656C; --line: #D3DCDA;
+  --accent: #0D6A68; --accent-soft: #DDEDEA; --flag: #A86A12; --flag-soft: #F6EBD6;
+  --ok: #2E7A4E; --warn: #A86A12; --risk: #B0452C; --none: #6E7C83;
+  --blocker: #B0452C; --major: #C9842A; --minor: #A9B6B9;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0E1618; --surface: #152024; --ink: #E2EAE9; --muted: #95A6AA; --line: #28373B;
+  --accent: #5CC0B9; --accent-soft: #17332F; --flag: #E2A94C; --flag-soft: #352914;
+  --ok: #6BC08D; --warn: #E2A94C; --risk: #E8836A; --none: #8C9A9F;
+  --blocker: #E8836A; --major: #E2A94C; --minor: #56676B; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0E1618; --surface: #152024; --ink: #E2EAE9; --muted: #95A6AA; --line: #28373B;
+  --accent: #5CC0B9; --accent-soft: #17332F; --flag: #E2A94C; --flag-soft: #352914;
+  --ok: #6BC08D; --warn: #E2A94C; --risk: #E8836A; --none: #8C9A9F;
+  --blocker: #E8836A; --major: #E2A94C; --minor: #56676B; color-scheme: dark }
+
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+.page { max-width: 1080px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 44px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+code { font-family: var(--mono); font-size: .86em; background: var(--accent-soft); padding: .08em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+h1, h2, h3, h4 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h2 { font-size: 1.7rem; font-weight: 700; letter-spacing: -.01em; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+h4 { font-size: 1.02rem; font-weight: 700; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.lbl { font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-right: .4em; }
+
+.crumbs { display: flex; gap: 8px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); font-family: var(--mono); }
+.crumbs a { text-decoration: none; }
+.hero { display: flex; flex-direction: column; gap: 14px; }
+.eyebrow { font-family: var(--mono); font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font-size: clamp(2rem, 5.2vw, 3.4rem); font-weight: 700; letter-spacing: -.02em; max-width: 20ch; }
+.lede { font-size: 1.2rem; max-width: 60ch; color: var(--ink); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip, .pill { font-family: var(--mono); font-size: .78rem; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; background: var(--surface); white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; }
+.pill i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.st-ok { color: var(--ok); } .st-warn { color: var(--warn); } .st-one { color: var(--risk); } .st-none { color: var(--none); }
+.statusbox { border-left: 4px solid currentColor; background: var(--surface); padding: 14px 18px; border-radius: 0 8px 8px 0; }
+.statusbox p { color: var(--ink); max-width: 75ch; }
+
+.block { display: flex; flex-direction: column; gap: 14px; }
+.block > .muted { max-width: 70ch; }
+.prose { max-width: 74ch; display: flex; flex-direction: column; gap: 12px; }
+.prose.big p { font-size: 1.08rem; line-height: 1.7; }
+.prose ul, .prose ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+.prose pre { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-size: .8rem; line-height: 1.5; margin: 0; }
+.prose pre code { background: none; padding: 0; overflow-wrap: normal; }
+.prose h3, .prose h4 { margin-top: 10px; }
+.prose blockquote { margin: 0; padding-left: 14px; border-left: 3px solid var(--line); color: var(--muted); }
+.tw { overflow-x: auto; max-width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.prose .tw { max-width: min(1080px, 100vw - 32px); width: max-content; min-width: 100%; }
+table { border-collapse: collapse; font-size: .84rem; line-height: 1.45; min-width: 560px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: var(--accent-soft); }
+tr:last-child td { border-bottom: 0; }
+td { min-width: 9ch; }
+
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; text-align: center; font-family: var(--body); }
+
+.decisions { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 12px; }
+.dec { display: flex; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+.dec-n { font-family: var(--mono); font-size: .8rem; color: var(--accent); font-weight: 500; min-width: 2.2ch; padding-top: 2px; }
+.dec-body { display: flex; flex-direction: column; gap: 7px; min-width: 0; font-size: .9rem; line-height: 1.5; }
+.dec-body h4 { font-size: 1rem; }
+.dec-chosen { color: var(--ink); }
+.dec-why { color: var(--ink); }
+.dec-rej { color: var(--muted); font-size: .84rem; }
+
+.openitems { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; counter-reset: oi; }
+.oi { counter-increment: oi; display: flex; gap: 14px; background: var(--flag-soft); border-radius: 10px; padding: 14px 18px; }
+.oi::before { content: counter(oi); font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--flag); min-width: 1.4ch; line-height: 1.2; }
+.oi > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.oi-b { font-size: .92rem; max-width: 80ch; }
+.oi-b p + p { margin-top: 8px; }
+
+.rv-note { max-width: 75ch; }
+.warnnote { border-left: 4px solid var(--warn); padding-left: 12px; }
+.nore { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 16px 18px; max-width: 75ch; }
+.rv { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.rv-h { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.rv-h > div:first-child { display: flex; flex-direction: column; gap: 4px; max-width: 60ch; }
+.rv-counts { display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-start; }
+.cnt { font-family: var(--mono); font-size: .74rem; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.cnt.blocker { color: var(--blocker); } .cnt.major { color: var(--major); } .cnt.minor { color: var(--muted); }
+.sevbar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px; }
+.seg.blocker { background: var(--blocker); } .seg.major { background: var(--major); } .seg.minor { background: var(--minor); }
+details > summary { cursor: pointer; }
+.rv-list > summary { font-weight: 600; font-size: .92rem; color: var(--accent); }
+.findings { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 10px; }
+.fd { display: flex; gap: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+.sev { font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; padding: 2px 7px; border-radius: 4px; height: fit-content; white-space: nowrap; border: 1px solid currentColor; }
+.fd.blocker .sev { color: var(--blocker); } .fd.major .sev { color: var(--major); }
+.fd-b { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: .9rem; }
+.fd-b details { font-size: .86rem; color: var(--ink); }
+.fd-b details > summary { color: var(--muted); font-size: .8rem; }
+.fd-b details[open] { display: flex; flex-direction: column; gap: 8px; }
+.fd-loc { font-family: var(--mono); font-size: .76rem; color: var(--muted); overflow-wrap: anywhere; }
+.minors { margin: 8px 0 0; padding-left: 1.2em; font-size: .86rem; display: flex; flex-direction: column; gap: 5px; color: var(--muted); }
+
+.toc { columns: 2 260px; margin: 0; padding-left: 1.3em; font-size: .9rem; }
+.toc li { break-inside: avoid; padding: 2px 0; }
+.fs { border-top: 1px solid var(--line); padding-block: 4px; }
+.fs > summary { list-style: none; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 0; }
+.fs > summary::-webkit-details-marker { display: none; }
+.fs > summary h3::before { content: "+"; font-family: var(--mono); color: var(--accent); display: inline-block; width: 1.4em; }
+.fs[open] > summary h3::before { content: "−"; }
+.wc { font-family: var(--mono); font-size: .74rem; color: var(--muted); white-space: nowrap; }
+.fs > .prose { padding-bottom: 18px; padding-left: 1.6em; }
+
+.foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--line); padding-top: 16px; font-size: .9rem; }
+
+/* cost chart (domain 08) */
+.costfig { margin: 6px 0 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+.costfig figcaption { display: flex; flex-direction: column; gap: 2px; }
+.cc { display: flex; flex-direction: column; gap: 8px; --lab: 120px; }
+.cc-scale { position: relative; height: 18px; margin-left: var(--lab); font-family: var(--mono); font-size: .7rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cc-scale span { position: absolute; transform: translateX(-50%); }
+.cc-scale span:first-child { transform: none; } .cc-scale span:last-child { transform: translateX(-100%); }
+.cc-plot { position: relative; display: flex; flex-direction: column; gap: 14px; padding-block: 18px 4px; }
+.refs { position: absolute; top: 0; bottom: 0; left: var(--lab); right: 0; pointer-events: none; }
+.ref { position: absolute; top: 0; bottom: 0; border-left: 1.5px dashed var(--muted); }
+.ref span { position: absolute; top: 0; left: 4px; font-family: var(--mono); font-size: .68rem; color: var(--muted); white-space: nowrap; }
+.ref.stop { border-color: var(--risk); } .ref.stop span { color: var(--risk); }
+.cc-row { display: flex; align-items: center; }
+.cc-l { width: var(--lab); flex: none; font-size: .84rem; }
+.cc-bars { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.bar { height: 16px; border-radius: 0 3px 3px 0; position: relative; }
+.bar b { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: .68rem; font-weight: 500; color: var(--paper); font-variant-numeric: tabular-nums; }
+.bar.now { background: var(--accent); }
+.bar.later { background: var(--flag); }
+.cc-key { display: flex; gap: 16px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); margin-left: var(--lab); }
+.k { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.k.now { background: var(--accent); } .k.later { background: var(--flag); }
+@media (max-width: 560px) { .cc { --lab: 92px; } .cc-l { font-size: .76rem; } }
+
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+
+</style>
+
+<div class="page">
+<nav class="crumbs"><a href="https://claude.ai/artifact/C3oRETQgDsX3X6dv8VjdP5">For one architecture</a><span>/</span><span>Domain 9 of 9</span></nav>
+<header class="hero">
+  <p class="eyebrow">Domain 09 · Technical architecture · written 2026-10-16</p>
+  <h1>Evaluation, observability and operations</h1>
+  <p class="lede">How the team knows the product works and keeps it working without building an observability product: rows in Postgres, alerts as SQL, an offline eval gate.</p>
+  <div class="meta">
+    <span class="pill st-none"><i></i>Unreviewed first draft</span>
+    <span class="chip">13 decisions</span>
+    <span class="chip">10 open for Muath</span>
+    <span class="chip">17,363 words, about 75 min</span>
+  </div>
+</header>
+
+<section class="statusbox st-none">
+  <p><strong>Unreviewed first draft.</strong> Nobody has checked this draft against the PRD yet. Treat every number as provisional.</p>
+</section>
+
+<section class="block" id="summary">
+  <h2>In one paragraph</h2>
+  <div class="prose big"><p>This domain answers one question for a team of one to two engineers plus Muath: <strong>how do we know the product works, and how do we keep it working, without building an observability product?</strong> The answer is to make every signal a row in the Postgres the team already runs, to make every alert a SQL query with a runbook link, and to make every change to a prompt, a model or a rule pass the same offline suite that the Milestone 0 learners' files and tags seed. Three managed tools (Sentry for errors, Better Stack for uptime, heartbeats and paging, Langfuse for model traces, the last owned by the cost domain) plus CloudWatch, which comes with Fargate, cover the rest. Nothing in this domain is ever shown to a learner (PRD-v2 16, law 1).</p></div>
+</section>
+
+<section class="block" id="picture">
+  <h2>The picture</h2>
+  <p class="muted">Drawn from section 3 of the document. Boxes are the canonical names the other domains use.</p>
+  <div class="diagram"><pre class="mermaid">
+flowchart LR
+  subgraph Producers
+    A[&quot;api&quot;]
+    WF[&quot;workflows&quot;]
+    CW[&quot;call-worker&quot;]
+    W[&quot;web&lt;br/&gt;client events&quot;]
+  end
+  Producers --&gt; PG[(&quot;Postgres rows&lt;br/&gt;events, calls.metrics, pipeline_steps&quot;)]
+  Producers --&gt; CL[&quot;CloudWatch logs + Sentry&quot;]
+  PG --&gt; M[&quot;forone.measures&lt;br/&gt;daily + weekly SQL&quot;]
+  PG --&gt; OP[&quot;forone.ops&lt;br/&gt;ops/watch every 5 min&quot;]
+  OP --&gt; BS[&quot;Better Stack&lt;br/&gt;pages, P1&quot;]
+  OP --&gt; SL[&quot;Slack #forone-ops&lt;br/&gt;P2, morning digest&quot;]
+  M0[(&quot;Milestone 0 files&lt;br/&gt;fixtures&quot;)] --&gt; EV[&quot;forone.eval&lt;br/&gt;eval-gate in CI&quot;]
+  EV --&gt; ER[(&quot;eval_runs&quot;)]
+</pre></div>
+  
+</section>
+
+<section class="block" id="decisions">
+  <h2>The decisions</h2>
+  <p class="muted">Section 1's table, one card per decision. "Rejected" is what was considered and turned down.</p>
+  <ol class="decisions">
+<li class="dec">
+<span class="dec-n">D1</span>
+<div class="dec-body">
+<h4>Where measures live</h4>
+<p class="dec-chosen">Every 16.1 and 16.2 measure is a row in one table, <code>measure_points</code>, computed nightly by <code>measures/daily</code> from the event log and the sibling domains' tables, with the definition as versioned SQL in <code>forone.measures</code> [DECISION, PRD-v2 16.2 "tracked from day one"]</p>
+<p class="dec-why"><span class="lbl">Why</span> One table, one job, one version; a measure can be recomputed from day one when its definition changes, like the stores (8.5)</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> A metrics vendor (Datadog, Mixpanel): a PDPL processor holding learner ids for nothing the event log does not already hold; counters in memory (lost on deploy)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D2</span>
+<div class="dec-body">
+<h4>Team dashboards</h4>
+<p class="dec-chosen">Server-rendered pages in <code>api</code> under <code>/admin/measures</code>, <code>/admin/gates</code>, <code>/admin/alerts</code>, <code>/admin/review</code>, <code>/admin/flags</code>, <code>/admin/incidents</code>, read from <code>measure_points</code> and the sibling tables through the <code>forone_readonly</code> role; CloudWatch dashboards for infrastructure; the Inngest and Langfuse consoles for runs and traces [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> RDS sits in a private VPC with no public endpoint, so a SaaS dashboard would need a tunnel or a replica; at 100 to 500 learners the numbers fit in a table</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Grafana Cloud (needs a reachable datasource), Metabase on Fargate (one more container; revisit at 1,000 learners, section 8)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D3</span>
+<div class="dec-body">
+<h4>Alerts are SQL</h4>
+<p class="dec-chosen"><code>ops/alerts.yaml</code> holds every rule (a SQL predicate, a window, a severity, a dedupe key, a runbook path); the Inngest cron <code>ops/watch</code> evaluates them every 5 minutes, writes <code>alert_state</code>, and calls <code>ops.page()</code> [DECISION, PRD-v2 15, 14.5]</p>
+<p class="dec-why"><span class="lbl">Why</span> The latency budgets of Part 15 and the cost stop line are facts about rows (<code>calls.metrics</code>, <code>notes.created_at</code>, <code>vendor_calls</code>), so the alert is the query; the team reviews rules as code</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> CloudWatch metric alarms for product budgets (they would need a metrics emitter per budget); vendor alerting UIs edited by hand (no review, no runbook link)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D4</span>
+<div class="dec-body">
+<h4>Paging</h4>
+<p class="dec-chosen">Better Stack: uptime checks on the three public hostnames, heartbeat monitors for the four crons that must never stop, one on-call schedule, phone-call escalation; <code>ops.page()</code> posts to its incident API; everything below P1 goes to the ops Slack channel or the morning digest [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> The topology already named it; it is the cheapest tool that calls a phone; one API to wrap</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> PagerDuty (price), Opsgenie (Atlassian stack), Slack only (no phone at 05:30)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D5</span>
+<div class="dec-body">
+<h4>Logging</h4>
+<p class="dec-chosen">Structured JSON on stdout from all four services to CloudWatch Logs (30-day retention), scrubbed at emission by <code>forone.ops.logscrub</code> using the data domain's <code>forone.learner.pii</code> classification; learner ids and event ids are allowed, names, emails, transcripts, facts and audio are not; CloudWatch Embedded Metric Format lines carry the few service counters the data domain emits [DECISION, PRD-v2 12.6]</p>
+<p class="dec-why"><span class="lbl">Why</span> Zero agents, zero extra processors; the scrubber is one function with a test corpus; EMF turns a log line into a CloudWatch metric for free</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> A log SaaS (another processor holding learner text), OpenTelemetry collectors (operations)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D6</span>
+<div class="dec-body">
+<h4>The offline suite</h4>
+<p class="dec-chosen">One package <code>forone.eval</code> and one CLI <code>tools/eval</code> running named suites from <code>eval/suites.yaml</code> against thresholds in <code>eval/thresholds.yaml</code>; fixtures seeded from Milestone 0 (learner files, tags, 30 clips, scripts, Muath's editor reads); results in <code>eval_runs</code> and <code>bench/reports/</code>; a CI job <code>eval-gate</code> runs the relevant suite when a prompt, model, rule or measure version changes and blocks the merge on regression [DECISION, PRD-v2 6.7 [P1], 10.11, 10.14, 14.4]</p>
+<p class="dec-why"><span class="lbl">Why</span> The PRD's rule is "a change that worsens any of these does not ship"; a rule needs a gate in CI, a baseline, and fixtures that exist before the beta</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> A separate eval vendor; manual "run it when you remember" (Milestone 0's mode)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D7</span>
+<div class="dec-body">
+<h4>Versioning of what models see</h4>
+<p class="dec-chosen">Every prompt, rubric, rule table and threshold is a file in the language package with a <code>prompt_version</code> in <code>packages/package_ar_en/versions.yaml</code>; <code>release_manifest</code> records which versions each deploy carried; a version bump is a PR that must pass <code>eval-gate</code> [DECISION, PRD-v2 10.11.3, 8.5]</p>
+<p class="dec-why"><span class="lbl">Why</span> "Pinned for each 4-week window" and "re-run on every model change" are only enforceable if versions are explicit and deploys record them</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Editing prompts in the admin UI (the pipeline domain's D17 already forbids it)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D8</span>
+<div class="dec-body">
+<h4>Feature flags</h4>
+<p class="dec-chosen">A <code>feature_flags</code> table (key, state, learner allowlist, percentage, changed_by), read by services with a 60 s cache, edited on <code>/admin/flags</code>; flags exist only for P1 features, vendor levers and kill switches, never for a law [DECISION, PRD-v2 19.3]</p>
+<p class="dec-why"><span class="lbl">Why</span> P1 items ship during a paid beta and need a way to reach 5 learners before 100; a kill switch is the first half of every runbook</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> LaunchDarkly or similar (processor, price); environment variables (a deploy per flip)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D9</span>
+<div class="dec-body">
+<h4>Release process</h4>
+<p class="dec-chosen">Trunk-based; CI on every PR (unit, PII scrub test, Inngest payload test, <code>eval-gate</code> when versions change); merge deploys staging; prod deploys from a tag after a manual approval, runs a canary episode and a canary call on the synthetic learner, then flips; release window Sunday to Thursday 10:00 to 16:00 Riyadh; no deploy inside any learner's drop window where it can be avoided; freeze 2026-12-05 to 2026-12-08 [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> Confirms topology D13 and D14 and adds the one thing they lack: when, and what proves a release is good before a learner hears it</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Continuous deploy to prod (a bad prompt would reach a drop at 05:40), release trains (too slow for a five-week build)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D10</span>
+<div class="dec-body">
+<h4>Human review</h4>
+<p class="dec-chosen">The pipeline's <code>review_items</code> queue for episodes (10 per learner per month plus every degraded, fallback and soft-fail item), a new <code>call_review_items</code> queue for calls (2 per learner per month plus every call with a move violation, a crisis activation or <code>end_reason: abandoned</code> in week 1), a monthly <code>claim_audits</code> sample of shown claims, all served by <code>/admin/review</code> with the security domain's role matrix [DECISION, PRD-v2 6.8, 16.1]</p>
+<p class="dec-why"><span class="lbl">Why</span> The PRD names the episode reviewer and the false-claim audit; the call review is the only way to know the move contract holds on real learners, and the governor's counters say what was declared, not what was heard</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Reviewing calls by listening (audio access needs break-glass; transcripts with timings are enough)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D11</span>
+<div class="dec-body">
+<h4>On-call</h4>
+<p class="dec-chosen">One primary engineer per week, Muath as escalation, phone paging only for P1 rules (the six in 4.6), the 05:00 to 08:30 Riyadh drop window as the protected hour; everything else waits for 08:30; a weekly 30-minute ops review on Tuesdays [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> Two people cannot staff 24/7; the product's critical hour is the drop, so that is where attention goes</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> A follow-the-sun rota (no sun to follow), no paging (an unready 05:40 drop found at 09:00 is a lost day for every commuter)</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D12</span>
+<div class="dec-body">
+<h4>Runbooks</h4>
+<p class="dec-chosen">Twelve one-page runbooks in <code>ops/runbooks/</code>, each with the same five headings (detect, first five minutes, fix, verify, tell the learner), every alert rule linking to one, two admin actions behind them (<code>pull episode</code>, <code>re-run after-pass</code>) [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> A runbook nobody can find at 05:40 is a document, not a runbook</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> A wiki</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">D13</span>
+<div class="dec-body">
+<h4>The beta gates</h4>
+<p class="dec-chosen"><code>/admin/gates</code> computes the eleven 16.1 gates per weekly invite cohort from <code>measure_points</code> with target and stop lines, with the date each gate first becomes readable; nothing is decided from a gate before its cohort is old enough [DECISION, PRD-v2 16.1, 19.3]</p>
+<p class="dec-why"><span class="lbl">Why</span> "Active in week 4" for the 2026-12-07 cohort is unreadable before 2027-01-04; a dashboard that shows it earlier invites a wrong decision</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> A single cross-cohort number</p>
+</div></li>
+</ol>
+  <div class="prose"><p>What this domain does not build: a metrics pipeline, a log search product, an experimentation platform, a status page for learners (there is none; the product says "Weak signal" and falls back), and anything a learner can see.</p></div>
+</section>
+
+<section class="block" id="open">
+  <h2>Open for Muath</h2>
+  <p class="muted">Section 10. Only you can settle these; the document says what each answer changes.</p>
+  <ol class="openitems"><li class="oi"><div><h4>On-call and paging</h4><div class="oi-b"><p>Who is primary in the beta's first three days (05:00 to 09:00 Riyadh, both engineers proposed), whether Muath is the escalation after 15 minutes at any hour, and whether the Better Stack on-call plan (about $30 a month) is in the budget. Without a phone path, an unready 05:40 drop is found at 09:00.</p></div></div></li>
+<li class="oi"><div><h4>The paid reviewer</h4><div class="oi-b"><p>PRD 6.8's native English reader: hours (about 4 a day at 100 learners for episodes alone, less with the cut in section 7), rate, and start date (needed by 2026-12-07; the first beta week queues every episode). Also whether the same person may file ban proposals directly or only propose.</p></div></div></li>
+<li class="oi"><div><h4>Who audits claims</h4><div class="oi-b"><p>The monthly false-claim audit (first on 2027-01-01) needs a reader who can judge "does the evidence support this sentence" on about 40 claims; Muath alone, or a second trained person (the assessment domain's second tagger is the natural candidate).</p></div></div></li>
+<li class="oi"><div><h4>The "very disappointed" question</h4><div class="oi-b"><p>PRD 16.1 names the metric but not the ask. Proposed: one in-app question in the week-4 proof's slot (replacing the worth-it question that week), three answers, never by email. Approve the mechanism and the Arabic wording, or drop the gate for the beta.</p></div></div></li>
+<li class="oi"><div><h4>Second-month renewal for founding members</h4><div class="oi-b"><p>Founding members pay a year up front, so <code>renewal_m2</code> reads only monthly subscribers during the beta and may have too few to read by 2027-01-10. Decide whether the gate is judged on monthly subscribers only or deferred.</p></div></div></li>
+<li class="oi"><div><h4>Pulling a shipped episode</h4><div class="oi-b"><p>Section 4.8 R4 adds an admin action that replaces a law-breaking episode and has Salma say one plain line on Today. It is new (not in PRD-v2). Veto or confirm, and confirm the line's wording.</p></div></div></li>
+<li class="oi"><div><h4>The stop line's owner</h4><div class="oi-b"><p>PRD 14.5 says over $1.00 a session with no costed plan is a stop. This document makes it a ticket to Muath with the breakdown, not an automatic halt. Confirm that a human decides, and within how many days.</p></div></div></li>
+<li class="oi"><div><h4>Milestone 0 fixtures and consent</h4><div class="oi-b"><p>The suite reuses de-identified pilot transcripts, scripts, tags and the 30 clips indefinitely as test fixtures. Confirm the pilot consent (02-consent.md) covers this, or the fixtures are limited to the 30 clips and synthetic learners.</p></div></div></li>
+<li class="oi"><div><h4>Budget for this domain</h4><div class="oi-b"><p>About $250 to $300 a month in tools and suite runs during the beta (section 6), outside the per-session number. Approve, or name the cut (the nightly smoke is the first $90 to go).</p></div></div></li>
+<li class="oi"><div><h4>Reviewer access to Arabic surfaces</h4><div class="oi-b"><p>The native English reviewer reads scripts and articles; Salma's Arabic notes and the Arabic law corpus need an Arabic reader for the law scan's near-miss cases. Muath in the beta, or a second reviewer.</p></div></div></li></ol>
+</section>
+
+<section class="block" id="build">
+  <h2>Build plan, 2026-11-02 to 2026-12-06</h2>
+  <div class="prose"><p>The rule for this domain: it ships inside the other domains' weeks, on top of what they build, and never costs more than about one engineer-week in total before 2026-12-07. P0 here means "the beta cannot be run safely without it"; the offline suite is P1 by the PRD, but its fixtures and the cheap code-only checks land early because the Milestone 0 data is free and the build itself needs them.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Dates</th>
+<th>Ships (this domain)</th>
+<th>P0 / P1</th>
+<th>What the Milestone 0 data lets us test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>11-02 to 11-08</td>
+<td><code>forone.ops</code> skeleton: structlog JSON logger with <code>logscrub</code> and the <code>pii_corpus</code> test; Sentry wired in all services with scrubbing; Better Stack account, uptime checks on staging, one heartbeat; <code>#forone-ops</code>; <code>ops.page()</code> with Slack only; <code>tools/import_m0.py</code> writes the fixtures listed in 4.2 (learner files, scripts with hand coverage, editor reads, transcripts and tags, 30 clips, facts, notes, similarity pairs); <code>eval/suites.yaml</code> with <code>fitter</code>, <code>law_scan</code>, <code>claim_gate</code> (code-only suites) and the <code>recognizers</code> suite wrapping <code>tools/call-bench recognizers</code>; <code>versions.yaml</code> v1</td>
+<td>P0 (logging, paging, fixtures), P1 (suite harness)</td>
+<td>The 30 clips produce the 10.14 result and the first <code>error_survival_rate</code> baseline; the 20 hand-checked scripts are the fitter's regression; the law corpus is seeded from Muath's step-8 catches and the bible's BANNED list</td>
+</tr>
+<tr>
+<td>2</td>
+<td>11-09 to 11-15</td>
+<td><code>eval_runs</code> table and <code>tools/eval run</code>; suites <code>editor</code>, <code>writer</code>, <code>pipeline</code> (10 fixtures), <code>memory</code>; <code>eval-gate</code> CI job with the path map; the first baselines on <code>main</code> from the Milestone 0 fixtures; <code>release_manifest</code> and <code>tools/release cut</code>; <code>ops/alerts.yaml</code> v1 with the pipeline rules (<code>episode_not_ready_before_drop</code>, <code>fallback_3_in_7</code>, <code>editor_degraded_share</code>, <code>fallback_rate_day</code>, <code>voice_failover_active</code>, <code>canary_failed</code>) and <code>ops/watch</code>; <code>ops/canary</code> weekly on the synthetic learner; <code>feature_flags</code> table and <code>flag()</code></td>
+<td>P0 (alerts for the pipeline, release tooling, flags), P1 (suites)</td>
+<td>Every Milestone 0 package through the Gemini editor against Muath's reads gives <code>editor_agreement_with_human</code>; the 15 learner files through teacher-to-editor give <code>editor_pass_first_try</code>, <code>fallback_rate</code> and cost per step; scripts judged "too alike" set <code>similarity_cosine</code> (Part 18 #10)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>11-16 to 11-22</td>
+<td><code>forone.measures</code> v1 with measures 3, 4, 10, 11, 13, 14, 18, 22 (the ones the onboarding, player and word sheet produce) and <code>measure_points</code>; <code>/admin/measures</code> (tables, 28-day sparklines); client-budget alert rules (<code>first_sound_slow</code>, <code>dropped_start_slow</code>, <code>word_sheet_slow</code>, <code>on_demand_slow</code>); the device test matrix runbook for the client domain's week-3 test; Better Stack on prod hostnames</td>
+<td>P0 (measures from day one, PRD 16.2)</td>
+<td>The 15 pilot word checks and reactions give the first <code>followed_vs_predicted</code> reading against the fitter's prediction</td>
+</tr>
+<tr>
+<td>4</td>
+<td>11-23 to 11-29</td>
+<td>Call rules (<code>host_reply_*</code>, <code>call_connect_p95</code>, <code>talkback_p50</code>, <code>governor_violations</code>, <code>notes_late</code>, <code>chat_opener_late</code>); <code>host</code> suite: governor replay on Milestone 0 transcripts (free) and the simulated caller on 10 scripted calls through <code>call-bench</code> on staging; the <code>calls_50</code> suite as a named run; <code>injection</code> suite with the security domain's 30 cases; <code>notes</code> suite; <code>call_review_items</code> and the calls review page (owner only); measures 12, 19, 23</td>
+<td>P0 (call alerts, <code>calls_50</code>), P1 (simulated caller)</td>
+<td>Milestone 0 call audio is the simulated caller's voice; Muath's tags on the same calls make <code>recast_rate_on_planted</code> and <code>clarification_rate_on_planted</code> computable before any live beta call</td>
+</tr>
+<tr>
+<td>5</td>
+<td>11-30 to 12-06</td>
+<td><code>analyst</code> suite calling <code>calibration/run</code>; the cost rules (<code>session_cost_over_1</code>, <code>cost_p50_7d_over_080</code>, <code>spend_cap_or_stop_line</code>, <code>cache_hit_low</code>); privacy and crisis rules (<code>privacy_promise_missed</code>, <code>crisis_activation</code>), <code>wrong_memory_*</code>, <code>claims_retracted</code>; <code>review/sample</code> and <code>/admin/review/episodes</code> with the reviewer role; <code>claims/audit-sample</code> and <code>/admin/review/claims</code>; <code>/admin/gates</code> with readable-from dates; <code>/admin/alerts</code>, <code>/admin/incidents</code>, <code>/admin/flags</code>; the twelve runbooks in <code>ops/runbooks/</code>; the two admin actions (<code>pull</code>, <code>rerun-after-pass</code>); <code>ops/oncall.yaml</code> and the Better Stack schedule with phone escalation; <code>ops/digest</code>; the 08:30 checklist; a 60-minute tabletop with the security domain's incident drill (R4 pull, R12 wrong memory, R1 failover by hand); measures 1, 2, 5 to 9, 15 to 17, 20 to 26; the end-to-end run with the Milestone 0 learners on prod with every rule live</td>
+<td>P0</td>
+<td>The end-to-end run on prod is the first real <code>cost_per_session</code> reading for the 2026-12-07 exit criterion and the first live <code>notes_late</code> and after-pass timings; the Milestone 0 week-0 and week-3 recordings seed <code>test_retest_pairs</code> so <code>/admin/gates</code> can show how many metrics have <code>n_pairs ≥ 12</code></td>
+</tr>
+<tr>
+<td>Beta (P1)</td>
+<td>12-07 to 2027-01-10</td>
+<td>Full synthetic learner set (50) and the full <code>pipeline</code> suite on every bump; <code>pronunciation</code> suite; <code>eval/nightly</code> moved to weekly if cost matters; <code>vendor/regress</code> first run 2027-01-01; the first false-claim audit 2027-01-01; the first rater window boundary 2027-01-04; the gate-review snapshot 2027-01-10; Metabase only if the admin tables are not enough</td>
+<td>P1</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Too much for one to two engineers, and the cut (in order):</strong> the simulated-caller half of the <code>host</code> suite (keep the governor replay, which is free and catches most prompt regressions; run <code>calls_50</code> by hand before each host release instead); <code>/admin/incidents</code> as a page (an <code>incidents</code> row written by <code>ops.page()</code> and a Slack thread is enough); sparklines on <code>/admin/measures</code> (tables only); <code>measures/weekly</code> (compute cohort rollups in the daily job); the calls review page (Muath reads transcripts from <code>/admin/calls/{id}</code> with the governor header shown inline); Metabase. <strong>Do not cut:</strong> <code>logscrub</code> and its corpus (PDPL), <code>ops.page()</code> with phone escalation (the 05:40 drop), the six P1 rule families, <code>eval-gate</code> for host and editor prompt changes (law 7 and law 5 live in those prompts), <code>release_manifest</code> (without it a bad prompt cannot be traced), the false-claim audit (a 16.1 gate), the <code>pull</code> action (the only remedy for a law break that shipped), and the runbooks R1 to R4 and R12.</p></div>
+</section>
+
+<section class="block" id="reviews">
+  <h2>Review findings</h2>
+  <div class="nore"><p><strong>No review ran on this document.</strong> The workflow stopped before its two reviewers reached it. It is a complete first draft written against PRD-v2 and the other eight domains, but nothing in it has been checked.</p></div>
+</section>
+
+<section class="block" id="full">
+  <h2>The full document</h2>
+  <p class="muted">Every section as written, closed by default. Source file: <code>architecture/09-evaluation-observability-and-operations.md</code>.</p>
+  <ol class="toc"><li><a href="#s1-summary-and-the-decisions-in-one-table">1. Summary and the decisions in one table</a></li><li><a href="#s2-requirements-this-domain-implements">2. Requirements this domain implements</a></li><li><a href="#s3-architecture">3. Architecture</a></li><li><a href="#s4-detailed-design">4. Detailed design</a></li><li><a href="#s5-failure-modes-fallbacks-and-degraded-m">5. Failure modes, fallbacks and degraded modes</a></li><li><a href="#s6-cost-and-performance-against-the-budge">6. Cost and performance against the budgets</a></li><li><a href="#s7-build-plan-for-2026-11-02-to-2026-12-0">7. Build plan for 2026-11-02 to 2026-12-06</a></li><li><a href="#s8-alternatives-rejected">8. Alternatives rejected</a></li><li><a href="#s9-assumptions-about-other-domains">9. Assumptions about other domains</a></li><li><a href="#s10-open-for-muath">10. Open for Muath</a></li></ol>
+  <details class="fs"><summary><h3>Front matter</h3></summary><div class="prose"><p><em>For one architecture, domain 9 of 9. Written 2026-10-16 against PRD-v2 (Implementation PRD v3.0), concept-v2 sections 7 to 10, decisions.md, the ai-architecture, learning-science and assessment-progress lenses, and the Milestone 0 kit (04-production, 05-prompts, 07-measures-and-gates, 08-runbook). Sibling documents 01 to 07 were read for names; where this document consumes something they defined, the name is theirs and is marked. Tags: [DECISION], [ASSUMPTION], [OPEN for Muath].</em></p></div></details>
+  <details class="fs" id="s1-summary-and-the-decisions-in-one-table"><summary><h3>1. Summary and the decisions in one table</h3><span class="wc">1,428 words</span></summary><div class="prose"><p>This domain answers one question for a team of one to two engineers plus Muath: <strong>how do we know the product works, and how do we keep it working, without building an observability product?</strong> The answer is to make every signal a row in the Postgres the team already runs, to make every alert a SQL query with a runbook link, and to make every change to a prompt, a model or a rule pass the same offline suite that the Milestone 0 learners' files and tags seed. Three managed tools (Sentry for errors, Better Stack for uptime, heartbeats and paging, Langfuse for model traces, the last owned by the cost domain) plus CloudWatch, which comes with Fargate, cover the rest. Nothing in this domain is ever shown to a learner (PRD-v2 16, law 1).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Chosen</th>
+<th>Reason in one line</th>
+<th>Rejected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td>Where measures live</td>
+<td>Every 16.1 and 16.2 measure is a row in one table, <code>measure_points</code>, computed nightly by <code>measures/daily</code> from the event log and the sibling domains' tables, with the definition as versioned SQL in <code>forone.measures</code> [DECISION, PRD-v2 16.2 "tracked from day one"]</td>
+<td>One table, one job, one version; a measure can be recomputed from day one when its definition changes, like the stores (8.5)</td>
+<td>A metrics vendor (Datadog, Mixpanel): a PDPL processor holding learner ids for nothing the event log does not already hold; counters in memory (lost on deploy)</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>Team dashboards</td>
+<td>Server-rendered pages in <code>api</code> under <code>/admin/measures</code>, <code>/admin/gates</code>, <code>/admin/alerts</code>, <code>/admin/review</code>, <code>/admin/flags</code>, <code>/admin/incidents</code>, read from <code>measure_points</code> and the sibling tables through the <code>forone_readonly</code> role; CloudWatch dashboards for infrastructure; the Inngest and Langfuse consoles for runs and traces [DECISION]</td>
+<td>RDS sits in a private VPC with no public endpoint, so a SaaS dashboard would need a tunnel or a replica; at 100 to 500 learners the numbers fit in a table</td>
+<td>Grafana Cloud (needs a reachable datasource), Metabase on Fargate (one more container; revisit at 1,000 learners, section 8)</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>Alerts are SQL</td>
+<td><code>ops/alerts.yaml</code> holds every rule (a SQL predicate, a window, a severity, a dedupe key, a runbook path); the Inngest cron <code>ops/watch</code> evaluates them every 5 minutes, writes <code>alert_state</code>, and calls <code>ops.page()</code> [DECISION, PRD-v2 15, 14.5]</td>
+<td>The latency budgets of Part 15 and the cost stop line are facts about rows (<code>calls.metrics</code>, <code>notes.created_at</code>, <code>vendor_calls</code>), so the alert is the query; the team reviews rules as code</td>
+<td>CloudWatch metric alarms for product budgets (they would need a metrics emitter per budget); vendor alerting UIs edited by hand (no review, no runbook link)</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>Paging</td>
+<td>Better Stack: uptime checks on the three public hostnames, heartbeat monitors for the four crons that must never stop, one on-call schedule, phone-call escalation; <code>ops.page()</code> posts to its incident API; everything below P1 goes to the ops Slack channel or the morning digest [DECISION]</td>
+<td>The topology already named it; it is the cheapest tool that calls a phone; one API to wrap</td>
+<td>PagerDuty (price), Opsgenie (Atlassian stack), Slack only (no phone at 05:30)</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>Logging</td>
+<td>Structured JSON on stdout from all four services to CloudWatch Logs (30-day retention), scrubbed at emission by <code>forone.ops.logscrub</code> using the data domain's <code>forone.learner.pii</code> classification; learner ids and event ids are allowed, names, emails, transcripts, facts and audio are not; CloudWatch Embedded Metric Format lines carry the few service counters the data domain emits [DECISION, PRD-v2 12.6]</td>
+<td>Zero agents, zero extra processors; the scrubber is one function with a test corpus; EMF turns a log line into a CloudWatch metric for free</td>
+<td>A log SaaS (another processor holding learner text), OpenTelemetry collectors (operations)</td>
+</tr>
+<tr>
+<td>D6</td>
+<td>The offline suite</td>
+<td>One package <code>forone.eval</code> and one CLI <code>tools/eval</code> running named suites from <code>eval/suites.yaml</code> against thresholds in <code>eval/thresholds.yaml</code>; fixtures seeded from Milestone 0 (learner files, tags, 30 clips, scripts, Muath's editor reads); results in <code>eval_runs</code> and <code>bench/reports/</code>; a CI job <code>eval-gate</code> runs the relevant suite when a prompt, model, rule or measure version changes and blocks the merge on regression [DECISION, PRD-v2 6.7 [P1], 10.11, 10.14, 14.4]</td>
+<td>The PRD's rule is "a change that worsens any of these does not ship"; a rule needs a gate in CI, a baseline, and fixtures that exist before the beta</td>
+<td>A separate eval vendor; manual "run it when you remember" (Milestone 0's mode)</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>Versioning of what models see</td>
+<td>Every prompt, rubric, rule table and threshold is a file in the language package with a <code>prompt_version</code> in <code>packages/package_ar_en/versions.yaml</code>; <code>release_manifest</code> records which versions each deploy carried; a version bump is a PR that must pass <code>eval-gate</code> [DECISION, PRD-v2 10.11.3, 8.5]</td>
+<td>"Pinned for each 4-week window" and "re-run on every model change" are only enforceable if versions are explicit and deploys record them</td>
+<td>Editing prompts in the admin UI (the pipeline domain's D17 already forbids it)</td>
+</tr>
+<tr>
+<td>D8</td>
+<td>Feature flags</td>
+<td>A <code>feature_flags</code> table (key, state, learner allowlist, percentage, changed_by), read by services with a 60 s cache, edited on <code>/admin/flags</code>; flags exist only for P1 features, vendor levers and kill switches, never for a law [DECISION, PRD-v2 19.3]</td>
+<td>P1 items ship during a paid beta and need a way to reach 5 learners before 100; a kill switch is the first half of every runbook</td>
+<td>LaunchDarkly or similar (processor, price); environment variables (a deploy per flip)</td>
+</tr>
+<tr>
+<td>D9</td>
+<td>Release process</td>
+<td>Trunk-based; CI on every PR (unit, PII scrub test, Inngest payload test, <code>eval-gate</code> when versions change); merge deploys staging; prod deploys from a tag after a manual approval, runs a canary episode and a canary call on the synthetic learner, then flips; release window Sunday to Thursday 10:00 to 16:00 Riyadh; no deploy inside any learner's drop window where it can be avoided; freeze 2026-12-05 to 2026-12-08 [DECISION]</td>
+<td>Confirms topology D13 and D14 and adds the one thing they lack: when, and what proves a release is good before a learner hears it</td>
+<td>Continuous deploy to prod (a bad prompt would reach a drop at 05:40), release trains (too slow for a five-week build)</td>
+</tr>
+<tr>
+<td>D10</td>
+<td>Human review</td>
+<td>The pipeline's <code>review_items</code> queue for episodes (10 per learner per month plus every degraded, fallback and soft-fail item), a new <code>call_review_items</code> queue for calls (2 per learner per month plus every call with a move violation, a crisis activation or <code>end_reason: abandoned</code> in week 1), a monthly <code>claim_audits</code> sample of shown claims, all served by <code>/admin/review</code> with the security domain's role matrix [DECISION, PRD-v2 6.8, 16.1]</td>
+<td>The PRD names the episode reviewer and the false-claim audit; the call review is the only way to know the move contract holds on real learners, and the governor's counters say what was declared, not what was heard</td>
+<td>Reviewing calls by listening (audio access needs break-glass; transcripts with timings are enough)</td>
+</tr>
+<tr>
+<td>D11</td>
+<td>On-call</td>
+<td>One primary engineer per week, Muath as escalation, phone paging only for P1 rules (the six in 4.6), the 05:00 to 08:30 Riyadh drop window as the protected hour; everything else waits for 08:30; a weekly 30-minute ops review on Tuesdays [DECISION]</td>
+<td>Two people cannot staff 24/7; the product's critical hour is the drop, so that is where attention goes</td>
+<td>A follow-the-sun rota (no sun to follow), no paging (an unready 05:40 drop found at 09:00 is a lost day for every commuter)</td>
+</tr>
+<tr>
+<td>D12</td>
+<td>Runbooks</td>
+<td>Twelve one-page runbooks in <code>ops/runbooks/</code>, each with the same five headings (detect, first five minutes, fix, verify, tell the learner), every alert rule linking to one, two admin actions behind them (<code>pull episode</code>, <code>re-run after-pass</code>) [DECISION]</td>
+<td>A runbook nobody can find at 05:40 is a document, not a runbook</td>
+<td>A wiki</td>
+</tr>
+<tr>
+<td>D13</td>
+<td>The beta gates</td>
+<td><code>/admin/gates</code> computes the eleven 16.1 gates per weekly invite cohort from <code>measure_points</code> with target and stop lines, with the date each gate first becomes readable; nothing is decided from a gate before its cohort is old enough [DECISION, PRD-v2 16.1, 19.3]</td>
+<td>"Active in week 4" for the 2026-12-07 cohort is unreadable before 2027-01-04; a dashboard that shows it earlier invites a wrong decision</td>
+<td>A single cross-cohort number</td>
+</tr>
+</tbody>
+</table></div>
+<p>What this domain does not build: a metrics pipeline, a log search product, an experimentation platform, a status page for learners (there is none; the product says "Weak signal" and falls back), and anything a learner can see.</p></div></details><details class="fs" id="s2-requirements-this-domain-implements"><summary><h3>2. Requirements this domain implements</h3><span class="wc">520 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>PRD-v2 part</th>
+<th>Requirement</th>
+<th>Where in this document</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.2 law 1, law 12; 1.3 promises 1, 4, 7</td>
+<td>Nothing game-like reaches a learner; no claim without proof; a wrong memory is counted</td>
+<td>Law-scan corpus in the suite (4.2.4); claim-gate property tests (4.2.6); the false-claim audit (4.5.3); the wrong-memory measure (4.1)</td>
+</tr>
+<tr>
+<td>6.3</td>
+<td>Editor fallback after a second fail; page a human after 3 fallbacks in 7 days</td>
+<td>Alert <code>fallback_3_in_7</code> (4.6); runbook R4 (4.8); editor-gate eval set (4.2.3)</td>
+</tr>
+<tr>
+<td>6.4, 6.5</td>
+<td>Re-listen fallbacks and similarity are counted; the human read updates the ban list</td>
+<td>Degraded-mode counters (4.1); review findings loop (4.5)</td>
+</tr>
+<tr>
+<td>6.7 [P1]</td>
+<td>Offline suite: 30 to 50 synthetic learners, simulated caller, seven regression measures, run on every prompt or model change, a regression does not ship</td>
+<td>4.2 entire; CI wiring 4.3</td>
+</tr>
+<tr>
+<td>6.8</td>
+<td>A paid native reviewer reads 10 random episodes per learner per month, flags errors, sameness, law breaks; findings update the ban list, prompts, similarity threshold</td>
+<td>4.5.1 with the access rules in 4.5.4</td>
+</tr>
+<tr>
+<td>10.11</td>
+<td>Calibration bars before claims; rater pinned per 4-week window; re-run on model change</td>
+<td><code>calibration/run</code> (assessment domain) wired into <code>eval-gate</code> and the calendar (4.3, 4.10)</td>
+</tr>
+<tr>
+<td>10.14</td>
+<td>30-clip recognizer test, before build week 2; recognizer error by first language from day one</td>
+<td>Suite <code>recognizers</code> (4.2.5); monthly <code>vendor/regress</code> (4.10)</td>
+</tr>
+<tr>
+<td>14.4</td>
+<td>Vendor tests in weeks 1 to 2; 50 scripted calls, median host reply under 1.5 s</td>
+<td>Suites <code>voices-blind</code> and <code>calls-50</code> (4.2.5); the latency alert rules (4.6)</td>
+</tr>
+<tr>
+<td>14.5</td>
+<td>Cost per session reported weekly, next to heavy-use outliers; stop line $1.00</td>
+<td>Weekly cost review in the calendar (4.10); alert rules <code>cost_session_p50_7d</code>, <code>cost_stop_line</code> (4.6); the cost domain owns the report itself</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Every latency and reliability budget</td>
+<td>Each budget has a measured signal, a source and an alert rule (4.6, table 4.6.1)</td>
+</tr>
+<tr>
+<td>16.1</td>
+<td>Eleven beta gates with target and stop lines</td>
+<td><code>/admin/gates</code> (4.4)</td>
+</tr>
+<tr>
+<td>16.2</td>
+<td>Eighteen quality and health measures from day one</td>
+<td><code>forone.measures</code> definitions (4.1)</td>
+</tr>
+<tr>
+<td>19.2, 19.3</td>
+<td>Exit criteria on 2026-12-07; P1 items during the beta; switch-to-native triggers</td>
+<td>Build plan (7); flags (4.7); the two switch measures (4.1 rows 17, 18)</td>
+</tr>
+<tr>
+<td>7.9</td>
+<td>Every crisis activation logged; human follow-up</td>
+<td>Alert <code>crisis_activation</code> and runbook R10 (4.6, 4.8)</td>
+</tr>
+<tr>
+<td>12.5, 12.6 (through the security domain)</td>
+<td>Deletion windows verified; staff access logged; PII never in logs</td>
+<td>Log scrubbing (4.9); the paging channel for <code>privacy.audit_failed</code> (4.6)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Budgets that bind this domain: the fixed monthly cost of its tools (section 6, about $120 to $200 a month in the beta); the cost of running the suite (about $15 to $20 per full run, section 6); zero per-session cost on the learner path (nothing here runs in a learner's request); and the engineering budget of the five build weeks, where this domain must stay under about one engineer-week in total before 2026-12-07 (section 7 says which week).</p></div></details><details class="fs" id="s3-architecture"><summary><h3>3. Architecture</h3><span class="wc">1,076 words</span></summary><div class="prose"><h3>3.1 Components</h3>
+<p>Draw six boxes in a row across the top, the four deployables plus two managed consoles, and three boxes below them owned by this domain.</p>
+<ul>
+<li><strong>Producers (top row, left to right):</strong> <code>api</code>, <code>workflows</code>, <code>call-worker</code>, <code>web</code> (the topology's four services). Each emits three things: structured log lines to stdout (CloudWatch), Sentry events on exceptions, and rows (<code>events</code>, <code>calls.metrics</code>, <code>pipeline_steps</code>, <code>vendor_calls</code>, <code>notes</code>, <code>claims</code>, <code>review_items</code>, <code>privacy_audit_runs</code>, and the rest of the sibling tables). <code>web</code> emits only client events (<code>app_open</code>, <code>client_perf</code>, <code>pwa_install</code>, <code>push_permission</code>) through <code>POST /v1/events</code>, and Sentry browser events.</li>
+<li><strong>Consoles (top row, right):</strong> Inngest (run history, replay), Langfuse (every model call with cost and <code>learner_model_version</code>; owned by the cost domain).</li>
+<li><strong><code>forone.measures</code> (bottom left):</strong> a Python package of SQL definitions, one function per measure, each stamped with <code>MEASURES_VERSION</code>. Run by the Inngest crons <code>measures/daily</code> (06:30 Riyadh, 03:30 UTC) and <code>measures/weekly</code> (Monday 06:30 Riyadh). Writes <code>measure_points</code>.</li>
+<li><strong><code>forone.ops</code> (bottom middle):</strong> <code>ops/watch</code> (cron, every 5 minutes) evaluates <code>ops/alerts.yaml</code> against Postgres, writes <code>alert_state</code>, calls <code>ops.page()</code>; <code>ops.page()</code> is the interface the topology, pipeline and security domains already call (<code>pipeline.human_page</code>, <code>vendor.degraded</code>, <code>privacy.audit_failed</code>, <code>cost_guard.tripped</code>, <code>security.incident_opened</code> all land here); <code>ops/canary</code> (weekly) runs one episode and one call on the synthetic learner through each voice vendor; <code>review/sample</code> (nightly) fills the review queues; <code>claims/audit-sample</code> (monthly) fills <code>claim_audits</code>; <code>vendor/regress</code> (monthly) re-runs the recognizer and pronunciation clip suites; <code>feature_flags</code> and <code>release_manifest</code> live here.</li>
+<li><strong><code>forone.eval</code> (bottom right):</strong> the offline suite. Fixtures under <code>eval/fixtures/</code> (seeded from <code>/mnt/project-files/milestone-0/</code> artifacts by <code>tools/import_m0.py</code>), suites in <code>eval/suites.yaml</code>, thresholds in <code>eval/thresholds.yaml</code>, the runner <code>tools/eval</code>. It runs on a developer laptop, in CI (<code>eval-gate</code>), and nightly on staging (<code>eval/nightly</code>, the 10-fixture smoke). Results go to <code>eval_runs</code> and <code>bench/reports/{date}-{sha}.json</code> (the call domain's <code>call-bench</code> already uses that directory).</li>
+<li><strong>Sinks (right edge):</strong> Sentry (errors, scrubbed), Better Stack (uptime, heartbeats, incidents, phone), the ops Slack channel <code>#forone-ops</code> (every alert at P2 and above, every page, every deploy, every canary result), the morning digest (P3, one Slack message at 08:30 Riyadh).</li>
+</ul>
+<p>Arrows: producers write rows to Postgres and lines to CloudWatch; <code>forone.measures</code> reads Postgres and writes <code>measure_points</code>; <code>forone.ops</code> reads Postgres and CloudWatch alarms (through SNS) and writes to Better Stack and Slack; <code>forone.eval</code> reads fixtures and calls the production adapters (real vendors at the gate level, <code>FORONE_FAKE_VENDORS=1</code> recorded fixtures at the unit level) and writes <code>eval_runs</code>; the <code>/admin</code> pages read everything through <code>forone_readonly</code> and write only <code>feature_flags</code>, <code>review_findings</code>, <code>claim_audits</code>, <code>incidents</code> and the two admin actions, each as an <code>audit_log</code> row (security domain D13).</p>
+<h3>3.2 Data flows</h3>
+<ol>
+<li><strong>A budget to an alert.</strong> A call ends; the worker writes <code>calls.metrics</code> (<code>reply_latency_ms</code> percentiles, <code>connect_ms</code>, <code>talkback_ms</code>, <code>moves.violations</code>, <code>end_reason</code>). Five minutes later <code>ops/watch</code> runs rule <code>host_reply_p50_20calls</code>: median of <code>reply_latency_ms</code> over the last 20 completed calls. Over 1.5 s for two consecutive evaluations, it writes <code>alert_state{rule, state: firing, since, dedupe_key}</code> and posts to Slack with the runbook link (P2). Under 1.5 s for two evaluations, it resolves. Nothing in this path touches a learner.</li>
+<li><strong>An event to a measure.</strong> The client sends <code>app_open {entry: "home_screen", drop_delta_min: 12}</code>. At 06:30 the next morning <code>measures/daily</code> computes <code>unprompted_return</code> for yesterday: sessions started without <code>entry in (push, gap_note)</code> and within 60 minutes of the learner's drop time, per learner-day, and the cohort share. It writes <code>measure_points(measure='unprompted_return_share', scope='cohort', scope_id='2026-12-07', period_start=yesterday, value=0.62, n=41)</code>. <code>/admin/measures</code> reads the last 28 days.</li>
+<li><strong>A prompt change to a deploy.</strong> An engineer edits <code>packages/package_ar_en/prompts/host_system.md</code> and bumps <code>versions.yaml: host_system: 1.4.0</code>. CI sees the path, runs <code>eval-gate</code> with suite <code>host</code> (the governor replay on Milestone 0 transcripts, the simulated caller on 10 scripted calls against staging, the law scan), compares with the baseline run for <code>main</code>, and fails the check if any metric in <code>thresholds.yaml</code> regressed beyond its allowance. On merge, staging deploys; on tag, prod deploys and <code>release_manifest</code> records <code>host_system: 1.4.0</code> with the image digest and the time. <code>calibration/run</code> (assessment domain) is part of <code>eval-gate</code> for assessment paths and blocks the same way.</li>
+<li><strong>A review to a config change.</strong> <code>review/sample</code> picks 10 shipped episodes for learner L in December into <code>review_items</code>. The reviewer (role <code>reviewer</code>, script with the display name tokenized) files <code>review_findings {flags: [sameness], ban_proposals: ["a quiet café"]}</code>. Muath accepts the proposal on the same page; the <code>ban_list</code> row is inserted by code with <code>source: review_finding</code>, and the next <code>eval-gate</code> run of the <code>writer</code> suite includes the new ban word in its scan. Nothing edits a prompt.</li>
+<li><strong>A page to a runbook.</strong> <code>episode/produce</code> emits <code>pipeline.human_page {learner_id, reason: "fallback_3_in_7", count_7d: 3}</code>. <code>ops.page()</code> opens a Better Stack incident with severity P1, title "3 fallbacks in 7 days for learner L", link <code>ops/runbooks/R4-bad-or-fallback-episode.md</code>, and the Slack post. The on-call engineer opens <code>/admin/episodes?learner=L</code>, reads the three editor verdicts, and follows R4.</li>
+</ol>
+<h3>3.3 Interfaces this domain exposes</h3>
+<pre><code class="language-python"># packages/ops/forone/ops/api.py
+from typing import Literal
+Severity = Literal[&quot;P1&quot;, &quot;P2&quot;, &quot;P3&quot;]
+
+def page(*, severity: Severity, rule: str, summary: str, runbook: str,
+         dedupe_key: str, learner_id: str | None = None, context: dict | None = None) -&gt; str:
+    &quot;&quot;&quot;Opens or updates an incident. P1 -&gt; Better Stack incident (phone escalation) + Slack.
+    P2 -&gt; Slack #forone-ops. P3 -&gt; morning digest. Returns the incident id.
+    Context must contain ids and scalars only; the scrubber rejects anything else.&quot;&quot;&quot;
+
+def resolve(dedupe_key: str, note: str = &quot;&quot;) -&gt; None: ...
+
+def flag(key: str, *, learner_id: str | None = None) -&gt; bool:
+    &quot;&quot;&quot;Feature flag read with a 60 s process cache. Falls back to the flag's `default` when
+    Postgres is unreachable, never to True for a kill switch.&quot;&quot;&quot;
+
+def heartbeat(monitor: str) -&gt; None:
+    &quot;&quot;&quot;Called at the end of a cron that must never stop (measures/daily, ops/watch, privacy/verify,
+    retention/daily). Better Stack pages when a heartbeat is late by more than its grace period.&quot;&quot;&quot;
+</code></pre>
+<pre><code class="language-python"># packages/measures/forone/measures/api.py
+MEASURES_VERSION = &quot;1.0.0&quot;
+
+def compute(measure: str, *, period_start, period_end, scope: Literal[&quot;learner&quot;,&quot;cohort&quot;,&quot;all&quot;]) -&gt; list[MeasurePoint]: ...
+def compute_all(period_start, period_end) -&gt; None:       # measures/daily calls this
+def recompute(measure: str, since) -&gt; None:              # when a definition changes, like a rebuild
+</code></pre>
+<pre><code class="language-python"># packages/eval/forone/eval/api.py
+def run(suite: str, *, against: Literal[&quot;local&quot;,&quot;staging&quot;], baseline: str | None = None,
+        fake_vendors: bool = False) -&gt; EvalRun:
+    &quot;&quot;&quot;Runs every check in the suite, writes eval_runs, writes bench/reports/{date}-{sha}.json,
+    compares with the baseline run (the last passing run of this suite on `main`) and returns
+    passed=False when any metric regresses beyond thresholds.yaml.&quot;&quot;&quot;
+</code></pre>
+<p>Inngest events this domain emits: <code>ops.alert_fired {rule, severity, dedupe_key}</code>, <code>ops.alert_resolved {rule, dedupe_key}</code>, <code>ops.canary_completed {vendor, kind, passed}</code>, <code>episode.pulled {learner_id, episode_id, reason}</code>, <code>flag.changed {key, state, changed_by}</code>, <code>eval.completed {suite, run_id, passed}</code>, <code>measures.completed {date, measures_version}</code>.</p>
+<p>Inngest events this domain consumes: <code>pipeline.human_page</code>, <code>vendor.degraded</code>, <code>voice.vendor_failover</code>, <code>episode.fallback_shipped</code>, <code>episode.failed</code>, <code>privacy.audit_failed</code>, <code>cost_guard.tripped</code>, <code>security.incident_opened</code>, <code>crisis.activated</code>, <code>claims.retracted</code>, <code>assessment.rebuild_completed</code>, <code>calibration.completed</code>, <code>memory.flagged</code>.</p></div></details><details class="fs" id="s4-detailed-design"><summary><h3>4. Detailed design</h3><span class="wc">10,314 words</span></summary><div class="prose"><h3>4.1 Measures: every 16.1 and 16.2 number, computed from the log</h3>
+<p><strong>Grain and scope.</strong> Every measure is computed per learner-day where that makes sense, then rolled up to <code>cohort</code> (the weekly invite batch, keyed by the Monday of the invite week, PRD-v2 2.1.6) and <code>all</code>. <code>measure_points</code> keeps all three scopes so that a cohort number can always be opened to its learners. Learner-scope rows are internal, never shown to a learner, and are deleted by <code>learner/delete</code> like any learner-scoped row.</p>
+<pre><code class="language-sql">create table measure_points (
+  measure           text not null,                       -- key from the table below
+  scope             text not null check (scope in ('learner','cohort','all')),
+  scope_id          text not null,                       -- learner_id, cohort monday (YYYY-MM-DD), or 'all'
+  period_start      date not null,
+  period_days       smallint not null,                   -- 1, 7 or 28
+  value             numeric,                             -- null when n &lt; min_n (never a fake zero)
+  n                 int not null,                        -- denominator or sample size
+  extra             jsonb,                               -- p50/p95, numerator, breakdown
+  measures_version  text not null,
+  computed_at       timestamptz not null default now(),
+  primary key (measure, scope, scope_id, period_start, period_days, measures_version)
+);
+create index on measure_points (measure, scope, period_start desc);
+alter table measure_points enable row level security;   -- learner scope rows under the data domain's policies
+</code></pre>
+<p><strong>Definitions.</strong> <code>src</code> names the tables and events of the sibling domains. "Session" is the data domain's <code>sessions</code> row; "active day" is PRD-v2 3.6 rule 1 as <code>day.became_active</code>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Measure key</th>
+<th>PRD</th>
+<th>Grain</th>
+<th>Definition (numerator / denominator)</th>
+<th>src</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>worth_it_share</code></td>
+<td>16.2, 11.1</td>
+<td>cohort, 7 d</td>
+<td><code>worth_it_answer = yes</code> / all <code>worth_it_answer</code> in the period; <code>extra</code> holds mostly and no, and the free-text count</td>
+<td><code>events: worth_it_answer</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>regret_share</code></td>
+<td>16.2</td>
+<td>cohort, 28 d</td>
+<td>learners whose last worth-it answer was <code>no</code> twice running / learners with 2+ answers [ASSUMPTION: "regret" is read from the worth-it series; the PRD names no separate question]</td>
+<td>same</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>unprompted_return_share</code></td>
+<td>16.2</td>
+<td>learner-day, cohort 7 d</td>
+<td>sessions whose first <code>app_open.entry not in (push, gap_note)</code> / sessions; <code>extra.within_hour</code> = share with <code>abs(drop_delta_min) &lt;= 60</code></td>
+<td><code>app_open</code>, <code>sessions</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>tomorrow_chosen_share</code></td>
+<td>16.2</td>
+<td>cohort, 7 d</td>
+<td>sessions with an <code>idea_chosen</code> where <code>source in (pick, tell_salma, remix)</code> / sessions that ended (<code>sessions.state=done or closed</code>)</td>
+<td><code>idea_chosen</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>weeks_on_rhythm</code></td>
+<td>16.2, 3.9</td>
+<td>learner, 7 d</td>
+<td>1 when active days in the local week ≥ the rhythm's chosen days; cohort value = share of learner-weeks met</td>
+<td><code>day.became_active</code>, <code>goals.rhythm</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>return_after_gap_14d</code></td>
+<td>16.2</td>
+<td>cohort, 28 d</td>
+<td>learners who had a gap ≥ 7 days and started a session within 14 days of the gap's start / learners with such a gap; <code>extra.median_gap_days</code></td>
+<td><code>sessions</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>retention_w{4,12,26,52}</code></td>
+<td>16.2</td>
+<td>cohort</td>
+<td>learners with ≥ 1 active day in week k after onboarding / cohort size; computed only when the cohort is ≥ k weeks old</td>
+<td><code>learners</code>, <code>day.became_active</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>delayed_recall_share</code></td>
+<td>16.2</td>
+<td>cohort, 28 d</td>
+<td>target items (words and structures first met in the period) with a clean, unprompted correct use ≥ 7 days after first exposure / target items with any obligatory context ≥ 7 days after first exposure</td>
+<td><code>word_bank</code>, <code>structure_observations</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>targets_hold_share</code></td>
+<td>16.2, 10.6</td>
+<td>cohort, 28 d</td>
+<td>structures that were <code>stable</code> before a recording and were confirmed by it (<code>stable_confirmed_at</code> set) / structures <code>stable</code> before a recording</td>
+<td><code>structure_map</code>, <code>recording_ratings</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>huh_per_min</code>, <code>taps_per_100w</code></td>
+<td>16.2</td>
+<td>learner-day, cohort 28 d</td>
+<td><code>huh</code> events / minutes played; <code>tap</code> events / running words heard or read</td>
+<td><code>huh</code>, <code>tap</code>, <code>play</code></td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>followed_vs_predicted</code></td>
+<td>16.2</td>
+<td>cohort, 28 d</td>
+<td>mean of (<code>followed_answer</code> mapped most=1, about_half=0.5, little=0) minus the episode's <code>why.predicted</code> coverage band mapped the same way; <code>extra</code> holds the confusion table</td>
+<td><code>followed_answer</code>, episode <code>why</code> artifact</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>talkback_per_call</code></td>
+<td>16.2</td>
+<td>learner, 7 d; cohort by learner-week-number</td>
+<td><code>talkback</code> events / calls; cohort view is by week since onboarding so the trend over weeks is visible</td>
+<td><code>talkback</code>, <code>calls</code></td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>notes_opened_share</code>, <code>say_it_once_share</code></td>
+<td>16.2</td>
+<td>cohort, 7 d</td>
+<td>notes with <code>shown_at</code> / notes created; <code>say_it_once</code> events / polish cards shown</td>
+<td><code>notes</code>, <code>say_it_once</code></td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>fact_edits_week1</code></td>
+<td>16.2</td>
+<td>cohort</td>
+<td>learners with ≥ 1 <code>fact_card_edit</code> or <code>notebook_edit</code> in their first 7 days / cohort size</td>
+<td>events</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>similarity_p90</code></td>
+<td>16.2, 6.5</td>
+<td>learner, 28 d</td>
+<td>90th percentile of the max cosine of each shipped script against the learner's previous 20; <code>extra.too_alike_human</code> = reviewer "too_alike" share</td>
+<td><code>script_embeddings</code>, <code>review_findings</code></td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>minutes_per_day_outliers</code></td>
+<td>16.2</td>
+<td>all, 1 d</td>
+<td>learners with &gt; 90 minutes of app playback plus call time in a local day, listed with learner id and minutes; this is a warning light for the team, never a goal [ASSUMPTION: 90 minutes, tuned in the beta]</td>
+<td><code>play</code>, <code>calls</code></td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>recognizer_err_by_l1</code></td>
+<td>16.2, 10.14</td>
+<td>all, 28 d</td>
+<td>word error rate of streaming text against verbatim text on clean turns, grouped by <code>learners.native_language</code> (one group in the beta; the measure exists so the second pair does not start blind)</td>
+<td><code>call_turns_v</code></td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>time_to_first_sound_p50</code>, <code>time_to_first_sentence_p50</code></td>
+<td>16.2, 15</td>
+<td>cohort, 7 d</td>
+<td>medians of <code>client_perf.first_sound_ms</code> and <code>first_english_ms</code> per onboarding</td>
+<td><code>client_perf</code></td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>calls_abandoned_on_move_share</code>, <code>feed_to_call_handoff_share</code></td>
+<td>16.2, 19.3</td>
+<td>cohort, 7 d</td>
+<td><code>end_reason=abandoned</code> with <code>client_perf.bg_play_stop</code> or motion hint / calls; calls with <code>app_open.entry=feed_link</code> that reached <code>call_started</code> / feed call-link exchanges</td>
+<td><code>calls</code>, <code>app_open</code>, <code>feed_links</code></td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>wrong_memories_per_100</code></td>
+<td>16.1</td>
+<td>all, 28 d</td>
+<td><code>wrong_memory_flag</code> events × 100 / callbacks spoken (<code>show_canon.kind=callback_made</code> plus Today's memory line shown); the data domain's formula</td>
+<td><code>events</code>, <code>show_canon</code></td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>false_claim_rate</code></td>
+<td>16.1</td>
+<td>all, 28 d</td>
+<td><code>claim_audits.verdict=false</code> / audited claims (4.5.3)</td>
+<td><code>claim_audits</code></td>
+</tr>
+<tr>
+<td>22</td>
+<td><code>cost_per_session_p50</code>, <code>cost_per_session_mean</code></td>
+<td>16.1, 14.5</td>
+<td>all and cohort, 7 d</td>
+<td>per session: sum of <code>vendor_calls.cost_usd</code> attributed to the session's episode, call, after-pass, notes and chat, plus a quarter of that learner's weekly proof cost; p50 and mean over sessions; <code>extra.top10</code> = the heaviest learners by cost that week</td>
+<td><code>vendor_calls</code>, <code>pipeline_steps</code> (the cost domain's attribution rule)</td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>speech_min_per_session_p50</code></td>
+<td>16.1</td>
+<td>cohort, 7 d</td>
+<td>median over sessions of (<code>calls.metrics.learner_speech_ms</code> for main and round two + shadow + say-it-once durations) / 60,000</td>
+<td><code>calls.metrics</code>, events</td>
+</tr>
+<tr>
+<td>24</td>
+<td><code>sessions_per_active_learner_week</code></td>
+<td>16.1</td>
+<td>cohort, 7 d</td>
+<td>median over learners active that week of sessions started</td>
+<td><code>sessions</code></td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>trial_to_paid</code>, <code>active_w4_paid</code>, <code>renewal_m2</code>, <code>referral_trials_share</code>, <code>very_disappointed_share</code></td>
+<td>16.1</td>
+<td>cohort</td>
+<td>see 4.4</td>
+<td><code>learners.status</code>, <code>subscriptions</code>, <code>payment_events</code>, <code>waitlist.source</code>, <code>events: pmf_answer</code> [new event, 4.4]</td>
+</tr>
+<tr>
+<td>26</td>
+<td><code>recording_improved_share</code></td>
+<td>16.1</td>
+<td>cohort, per season</td>
+<td>learners whose finale had ≥ 1 passed claim of kind <code>fluency_change</code>, <code>accuracy_change</code> or <code>complexity_change</code> with a positive direction / learners with two rated recordings</td>
+<td><code>claims</code>, <code>recording_ratings</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Rules for every definition: a value is <code>null</code> when <code>n</code> is below the measure's <code>min_n</code> (5 for cohort shares, 3 for medians), never zero; a definition change bumps <code>MEASURES_VERSION</code> and <code>recompute()</code> rewrites history under the new version while the old rows stay (the same "never silently retract" rule as 8.5); nothing in <code>forone.measures</code> reads audio or transcript text.</p>
+<p>Three definitions in full, so the shape is clear:</p>
+<pre><code class="language-sql">-- 3. unprompted_return_share, learner-day grain, one local day
+with first_open as (
+  select s.learner_id, s.id as session_id,
+         (select e.payload-&gt;&gt;'entry' from events e
+           where e.learner_id = s.learner_id and e.type = 'app_open'
+             and e.occurred_at between s.started_at - interval '10 minutes' and s.started_at
+           order by e.occurred_at desc limit 1) as entry,
+         (select (e.payload-&gt;&gt;'drop_delta_min')::int from events e
+           where e.learner_id = s.learner_id and e.type = 'app_open'
+             and e.occurred_at between s.started_at - interval '10 minutes' and s.started_at
+           order by e.occurred_at desc limit 1) as drop_delta_min
+  from sessions s
+  where s.started_at &gt;= :period_start and s.started_at &lt; :period_end)
+select learner_id,
+       count(*) filter (where coalesce(entry,'browser') not in ('push','gap_note')) as unprompted,
+       count(*) filter (where coalesce(entry,'browser') not in ('push','gap_note')
+                          and abs(coalesce(drop_delta_min, 999)) &lt;= 60) as within_hour,
+       count(*) as sessions
+from first_open group by learner_id;
+</code></pre>
+<pre><code class="language-sql">-- 8. delayed_recall_share, cohort, 28 days. &quot;Target item&quot; = a word or structure the teacher targeted.
+with targeted as (
+  select learner_id, unit_id as item, 'word' as kind, first_seen_at as first_at
+    from word_bank where targeted_first_at between :p0 and :p1
+  union all
+  select learner_id, structure_id, 'structure', first_targeted_at
+    from structure_map where first_targeted_at between :p0 and :p1),
+later_use as (
+  select t.*, exists (
+    select 1 from structure_observations o
+     where o.learner_id = t.learner_id and o.structure_id = t.item and t.kind = 'structure'
+       and o.clean and o.correct and not o.prompted and o.occurred_at &gt;= t.first_at + interval '7 days'
+    union all
+    select 1 from word_uses u
+     where u.learner_id = t.learner_id and u.unit_id = t.item and t.kind = 'word'
+       and u.clean and u.correct and not u.prompted and u.occurred_at &gt;= t.first_at + interval '7 days') as recalled,
+  exists (select 1 from structure_observations o where o.learner_id = t.learner_id and o.structure_id = t.item
+            and o.occurred_at &gt;= t.first_at + interval '7 days'
+          union all
+          select 1 from word_uses u where u.learner_id = t.learner_id and u.unit_id = t.item
+            and u.occurred_at &gt;= t.first_at + interval '7 days') as had_context
+  from targeted t)
+select l.cohort_monday, count(*) filter (where recalled) as num, count(*) filter (where had_context) as den
+from later_use lu join learners l using (learner_id) group by 1;
+</code></pre>
+<p><code>word_uses</code> is the data domain's per-use evidence table for words [ASSUMPTION: it exists under that name or the word bank exposes an equivalent view; the measure needs per-use rows with <code>clean</code>, <code>correct</code>, <code>prompted</code>, <code>occurred_at</code>].</p>
+<pre><code class="language-sql">-- 22. cost_per_session, one week, all scope; attribution rule from the cost domain:
+-- vendor_calls.session_id is set for call, after-pass, notes and chat calls; episode cost joins by episode_id;
+-- the weekly proof cost is split equally over that learner's sessions in the proof week.
+with per_session as (
+  select s.id as session_id, s.learner_id,
+         coalesce((select sum(cost_usd) from vendor_calls v where v.session_id = s.id), 0)
+       + coalesce((select cost_usd from episodes e where e.id = s.episode_id), 0)
+       + coalesce((select p.cost_usd / nullif(p.sessions_in_week,0) from proofs p
+                    where p.learner_id = s.learner_id and s.started_at &gt;= p.week_start
+                      and s.started_at &lt; p.week_start + 7), 0) as cost_usd
+  from sessions s where s.started_at &gt;= :p0 and s.started_at &lt; :p1)
+select percentile_cont(0.5) within group (order by cost_usd) as p50, avg(cost_usd) as mean, count(*) as n,
+       jsonb_agg(jsonb_build_object('learner_id', learner_id, 'cost', cost_usd) order by cost_usd desc) filter (where rn &lt;= 10) as top10
+from (select *, row_number() over (order by cost_usd desc) rn from per_session) x;
+</code></pre>
+<h3>4.2 The offline test suite</h3>
+<p><strong>What Milestone 0 hands over and where it lands</strong> (PRD-v2 19.1.7). <code>tools/import_m0.py</code> reads the kit's artifacts once, in build week 1, and writes fixtures. Every fixture derived from a real pilot learner is covered by the pilot consent (02-consent.md) [ASSUMPTION: the consent covers use of de-identified transcripts and clips for building and testing the product; the security domain confirms] and is stored with the display name tokenized and the learner id replaced by <code>m0-L03</code>-style refs.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Milestone 0 artifact</th>
+<th>Fixture path</th>
+<th>Used by suite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>15 learner files (Google Docs exported as Markdown)</td>
+<td><code>eval/fixtures/learners/m0-L01..L15.json</code> as <code>TeacherInput</code> (the pipeline's 4.3 schema)</td>
+<td><code>pipeline</code>, <code>teacher</code></td>
+</tr>
+<tr>
+<td>Scripts and articles with Muath's hand-checked coverage (step 6 of the evening cycle)</td>
+<td><code>eval/fixtures/scripts/*.json</code> with <code>coverage_hand</code>, <code>new_words</code>, <code>level</code></td>
+<td><code>fitter</code></td>
+</tr>
+<tr>
+<td>Every package with Muath's step-8 read and the human reviewer's flags, plus the Gemini editor's verdict at the time</td>
+<td><code>eval/fixtures/editor/*.json</code> with <code>human_verdict</code>, <code>flags</code></td>
+<td><code>editor</code></td>
+</tr>
+<tr>
+<td>Call transcripts (Scribe v2) with Muath's error tags, structure ids, categories and "blurred meaning" marks</td>
+<td><code>calibration_samples</code> (assessment domain, via its <code>tools/import_m0_tags.py</code>) and <code>eval/fixtures/transcripts/*.json</code></td>
+<td><code>analyst</code>, <code>host</code> (governor replay)</td>
+</tr>
+<tr>
+<td>30 consented clips with verbatim hand transcripts, code-switch and long-pause marks</td>
+<td><code>eval/fixtures/clips/recognizer/</code></td>
+<td><code>recognizers</code></td>
+</tr>
+<tr>
+<td>Week-0 and week-3 then-and-now recordings with blind ratings</td>
+<td><code>test_retest_pairs</code> (assessment domain) and <code>eval/fixtures/recordings/</code></td>
+<td><code>rater</code></td>
+</tr>
+<tr>
+<td>Confirmed and rejected life-fact candidates with quotes</td>
+<td><code>eval/fixtures/facts/*.json</code></td>
+<td><code>memory</code></td>
+</tr>
+<tr>
+<td>The first ban list (show bible section BANNED) and scripts judged "too alike"</td>
+<td><code>packages/package_ar_en/ban_list.yaml</code>, <code>eval/fixtures/similarity/pairs.json</code></td>
+<td><code>writer</code>, <code>editor</code></td>
+</tr>
+<tr>
+<td>Salma's notes as sent, with any learner reaction</td>
+<td><code>eval/fixtures/notes/*.json</code></td>
+<td><code>notes</code> (law scan on real notes)</td>
+</tr>
+<tr>
+<td>Say-it-once and voice-note clips (where consented) with a hand mark good/unclear</td>
+<td><code>eval/fixtures/clips/pronunciation/</code></td>
+<td><code>pronunciation</code> (P1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Synthetic learners</strong> (PRD-v2 6.7: 30 to 50). The 15 pilot files give 15; <code>tools/eval synth --n 25</code> makes 25 more by varying level (A2+, B1-, B1, B1+, B2-), vocabulary size (2,000 to 5,000), interests (from the generic topic pool), rhythm, and by planting error patterns from the analyst prompt's list: missing <em>be</em>, articles with singular countables, present perfect versus past simple, prepositions after verbs, resumptive pronouns, questions without inversion, uncountable plurals, third-person <em>-s</em>. Each synthetic learner is a <code>TeacherInput</code> plus a <strong>caller profile</strong>: a list of 20 to 25 scripted turns written to contain its planted errors at known positions, with pause marks, rendered to audio once with a TTS voice of the vendor not under test (so the recognizer under test never hears its own vendor's synthesis) [DECISION]. The call domain's <code>tools/call-bench</code> plays these as the simulated caller; this domain owns the profiles and the scoring.</p>
+<p><strong>Suites.</strong> Each suite is a list of checks; each check is a function in <code>forone.eval.checks</code> that returns named metrics; <code>thresholds.yaml</code> says, per metric, the floor or ceiling and the allowed regression against the baseline. The suite names are the keys CI uses.</p>
+<pre><code class="language-yaml"># eval/suites.yaml
+fitter:         # code only, free, seconds
+  checks: [coverage_accuracy, chunk_recall, new_word_budget]
+  fixtures: [scripts]
+  vendors: fake
+law_scan:       # code only, free
+  checks: [law_words_precision_recall, arabic_law_words, lesson_word_near_misses]
+  fixtures: [law_corpus, notes]
+  vendors: fake
+claim_gate:     # property tests, free
+  checks: [no_claim_without_evidence, no_claim_across_version, no_metric_claim_without_sem,
+           like_for_like_only, first_ever_requires_zero_prior, shown_never_deleted]
+  vendors: fake
+analyst:        # Haiku on the calibration set, about $1
+  checks: [tag_precision_claim_tags, tag_precision_all, tag_recall_all, quote_exactness, needed_structure_agreement]
+  fixtures: [calibration_samples]
+  vendors: real
+  external: calibration/run        # the assessment domain's job; its pass/fail is this suite's
+memory:         # Haiku, cents
+  checks: [fact_precision, sensitive_never_unconfirmed, quote_in_transcript, no_inference]
+  fixtures: [facts]
+  vendors: real
+editor:         # Gemini, about $0.50
+  checks: [editor_agreement_with_human, fact_leak_catch_rate, law_catch_rate, generic_catch_rate]
+  fixtures: [editor]
+  vendors: real
+writer:         # Sonnet, about $3 for 15 fixtures
+  checks: [ban_hits, similarity_vs_prior, target_presence, fun_carries_language_share, length_bounds]
+  fixtures: [learners(15)]
+  vendors: real
+pipeline:       # teacher to editor, no voice, about $9 for 50 fixtures
+  checks: [editor_pass_first_try, fallback_rate, coverage_prediction_vs_fitter, cost_per_step, latency_per_step, why_reasons_traceable]
+  fixtures: [learners(50)]
+  vendors: real
+host:           # governor replay (free) + simulated caller on staging (about $3 for 20 calls)
+  checks: [violations_share, recast_rate_on_planted, clarification_rate_on_planted, nudge_budget,
+           recall_gap_count, learner_talk_share, reply_latency_p50_p95, connect_p95, talkback_p50, cutoffs_per_call,
+           law_words_in_host_lines, ai_disclosure_on_ask]
+  fixtures: [transcripts, callers(20)]
+  vendors: real
+  tool: tools/call-bench calls --n 20
+notes:          # Sonnet, cents
+  checks: [cards_at_most_3, own_sentence_first, no_numbers_or_grades, arabic_share_ge_80, polish_on_active_target]
+  fixtures: [transcripts]
+  vendors: real
+recognizers:    # the 10.14 test as a regression, about $0.50
+  checks: [error_survival_rate, filler_retention, hallucinations_near_pauses, code_switch_handling, wer_vs_hand]
+  fixtures: [clips/recognizer]
+  vendors: real
+  tool: tools/call-bench recognizers
+pronunciation:  # P1
+  checks: [known_sentence_score_separates_good_unclear]
+  fixtures: [clips/pronunciation]
+  vendors: real
+injection:      # the security domain's 30 cases, Sonnet, cents
+  checks: [no_law_break_on_request, no_cross_learner_text, disclosure_holds]
+  fixtures: [injection]
+  vendors: real
+calls_50:       # PRD 14.4 #3, staging only, about $8
+  tool: tools/call-bench calls --n 50
+  checks: [reply_latency_p50_p95, connect_p95, talkback_p50, violations_share, learner_talk_share, cutoffs_per_call, cost_per_call]
+</code></pre>
+<pre><code class="language-yaml"># eval/thresholds.yaml (excerpt). floor/ceiling are absolute gates; max_regression is against the baseline run.
+tag_precision_claim_tags:   {floor: 0.80, max_regression: 0.02}      # PRD 10.11
+qwk_band:                   {floor: 0.70, max_regression: 0.03}      # PRD 10.11 (from calibration/run)
+coverage_accuracy:          {ceiling_abs_error_pts: 1.0, max_regression: 0.3}   # fitter vs hand coverage
+error_survival_rate:        {floor: 0.85, max_regression: 0.03}      # share of hand-tagged learner errors kept by the recognizer
+violations_share:           {ceiling: 0.05, max_regression: 0.01}    # governor violations / host turns
+recast_rate_on_planted:     {floor: 0.60, max_regression: 0.05}      # planted target errors that got a recast or clarification
+clarification_rate_on_planted: {floor: 0.50, max_regression: 0.05}   # planted meaning-blurring errors that got a clarification first
+nudge_budget:               {ceiling: 1, max_regression: 0}          # per call, hard
+recall_gap_count:           {floor: 2, ceiling: 4}                   # per non-anxiety call
+learner_talk_share:         {floor: 0.60, max_regression: 0.03}      # PRD 5.4.3: host at most 40%
+reply_latency_p50_ms:       {ceiling: 1500}                          # PRD 15
+reply_latency_p95_ms:       {ceiling: 2500}
+law_words_precision:        {floor: 0.95}                            # near-miss corpus
+law_words_recall:           {floor: 1.0}                             # every violating line is caught, hard
+fact_precision:             {floor: 0.95, max_regression: 0.02}
+sensitive_never_unconfirmed:{floor: 1.0}                             # hard
+editor_pass_first_try:      {floor: 0.70, max_regression: 0.05}
+fallback_rate:              {ceiling: 0.05, max_regression: 0.02}
+ban_hits:                   {ceiling: 0}
+similarity_vs_prior_p90:    {ceiling: 0.85}                          # Part 18 #10 starting value, replaced by the M0 judgment
+cost_per_episode_text_usd:  {ceiling: 0.25, max_regression: 0.03}    # teacher+writer+fitter+editor at standard price
+</code></pre>
+<p><strong>Baselines.</strong> <code>eval_runs</code> keeps every run; the baseline for a suite is the most recent run on <code>main</code> with <code>passed=true</code> and the same <code>against</code>. A metric with no baseline is judged on its floor or ceiling only. The first baselines are the week-2 runs on the Milestone 0 fixtures (section 7).</p>
+<pre><code class="language-sql">create table eval_runs (
+  id uuid primary key, suite text not null, git_sha text not null, branch text not null,
+  against text not null check (against in ('local','staging')),
+  versions jsonb not null,            -- the versions.yaml snapshot the run used
+  baseline_run_id uuid references eval_runs(id),
+  metrics jsonb not null,             -- {metric: value}
+  regressions jsonb not null,         -- [{metric, value, baseline, allowed}]
+  passed boolean not null, cost_usd numeric(8,4), duration_s int,
+  report_path text, ran_at timestamptz not null default now(), ran_by text not null
+);
+</code></pre>
+<p><strong>The law-scan corpus</strong> (<code>eval/fixtures/law_corpus.jsonl</code>, 200 lines, grown by every reviewer finding flagged <code>law</code>): 100 violating lines across every surface the scan covers (host line, Salma note, chat message, feed note, push text, proof script), in English and Arabic, including game words (streak, points, level, badge, score, grade, percent), lesson words (lesson, test, exercise, homework), guilt and attachment ("we missed you", "don't go", "اشتقنا لك"), explicit host corrections ("the correct form is"), and progress claims from a host; and 100 clean near-misses ("the water level", "a test drive", "the next level of the car park", "I scored the goal", "let's test the theory", Salma using "notes" and "polish"). The check runs the shared <code>guard/law_words.yaml</code> scanner (security domain) and the editor's check 10; recall must be 1.0 on the violating half, precision at least 0.95 on the clean half. A new false negative found in production (a reviewer <code>law</code> flag on a shipped line) is added to the corpus in the same PR that fixes it.</p>
+<p><strong>The editor-gate set</strong> (<code>eval/fixtures/editor/</code>): every Milestone 0 package with Muath's <code>SHIP / SHIP AFTER FIXES / REWRITE</code>, plus 20 mutated packages built by <code>tools/eval mutate</code>: one unconfirmed fact inserted, one real-world statistic asserted, one "don't bring up" topic mentioned, one joke that carries nothing, one episode that needs the previous one, one banned name. <code>fact_leak_catch_rate</code> and <code>law_catch_rate</code> must be 1.0 (these are code checks 4 and 10, so a miss is a bug, not a model variance); <code>editor_agreement_with_human</code> is the model's share of agreement with Muath's reads, reported, with a floor of 0.8 on the REWRITE cases.</p>
+<p><strong>Fitter coverage tests</strong>: the server fitter must reproduce <code>coverage-checker.html</code> to within 0.1 point on the 20 hand-checked scripts (the pipeline's own week-1 regression), and predict the learners' <code>followed_answer</code> direction on the Milestone 0 reactions (❤️/👍/😐 as the proxy) with the correlation reported, no floor in the beta.</p>
+<p><strong>Claim-gate property tests</strong> (free, run on every PR): generate random <code>claims</code> candidates with Hypothesis over the gate's inputs; assert that no row reaches <code>status=passed</code> without a <code>claim_evidence</code> row, never across two <code>assessment_version</code>s, never a metric kind without a <code>metric_calibration</code> row with <code>n_pairs ≥ 12</code>, never a <code>first_ever</code> with a prior clean use, and that <code>status=shown</code> rows are never deleted by <code>assessment/rebuild</code> (they become <code>retracted</code> with <code>notice_pending</code>). These encode PRD-v2 10.10 and 8.5 as tests the assessment domain's module must pass.</p>
+<h3>4.3 CI wiring and the release process</h3>
+<p><strong>Versions.</strong> <code>packages/package_ar_en/versions.yaml</code> lists every versioned artifact a model sees or a measure depends on:</p>
+<pre><code class="language-yaml"># packages/package_ar_en/versions.yaml
+prompts:
+  teacher_system: 1.2.0
+  writer_system: 1.3.1
+  fitter_tagging: 1.0.0
+  editor_rubric: 1.1.0
+  host_system: 1.4.0
+  salma_live: 1.0.2
+  salma_notes: 1.1.0
+  chat_host: 1.0.0
+  analyst_full: 1.2.0
+  analyst_fast: 1.0.1
+  memory_keeper: 1.0.0
+  proof_producer: 1.0.0
+  rater: 1.0.0            # pinned per 4-week window (assessment D12); a bump here is refused inside a window
+rules:
+  structure_rules: 1.0.0  # structure_rules.yaml
+  law_words: 1.1.0        # guard/law_words.yaml
+  ban_list: 2026-11-20    # dated, grows monthly
+  crisis_keywords: 1.0.0
+thresholds:
+  asr_confidence: 0.70    # set by the 10.14 run
+  similarity_cosine: 0.85 # Part 18 #10
+assessment_version: 1.0.0 # semver stamped on stores and claims (assessment D12)
+measures_version: 1.0.0
+</code></pre>
+<p><strong>CI jobs on every PR:</strong> <code>unit</code> (all packages, <code>FORONE_FAKE_VENDORS=1</code>), <code>pii_scrub</code> (the log scrubber and Sentry scrubber against <code>eval/fixtures/pii_corpus.jsonl</code>, 4.9), <code>inngest_payloads</code> (no event model carries <code>text</code>, <code>quote</code>, <code>transcript</code> or <code>audio</code>; the security domain's test), <code>law_scan</code>, <code>claim_gate</code>, <code>fitter</code>, <code>migrations</code> (upgrade and downgrade on a fresh database). <strong><code>eval-gate</code></strong> runs only when the diff touches a path in the map below, with the mapped suites, against <code>staging</code> for <code>host</code> and <code>calls_50</code> and <code>local</code> otherwise; it is a required check on <code>main</code>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Path changed</th>
+<th>Suites run</th>
+<th>Cost</th>
+<th>Minutes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prompts/teacher_*</code>, <code>prompts/writer_*</code>, <code>ban_list.yaml</code>, <code>vendors.yaml roles.teacher|writer</code></td>
+<td><code>writer</code>, <code>pipeline</code></td>
+<td>about $12</td>
+<td>12</td>
+</tr>
+<tr>
+<td><code>prompts/editor_*</code>, <code>vendors.yaml roles.editor</code></td>
+<td><code>editor</code></td>
+<td>$0.50</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>prompts/host_*</code>, <code>prompts/salma_live*</code>, governor code, <code>vendors.yaml roles.host|call_tts|streaming_stt</code></td>
+<td><code>host</code> (20 calls on staging), <code>injection</code></td>
+<td>about $4</td>
+<td>15</td>
+</tr>
+<tr>
+<td><code>prompts/analyst_*</code>, <code>structure_rules.yaml</code>, measures code, <code>claims.py</code></td>
+<td><code>analyst</code> (runs <code>calibration/run</code>), <code>claim_gate</code></td>
+<td>about $1</td>
+<td>6</td>
+</tr>
+<tr>
+<td><code>prompts/salma_notes*</code>, notes selection code</td>
+<td><code>notes</code>, <code>law_scan</code></td>
+<td>cents</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>prompts/memory_keeper*</code>, facts code</td>
+<td><code>memory</code></td>
+<td>cents</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>prompts/rater*</code>, <code>vendors.yaml roles.rater</code></td>
+<td><code>analyst</code> (rater component of <code>calibration/run</code>), and the job refuses the bump when <code>pinned_until</code> is in the future</td>
+<td>about $1</td>
+<td>6</td>
+</tr>
+<tr>
+<td><code>guard/law_words.yaml</code></td>
+<td><code>law_scan</code>, <code>notes</code>, <code>host</code> (replay half only)</td>
+<td>free</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>vendors.yaml roles.verbatim_stt|streaming_stt</code></td>
+<td><code>recognizers</code></td>
+<td>$0.50</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>forone/measures/**</code></td>
+<td><code>measures_replay</code> (recompute 7 days on the staging copy and diff against the previous version; any measure that moves more than 5 points is listed in the PR)</td>
+<td>free</td>
+<td>4</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Release.</strong> <code>main</code> deploys to staging on merge (topology <code>deploy-staging.yml</code>). A prod release is a tag <code>v2026.12.03-1</code> created from <code>main</code> by <code>tools/release cut</code>, which writes the <code>release_manifest</code> row (versions snapshot, image digest, flags snapshot, the <code>eval_runs</code> ids that cover this diff), opens the manual approval in GitHub, and posts to Slack. After approval: migrations, rolling deploy, then <code>ops/canary</code> runs one <code>episode/produce</code> and one scripted call for the synthetic learner through the primary voice vendor; a failed canary rolls back to the previous image automatically (ECS task definition revision minus one) and pages P2. The deploy is announced in Slack with the manifest diff.</p>
+<pre><code class="language-sql">create table release_manifest (
+  tag text primary key, git_sha text not null, image_digest text not null,
+  versions jsonb not null, flags jsonb not null, eval_run_ids uuid[] not null,
+  cut_by text not null, cut_at timestamptz not null, approved_by text, deployed_at timestamptz,
+  canary_passed boolean, rolled_back_at timestamptz, notes text
+);
+</code></pre>
+<p>Release rules: Sunday to Thursday, 10:00 to 16:00 Riyadh; never while <code>/admin/alerts</code> shows a firing P1; never inside the 30 minutes before any learner's drop time when the diff touches <code>episode/produce</code> or <code>day/next</code> (the tool checks <code>learner_schedule</code> and warns; the engineer can override with a reason); migrations are expand-then-contract, forward-only in prod, and a contract migration ships at least one release after its expand; a prompt version bump and a code change that depends on it ship in the same release; <strong>freeze</strong> from 2026-12-05 12:00 to 2026-12-08 12:00 Riyadh (launch) and from 2026-12-31 to 2027-01-02 (the Gemini price change lands on 2027-01-01 and the first finales start 2027-01-03). Rollback is "deploy the previous tag"; a rollback of a prompt version is the same PR reverted plus a release, because versions are files.</p>
+<h3>4.4 The beta gates as a team dashboard</h3>
+<p><code>/admin/gates</code> shows one row per gate per cohort (cohorts are the weekly invite batches: <code>2026-12-07</code>, <code>2026-12-14</code>, ...) and an "all cohorts old enough" column. Each cell shows the value, <code>n</code>, the target, the stop line, and the date the cell first became readable. Cells before their readable date show "not yet" and nothing else, so no one reads a 3-day-old cohort's week-4 retention.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Gate (16.1)</th>
+<th>Measure key</th>
+<th>Readable for a cohort from</th>
+<th>Numerator / denominator</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trial to paid 30%+ (stop under 15%)</td>
+<td><code>trial_to_paid</code></td>
+<td>cohort start + 10 days (day 7 ask plus 3 days grace)</td>
+<td><code>learners.status</code> reached <code>paid</code> / learners who completed A9 (<code>trial_started_at</code> set)</td>
+<td>Founding price only; a declined-card retry counts once</td>
+</tr>
+<tr>
+<td>Active in week 4 (paid) 40%+ (stop 25%)</td>
+<td><code>active_w4_paid</code></td>
+<td>cohort start + 28 days</td>
+<td>paid learners with ≥ 1 active day in days 22 to 28 / paid learners</td>
+<td>First readable 2027-01-04 for the first cohort</td>
+</tr>
+<tr>
+<td>Sessions per active learner per week 4+ (stop 2.5)</td>
+<td><code>sessions_per_active_learner_week</code></td>
+<td>cohort start + 7 days, then weekly</td>
+<td>median over learners active that week</td>
+<td>Shown per week since onboarding</td>
+</tr>
+<tr>
+<td>Learner's own speech per session 4+ min (stop 2)</td>
+<td><code>speech_min_per_session_p50</code></td>
+<td>cohort start + 7 days</td>
+<td>see 4.1 row 23</td>
+<td>Main call plus round two plus shadow plus say-it-once</td>
+</tr>
+<tr>
+<td>The 4-weekly recording improves for most</td>
+<td><code>recording_improved_share</code></td>
+<td>first finale (cohort start + 28 days, on the learner's next session)</td>
+<td>see 4.1 row 26</td>
+<td>Claims through the gate only; "no measurable change" is the stop line</td>
+</tr>
+<tr>
+<td>Second-month renewal 60%+ (stop 40%)</td>
+<td><code>renewal_m2</code></td>
+<td>first renewal date + 3 days; <strong>not readable inside the beta for yearly founding members</strong></td>
+<td><code>payment_events</code> second successful charge / learners whose first term ended</td>
+<td>Founding members pay a year up front, so this gate reads only monthly subscribers [OPEN for Muath, section 10]</td>
+</tr>
+<tr>
+<td>"Very disappointed" 40%+ (stop 25%)</td>
+<td><code>very_disappointed_share</code></td>
+<td>cohort start + 28 days</td>
+<td><code>pmf_answer = very</code> / all <code>pmf_answer</code></td>
+<td>The PRD names the metric but not the ask; this document adds one in-app question, asked once in the week-4 proof's question slot in place of the worth-it question that week, with the three answers [DECISION, new event <code>pmf_answer</code>; OPEN for Muath on wording, section 10]. No email, because 3.10 allows none</td>
+</tr>
+<tr>
+<td>Cost per session under $0.60 (stop over $1.00 with no plan)</td>
+<td><code>cost_per_session_p50</code></td>
+<td>from the first week</td>
+<td>4.1 row 22</td>
+<td>The mean is shown next to the median; the stop line is judged on the mean of the trailing 7 days</td>
+</tr>
+<tr>
+<td>False-claim rate under 5%</td>
+<td><code>false_claim_rate</code></td>
+<td>first audit, 2027-01-01</td>
+<td>4.5.3</td>
+<td>Monthly</td>
+</tr>
+<tr>
+<td>Wrong memories under 1 in 100 callbacks</td>
+<td><code>wrong_memories_per_100</code></td>
+<td>cohort start + 14 days</td>
+<td>4.1 row 20</td>
+<td>30-day window</td>
+</tr>
+<tr>
+<td>New trials from referrals and forwarded samples 30%+ (stop 10%)</td>
+<td><code>referral_trials_share</code></td>
+<td>from the second invite batch</td>
+<td>trials whose <code>waitlist.source in (share, referral)</code> / trials started</td>
+<td><code>waitlist.source</code> is set from the share page's <code>?ref=</code> and the invite's referrer field [ASSUMPTION: the client domain records <code>source</code>]</td>
+</tr>
+</tbody>
+</table></div>
+<p>When a gate is under its stop line for two consecutive readable weeks, <code>/admin/gates</code> marks it and <code>ops.page(P3)</code> adds it to the Tuesday ops review agenda. The decision rule stays PRD-v2 16.1's last sentence: find which claim failed before writing code; the dashboard only makes the failure visible.</p>
+<h3>4.5 Human review</h3>
+<h4>4.5.1 Episodes (PRD-v2 6.8)</h4>
+<p>The queue is the pipeline's <code>review_items</code> and <code>review_findings</code> (its D17); this domain owns the sampling job, the page and the loop.</p>
+<ul>
+<li><strong><code>review/sample</code></strong> (Inngest cron, nightly 04:00 Riyadh): for each learner, keep a running count of items this calendar month; add every episode with <code>degraded</code>, <code>relisten=skipped</code>, <code>fallback</code>, or <code>editor_soft_fail</code> flags at once; fill up to 10 per learner per month with random shipped episodes, weighted toward episodes with a <code>followed_answer=little</code> or a <code>huh_per_min</code> above the learner's median (so the reviewer sees the ones that may be mispitched). In Milestone 0 and the first beta week, every shipped episode is queued (the pipeline's rule). Expected volume at 100 learners: about 1,000 items a month, 35 a day, about 4 hours of reviewer time a day at 6 minutes each [OPEN for Muath, section 10: the reviewer's hours and rate].</li>
+<li><strong>The page</strong> <code>/admin/review/episodes</code>: script, article, audio player, editor verdict, the <code>why</code> reasons, the fitter's coverage and new-word list, side by side; the display name and <code>life_facts.people</code> names tokenized (security D14); the reviewer never sees transcripts, the notebook or any claim. One form: flags (<code>error</code>, <code>sameness</code>, <code>law</code>, <code>gloss</code>, <code>other</code>), the lines, a note, ban proposals, a <code>similarity_judgment</code> for the paired "too alike?" question when the item was sampled as a similarity pair.</li>
+<li><strong>The loop</strong>: ban proposals are accepted or declined by Muath on <code>/admin/review/bans</code> and inserted by code with <code>source=review_finding</code>; <code>law</code> flags open a <code>law_corpus</code> PR automatically (the line, the surface, the flag) through a GitHub issue the engineer turns into the fixture; <code>error</code> flags with a line id are counted per prompt version in <code>measure_points(measure='review_error_rate')</code> so a prompt regression that the suite missed is visible within a week; <code>sameness</code> judgments feed the assessment of the similarity threshold (<code>similarity_p90</code> against <code>too_alike_human</code>); the monthly summary (findings by flag, by format, by prompt version) is on the first Tuesday's ops review.</li>
+</ul>
+<h4>4.5.2 Calls [DECISION, extends 6.8 to the call]</h4>
+<p>The PRD reviews episodes; the move contract (5.4.6) and anxiety mode (5.4.7) are only measurable on real calls, and the governor counts what the host declared, not what the learner experienced. A <code>call_review_items</code> queue samples 2 calls per learner per month plus every call with <code>moves.violations ≥ 2</code>, every <code>end_reason in (crisis, abandoned, pipeline_error)</code> in a learner's first week, and every call where <code>anxiety_mode</code> was entered. The reviewer for calls in the beta is Muath himself (role <code>owner</code>), because a call transcript is the learner's own speech and the trust contract's promise 6 ("told, not inferred") means the fewest eyes possible; a <code>tagger</code> may read only transcripts of learners with <code>data_use=true</code>, anonymized through the security domain's <code>research/anonymize</code>, and only for calibration tagging, never for call review.</p>
+<pre><code class="language-sql">create table call_review_items (
+  id uuid primary key, learner_id uuid not null, call_id uuid not null, sampled_reason text not null,
+  state text not null default 'queued' check (state in ('queued','reviewed','actioned','closed')),
+  created_at timestamptz default now(), reviewed_at timestamptz, reviewed_by text
+);
+create table call_review_findings (
+  item_id uuid primary key references call_review_items(id),
+  move_contract jsonb not null,   -- {recasts_ok, clarifications_ok, nudge_ok, recall_gaps_ok, retell_ok, praise_ok, never_rules_ok}
+  anxiety_mode_appropriate boolean, law_flags text[], host_quality smallint check (host_quality between 1 and 5),
+  recognizer_suspect boolean, notes text, prompt_change_ticket text
+);
+</code></pre>
+<p>The page shows the verbatim transcript with timings, the host's declared <code>@moves</code> header per turn next to what it said, the governor's budget counters, and the captions as shown. Audio is not played on this page; a break-glass read of the audio requires a reason (security D2) and is a separate action.</p>
+<h4>4.5.3 The monthly false-claim audit (PRD-v2 16.1)</h4>
+<p><code>claims/audit-sample</code> (Inngest cron, the 1st of each month, 09:00 Riyadh) samples from <code>claims</code> with <code>status=shown</code> and <code>shown_at</code> in the previous month: all claims if fewer than 40, else 40 stratified by <code>kind</code> (every kind represented at least 3 times). It writes <code>claim_audits</code> rows and the auditor (Muath, or a second trained person [OPEN for Muath]) opens each on <code>/admin/review/claims</code>: the claim sentence as shown, the evidence (<code>claim_evidence</code>: the two sentences, or the two clips by byte range where voice storage is on), the gate inputs (<code>sem</code>, <code>n_pairs</code>, task types, <code>assessment_version</code>). Verdicts: <code>true</code> (the evidence supports the sentence as a learner would read it), <code>false</code> (it does not), <code>unclear</code> (the evidence is ambiguous or the sentence overstates). <code>false_claim_rate</code> = false / (true + false + unclear); unclear counts against. Above 5% for a kind: that kind is switched off with the flag <code>claims.kind.&lt;kind&gt;</code> (4.7) until the cause is fixed, and the next proof for affected learners says so (assessment D16's notice path).</p>
+<pre><code class="language-sql">create table claim_audits (
+  id uuid primary key, claim_id uuid not null, sampled_for date not null,
+  verdict text check (verdict in ('true','false','unclear')), reason text,
+  audited_by text, audited_at timestamptz, created_at timestamptz default now()
+);
+</code></pre>
+<h4>4.5.4 Access rules for every review surface</h4>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Surface</th>
+<th><code>owner</code></th>
+<th><code>engineer</code></th>
+<th><code>reviewer</code> (paid native reader)</th>
+<th><code>tagger</code> (calibration)</th>
+<th><code>ops</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/admin/review/episodes</code> (scripts, audio, verdicts; names tokenized)</td>
+<td>read, action</td>
+<td>read</td>
+<td>read, file findings</td>
+<td>no</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>/admin/review/calls</code> (verbatim transcripts with timings)</td>
+<td>read, file findings</td>
+<td>read when on-call for an incident, logged</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>/admin/review/claims</code> (claims with evidence, clips)</td>
+<td>audit</td>
+<td>read</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>/admin/research</code> (anonymized text of <code>data_use=true</code> learners)</td>
+<td>read</td>
+<td>no</td>
+<td>no</td>
+<td>tag</td>
+<td>no</td>
+</tr>
+<tr>
+<td>Learner audio (any)</td>
+<td>break-glass with reason</td>
+<td>break-glass with reason</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>/admin/measures</code>, <code>/admin/gates</code>, <code>/admin/alerts</code>, <code>/admin/incidents</code></td>
+<td>read</td>
+<td>read</td>
+<td>no</td>
+<td>no</td>
+<td>read</td>
+</tr>
+<tr>
+<td><code>/admin/flags</code>, <code>/admin/vendors</code>, admin actions</td>
+<td>write</td>
+<td>write</td>
+<td>no</td>
+<td>no</td>
+<td>write (flags and vendors only)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Every read of a learner-content page writes an <code>audit_log</code> row (security D13), which the learner's export includes.</p>
+<h3>4.6 Alerting on the Part 15 budgets and the cost stop line</h3>
+<p><strong>Severities.</strong> P1 pages a phone at any hour and opens a Better Stack incident; P2 posts to <code>#forone-ops</code> and is handled in working hours (or at once if someone is awake); P3 goes into the 08:30 digest. Only six rule families may be P1 (listed first below); this is deliberate so a two-person team is never paged for a trend.</p>
+<p><strong>Rule format.</strong> Every rule is a SQL predicate over a window, evaluated by <code>ops/watch</code> every 5 minutes. A rule fires after <code>for</code> consecutive true evaluations and resolves after two false ones. <code>dedupe</code> groups incidents so one learner or one vendor produces one incident, not one per evaluation.</p>
+<pre><code class="language-yaml"># ops/alerts.yaml (every rule listed; the SQL of three is shown in full, the rest name their predicate)
+- id: episode_not_ready_before_drop            # P1 family 1, PRD 15 &quot;tomorrow's episode ready before the drop time&quot;
+  severity: P1
+  sql: |
+    select ls.learner_id, ls.next_drop_at
+    from learner_schedule ls join sessions s on s.learner_id = ls.learner_id and s.state in ('done','closed')
+    where ls.next_drop_at between now() and now() + interval '45 minutes'
+      and ls.expects_drop                      -- yesterday was an active day (PRD 3.6 rule 2)
+      and not exists (select 1 from episodes e where e.learner_id = ls.learner_id
+                        and e.drop_at = ls.next_drop_at and e.status in ('ready','published'))
+  for: 1
+  dedupe: &quot;{learner_id}:{next_drop_at}&quot;
+  runbook: ops/runbooks/R3-pipeline-late-for-drop.md
+- id: fallback_3_in_7                           # P1 family 2, PRD 6.3; fired from pipeline.human_page, not SQL
+  severity: P1
+  source: event:pipeline.human_page
+  dedupe: &quot;{learner_id}:fallback&quot;
+  runbook: ops/runbooks/R4-bad-or-fallback-episode.md
+- id: voice_both_vendors_down                   # P1 family 3, PRD 15 &quot;second vendor within the same day&quot;
+  severity: P1
+  sql: select 1 from vendor_health where capability in ('episode_tts','call_tts') group by capability having bool_and(state='degraded')
+  for: 1
+  runbook: ops/runbooks/R1-voice-vendor-outage.md
+- id: recognizer_down                           # P1 family 3 (calls cannot run; notes cannot be written)
+  severity: P1
+  sql: select 1 from vendor_health where capability in ('streaming_stt','verbatim_stt') and state='degraded' and no_secondary
+  for: 1
+  runbook: ops/runbooks/R2-recognizer-outage.md
+- id: privacy_promise_missed                    # P1 family 4, PRD 12.5, 15; from privacy.audit_failed and voice_objects_overdue
+  severity: P1
+  source: event:privacy.audit_failed
+  sql_also: select 1 from media_objects where ephemeral and expires_at &lt; now() - interval '2 minutes' and deleted_at is null
+  for: 1
+  runbook: ops/runbooks/R11-privacy-audit-failed.md
+- id: spend_cap_or_stop_line                    # P1 family 5, PRD 14.5; from cost_guard.tripped and the daily cap
+  severity: P1
+  source: event:cost_guard.tripped
+  sql_also: |
+    select 1 from (select avg(cost_usd) m from session_costs where started_at &gt; now() - interval '7 days') x where m &gt; 1.00
+  for: 1
+  runbook: ops/runbooks/R8-cost-runaway.md
+- id: platform_down                             # P1 family 6: Better Stack uptime on app.forone.app, api /v1/health, feed health.xml; heartbeats late
+  severity: P1
+  source: betterstack
+  runbook: ops/runbooks/R7-platform-down.md
+
+- id: host_reply_p50_20calls                    # P2, PRD 15 median under 1.5 s
+  severity: P2
+  sql: |
+    select 1 from (select percentile_cont(0.5) within group (order by (metrics-&gt;&gt;'reply_latency_p50_ms')::int) p50
+                   from (select metrics from calls where ended_at is not null and kind='main'
+                         order by ended_at desc limit 20) c) x where p50 &gt; 1500
+  for: 2
+  runbook: ops/runbooks/R6-call-latency.md
+- {id: host_reply_p95_20calls, severity: P2, predicate: &quot;p95 of reply_latency over last 20 calls &gt; 2500 ms&quot;, for: 2, runbook: R6}
+- {id: call_connect_p95, severity: P2, predicate: &quot;p95 connect_ms over last 20 calls &gt; 3000&quot;, for: 2, runbook: R6}
+- {id: talkback_p50, severity: P3, predicate: &quot;p50 talkback_ms over last 50 talkbacks &gt; 2000&quot;, for: 2, runbook: R6}
+- {id: notes_late, severity: P2, predicate: &quot;p50 of (notes.created_at - calls.ended_at) over last 10 calls &gt; 90 s, or any single one &gt; 5 min&quot;, for: 1, runbook: R9}
+- {id: after_pass_late, severity: P2, predicate: &quot;≥ 3 sessions in the last hour with after_pass completed_at - call ended_at &gt; 10 min, or evidence_quality='partial' share &gt; 20% today&quot;, for: 1, runbook: R9}
+- {id: chat_opener_late, severity: P3, predicate: &quot;p50 (first host chat_message - chat door open) &gt; 30 s over last 20&quot;, for: 2, runbook: R9}
+- {id: first_sound_slow, severity: P2, predicate: &quot;p50 client_perf.first_sound_ms over last 5 onboardings &gt; 60000&quot;, for: 1, runbook: R5}
+- {id: on_demand_slow, severity: P2, predicate: &quot;p50 (episode.streaming_started - trigger) over last 5 swaps/returns/pilots &gt; 30 s (45 s for pilots)&quot;, for: 1, runbook: R3}
+- {id: dropped_start_slow, severity: P3, predicate: &quot;p50 client_perf.play_start_ms for dropped episodes today &gt; 2000&quot;, for: 1, runbook: R5}
+- {id: word_sheet_slow, severity: P3, predicate: &quot;client_perf.word_sheet_open_ms rows today &gt; 5% of tap events&quot;, for: 1, runbook: R5}
+- {id: voice_failover_active, severity: P2, source: &quot;event:voice.vendor_failover&quot;, runbook: R1}   # a failover that worked is P2; the next episode announces it
+- {id: vendor_degraded_any, severity: P2, source: &quot;event:vendor.degraded&quot;, runbook: R1 or R2 by capability}
+- {id: editor_degraded_share, severity: P2, predicate: &quot;episodes with editor degraded=true today &gt; 3 or &gt; 10%&quot;, for: 1, runbook: R4}
+- {id: fallback_rate_day, severity: P2, predicate: &quot;fallback episodes today / episodes today &gt; 5% with n ≥ 10&quot;, for: 1, runbook: R4}
+- {id: governor_violations, severity: P2, predicate: &quot;sum(moves.violations)/sum(host turns) over last 50 calls &gt; 5%&quot;, for: 2, runbook: R6}
+- {id: session_cost_over_1, severity: P2, predicate: &quot;any session_costs.cost_usd &gt; 1.00 in last hour&quot;, for: 1, dedupe: &quot;{session_id}&quot;, runbook: R8}
+- {id: cost_p50_7d_over_080, severity: P2, predicate: &quot;mean session cost trailing 7 days &gt; 0.80&quot;, for: 1, runbook: R8}
+- {id: cache_hit_low, severity: P3, predicate: &quot;cached_input_tokens / input_tokens over teacher+writer+host calls today &lt; 0.90&quot;, for: 1, runbook: R8}
+- {id: outbox_growing, severity: P1, predicate: &quot;count(outbox unsent) &gt; 100 for 5 min (Inngest unreachable)&quot;, for: 1, runbook: R7}
+- {id: crisis_activation, severity: P2, source: &quot;event:crisis.activated&quot;, dedupe: &quot;{learner_id}:{event_id}&quot;, runbook: R10}  # Slack at once, human reads within 24 h; the protocol itself is in-product
+- {id: wrong_memory_flag, severity: P3, source: &quot;event:memory.flagged&quot;, runbook: R12}
+- {id: wrong_memory_rate, severity: P2, predicate: &quot;wrong_memories_per_100 (30 d) &gt; 1.0 with callbacks ≥ 200&quot;, for: 1, runbook: R12}
+- {id: claims_retracted, severity: P2, source: &quot;event:claims.retracted&quot;, runbook: R12}
+- {id: review_backlog, severity: P3, predicate: &quot;review_items queued &gt; 120 or oldest queued &gt; 7 days&quot;, for: 1, runbook: none (reviewer capacity)}
+- {id: eval_nightly_failed, severity: P3, source: &quot;event:eval.completed passed=false&quot;, runbook: none (engineer reads the report)}
+- {id: canary_failed, severity: P2, source: &quot;event:ops.canary_completed passed=false&quot;, runbook: R1}
+- {id: rater_pin_violated, severity: P2, predicate: &quot;recording/rate refused a run (assessment D12)&quot;, for: 1, runbook: R4}
+- {id: heartbeat_late, severity: P1, source: betterstack, monitors: [measures/daily, ops/watch, privacy/verify, retention/daily], grace: 30 min}
+</code></pre>
+<p><strong>4.6.1 Every Part 15 budget and its signal.</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Budget (PRD-v2 15)</th>
+<th>Signal</th>
+<th>Source</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>First sound under 60 s</td>
+<td><code>client_perf.first_sound_ms</code></td>
+<td>client</td>
+<td><code>first_sound_slow</code></td>
+</tr>
+<tr>
+<td>First spoken English sentence under 5 min</td>
+<td><code>client_perf.first_english_ms</code></td>
+<td>worker</td>
+<td>measure 18 only; no alert (the learner's own pace moves it)</td>
+</tr>
+<tr>
+<td>Sample playable under 30 s</td>
+<td><code>client_perf.sample_first_sound_ms</code> (anonymous telemetry)</td>
+<td>client</td>
+<td>P3 if p50 today &gt; 30 s</td>
+</tr>
+<tr>
+<td>Pilot playback under 45 s</td>
+<td><code>episode.streaming_started - onboarding.intake_completed</code></td>
+<td>workflows</td>
+<td><code>on_demand_slow</code></td>
+</tr>
+<tr>
+<td>Dropped episode start under 2 s</td>
+<td><code>client_perf.play_start_ms</code></td>
+<td>client</td>
+<td><code>dropped_start_slow</code></td>
+</tr>
+<tr>
+<td>On-demand episode under 30 s</td>
+<td><code>episode.streaming_started - trigger event</code></td>
+<td>workflows</td>
+<td><code>on_demand_slow</code></td>
+</tr>
+<tr>
+<td>Call connect under 3 s</td>
+<td><code>calls.metrics.connect_ms</code></td>
+<td>worker</td>
+<td><code>call_connect_p95</code></td>
+</tr>
+<tr>
+<td>Host reply p50 1.5 s, p95 2.5 s</td>
+<td><code>calls.metrics.reply_latency_*</code></td>
+<td>worker</td>
+<td><code>host_reply_p50_20calls</code>, <code>host_reply_p95_20calls</code></td>
+</tr>
+<tr>
+<td>Talkback under 2 s</td>
+<td><code>calls.metrics.talkback_ms</code></td>
+<td>worker</td>
+<td><code>talkback_p50</code></td>
+</tr>
+<tr>
+<td>Word sheet under 300 ms</td>
+<td><code>client_perf.word_sheet_open_ms</code> (logged only when over)</td>
+<td>client</td>
+<td><code>word_sheet_slow</code></td>
+</tr>
+<tr>
+<td>Notes under 90 s</td>
+<td><code>notes.created_at - calls.ended_at</code></td>
+<td>workflows</td>
+<td><code>notes_late</code></td>
+</tr>
+<tr>
+<td>Chat opener under 30 s</td>
+<td>first host <code>chat_message</code> minus door open</td>
+<td>workflows</td>
+<td><code>chat_opener_late</code></td>
+</tr>
+<tr>
+<td>After-session pass within 10 min</td>
+<td><code>session.after_pass.completed</code> minus <code>call.ended</code></td>
+<td>workflows</td>
+<td><code>after_pass_late</code></td>
+</tr>
+<tr>
+<td>Episode ready before drop; on-demand at drop minus 90 min</td>
+<td><code>episodes.status</code> at drop minus 45 min</td>
+<td>workflows</td>
+<td><code>episode_not_ready_before_drop</code></td>
+</tr>
+<tr>
+<td>Audio deleted within 15 min (storage off)</td>
+<td><code>media_objects</code> ephemeral overdue; <code>privacy/verify</code></td>
+<td>data, security</td>
+<td><code>privacy_promise_missed</code></td>
+</tr>
+<tr>
+<td>All audio deleted within 24 h of revoke</td>
+<td><code>privacy/verify</code></td>
+<td>security</td>
+<td><code>privacy_promise_missed</code></td>
+</tr>
+<tr>
+<td>Live voice failure falls back to voice notes</td>
+<td><code>end_reason=fallback</code> share</td>
+<td>worker</td>
+<td>P3 if &gt; 10% of calls today</td>
+</tr>
+<tr>
+<td>Voice vendor outage: second vendor same day</td>
+<td><code>vendor.degraded</code>, <code>voice.vendor_failover</code></td>
+<td>topology, pipeline</td>
+<td><code>voice_failover_active</code>, <code>voice_both_vendors_down</code></td>
+</tr>
+<tr>
+<td>Cost: $0.60 budget, $1.00 stop line</td>
+<td><code>session_costs</code> (a view over <code>vendor_calls</code> and <code>episodes.cost_usd</code> maintained by the cost domain)</td>
+<td>cost</td>
+<td><code>session_cost_over_1</code>, <code>cost_p50_7d_over_080</code>, <code>spend_cap_or_stop_line</code></td>
+</tr>
+</tbody>
+</table></div>
+<pre><code class="language-sql">create table alert_state (
+  rule text not null, dedupe_key text not null, state text not null check (state in ('firing','resolved')),
+  severity text not null, since timestamptz not null, last_eval timestamptz not null, resolved_at timestamptz,
+  incident_ref text, context jsonb, primary key (rule, dedupe_key, since)
+);
+create table incidents (
+  id uuid primary key, opened_at timestamptz not null, closed_at timestamptz, severity text not null,
+  title text not null, rules text[] not null, learner_ids uuid[], runbook text, owner text,
+  timeline jsonb not null default '[]', postmortem_path text, security_incident_id uuid   -- links the security domain's table when relevant
+);
+</code></pre>
+<h3>4.7 Feature flags</h3>
+<pre><code class="language-sql">create table feature_flags (
+  key text primary key, state text not null check (state in ('off','allowlist','percent','on')),
+  percent smallint, allowlist uuid[], &quot;default&quot; boolean not null default false,  -- the value when the table is unreachable
+  description text not null, changed_by text not null, changed_at timestamptz not null default now()
+);
+</code></pre>
+<p>Flags that exist in the beta, with their default on 2026-12-07:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Default 12-07</th>
+<th>What it gates</th>
+<th>Kind</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>round_two</code></td>
+<td>off → allowlist in week 2 of the beta</td>
+<td>PRD 5.4.9 [P1]</td>
+<td>P1 rollout</td>
+</tr>
+<tr>
+<td><code>shadowing</code></td>
+<td>off</td>
+<td>5.2 [P1]</td>
+<td>P1 rollout</td>
+</tr>
+<tr>
+<td><code>dial_in</code></td>
+<td>off</td>
+<td>5.4.12 [P1] experiment, allowlist only</td>
+<td>P1 rollout</td>
+</tr>
+<tr>
+<td><code>finale</code></td>
+<td>off → on when the first season boundary approaches (2027-01-03)</td>
+<td>11.2 [P1]</td>
+<td>P1 rollout</td>
+</tr>
+<tr>
+<td><code>tape</code></td>
+<td>off</td>
+<td>12.3 the tape [P1]</td>
+<td>P1 rollout</td>
+</tr>
+<tr>
+<td><code>claims.kind.fluency_change</code>, <code>...accuracy_change</code>, <code>...complexity_change</code></td>
+<td>off (and the gate refuses anyway until <code>n_pairs ≥ 12</code>)</td>
+<td>11.1 full proof [P1]; also the audit's kill switch (4.5.3)</td>
+<td>kill switch</td>
+</tr>
+<tr>
+<td><code>claims.kind.first_ever</code>, <code>...word_owned</code>, <code>...did_it</code></td>
+<td>on</td>
+<td>the simple proof [P0]; off only in an audit emergency</td>
+<td>kill switch</td>
+</tr>
+<tr>
+<td><code>host.model=haiku</code></td>
+<td>off</td>
+<td>the call domain's measured fallback as a lever</td>
+<td>vendor lever</td>
+</tr>
+<tr>
+<td><code>tts.batch</code></td>
+<td>off</td>
+<td>the pipeline's P1 batch TTS lever</td>
+<td>vendor lever</td>
+</tr>
+<tr>
+<td><code>pipeline.editor_model</code></td>
+<td>on</td>
+<td>off = code checks only (degraded) during a Gemini outage</td>
+<td>kill switch</td>
+</tr>
+<tr>
+<td><code>notes.enabled</code></td>
+<td>on</td>
+<td>off = "Salma is resting today" and no notes (law-safe degraded state)</td>
+<td>kill switch</td>
+</tr>
+<tr>
+<td><code>chat.enabled</code>, <code>talkback.enabled</code></td>
+<td>on</td>
+<td>kill switches</td>
+<td>kill switch</td>
+</tr>
+<tr>
+<td><code>drop.push</code></td>
+<td>on</td>
+<td>off = feed alert only</td>
+<td>kill switch</td>
+</tr>
+<tr>
+<td><code>observer_slot</code></td>
+<td>off</td>
+<td>the call domain's reserved slot [LATER] test</td>
+<td>experiment</td>
+</tr>
+</tbody>
+</table></div>
+<p>Rules: a flag never changes a law (there is no flag for recasts, the allowance, the three message kinds, consent, or the claim gate's rules); a kill switch's <code>default</code> is its safe state; every flip writes <code>audit_log</code> and <code>flag.changed</code>; a flag older than 60 days with state <code>on</code> is a cleanup ticket.</p>
+<h3>4.8 Runbooks</h3>
+<p>Each runbook is one page in <code>ops/runbooks/</code> with the same five headings. The twelve, condensed:</p>
+<p><strong>R1 Voice vendor outage (episode TTS or call TTS).</strong> <em>Detect:</em> <code>vendor.degraded</code> (5 failures in 10 min), <code>voice.vendor_failover</code>, <code>canary_failed</code>, or a learner saying the host sounds different. <em>First five minutes:</em> confirm on the vendor's status page; check <code>/admin/vendors</code> shows the secondary active for <code>episode_tts</code> and <code>call_tts</code>; check the pipeline's <code>failover.active</code> is sticky. <em>Fix:</em> if the automatic switch did not happen, flip <code>vendor_config</code> on <code>/admin/vendors</code> (no deploy); if both vendors are down (P1), set <code>pipeline.editor_model</code> unaffected, let <code>day/next</code> ship yesterday's episode state (the Today screen keeps the unplayed episode; no drop push fires for an episode that is not ready, PRD 3.6) and switch calls to the voice-note fallback by flag <code>talkback.enabled=off</code> plus the worker's own fallback path. <em>Verify:</em> <code>ops/canary</code> on the active vendor passes; the next shipped episode carries the one-line announcement (PRD 7.1). <em>Tell the learner:</em> nothing beyond that line; never an email. <em>Afterwards:</em> switch back only after a passing canary, during the release window, and announce again.</p>
+<p><strong>R2 Recognizer outage (streaming or verbatim).</strong> <em>Detect:</em> <code>vendor.degraded</code> for <code>streaming_stt</code> or <code>verbatim_stt</code>; <code>notes_late</code>; <code>evidence_quality=text_only</code> share rising. <em>First five minutes:</em> streaming down means calls cannot run: confirm the worker is sending new calls to the secondary (Deepgram) by <code>vendor_config</code>; if no secondary passes the 10.14 gate [ASSUMPTION: Deepgram is wired as the hot secondary per the call domain's P1 plan; before that, the fallback is voice notes], set calls to the voice-note fallback. Verbatim down means notes and claims lose evidence: the call domain keeps audio until the 15-minute window; after that, evidence is low-confidence and makes no claims (PRD 5.4.11), which is the designed behaviour. <em>Fix:</em> flip the vendor; re-run <code>call/verbatim-turn</code> for turns whose audio still exists (<code>/admin/calls/{id}/retranscribe</code>, only while audio exists). <em>Verify:</em> <code>recognizers</code> suite on the secondary; <code>notes_late</code> resolves. <em>Tell the learner:</em> the notes door says "no notes for this call" when none could be made; nothing else.</p>
+<p><strong>R3 Pipeline late for the drop.</strong> <em>Detect:</em> <code>episode_not_ready_before_drop</code> (P1 at drop minus 45 min), <code>on_demand_slow</code>, Inngest run failures. <em>First five minutes:</em> open the Inngest run for <code>episode/produce</code> for that learner; the step that is stuck names the vendor (teacher batch not returned, TTS slow, editor loop). <em>Fix, in order:</em> if a batch result is late, the pipeline's cut lines should already have re-run at standard price; if not, cancel and re-run the function with <code>pricing_mode=standard</code> from <code>/admin/episodes/{id}/rerun</code>; if a vendor is down, R1 or R2; if the editor is looping, force <code>pipeline.editor_model=off</code> for that run (ships code-checked, flagged for review). If nothing can ship by the drop time: do nothing to the learner's screen. The unplayed previous episode stays as today's hero and no push fires (PRD 3.6 rule 2); the late episode publishes when ready and the push fires then. <em>Verify:</em> <code>episodes.status=published</code>, <code>drop.published</code>. <em>Tell the learner:</em> nothing. The Milestone 0 "a day late" message is replaced by silence plus the late drop, because a late drop is not one of the three message kinds (3.10). <em>Afterwards:</em> if more than 3 learners were late in one morning, a postmortem within 7 days.</p>
+<p><strong>R4 Bad or fallback episode shipped.</strong> <em>Detect:</em> <code>fallback_3_in_7</code>, <code>editor_degraded_share</code>, a reviewer <code>law</code> or <code>error</code> flag on a shipped episode, a learner message. <em>Decide:</em> a shipped episode is <strong>pulled</strong> only when it breaks law 5 (a fact the learner did not supply, a fake life), law 1 or 10 (game or lesson language), or memory rule 8.4 (an unconfirmed or "don't bring up" fact); an episode that is merely weak is not pulled. <em>Fix:</em> <code>/admin/episodes/{id}/pull</code> [DECISION, new admin action]: sets <code>episodes.status=pulled</code>, removes the feed item (the enclosure returns 410), replaces Today's hero with a fallback episode produced on demand at standard pricing (<code>episode_kind=fallback</code>), writes <code>episode.pulled</code>, and gives Salma one plain Arabic line on Today, "سحبنا حلقة اليوم بسبب خطأ من عندنا، وهذي بديلة." (we pulled today's episode because of a mistake on our side; here is a replacement). The pulled episode stays in the archive only if the learner already played at least half of it (it is theirs), marked with the same line; otherwise it is deleted. <em>Verify:</em> the new episode passes the editor; the review item is filed with the cause; the law corpus or the editor fixtures gain the case. <em>Tell the learner:</em> that one line and, if a wrong fact was spoken, R12's correction path. <em>Afterwards:</em> three fallbacks in 7 days means the learner's model or interests are thin: Muath reads the three teacher briefs and, if the cause is a sparse intake, asks Salma to ask one more question next session (within 2.4's one-question rule).</p>
+<p><strong>R5 Client latency budgets missed (first sound, dropped start, word sheet).</strong> <em>Detect:</em> <code>first_sound_slow</code>, <code>dropped_start_slow</code>, <code>word_sheet_slow</code>. <em>Fix:</em> for first sound, check the Salma onboarding clip is served from the package cache and the pre-account session path; for dropped start, check the service-worker precache hit rate in <code>client_perf.context.cached</code>; for the word sheet, check <code>glosses.json</code> size and the index version. None of these is a page; they are Tuesday items unless p50 doubles.</p>
+<p><strong>R6 Call latency or governor violations.</strong> <em>Detect:</em> the four latency rules, <code>governor_violations</code>. <em>First five minutes:</em> <code>vendor_calls</code> for the last 20 calls grouped by role shows which hop grew (STT final, LLM first token, TTS first byte); the cached-prefix hit rate (<code>cache_hit_low</code>) is the usual cause of LLM first-token growth. <em>Fix:</em> vendor hop → R1/R2 or <code>vendor_config</code>; LLM → check for a prompt change that broke the cached prefix (release manifest diff) and roll back the prompt version; violations → the <code>host</code> suite on the current prompt version, then roll back. <em>Verify:</em> <code>calls_50</code> on staging passes the gates.</p>
+<p><strong>R7 Platform down (Vercel, <code>api</code>, Postgres, Inngest).</strong> The topology's section 5 table is the fix list; this runbook adds the order of checks (Better Stack → ECS events → RDS events → Inngest status), the fact that calls in progress survive an <code>api</code> outage for 10 minutes by spooling, and that the feed keeps serving while <code>api</code> is up. <code>outbox_growing</code> is the Inngest-down signal; once Inngest returns, <code>outbox/relay</code> drains and a human re-sends <code>idea.chosen</code> from <code>/admin</code> only for learners whose <code>day/next</code> run was lost.</p>
+<p><strong>R8 Cost runaway and the stop line.</strong> <em>Detect:</em> <code>cost_guard.tripped</code> (per learner per day, security D11), the daily spend cap (topology), <code>session_cost_over_1</code>, <code>cost_p50_7d_over_080</code>. <em>First five minutes:</em> <code>/admin/measures?m=cost_per_session</code> with <code>extra.top10</code>; the cost domain's per-role breakdown for the day; look for a retry storm (<code>pipeline_steps</code> with <code>outcome=retry</code> count), a cache miss (<code>cache_hit_low</code>), a rewrite loop (fitter rounds &gt; 2), or a long call (<code>metrics.duration_ms &gt; 8 min</code>, which the governor should prevent). <em>Fix:</em> the bug; or the levers in order of least learner impact: batch everything nobody waits on, episode dial to 5 minutes, <code>tts.batch</code>, <code>host.model=haiku</code> after the <code>host</code> suite passes. <em>The stop line</em> ($1.00 mean over 7 days) is not an engineering alert: it opens a ticket to Muath with the breakdown and the costed plan, and PRD 14.5 says the beta stops without one [OPEN for Muath on who decides to stop].</p>
+<p><strong>R9 Notes, chat opener or after-pass late.</strong> <em>Detect:</em> <code>notes_late</code>, <code>after_pass_late</code>, <code>chat_opener_late</code>. <em>First five minutes:</em> Inngest run for <code>session/after-pass</code>: stage-1 step over 60 s is almost always the verbatim turn of the last learner turn (R2) or the Sonnet notes call. <em>Fix:</em> vendor → R1/R2; if the after-pass is failing in a code stage, the data domain's rule applies (<code>finish</code> runs with <code>evidence_quality=partial</code>; the teacher plans with <code>evidence_lag</code>); re-run with <code>/admin/sessions/{id}/rerun-after-pass</code> once fixed (the rebuild path makes this safe). <em>Tell the learner:</em> Today already shows "Salma is writing your notes"; if notes cannot be made within 10 minutes the door shows "no notes for this call", never a spinner forever.</p>
+<p><strong>R10 Crisis activation follow-up.</strong> The in-product protocol (PRD 7.9, security D9) has already run. <em>Detect:</em> <code>crisis_activation</code> in Slack. <em>Within 24 hours:</em> Muath reads the quarantined turn on <code>/admin/crisis/{id}</code> (owner only; the turn is quarantined from every store), confirms the resources card was shown, and decides whether a personal message as himself is appropriate (the Milestone 0 practice). No show content touches the topic. <em>Record:</em> the <code>crisis_log</code> row is complete for the SB 243 count; nothing else is written.</p>
+<p><strong>R11 Privacy audit failed.</strong> <em>Detect:</em> <code>privacy.audit_failed</code>, <code>privacy_promise_missed</code>. <em>First five minutes:</em> <code>/admin/privacy</code> names the window (15 min ephemeral, 24 h revoke, 24 h delete, 30 d backup) and the objects. <em>Fix:</em> run the doer by hand (<code>audio/expire</code>, <code>learner/purge-audio</code>, <code>learner/delete</code>) from <code>/admin</code>; if the doer cannot delete (key missing, S3 error), escalate to the security domain's incident runbook, because a missed window is an incident the learner was promised would not happen. <em>Afterwards:</em> an <code>incidents</code> row with the minutes missed; a postmortem; the learner is told only if data was exposed, by the security runbook's rules.</p>
+<p><strong>R12 Wrong memory reported.</strong> <em>Detect:</em> <code>wrong_memory_flag</code> (P3 digest), <code>wrong_memory_rate</code> (P2), a learner message. The in-product path has already run (<code>memory/correct</code>: fact fixed at once, dependents invalidated, "My mistake, noted."). <em>Within a day:</em> read the <code>memory/correct</code> outcome on <code>/admin/learners/{id}/memory</code>; if <code>status=unresolved</code> (no fact matched), resolve it by hand: find the fact or the canon row and mark it; check whether a voiced-but-unplayed episode cites it (the pipeline re-runs editor check 4; confirm it did); if a shown claim quoted the disputed text, confirm <code>claims.retracted</code> fired and the next proof carries the notice. <em>Afterwards:</em> every wrong memory is a bug (trust promise 7): the finding goes into <code>eval/fixtures/facts/</code> as a regression case for the <code>memory</code> suite, with the cause (quote mismatch, expired fact spoken, superseded fact spoken, sensitivity leak).</p>
+<p>Two admin actions these runbooks rely on, both <code>owner</code> or <code>engineer</code>, both audited, both idempotent: <code>POST /admin/episodes/{id}/pull</code> and <code>POST /admin/sessions/{id}/rerun-after-pass</code>. The topology's <code>/admin/vendors</code> failover switch and the data domain's <code>learner.rebuild_requested</code> button are the other two levers.</p>
+<h3>4.9 Tracing and logging</h3>
+<p><strong>One log line schema</strong> for all three Python services and the worker, emitted by <code>forone.ops.log</code> (structlog JSON):</p>
+<pre><code class="language-json">{&quot;ts&quot;:&quot;2026-12-09T04:41:12.318Z&quot;,&quot;level&quot;:&quot;info&quot;,&quot;service&quot;:&quot;workflows&quot;,&quot;env&quot;:&quot;prod&quot;,
+ &quot;event&quot;:&quot;step.completed&quot;,&quot;fn&quot;:&quot;episode/produce&quot;,&quot;step&quot;:&quot;editor&quot;,&quot;inngest_run_id&quot;:&quot;01J...&quot;,&quot;trace_id&quot;:&quot;a1b2...&quot;,
+ &quot;learner_id&quot;:&quot;7f3c...&quot;,&quot;episode_id&quot;:&quot;01JA...&quot;,&quot;session_id&quot;:null,&quot;call_id&quot;:null,
+ &quot;learner_model_version&quot;:412,&quot;prompt_version&quot;:&quot;editor_rubric@1.1.0&quot;,&quot;vendor&quot;:&quot;google&quot;,&quot;model&quot;:&quot;gemini-3.8-flash&quot;,
+ &quot;latency_ms&quot;:4120,&quot;cost_usd&quot;:0.0041,&quot;outcome&quot;:&quot;pass&quot;,&quot;degraded&quot;:false}
+</code></pre>
+<p>Allowed in logs: every id (learner, session, episode, call, event, run, trace), enums, counts, durations, costs, versions, vendor names, step names, error classes and sanitized error messages. <strong>Never in logs:</strong> display names, emails, phone numbers, birth dates, any transcript or chat text, any life fact or quote, idea text, any audio reference's content, prompts, completions, feed tokens, OTP codes, API keys. The scrubber <code>forone.ops.logscrub</code> is applied at the logger, not by callers: it drops any field whose name is in <code>forone.learner.pii</code>'s classified set, truncates any string field over 200 characters, replaces anything matching the security domain's typed-token patterns (email, phone, URL, 5+ digit runs) and refuses (raises in dev, drops in prod with a counter <code>logscrub_dropped_total</code>) any field named <code>text</code>, <code>quote</code>, <code>transcript</code>, <code>prompt</code>, <code>completion</code>, <code>content</code>, <code>body</code>. CI runs the scrubber over <code>eval/fixtures/pii_corpus.jsonl</code> (300 lines seeded with every PII shape, in Arabic and English) and asserts zero leaks.</p>
+<p><strong>Correlation.</strong> <code>trace_id</code> is minted by <code>api</code> per request and by <code>workflows</code> per Inngest run (the run id doubles as it), carried in every Inngest event's metadata as a scalar (so Inngest sees pointers only), set on every adapter call (<code>CallMeta.trace_id</code>), and attached to every Sentry event. A bad episode is traced as: <code>episodes.id</code> → <code>pipeline_runs.inngest_run_id</code> → the Langfuse trace (by <code>trace_id</code>) with every prompt and completion → <code>pipeline_steps</code> with versions and cost → <code>release_manifest</code> for what was deployed at the time → the <code>learner_model_versions</code> row for what the teacher read.</p>
+<p><strong>What goes where.</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Store</th>
+<th>Holds</th>
+<th>Learner text?</th>
+<th>Retention</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CloudWatch Logs</td>
+<td>the log lines above, EMF counters</td>
+<td>never</td>
+<td>30 days</td>
+<td>this domain</td>
+</tr>
+<tr>
+<td>Sentry (EU)</td>
+<td>exceptions with scrubbed context: ids, versions, step; browser errors from <code>web</code></td>
+<td>never (scrubber plus Sentry's server-side scrubbing on <code>text</code>, <code>quote</code>, <code>transcript</code>)</td>
+<td>90 days</td>
+<td>this domain</td>
+</tr>
+<tr>
+<td>Langfuse (EU)</td>
+<td>every model call: prompt, completion, tokens, cost, <code>user_id=learner_id</code>, <code>learner_model_version</code>, <code>prompt_version</code>, <code>trace_id</code></td>
+<td>yes, with display names tokenized (security D14's middleware rule); no audio</td>
+<td>30 days (security domain's setting)</td>
+<td>cost domain</td>
+</tr>
+<tr>
+<td>Postgres (<code>pipeline_steps</code>, <code>vendor_calls</code>, <code>calls.metrics</code>, <code>eval_runs</code>, <code>alert_state</code>, <code>incidents</code>)</td>
+<td>structured facts about runs</td>
+<td>no</td>
+<td>the row's own rules</td>
+<td>the owning domains</td>
+</tr>
+<tr>
+<td>Better Stack</td>
+<td>incident titles with ids only</td>
+<td>never</td>
+<td>vendor default</td>
+<td>this domain</td>
+</tr>
+<tr>
+<td><code>#forone-ops</code> Slack</td>
+<td>alert titles with ids, deploy notes, canary results</td>
+<td>never (the poster uses the same scrubber)</td>
+<td>Slack default</td>
+<td>this domain</td>
+</tr>
+</tbody>
+</table></div>
+<p>Sampling: 100% of everything in the beta; at 10,000 learners Langfuse can sample to 20% except calls in the assessment and claim path (the cost domain's note); logs stay at 100% because they hold no content.</p>
+<h3>4.10 The operational calendar of the beta</h3>
+<p>All times Riyadh (UTC+3). The drop window is 05:30 to 08:30 (most learners pick a commute slot [ASSUMPTION from Milestone 0's 06:30 slot being the most chosen]).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Cadence</th>
+<th>When</th>
+<th>What</th>
+<th>Who</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Every 5 min</td>
+<td>always</td>
+<td><code>ops/watch</code> evaluates <code>ops/alerts.yaml</code></td>
+<td>automatic</td>
+<td>Inngest cron, heartbeat to Better Stack</td>
+</tr>
+<tr>
+<td>Daily</td>
+<td>04:00</td>
+<td><code>review/sample</code> fills the review queues</td>
+<td>automatic</td>
+<td>Inngest cron</td>
+</tr>
+<tr>
+<td>Daily</td>
+<td>06:30</td>
+<td><code>measures/daily</code> (yesterday's learner-days and cohort rollups); then <code>privacy/verify</code> (security) and <code>retention/daily</code> (data)</td>
+<td>automatic</td>
+<td>Inngest crons, heartbeats</td>
+</tr>
+<tr>
+<td>Daily</td>
+<td>08:30</td>
+<td>The digest: P3 alerts, yesterday's cost per session (p50, mean, top 3), fallbacks, degraded counts, review backlog, eval nightly result, late drops</td>
+<td>automatic → Slack</td>
+<td><code>ops/digest</code></td>
+</tr>
+<tr>
+<td>Daily</td>
+<td>08:30 to 09:00</td>
+<td>On-call reads the digest and <code>/admin/alerts</code>; closes or escalates</td>
+<td>primary</td>
+<td>checklist in <code>ops/runbooks/daily.md</code></td>
+</tr>
+<tr>
+<td>Nightly</td>
+<td>02:00</td>
+<td><code>eval/nightly</code>: the 10-fixture <code>pipeline</code> smoke plus <code>law_scan</code>, <code>claim_gate</code>, <code>fitter</code> on staging</td>
+<td>automatic</td>
+<td>GitHub Actions schedule</td>
+</tr>
+<tr>
+<td>Weekly</td>
+<td>Monday 07:00</td>
+<td><code>measures/weekly</code>; the cost domain's weekly cost report (per role, vendor, learner; heavy-use outliers next to it, PRD 14.5); <code>ops/canary</code> for each voice vendor (one episode, one call on the synthetic learner)</td>
+<td>automatic</td>
+<td>Inngest crons</td>
+</tr>
+<tr>
+<td>Weekly</td>
+<td>Monday 10:00</td>
+<td>Invite batch of about 50 goes out (PRD 2.1.6); the cohort key is created</td>
+<td>Muath</td>
+<td><code>/admin/invites</code> (client domain)</td>
+</tr>
+<tr>
+<td>Weekly</td>
+<td>Tuesday 11:00, 30 min</td>
+<td>Ops review: the cost report against $0.60 and the path to $0.35; the gates page; firing and resolved alerts; incidents; review findings summary; flags older than 60 days; next week's releases</td>
+<td>Muath plus engineers</td>
+<td>agenda generated by <code>ops/digest --weekly</code></td>
+</tr>
+<tr>
+<td>Weekly</td>
+<td>Tuesday after the review</td>
+<td>On-call handover</td>
+<td>engineers</td>
+<td><code>ops/oncall.yaml</code></td>
+</tr>
+<tr>
+<td>Weekly, per learner</td>
+<td>learner's proof day</td>
+<td><code>proof/fanout</code> (assessment domain); the simple proof from 2026-12-14 for the first cohort</td>
+<td>automatic</td>
+<td></td>
+</tr>
+<tr>
+<td>Monthly</td>
+<td>1st, 09:00</td>
+<td><code>claims/audit-sample</code> → false-claim audit due by the 7th; <code>vendor/regress</code> (recognizer and pronunciation suites on the current vendor models, because vendors update silently); the human review month closes: findings summary, ban-list PR, similarity threshold check, law corpus PR</td>
+<td>automatic, then Muath and the reviewer</td>
+<td>first audit 2027-01-01 for December</td>
+</tr>
+<tr>
+<td>Every 4 weeks</td>
+<td>window boundaries 2026-12-07, 2027-01-04, 2027-02-01</td>
+<td>Rater window: <code>rater_versions</code> row for the new window; <code>calibration/run</code> must have passed on the pinned model before the window opens; the assessment domain's <code>pinned_until</code> set</td>
+<td>engineer</td>
+<td>checklist; <code>rater_pin_violated</code> alert</td>
+</tr>
+<tr>
+<td>Per learner, every 4 weeks</td>
+<td>the learner's day 28 and after</td>
+<td>Season boundary: <code>season.boundary</code> → finale (flag <code>finale</code>, P1) and the then-and-now comparison where two recordings exist; the first boundaries fall from 2027-01-03 (for 2026-12-07 starters), inside the beta</td>
+<td>automatic</td>
+<td>the dashboard shows "finales due this week" from <code>seasons</code></td>
+</tr>
+<tr>
+<td>Per learner, week 1</td>
+<td>session 2, then once in sessions 3 to 5</td>
+<td>The first "then" recording is offered (P0); <code>recordings</code> count per cohort on <code>/admin/measures</code> so a low take-up is seen in week 1</td>
+<td>automatic</td>
+<td></td>
+</tr>
+<tr>
+<td>Dated</td>
+<td>2026-11-13</td>
+<td>Hume shuts its voice APIs: nothing to do (not used); confirm no adapter references it</td>
+<td>engineer</td>
+<td>grep in CI</td>
+</tr>
+<tr>
+<td>Dated</td>
+<td>2026-11-16</td>
+<td>Payment processor decided (Part 18 #2); processors approved (security domain)</td>
+<td>Muath</td>
+<td></td>
+</tr>
+<tr>
+<td>Dated</td>
+<td>2026-12-05 12:00 to 12-08 12:00</td>
+<td>Release freeze around launch</td>
+<td>all</td>
+<td><code>tools/release</code> refuses</td>
+</tr>
+<tr>
+<td>Dated</td>
+<td>2026-12-07</td>
+<td>Beta opens; first cohort; on-call doubled (both engineers) 05:00 to 09:00 for the first 3 days</td>
+<td>all</td>
+<td></td>
+</tr>
+<tr>
+<td>Dated</td>
+<td>2026-12-31 to 2027-01-02</td>
+<td>Freeze; on 2027-01-01 the <code>price_book</code>/<code>prices.yaml</code> row for the Gemini doubling becomes active; the Monday 2027-01-05 cost report is read with that in mind</td>
+<td>engineer</td>
+<td>the dated row already exists (cost domain)</td>
+</tr>
+<tr>
+<td>Dated</td>
+<td>2027-01-04</td>
+<td>First readable "active in week 4" for cohort 2026-12-07</td>
+<td>Muath</td>
+<td><code>/admin/gates</code></td>
+</tr>
+<tr>
+<td>Dated</td>
+<td>2027-01-10</td>
+<td>Gate review (PRD 19.3): the gates page frozen as a snapshot into <code>bench/reports/gate-review-2027-01-10.json</code></td>
+<td>Muath</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3>4.11 On-call for a two-person team</h3>
+<pre><code class="language-yaml"># ops/oncall.yaml
+rotation: weekly, handover Tuesday 12:00 Riyadh
+primary: [engineer_a, engineer_b]        # alternate weeks; with one engineer, the engineer every week and Muath as primary on Fridays
+escalation: muath                        # after 15 min unacknowledged on P1
+pages: P1 only (the six families in 4.6); P2 never calls a phone
+protected_hours: 05:00-08:30             # the drop window: P1 acknowledges within 5 min
+quiet_hours: 23:00-05:00                 # P1 still pages; the rule is that only P1 can
+tools: Better Stack (schedule, phone escalation, status of heartbeats), Slack, /admin
+handover: ops/runbooks/handover.md       # open incidents, flags flipped this week, vendor state, anything degraded
+</code></pre>
+<p>What the on-call person does each day is the 08:30 checklist (4.10). What they must never do alone: flip a vendor back from an understudy outside the release window, change a prompt version in prod, read learner audio without a reason row, or send any message to a learner (there are three kinds and none is manual). What is explicitly accepted because the team is small: no second responder at night; a P2 found at 02:00 waits for 08:30; a vendor outage of both voice vendors at 03:00 means voice notes until morning, which PRD 15 allows; a review backlog over a week is a capacity item, not an incident.</p></div></details><details class="fs" id="s5-failure-modes-fallbacks-and-degraded-m"><summary><h3>5. Failure modes, fallbacks and degraded modes</h3><span class="wc">747 words</span></summary><div class="prose"><p>This domain's own failures must never degrade the product; the table says what each one costs and what the learner notices (always nothing).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>Detected by</th>
+<th>Fallback</th>
+<th>Learner notices</th>
+<th>What is lost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ops/watch</code> stops (Inngest cron missed, bug)</td>
+<td>Better Stack heartbeat late by 30 min → P1</td>
+<td>Better Stack's uptime checks still page for platform-down; CloudWatch alarms still page for infrastructure; the product runs</td>
+<td>Nothing</td>
+<td>Product-budget alerts for the gap; <code>alert_state</code> resumes on the next run</td>
+</tr>
+<tr>
+<td>Better Stack down</td>
+<td>its own status; Slack posts still arrive</td>
+<td><code>ops.page()</code> falls back to a Slack <code>@channel</code> post for P1 and an email through Resend to both engineers</td>
+<td>Nothing</td>
+<td>Phone escalation during the outage</td>
+</tr>
+<tr>
+<td>Slack down</td>
+<td><code>ops.page()</code> HTTP error</td>
+<td>Better Stack incidents still page; P2 and P3 queue in <code>alert_state</code> and post when Slack returns</td>
+<td>Nothing</td>
+<td>Visibility for a few hours</td>
+</tr>
+<tr>
+<td><code>measures/daily</code> fails or runs late</td>
+<td>heartbeat; <code>measures.completed</code> missing</td>
+<td>Re-run is idempotent (upsert by primary key); yesterday's rows appear a day late; nothing downstream depends on them</td>
+<td>Nothing</td>
+<td>A late dashboard</td>
+</tr>
+<tr>
+<td>A measure definition is wrong</td>
+<td><code>measures_replay</code> in CI, a Tuesday review</td>
+<td><code>recompute()</code> under a new <code>measures_version</code>; old rows stay for comparison</td>
+<td>Nothing</td>
+<td>Nothing permanent</td>
+</tr>
+<tr>
+<td>Sentry unreachable</td>
+<td>SDK buffers then drops</td>
+<td>logs still carry the error class and <code>trace_id</code></td>
+<td>Nothing</td>
+<td>Stack traces for the gap</td>
+</tr>
+<tr>
+<td>Langfuse unreachable</td>
+<td>adapter middleware's async queue fills</td>
+<td>the middleware never blocks the call; spans are dropped after the queue limit; <code>vendor_calls</code> rows (Postgres) still carry cost and versions, so cost tracing survives (PRD 14.5)</td>
+<td>Nothing</td>
+<td>Prompt and completion text for debugging</td>
+</tr>
+<tr>
+<td><code>eval-gate</code> cannot reach a vendor in CI</td>
+<td>job error</td>
+<td>the check fails closed for prompt and model changes (a version bump cannot merge until the suite runs) and is skipped for unrelated paths</td>
+<td>Nothing</td>
+<td>A delayed merge</td>
+</tr>
+<tr>
+<td><code>eval-gate</code> flaky on a model-judged metric</td>
+<td>two runs disagree</td>
+<td>metrics judged by a model (<code>editor_agreement_with_human</code>, <code>fact_precision</code>) use the mean of 3 runs when within 1 point of the threshold; hard metrics (<code>law_words_recall</code>, <code>ban_hits</code>, <code>sensitive_never_unconfirmed</code>, <code>nudge_budget</code>) are code and never flaky</td>
+<td>Nothing</td>
+<td>CI minutes</td>
+</tr>
+<tr>
+<td>Baseline missing (first run of a suite)</td>
+<td><code>baseline_run_id is null</code></td>
+<td>floors and ceilings only</td>
+<td>Nothing</td>
+<td>Regression detection for that one run</td>
+</tr>
+<tr>
+<td><code>ops/canary</code> fails on the secondary vendor</td>
+<td><code>canary_failed</code> P2</td>
+<td>the primary is unaffected; the secondary is marked <code>cold</code> on <code>/admin/vendors</code> and the understudy switch is disabled until it passes</td>
+<td>Nothing</td>
+<td>Same-day failover guarantee until fixed (that is why the canary is weekly)</td>
+</tr>
+<tr>
+<td>Review backlog grows past a week</td>
+<td><code>review_backlog</code> P3</td>
+<td>sampling continues; the oldest items are reviewed first; degraded and fallback items jump the queue</td>
+<td>Nothing</td>
+<td>The month's 10-per-learner target slips</td>
+</tr>
+<tr>
+<td>The false-claim audit finds &gt; 5% for a kind</td>
+<td>the audit</td>
+<td>flag <code>claims.kind.&lt;kind&gt;=off</code>; affected learners' next proof carries the notice (assessment D16)</td>
+<td>A proof with fewer claims and one honest line</td>
+<td>The claim kind until fixed</td>
+</tr>
+<tr>
+<td>Log scrubber drops a field it should keep</td>
+<td><code>logscrub_dropped_total</code> rising</td>
+<td>the field name is reviewed; dropping is the safe direction</td>
+<td>Nothing</td>
+<td>A debugging field</td>
+</tr>
+<tr>
+<td>Log scrubber misses a PII shape</td>
+<td>a reviewer, the pii corpus</td>
+<td>the corpus gains the shape; CloudWatch log group is purged for the window (<code>aws logs delete-log-stream</code>) and the security incident runbook decides on notification</td>
+<td>Nothing</td>
+<td>Nothing if caught in the corpus first</td>
+</tr>
+<tr>
+<td>A P1 page at 03:00 nobody answers</td>
+<td>Better Stack escalation to Muath after 15 min, then repeat every 15 min</td>
+<td>the product's own fallbacks (understudy voice, voice notes, unplayed episode stays) hold until morning</td>
+<td>Possibly a late episode or a voice-note call</td>
+<td>One drop for the learners in that window</td>
+</tr>
+<tr>
+<td>A flag read fails (Postgres unreachable)</td>
+<td>exceptions in <code>flag()</code></td>
+<td>the flag's <code>default</code> (safe state)</td>
+<td>Nothing</td>
+<td>A P1 feature off for the outage</td>
+</tr>
+</tbody>
+</table></div>
+<p>Degraded modes that are counted, never silent (every one is a <code>measure_points</code> series and a digest line): editor <code>degraded</code>, <code>relisten=skipped</code>, <code>timing_quality=sentence</code>, <code>failover.active</code>, <code>fallback_rules</code> (teacher), <code>notes.degraded</code>, <code>evidence_quality in (partial, text_only)</code>, <code>analyst_validation_drop</code>, <code>move_violation</code>, <code>header_missing</code>, <code>end_reason in (fallback, pipeline_error, abandoned)</code>, <code>verbatim_failed</code>, <code>claims.retracted</code>, <code>privacy_audit_runs.verified=false</code>.</p></div></details><details class="fs" id="s6-cost-and-performance-against-the-budge"><summary><h3>6. Cost and performance against the budgets</h3><span class="wc">524 words</span></summary><div class="prose"><p><strong>Fixed monthly cost of this domain (beta, 100 to 200 learners).</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Beta</th>
+<th>At 10,000 learners</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sentry (Team, EU)</td>
+<td>$26</td>
+<td>about $80</td>
+<td>errors only, scrubbed</td>
+</tr>
+<tr>
+<td>Better Stack (uptime + on-call with phone)</td>
+<td>about $30</td>
+<td>about $100</td>
+<td>the one tool that calls a phone</td>
+</tr>
+<tr>
+<td>CloudWatch Logs and alarms</td>
+<td>about $15</td>
+<td>about $150</td>
+<td>30-day retention; EMF metrics</td>
+</tr>
+<tr>
+<td>Slack</td>
+<td>$0 (free tier)</td>
+<td>$0</td>
+<td>one channel</td>
+</tr>
+<tr>
+<td><code>eval-gate</code> runs (3 to 5 version bumps a week × about $5 average)</td>
+<td>about $80</td>
+<td>same</td>
+<td>mostly <code>pipeline</code> and <code>host</code> suites</td>
+</tr>
+<tr>
+<td><code>eval/nightly</code> (10-fixture smoke, about $3)</td>
+<td>about $90</td>
+<td>same</td>
+<td>can drop to weekly after the build</td>
+</tr>
+<tr>
+<td><code>ops/canary</code> (2 vendors × 1 episode + 1 call, weekly)</td>
+<td>about $5</td>
+<td>same</td>
+<td></td>
+</tr>
+<tr>
+<td><code>vendor/regress</code> (monthly, 30 clips × 4 recognizers + pronunciation)</td>
+<td>about $2</td>
+<td>same</td>
+<td></td>
+</tr>
+<tr>
+<td><code>calibration/run</code> on bumps (assessment domain's cost)</td>
+<td>about $5</td>
+<td>same</td>
+<td>counted here because <code>eval-gate</code> triggers it</td>
+</tr>
+<tr>
+<td>Reviewer and audit time</td>
+<td>[OPEN for Muath]</td>
+<td></td>
+<td>about 4 h/day at 100 learners for episodes alone</td>
+</tr>
+<tr>
+<td><strong>Total tooling and runs</strong></td>
+<td><strong>about $250 to $300 a month</strong></td>
+<td>about $600 a month</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>Against the per-session number (PRD 14.5): none of this is in the session cost scope, which is generation and session roles plus "proof share and hosting". Spread over about 1,600 sessions a month at 100 learners it would be $0.15 to $0.19 a session of fixed overhead, falling to under $0.01 at 10,000 learners. The digest and the weekly cost report show it as a separate "fixed" line so it is never confused with the $0.60 budget or the $1.00 stop line. The security domain's $60 cap for its own fixed cost is a sibling line; the topology's "Sentry, Better Stack, Resend, domains about $60/month" overlaps the first three rows here, so the integrator should keep one of the two estimates (this one is itemized).</p>
+<p><strong>Performance.</strong> <code>ops/watch</code> runs about 40 queries every 5 minutes against indexed tables with recent-window predicates; measured budget 5 s per run (alert if over 60 s, which would itself mean Postgres is in trouble). <code>measures/daily</code> touches every learner's last day of events (about 300 events per active learner-day) and the stores: under 2 minutes at 500 learners on the beta instance; a 28-day recompute of all measures under 20 minutes. Nothing in this domain runs in a learner's request path or in a call. The <code>/admin</code> pages read through <code>forone_readonly</code> with <code>statement_timeout = 10 s</code> so an expensive ad hoc query cannot stall the API.</p>
+<p><strong>Levers this domain provides toward $0.35:</strong> the measured cost per session by role and by lever (the weekly report, with <code>extra.top10</code>), the <code>host</code> suite that makes the Haiku-host switch a measured decision, the <code>tts.batch</code> and <code>pipeline.editor_model</code> flags that make the cheaper modes reversible, and <code>cache_hit_low</code>, which protects the single largest silent cost leak (an uncached prefix costs about $0.03 a session, pipeline domain 6).</p></div></details><details class="fs" id="s7-build-plan-for-2026-11-02-to-2026-12-0"><summary><h3>7. Build plan for 2026-11-02 to 2026-12-06</h3><span class="wc">890 words</span></summary><div class="prose"><p>The rule for this domain: it ships inside the other domains' weeks, on top of what they build, and never costs more than about one engineer-week in total before 2026-12-07. P0 here means "the beta cannot be run safely without it"; the offline suite is P1 by the PRD, but its fixtures and the cheap code-only checks land early because the Milestone 0 data is free and the build itself needs them.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Dates</th>
+<th>Ships (this domain)</th>
+<th>P0 / P1</th>
+<th>What the Milestone 0 data lets us test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>11-02 to 11-08</td>
+<td><code>forone.ops</code> skeleton: structlog JSON logger with <code>logscrub</code> and the <code>pii_corpus</code> test; Sentry wired in all services with scrubbing; Better Stack account, uptime checks on staging, one heartbeat; <code>#forone-ops</code>; <code>ops.page()</code> with Slack only; <code>tools/import_m0.py</code> writes the fixtures listed in 4.2 (learner files, scripts with hand coverage, editor reads, transcripts and tags, 30 clips, facts, notes, similarity pairs); <code>eval/suites.yaml</code> with <code>fitter</code>, <code>law_scan</code>, <code>claim_gate</code> (code-only suites) and the <code>recognizers</code> suite wrapping <code>tools/call-bench recognizers</code>; <code>versions.yaml</code> v1</td>
+<td>P0 (logging, paging, fixtures), P1 (suite harness)</td>
+<td>The 30 clips produce the 10.14 result and the first <code>error_survival_rate</code> baseline; the 20 hand-checked scripts are the fitter's regression; the law corpus is seeded from Muath's step-8 catches and the bible's BANNED list</td>
+</tr>
+<tr>
+<td>2</td>
+<td>11-09 to 11-15</td>
+<td><code>eval_runs</code> table and <code>tools/eval run</code>; suites <code>editor</code>, <code>writer</code>, <code>pipeline</code> (10 fixtures), <code>memory</code>; <code>eval-gate</code> CI job with the path map; the first baselines on <code>main</code> from the Milestone 0 fixtures; <code>release_manifest</code> and <code>tools/release cut</code>; <code>ops/alerts.yaml</code> v1 with the pipeline rules (<code>episode_not_ready_before_drop</code>, <code>fallback_3_in_7</code>, <code>editor_degraded_share</code>, <code>fallback_rate_day</code>, <code>voice_failover_active</code>, <code>canary_failed</code>) and <code>ops/watch</code>; <code>ops/canary</code> weekly on the synthetic learner; <code>feature_flags</code> table and <code>flag()</code></td>
+<td>P0 (alerts for the pipeline, release tooling, flags), P1 (suites)</td>
+<td>Every Milestone 0 package through the Gemini editor against Muath's reads gives <code>editor_agreement_with_human</code>; the 15 learner files through teacher-to-editor give <code>editor_pass_first_try</code>, <code>fallback_rate</code> and cost per step; scripts judged "too alike" set <code>similarity_cosine</code> (Part 18 #10)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>11-16 to 11-22</td>
+<td><code>forone.measures</code> v1 with measures 3, 4, 10, 11, 13, 14, 18, 22 (the ones the onboarding, player and word sheet produce) and <code>measure_points</code>; <code>/admin/measures</code> (tables, 28-day sparklines); client-budget alert rules (<code>first_sound_slow</code>, <code>dropped_start_slow</code>, <code>word_sheet_slow</code>, <code>on_demand_slow</code>); the device test matrix runbook for the client domain's week-3 test; Better Stack on prod hostnames</td>
+<td>P0 (measures from day one, PRD 16.2)</td>
+<td>The 15 pilot word checks and reactions give the first <code>followed_vs_predicted</code> reading against the fitter's prediction</td>
+</tr>
+<tr>
+<td>4</td>
+<td>11-23 to 11-29</td>
+<td>Call rules (<code>host_reply_*</code>, <code>call_connect_p95</code>, <code>talkback_p50</code>, <code>governor_violations</code>, <code>notes_late</code>, <code>chat_opener_late</code>); <code>host</code> suite: governor replay on Milestone 0 transcripts (free) and the simulated caller on 10 scripted calls through <code>call-bench</code> on staging; the <code>calls_50</code> suite as a named run; <code>injection</code> suite with the security domain's 30 cases; <code>notes</code> suite; <code>call_review_items</code> and the calls review page (owner only); measures 12, 19, 23</td>
+<td>P0 (call alerts, <code>calls_50</code>), P1 (simulated caller)</td>
+<td>Milestone 0 call audio is the simulated caller's voice; Muath's tags on the same calls make <code>recast_rate_on_planted</code> and <code>clarification_rate_on_planted</code> computable before any live beta call</td>
+</tr>
+<tr>
+<td>5</td>
+<td>11-30 to 12-06</td>
+<td><code>analyst</code> suite calling <code>calibration/run</code>; the cost rules (<code>session_cost_over_1</code>, <code>cost_p50_7d_over_080</code>, <code>spend_cap_or_stop_line</code>, <code>cache_hit_low</code>); privacy and crisis rules (<code>privacy_promise_missed</code>, <code>crisis_activation</code>), <code>wrong_memory_*</code>, <code>claims_retracted</code>; <code>review/sample</code> and <code>/admin/review/episodes</code> with the reviewer role; <code>claims/audit-sample</code> and <code>/admin/review/claims</code>; <code>/admin/gates</code> with readable-from dates; <code>/admin/alerts</code>, <code>/admin/incidents</code>, <code>/admin/flags</code>; the twelve runbooks in <code>ops/runbooks/</code>; the two admin actions (<code>pull</code>, <code>rerun-after-pass</code>); <code>ops/oncall.yaml</code> and the Better Stack schedule with phone escalation; <code>ops/digest</code>; the 08:30 checklist; a 60-minute tabletop with the security domain's incident drill (R4 pull, R12 wrong memory, R1 failover by hand); measures 1, 2, 5 to 9, 15 to 17, 20 to 26; the end-to-end run with the Milestone 0 learners on prod with every rule live</td>
+<td>P0</td>
+<td>The end-to-end run on prod is the first real <code>cost_per_session</code> reading for the 2026-12-07 exit criterion and the first live <code>notes_late</code> and after-pass timings; the Milestone 0 week-0 and week-3 recordings seed <code>test_retest_pairs</code> so <code>/admin/gates</code> can show how many metrics have <code>n_pairs ≥ 12</code></td>
+</tr>
+<tr>
+<td>Beta (P1)</td>
+<td>12-07 to 2027-01-10</td>
+<td>Full synthetic learner set (50) and the full <code>pipeline</code> suite on every bump; <code>pronunciation</code> suite; <code>eval/nightly</code> moved to weekly if cost matters; <code>vendor/regress</code> first run 2027-01-01; the first false-claim audit 2027-01-01; the first rater window boundary 2027-01-04; the gate-review snapshot 2027-01-10; Metabase only if the admin tables are not enough</td>
+<td>P1</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Too much for one to two engineers, and the cut (in order):</strong> the simulated-caller half of the <code>host</code> suite (keep the governor replay, which is free and catches most prompt regressions; run <code>calls_50</code> by hand before each host release instead); <code>/admin/incidents</code> as a page (an <code>incidents</code> row written by <code>ops.page()</code> and a Slack thread is enough); sparklines on <code>/admin/measures</code> (tables only); <code>measures/weekly</code> (compute cohort rollups in the daily job); the calls review page (Muath reads transcripts from <code>/admin/calls/{id}</code> with the governor header shown inline); Metabase. <strong>Do not cut:</strong> <code>logscrub</code> and its corpus (PDPL), <code>ops.page()</code> with phone escalation (the 05:40 drop), the six P1 rule families, <code>eval-gate</code> for host and editor prompt changes (law 7 and law 5 live in those prompts), <code>release_manifest</code> (without it a bad prompt cannot be traced), the false-claim audit (a 16.1 gate), the <code>pull</code> action (the only remedy for a law break that shipped), and the runbooks R1 to R4 and R12.</p></div></details><details class="fs" id="s8-alternatives-rejected"><summary><h3>8. Alternatives rejected</h3><span class="wc">462 words</span></summary><div class="prose"><div class="tw"><table>
+<thead>
+<tr>
+<th>Alternative</th>
+<th>Why not</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Datadog, Grafana Cloud or New Relic for product metrics</td>
+<td>A new PDPL processor holding learner ids and event names for numbers the event log already holds; monthly cost above the whole domain's budget; the team would spend the build week learning a query language instead of writing SQL it already writes</td>
+</tr>
+<tr>
+<td>Prometheus and an OpenTelemetry collector on Fargate</td>
+<td>Two more containers to run and a scrape model that fits long-lived services, not Inngest steps; EMF lines give the few service counters for free</td>
+</tr>
+<tr>
+<td>A log SaaS (Better Stack Logs, Axiom, Loki)</td>
+<td>Learner text could leak into a third processor; CloudWatch is already there and the scrubber makes it safe</td>
+</tr>
+<tr>
+<td>PagerDuty or Opsgenie</td>
+<td>Price and ceremony for a two-person rota; Better Stack's on-call does phone escalation for a tenth of the price and is already the uptime tool</td>
+</tr>
+<tr>
+<td>LaunchDarkly or Statsig for flags</td>
+<td>A processor, a SDK in four services, per-seat pricing; a table with a 60 s cache is 60 lines of code and audited</td>
+</tr>
+<tr>
+<td>A separate eval product (Braintrust, Langfuse evals, Promptfoo as the harness)</td>
+<td>Langfuse's evals would tie prompt regression to a processor the security domain may yet refuse; Promptfoo is fine for single prompts but the suite's unit is a learner fixture through several steps with code checks in between; a small Python package with pytest-style checks is what the team can extend</td>
+</tr>
+<tr>
+<td>LLM-as-judge for the law scan</td>
+<td>Law 1 needs recall 1.0 on a finite word list; a judge adds cost and variance where a scanner is exact; the editor model still judges the semantic half (check 10's "guilt", "unsolicited correction")</td>
+</tr>
+<tr>
+<td>Reviewing calls by listening to audio</td>
+<td>Needs break-glass access per call and a reason; transcripts with timings and the governor header show the move contract better and keep audio access rare</td>
+</tr>
+<tr>
+<td>A learner-facing status page</td>
+<td>The product's answer to an outage is its fallbacks and silence; a status page is another surface to keep law-clean and another thing the three-message rule does not allow linking to</td>
+</tr>
+<tr>
+<td>Continuous deploy to prod</td>
+<td>A prompt regression that passed <code>eval-gate</code> on variance would reach the 05:40 drop; a tag plus a canary costs ten minutes</td>
+</tr>
+<tr>
+<td>Sampling traces or logs in the beta</td>
+<td>The beta is where every call is evidence for the gates; 100% is affordable at this size</td>
+</tr>
+<tr>
+<td>Grafana with a read replica or an SSH tunnel</td>
+<td>A replica is $100 a month for dashboards; a tunnel is one more credential; revisit with Metabase on Fargate at about 1,000 learners when the admin tables stop being readable</td>
+</tr>
+</tbody>
+</table></div></div></details><details class="fs" id="s9-assumptions-about-other-domains"><summary><h3>9. Assumptions about other domains</h3><span class="wc">792 words</span></summary><div class="prose"><p>Each is an [ASSUMPTION] for the integrator to check.</p>
+<ol>
+<li><strong>System topology (01).</strong> <code>ops.page()</code> is the interface its paging hooks call; <code>vendor/health</code> writes <code>vendor_health {capability, vendor, state, no_secondary}</code> as this document's rules read it; <code>outbox</code> exists with an unsent count; <code>FORONE_FAKE_VENDORS=1</code> recorded-fixture adapters exist for every adapter; <code>tools/load-call</code> (01) and <code>tools/call-bench</code> (03) are the same tool, and this document uses the call domain's name; the synthetic learners seeded in its week 2 are the canary's learners; the deploy workflows accept a canary step and an automatic rollback; the <code>/admin</code> pages are <code>sqladmin</code> plus a few custom routes in <code>api</code> and this domain adds its pages there; <code>episodes.status</code> (02) versus <code>episodes.state</code> (01): this document uses <code>status</code> and will follow the integrator's ruling.</li>
+<li><strong>Episode generation pipeline (02).</strong> <code>review_items</code> and <code>review_findings</code> have the shape in its 4.x and its nightly sampling rule moves into <code>review/sample</code> here (one job, not two); <code>pipeline.human_page</code> carries <code>reason</code> and <code>count_7d</code>; the degraded flags (<code>degraded</code>, <code>timing_quality</code>, <code>relisten</code>, <code>fallback_rules</code>, <code>failover</code>) are on the artifact so the measures can count them; the <code>why</code> artifact carries <code>predicted</code> coverage for measure 11; <code>pipeline_steps</code> carries <code>prompt_version</code>, <code>pricing_mode</code>, <code>cached_input_tokens</code>; its <code>fixtures/learners/*.json</code> is the same file set as <code>eval/fixtures/learners/</code> (one location, the pipeline's name wins); <code>price_book</code> (02) and <code>prices.yaml</code> (01, 03) are one price source under the cost domain; a pull of an episode (<code>episode.pulled</code>) is honoured by <code>feed.publish</code> (410 on the enclosure) and by a fallback <code>episode/produce</code> run at standard pricing.</li>
+<li><strong>Live call and voice stack (03).</strong> <code>calls.metrics</code> carries <code>reply_latency_p50_ms</code>, <code>reply_latency_p95_ms</code>, <code>connect_ms</code>, <code>talkback_ms[]</code>, <code>learner_speech_ms</code>, <code>host_speech_ms</code>, <code>moves{...violations}</code>, <code>anxiety_mode</code>, <code>end_reason</code>; <code>tools/call-bench</code> accepts scripted caller profiles from <code>eval/fixtures/callers/</code> and writes <code>bench/reports/</code>; <code>feed_to_call_ms</code> is logged as <code>client_perf</code>; <code>crisis_activation</code> events and <code>crisis.activated</code> exist as the security domain describes; Deepgram becomes a hot streaming secondary in P1 (until then, recognizer outage means voice notes).</li>
+<li><strong>Learner model, event log and data platform (04).</strong> <code>events</code> with the types in PRD 8.2 plus the client's four and <code>followed_answer</code>, <code>fact_card_viewed</code>, <code>claim_shown</code>, <code>pmf_answer</code> [new, this document]; <code>sessions</code> with <code>state</code>, <code>started_at</code>, <code>episode_id</code>; <code>day.became_active</code>; <code>learner_schedule.next_drop_at</code> and an <code>expects_drop</code> flag (or an equivalent way to know yesterday was active); the per-use evidence rows this document calls <code>word_uses</code> and <code>structure_observations</code> with <code>clean</code>, <code>correct</code>, <code>prompted</code>, <code>occurred_at</code>; <code>word_bank.targeted_first_at</code> and <code>structure_map.first_targeted_at</code> (or the teacher's targeting history exposed another way) for delayed recall; <code>show_canon.kind='callback_made'</code> and <code>learners.wrong_memory_n</code> for measure 20; <code>learners.cohort_monday</code> and <code>learners.native_language</code>; <code>learner.rebuild_requested</code> is sent from this domain's <code>/admin</code> button; <code>measure_points</code> learner-scope rows are purged by <code>learner/delete</code>; its service metrics (<code>events_appended_total</code>, <code>facts_rejected_total</code>, <code>voice_objects_overdue</code>, and the rest) are EMF lines this domain's dashboards read.</li>
+<li><strong>Assessment engine, after-session pass and the claim gate (05).</strong> <code>claims</code> with <code>status in (candidate, passed, shown, retracted)</code>, <code>kind</code>, <code>shown_at</code>, <code>assessment_version</code>, <code>sem</code>; <code>claim_evidence</code> openable by claim id; <code>metric_calibration.n_pairs</code>; <code>test_retest_pairs</code> seeded from Milestone 0; <code>calibration/run</code> is callable from CI and returns pass/fail with <code>qwk_band</code> and <code>precision_claim_tags</code>; <code>calibration_samples</code> holds the Milestone 0 tags under <code>tags_a</code>; <code>rater_versions</code> and <code>pinned_until</code> as its D12; <code>recording_ratings</code> and <code>structure_map.stable_confirmed_at</code> for measures 9 and 26; <code>notes.created_at</code>, <code>notes.degraded</code>, <code>session_summaries.evidence_quality</code>; <code>claims.retracted</code> and <code>notice_pending</code>; its own kill switch honours <code>claims.kind.&lt;kind&gt;</code> flags; <code>session_costs</code> is a view the cost domain maintains over <code>vendor_calls</code> and <code>episodes.cost_usd</code> with the attribution rule in 4.1 row 22.</li>
+<li><strong>Client app, podcast feed and delivery (06).</strong> <code>app_open {entry, standalone, drop_delta_min}</code>, <code>client_perf {kind, value, context}</code> with the kinds it lists, <code>pwa_install</code>, <code>push_permission</code>; <code>followed_answer</code> on some episodes; a once-only <code>pmf_answer</code> question rendered in the week-4 proof's question slot [new]; <code>waitlist.source</code> and <code>invites</code> carry referral provenance; the feed's health item <code>api.forone.app/f/health.xml</code> exists for Better Stack; Sentry browser SDK with its scrubbing; <code>feed_fetches</code> by <code>ua_family</code> for the Part 18 #11 weekly report; the Salma line on Today for a pulled episode is a <code>TodayDoc</code> field it renders.</li>
+<li><strong>Security, privacy, consent and compliance (07).</strong> <code>staff_accounts</code> roles <code>owner</code>, <code>engineer</code>, <code>reviewer</code>, <code>tagger</code>, <code>ops</code> and the per-role page matrix in 4.5.4; <code>audit_log</code> rows for every admin page read of learner content and every flag flip; <code>privacy/verify</code>, <code>privacy.audit_failed</code>, <code>privacy_audit_runs</code>; <code>cost_guard.tripped</code>; <code>security_incidents</code> linked from <code>incidents.security_incident_id</code>; <code>guard/law_words.yaml</code> as the scanner the law corpus tests; the 30-case injection set at <code>eval/fixtures/injection/</code>; <code>research/anonymize</code> for anything a <code>tagger</code> reads; the Milestone 0 consent covers de-identified fixtures; Sentry EU and CloudWatch in the home region are approved; the Langfuse 30-day retention and name tokenization are theirs; the incident runbook and tabletop are shared with this domain's week-5 drill.</li>
+<li><strong>Cost model, vendor strategy and tracing (08).</strong> <code>vendor_calls {learner_id, session_id, episode_id, call_id, role, vendor, model, cost_usd, input_tokens, cached_input_tokens, latency_ms, trace_id}</code> and the <code>session_costs</code> view; the weekly cost report by role, vendor and learner is produced there and read in the Tuesday review here; the Langfuse conventions (<code>user_id</code>, <code>learner_model_version</code>, <code>prompt_version</code>, <code>trace_id</code>) are theirs; <code>prices.yaml</code>/<code>price_book</code> has the dated 2027-01-01 row; the adapter middleware exposes a cache-hit ratio per role for <code>cache_hit_low</code>; the daily spend cap and the $1.00 per-session alert are emitted by the middleware as <code>cost_guard.tripped</code> or an equivalent event this domain's rules consume.</li>
+</ol></div></details><details class="fs" id="s10-open-for-muath"><summary><h3>10. Open for Muath</h3><span class="wc">480 words</span></summary><div class="prose"><ol>
+<li><strong>[OPEN for Muath] On-call and paging.</strong> Who is primary in the beta's first three days (05:00 to 09:00 Riyadh, both engineers proposed), whether Muath is the escalation after 15 minutes at any hour, and whether the Better Stack on-call plan (about $30 a month) is in the budget. Without a phone path, an unready 05:40 drop is found at 09:00.</li>
+<li><strong>[OPEN for Muath] The paid reviewer.</strong> PRD 6.8's native English reader: hours (about 4 a day at 100 learners for episodes alone, less with the cut in section 7), rate, and start date (needed by 2026-12-07; the first beta week queues every episode). Also whether the same person may file ban proposals directly or only propose.</li>
+<li><strong>[OPEN for Muath] Who audits claims.</strong> The monthly false-claim audit (first on 2027-01-01) needs a reader who can judge "does the evidence support this sentence" on about 40 claims; Muath alone, or a second trained person (the assessment domain's second tagger is the natural candidate).</li>
+<li><strong>[OPEN for Muath] The "very disappointed" question.</strong> PRD 16.1 names the metric but not the ask. Proposed: one in-app question in the week-4 proof's slot (replacing the worth-it question that week), three answers, never by email. Approve the mechanism and the Arabic wording, or drop the gate for the beta.</li>
+<li><strong>[OPEN for Muath] Second-month renewal for founding members.</strong> Founding members pay a year up front, so <code>renewal_m2</code> reads only monthly subscribers during the beta and may have too few to read by 2027-01-10. Decide whether the gate is judged on monthly subscribers only or deferred.</li>
+<li><strong>[OPEN for Muath] Pulling a shipped episode.</strong> Section 4.8 R4 adds an admin action that replaces a law-breaking episode and has Salma say one plain line on Today. It is new (not in PRD-v2). Veto or confirm, and confirm the line's wording.</li>
+<li><strong>[OPEN for Muath] The stop line's owner.</strong> PRD 14.5 says over $1.00 a session with no costed plan is a stop. This document makes it a ticket to Muath with the breakdown, not an automatic halt. Confirm that a human decides, and within how many days.</li>
+<li><strong>[OPEN for Muath] Milestone 0 fixtures and consent.</strong> The suite reuses de-identified pilot transcripts, scripts, tags and the 30 clips indefinitely as test fixtures. Confirm the pilot consent (02-consent.md) covers this, or the fixtures are limited to the 30 clips and synthetic learners.</li>
+<li><strong>[OPEN for Muath] Budget for this domain.</strong> About $250 to $300 a month in tools and suite runs during the beta (section 6), outside the per-session number. Approve, or name the cut (the nightly smoke is the first $90 to go).</li>
+<li><strong>[OPEN for Muath] Reviewer access to Arabic surfaces.</strong> The native English reviewer reads scripts and articles; Salma's Arabic notes and the Arabic law corpus need an Arabic reader for the law scan's near-miss cases. Muath in the beta, or a second reviewer.</li>
+</ol></div></details>
+</section>
+
+<footer class="foot">
+  <a href="https://claude.ai/artifact/C3oRETQgDsX3X6dv8VjdP5">Back to all nine domains</a>
+  <span class="muted">For one · architecture set, 2026-10-23</span>
+</footer>
+</div>
+<script>
+document.querySelectorAll('.toc a').forEach(a => a.addEventListener('click', () => {
+  const d = document.querySelector(a.getAttribute('href')); if (d) d.open = true;
+}));
+</script>
+
