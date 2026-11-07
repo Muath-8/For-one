@@ -65,7 +65,7 @@ Each unit (lemma or chunk) has three Beta distributions: ear (understood when he
 | `huh` on its line | each unit in the line `b += 0.5` |
 | `keep` | `kept = true` |
 | produced correctly, prompted (recall gap, talkback) | prod `a += 0.7` |
-| produced correctly, unprompted (analyst `word_evidence`) | prod `a += 1`, `produced_sessions ∪= session`, `own_sentences` (≤3) |
+| produced correctly, unprompted (analyst `word_evidence`) | prod `a += 1`, `produced_sessions ∪= session`, `own_sentences` (≤3), a `word_uses` row (the evidence behind `word_owned` claims) |
 | produced wrongly or substituted | prod `b += 1` |
 
 `status` moves `unseen → planned → heard/read → attempting → owned`; **owned** = correct unprompted use in ≥ 2 distinct sessions at least 20 h apart (the claim gate's rule). FSRS (v4.5 weights, `fsrs jsonb`) schedules reuse: a unit is **due** when predicted recall by the next drop time is below 0.85; grammar structures are due every 1 to 3 days early on. The scheduler drives which items the teacher gets, never which text (law 10: text once, language comes back).
@@ -74,7 +74,7 @@ Each unit (lemma or chunk) has three Beta distributions: ear (understood when he
 
 ## 4. Structures and mistake tracking
 
-Structures come from the language package inventory (`structures`, 12 categories, English Grammar Profile ids for `ar-en`, licensing open). The analyst proposes `structure_observations {structure_id, obligatory, correct, prompted, quote, corrected, confidence, blurred_meaning}` per obligatory context in the verbatim transcript; code writes them with deterministic ids and recomputes:
+Structures come from the language package inventory (`structures`, 12 categories, English Grammar Profile ids for `languages/en`, licensing open). The analyst proposes `structure_observations {structure_id, obligatory, correct, prompted, quote, corrected, confidence, blurred_meaning}` per obligatory context in the verbatim transcript; code writes them with deterministic ids and recomputes:
 
 - `structure_map.state`: `not_seen → heard (input count > 0) → attempting (any obligatory context) → taking (≥ 50% correct over the 14-day window, ≥ 3 contexts) → stable (≥ 80% over 14+ days, ≥ 5 contexts, ≥ 2 sessions)`; `stable_confirmed_at` when the next 4-weekly recording holds; re-checks at 2, 4, 8 weeks (`recheck_due_at`).
 - `error_profile`: one row per structure with errors; `status = pattern` when `count_clean ≥ 3` across `≥ 2` sessions (error vs slip rule); `targeting` when the teacher picks it; `dropped_by_learner` on a veto unless `blurred_n > 0`; `resolved` at `stable_confirmed_at`.
@@ -131,4 +131,4 @@ On a version change of the analyst, classifier, measures or memory keeper, `asse
 
 ## 9. Onboarding cold start
 
-A1 to A10 seed the model: waitlist answers → `interests(source = waitlist)`; A3 Salma intake → `onboarding_answer` events → `life_facts (confirmed_by = intake_card, ground_truth)` for the cards the learner left standing, `goals (kind = why_target)`; A4 word check (48 items, 75 s cap) → `word_check_answer` → `N_est` and the `prior_p` curve; A7 first call → first speaking estimate (`skills.speaking` with `sd = 12`). The first three episodes run one step easier.
+A1 to A10 seed the model: waitlist answers → `interests(source = waitlist)`; A3 Salma intake → `onboarding_answer` events → `life_facts (confirmed_by = intake_card, usable)` for the cards the learner left standing (`ground_truth` only after a later confirmation or edit, PRD 8.4.2), `goals (kind = why_target)`; A4 word check (48 items, 75 s cap) → `word_check_answer` → `N_est` and the `prior_p` curve; A7 first call → first speaking estimate (`skills.speaking` with `sd = 12`). The first three episodes run one step easier.

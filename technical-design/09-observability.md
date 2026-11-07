@@ -19,7 +19,7 @@ Conventions: trace ids `episode:{id}`, `call:{id}`, `session:{id}`; span names `
 
 ## 2. Measures from the log
 
-`forone.measures` computes every PRD 16.1 and 16.2 number from `events` and `vendor_calls`, nightly and on demand: active days, unprompted return, "worth it" answers, call completion and abandonment, host talk share, median learner turn length, Huh? rate, taps per 100 words, talkback per call, recast uptake, move violations, notes opened (flag), wrong-memory flags per 100 callbacks, time to first sound, cost per session by role and vendor, escalation rate (batch → standard), fallback rate, verbatim coverage (turns with verbatim done / turns), claim pass rate by rule. The team dashboard (admin) renders them; the learner never sees any.
+`forone.measures` computes every PRD 16.1 and 16.2 number from `events` and `vendor_calls`, nightly and on demand: active days, unprompted return, "worth it" answers, call completion and abandonment, host talk share, median learner turn length, Huh? rate, taps per 100 words, talkback per call, recast uptake, move violations, explicit corrections per 100 turns (ceiling 0), wrong-memory flags per 100 callbacks, plan mix and blended margin by plan, time to first sound, cost per session by role and vendor, escalation rate (batch → standard), fallback rate, verbatim coverage (turns with verbatim done / turns), claim pass rate by rule. The team dashboard (admin) renders them; the learner never sees any.
 
 ## 3. Alarms (Part 15 budgets and the stop line)
 
@@ -27,14 +27,14 @@ Conventions: trace ids `episode:{id}`, `call:{id}`, `session:{id}`; span names `
 |---|---|---|
 | host reply latency | p50 > 1.5 s or p95 > 2.5 s over 20 calls | yes |
 | call connect | p95 > 3 s | yes |
-| episode not ready at drop | any | yes (`pipeline.human_page`) |
+| episode not ready at drop | one learner: P2 with dedupe; 3 or more learners or 5%: `drops_late_systemic` P1 | yes |
 | pilot first sound | p95 > 45 s | day |
 | swap or return first sound | p95 > 30 s | day |
 | after-pass completion | p95 > 10 min | day |
 | ephemeral audio past expiry | any row | yes |
 | revoke not purged in 24 h | any | yes |
 | deletion not complete in 24 h | any | yes |
-| cost per session (7-day mean) | > $0.75 warn; > $1.00 stop line | yes |
+| cost per session (7-day mean) | > $0.75 warn (`cost_runaway`, P1); > $1.00 stop line (`cost_stop_line`, P3 plus the ticket) | yes / ticket |
 | daily spend | > 1.5 × the 7-day mean | yes |
 | batch escalation rate | > 20% | day |
 | editor fail rate | > 15% first pass | day |
@@ -48,6 +48,7 @@ Conventions: trace ids `episode:{id}`, `call:{id}`, `session:{id}`; span names `
 
 - `prices.yaml` is the pull-request surface for every unit price with `valid_from`; the middleware prices each call at write time and stores the row ids used.
 - Spend modes (`tracing.spend_mode()`): `normal`; `conserve` (teacher on Sonnet batch, one rewrite round, batch TTS where offered, no pre-write) when the 7-day mean passes $0.75 or the month's forecast passes budget; `halt` (no new swaps, pilots or samples; dailies and returns proceed) at the $1.00 stop line or a vendor billing anomaly. Flips write `audit_log` and page.
+- `cost/rollup` fills `session_costs` (with `plan`); `cost/reconcile-spend` runs hourly against vendor dashboards; the weekly report carries "Margin by plan" (net price, measured episodes used, cost per learner-month, break-even at full use: $0.57 / $0.42 / $0.42).
 - Per-learner outliers (cost > 3× median for 3 days) go to the weekly report with the role breakdown.
 - Vendor risk calendar: Gemini price doubling 2027-01-01; ElevenLabs promo ended 2026-10-12; OpenAI TTS deprecation 2027-01-06; Hume voice shutdown 2026-11-13 (not used). The cost model (`tools/cost-model/assumptions.yaml`) is re-run on every price change in CI and the delta posted on the PR.
 - Quotas at 100 and 10,000 learners are in `architecture/08 §4.9`; the beta needs no committed contracts.
@@ -58,15 +59,15 @@ Conventions: trace ids `episode:{id}`, `call:{id}`, `session:{id}`; span names `
 
 **Online**: canary episode and canary call on the synthetic learner after every deploy; human review of 10 random episodes per learner per month; blind listening tests (5 native target-language listeners and 5 native-language listeners per voice vendor); the external test (20 to 30 learners, week 0 and week 8) [P1].
 
-**Model pinning**: every role's model id and prompt version in `vendors.yaml` and `prompt_versions`; the rater pinned per 4-week window; a model change triggers calibration re-run and, for the analyst or classifier, `assessment/rebuild`.
+**Model pinning**: every role's model id and prompt version in `vendors.yaml` (roles that depend on the target language are keyed by it) and `prompt_versions`; the rater pinned until 2027-02-16, next window from 2027-02-17; a model change triggers calibration re-run and, for the analyst or classifier, `assessment/rebuild`.
 
 ## 6. Feature flags and kill switches
 
-`feature_flags {key, state (off|allowlist|percent|on), percent, allowlist, default, description, changed_by}`. Beta flags: `round_two`, `shadowing`, `dial_in`, `finale`, `tape` (P1 rollouts); `claims.kind.*` (kill switches; metric kinds off until calibration); `notes.enabled` (**off** per decision 3), `chat.enabled`, `talkback.enabled`, `drop.push`, `pipeline.editor_model`, `host.model=haiku`, `tts.batch`; `observer_slot` (LATER). A flag never changes a law; a kill switch's default is its safe state; every flip is audited; a flag `on` for 60 days is a cleanup ticket.
+`feature_flags {key, state (off|allowlist|percent|on), percent, allowlist, default, description, changed_by}`. Beta flags: `round_two`, `shadowing`, `dial_in`, `finale`, `tape` (P1 rollouts); `claims.kind.*` (kill switches; metric kinds off until calibration); `chat.enabled`, `talkback.enabled`, `drop.push`, `pipeline.editor_model`, `host.model=haiku`, `tts.batch`; `observer_slot` (LATER). A flag never changes a law; a kill switch's default is its safe state; every flip is audited; a flag `on` for 60 days is a cleanup ticket.
 
 ## 7. Operations
 
-Deploys: staging on every push to `main` (migrate → api and workflows rolling → call-worker drain-replace → smoke test with one sample and one scripted call); prod on tag with manual approval, refused inside call windows (local drop time + 0 to 3 h for active learners), canary afterwards. Runbooks (`ops/runbooks/`): episode not ready, vendor outage and switch, call latency regression, cost spike, deletion stuck, crisis review, rebuild. On-call: two people, Sunday to Thursday 10:00 to 16:00 in the team's zone with paging for the "yes" rows above. Backups: RDS 30 days, S3 versioning off (deletion must be real), Terraform state in S3 with locking.
+Jobs run around the clock on learner-local time (ADR-16): `measures/hourly` for local days that closed in the last hour, `privacy/verify` hourly over the last 25 hours, `retention/daily` per learner-local midnight, the digest at 06:00 UTC, the weekly report Mondays 06:00 UTC. `tools/release` refuses a deploy when more than 2% of learners have a drop in the next 45 minutes. Deploys: staging on every push to `main` (migrate → api and workflows rolling → call-worker drain-replace → smoke test with one sample and one scripted call); prod on tag with manual approval, refused inside call windows (local drop time + 0 to 3 h for active learners), canary afterwards. Runbooks (`ops/runbooks/`): episode not ready, vendor outage and switch, call latency regression, cost spike, deletion stuck, crisis review, rebuild. On-call: two people, Sunday to Thursday 10:00 to 16:00 in the team's zone with paging for the "yes" rows above. Backups: RDS 30 days, S3 versioning off (deletion must be real), Terraform state in S3 with locking.
 
 ## 8. What the first week must have
 

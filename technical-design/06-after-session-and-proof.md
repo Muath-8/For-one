@@ -4,15 +4,14 @@
 
 ## 1. The pass
 
-Inngest `session/after-pass`, triggered by `call.ended`, `chat.closed`, `voicenote.received`, `recording.completed`; concurrency 1 per learner; stage 1 timeout 60 s; the whole pass inside 10 minutes.
+Inngest `session/after-pass`, one function triggered by `call.ended`, `chat.closed`, `voicenote.received`, `recording.completed`; concurrency 1 per learner; the whole pass inside 10 minutes (ADR-06: there is no separate 90-second notes stage; the analyst's first stage runs inside this function).
 
 ```mermaid
 flowchart TB
   T[call.ended / chat.closed] --> S1
-  subgraph S1["Stage 1 (≤ 90 s)"]
+  subgraph S1["Stage 1"]
     V[wait for verbatim turns<br/>is_last prioritized] --> M[merge call_turns_v<br/>verbatim wins; confidence filter]
     M --> A1[analyst first pass<br/>Haiku 5.5, fixed schema]
-    A1 --> N[notes stage 1<br/>flag notes.enabled, default off]
   end
   S1 --> S2[Stage 2: edit classifier<br/>obligatory contexts, structure observations]
   S2 --> S3[Stage 3: measures<br/>fluency, complexity, uptake, pause profile]
@@ -102,11 +101,11 @@ Templates per mode (`proof/v1/{good,flat,slow,worse}.md`): a flat week says "not
 
 ## 7. The then-and-now recording and the finale [P1 comparison]
 
-Offered after session 2 (and once more in sessions 3 to 5) as the first "then": about 3 minutes, three tasks (60 to 90 s retell of a fixed-form prompt, 60 to 90 s opinion, 8 repeat sentences), skippable, nothing scored on screen. Stored in `recordings (season_number, kind then|now, form, tasks)`; audio under the voice-storage rules unless the learner keeps that one. The rater (a pinned model per 4-week window, `rater_versions`, plus code measures) writes `recording_ratings {band, band_low, band_high, measures, repeat_scores, content_points}`. The "now" at day 28 produces `then_and_now` candidates through the same gate (different stimulus forms; same assessment version). The finale (season boundary, flag `finale`) speaks at most two measured differences. Calibration before any band is spoken: 150 to 200 double-tagged samples, QWK about 0.7, tag precision ≥ 0.8 (`calibration_runs`, `skill_calibration`).
+Offered after session 2 (and once more in sessions 3 to 5) as the first "then": about 3 minutes, three tasks (60 to 90 s retell of a fixed-form prompt, 60 to 90 s opinion, 8 repeat sentences), skippable, nothing scored on screen. Stored in `recordings (season_number, kind then|now, form, tasks)`; audio under the voice-storage rules unless the learner keeps that one. The rater (a model pinned per window, `rater_versions`, `rater.pinned_until = 2027-02-16` for the beta, plus code measures) writes `recording_ratings {band, band_low, band_high, measures, repeat_scores, content_points}`. The "now" at day 28 produces `then_and_now` candidates through the same gate (different stimulus forms; same assessment version). The finale (season boundary, flag `finale`) speaks at most two measured differences. Calibration before any band is spoken: 150 to 200 double-tagged samples, QWK about 0.7, tag precision ≥ 0.8 (`calibration_runs`, `skill_calibration`).
 
-## 8. Notes and chat (status after the 2026-10-23 decision)
+## 8. No notes, no margin note (ADR-06)
 
-The architecture designed Salma's notes (three cards: new for you, polish, reached for) and a chat margin note. Decision 3 (teaching is invisible) dropped the after-call correction notes, the polish card and the margin note from the first version. This TDD keeps the `notes` and `margin_notes` tables and the stage-1 code path behind `notes.enabled = off` and `chat.margin_note = off` [DECISION], so the evidence they need (verbatim, analyst) still runs for the teacher, and the feature can be switched on if Muath reverses the line (see [10-open-questions.md](10-open-questions.md) #1). The chat host (3 to 5 messages, Sonnet 5.5, closes at message 5, offers tomorrow's ideas) stays, with the margin note removed.
+After-call notes, the polish card and the chat margin note do not exist: no `notes` or `margin_notes` tables, no notes door, no `note_shown` event, no `notes_mode` consent. Corrections reach the learner only as recasts in the conversation, planned by the teacher's echo plan and carried in the host brief's `recasts` field. What remains as evidence (decision 4): the notebook ("working on", "words you own", the tape, "how we know"), the weekly proof and finale through the claim gate, "why this episode", "where do I stand" when asked with a range, a "New for you" card on Today built from `did_it` and `first_ever` claims only, and "say it once" and shadowing with internal scoring. Salma explains only when the learner asks (`salma_explain`, Sonnet 5.5, `POST /v1/salma/explain`). The correction guard (`guard.check_output` item 6) counts any explicit correction in host, Salma or chat output; the measure `explicit_corrections_per_100_turns` has a ceiling of 0. The chat host (3 to 5 messages, closes at message 5, offers tomorrow's ideas) stays.
 
 ## 9. Rebuild and versioning
 
@@ -114,4 +113,4 @@ The architecture designed Salma's notes (three cards: new for you, polish, reach
 
 ## 10. Budgets and cost
 
-Within 10 minutes of session end (p95); stage 1 within 90 s. Analyst about $0.0035, memory keeper $0.0005, classifier and measures (code) nil, chat about $0.021, proof about $0.06 per week (a quarter per session): about **$0.03 per session** plus verbatim re-transcription ($0.028, counted in 04).
+Within 10 minutes of session end (p95); stage 1 within 90 s. Analyst about $0.0035, memory keeper $0.0005, classifier and measures (code) nil, Salma when asked and chat about $0.021, proof about $0.06 per week (a quarter per session): about **$0.03 per session** plus verbatim re-transcription ($0.028, counted in 04).

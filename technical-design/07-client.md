@@ -22,12 +22,11 @@ flowchart LR
     SH["/show, /show/[episodeId]"]
     NB["/notebook, /notebook/[section]"]
     CO["/controls"]
-    N["/notes/[sessionId] (flag)"]
   end
   A10 --> T
 ```
 
-Every sheet (player, word sheet, notes) is a route or search param so the back gesture closes it. Route → document → events mapping is in `architecture/06 §4.2`; the API in [02](02-api-contracts.md).
+Every sheet (player, word sheet) is a route or search param so the back gesture closes it. Route → document → events mapping is in `architecture/06 §4.2`; the API in [02](02-api-contracts.md).
 
 ## 2. State
 
@@ -45,7 +44,7 @@ The client holds no copy of the learner model; facts, counts and claims come fro
 
 ## 3. The player
 
-- `<audio>` on `full.mp3` with `Range`; segments are for streaming on-demand episodes (`MediaSource` when supported, otherwise the player follows `manifest.segments` and swaps `src` at seams).
+- `<audio>` on `full.mp3` through a 10-minute presigned S3 URL (`sse_kms_env`, ADR-12; learner-voice clips stay behind `api`) with `Range`; segments are for streaming on-demand episodes (`MediaSource` when supported, otherwise the player follows `manifest.segments` and swaps `src` at seams).
 - Word-synced transcript from `manifest.lines[].words` (`timing_quality = sentence` degrades to line highlight); folded by default for intermediate learners (`skills.transcript_default`), opened by a tap or by "Huh?".
 - **Huh?** replays the last sentence at 0.85× and shows it; emits `huh {line_id, sentence_text, unit_ids}`.
 - Speeds 0.75 / 0.85 / 1.0; previous-track on the lock screen replays the sentence (`replay_line {source: media_session}`).
@@ -85,15 +84,15 @@ Controls: a hold pad (hold to keep the floor; `hold.down/up`), a word button (ta
 
 ## 7. Onboarding specifics
 
-A3 runs the Salma call on the same call screen in `onboarding` kind, with live fact cards (`fact_card` from the worker; edit or remove inline); A4 is a 48-item yes/no grid, 75 s cap; A5 plays three "hello" clips per host and three name candidates; A6 streams the pilot with `episode.manifest` updates; A9 creates the account **after** the first call (email code, Apple, Google), asks birth date (under 18 ends the flow and deletes the pre-account learner), drop time and anchor, the voice-storage checkbox with its one plain sentence; A10 shows tomorrow's three ideas. First-open-to-Salma under 60 s; first spoken sentence under 5 min.
+A3 runs the Salma call (persona and voice from the native package) on the same call screen in `onboarding` kind, with live fact cards (`fact_card` from the worker; edit or remove inline); A4 is a 48-item yes/no grid, 75 s cap; A5 plays three "hello" clips per host and three name candidates; A6 streams the pilot with `episode.manifest` updates; A9 creates the account **after** the first call (email code, Apple, Google), asks birth date (under 18 ends the flow and deletes the pre-account learner), the country of residence with a picker (never from IP), drop time and anchor, the voice-storage checkbox with its one plain sentence; A10 shows tomorrow's three ideas. First-open-to-Salma under 60 s; first spoken sentence under 5 min.
 
 ## 8. Today
 
-One hero (today's episode and its doors as four words with ticks), the host line (always a confirmed memory), the proof above the hero on proof day, the recording offer, the round-two offer (flag), tomorrow's teaser once done, the three ideas when due, the once-only crisis resources card, the day-7 payment card (Salma's one sentence and the three plans with "Recommended" on the middle; never a wall). Plans with 2 or 3 episodes a day show a plain "another one today?" line when a slot remains (`next_slot.available`); never a count of unplayed episodes.
+One hero (today's episode and its doors as four words with ticks), the host line (always a confirmed memory), the proof above the hero on proof day, the recording offer, the round-two offer (flag), tomorrow's teaser once done, the three ideas when due, the once-only crisis resources card, the day-7 payment card (Salma's one sentence and the three plans with "Recommended" on the middle; never a wall). On `two_a_day` and `three_a_day`, one "next one" button appears after the current episode has ended when `next_episode.available` (ADR-05: `POST /v1/episodes/next`, streamed, never autoplay); the Show tab lists the day's episodes; never a count of unplayed episodes. A "New for you" card appears only from passed `did_it` and `first_ever` claims.
 
 ## 9. Accessibility, text direction, performance
 
-RTL when the native language is RTL (`dir` from the package; logical CSS properties only); Arabic and Latin typography from the package font stack (Readex Pro for Arabic in the prototype); text size control in Controls; every control reachable by keyboard and labelled; captions and transcripts are the accessible alternative to audio. Budgets: LCP under 2.5 s on a mid-range Android over 4G; the word sheet under 300 ms; JS under 250 KB gzipped on the Today route; images none, covers are SVG.
+RTL when `packages/native/<native_language>/` says so (`dir` from the native package; logical CSS properties only); typography from the native package's font stack (Readex Pro for Arabic in the prototype); text size control in Controls; every control reachable by keyboard and labelled; captions and transcripts are the accessible alternative to audio. Budgets: LCP under 2.5 s on a mid-range Android over 4G; the word sheet under 300 ms; JS under 250 KB gzipped on the Today route; images none, covers are SVG.
 
 ## 10. Analytics without surveillance
 

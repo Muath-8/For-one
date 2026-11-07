@@ -65,13 +65,14 @@ Spend modes from the cost domain: `conserve` moves the teacher to Sonnet 5.5 bat
 **Prompt** `teacher/v1.md` (system block cached; variables in braces):
 
 ```
-You plan tomorrow's episode of a private podcast for one adult learning {target_lang} from {native_lang}.
+You plan tomorrow's episodes (1 to {episodes_per_day}) of a private podcast for one adult learning {target_language}; their own language is {native_language}. Each episode gets its own brief and its own targets so the day's load stays within 1 structure and 2 to 4 words per episode.
 You decide pedagogy; the learner decided topic, format and cast. Return JSON matching EpisodePlan. Rules you may not break:
 - exactly 1 grammar target from the inventory ids below; it may not be a target in more than {max_consecutive=4} consecutive sessions
 - 2 to 4 target words from the due list; 3 to 6 new words, at least 80% from the top 3,000 lemmas, none from the ban list
 - at most 2 life facts, only from USABLE FACTS, cited by fact_id; never a fact whose sensitivity is set unless raised this ISO week
 - dials move at most one step from the last plan; first three episodes and return episodes are one step easier
-- 2 to 4 "why this episode" reasons in plain {native_lang}, each tied to evidence you were given
+- 2 to 4 "why this episode" reasons in plain {native_language}, each tied to evidence you were given
+- an echo plan: which of the learner's recurring errors the host should recast on this call, and which right forms the next episodes carry (the only correction channel, ADR-06)
 - never mention scores, levels, streaks, tests or homework anywhere
 LEARNER MODEL (version {lm_version}): {due_list} {structure_acc_14d} {error_profile} {working_on} {facts} {interests} {arcs} {season} {taste} {claims_passed} {last_14_days}
 IDEA: {idea | "none: pick the top-ranked of your own three"}
@@ -88,14 +89,14 @@ Request: `claude-opus-5-5`, batch, `max_tokens 24000`, structured output by JSON
 **Prompt** `writer/v1.md`:
 
 ```
-You write today's episode of "{show_title}", a {length_min}-minute {format} for one listener, {learner_name}, who learns {target_lang}.
+You write today's episode of "{show_title}", a {length_min}-minute {format} for one listener, {learner_name}, who learns {target_language}.
 Write for the ear: 2 to 4 scenes, a cold open under 30 s, natural speech, the hosts as the bible describes them.
 HARD RULES (code checks each; a miss comes back as a rewrite): use the grammar target {grammar.label} in at least {grammar.min_uses} natural places;
 use each target word {words}; introduce exactly these new words {new_words}, each at least twice, meaning clear from context;
 every proper noun in NAMES only; the learner is never spoken to as a student; nobody mentions learning, levels, progress or homework;
 no phrase from BAN LIST; the episode stands alone; the plot may continue ARC but owes nothing; end with the throw: {host} asks the listener {question} and says "call me".
 FACTS you may use once each, lightly: {facts with quotes}. CALLBACK (once): {callback}. NEVER MENTION: {never_mention}.
-Then write: the article ({article_words} words, same topic, different angle), the call brief, a 90-second recap, Salma's 5-second feed tag in {native_lang}, 3 shadow lines.
+Then write: the article ({article_words} words, same topic, different angle), the call brief, a 90-second recap, Salma's 5-second feed tag in {native_language}, 3 shadow lines.
 Return JSON matching EpisodePackage.
 ```
 
@@ -133,7 +134,7 @@ Latency: lemmatizing 1,500 words under 200 ms. Cost about $0.003.
 
 **Variety** (code): embed the script (`voyage-3-lite` or the configured embedder), cosine against the learner's last 20 scripts; over 0.85 is a sameness fail passed to the editor as evidence. Format rotation: no format 3 times in a row over the last 10.
 
-**Editor** (`editor/v1.md`, Gemini 3.8 Flash, a different vendor from the writer by rule): receives the package, the plan and the code-check results, returns `Verdict {pass: bool, checks: {1..11: {pass, note}}, repair_instructions[], flags[]}`. The eleven checks: 1 level fit (coverage and new-word budget, from the fitter), 2 targets present and natural, 3 facts used correctly and only the allowed ones, 4 names and entities allowed, 5 nothing false about the learner, 6 arc continuity, 7 bible consistency (voices, jokes), 8 sameness and format rotation, 9 stands alone, 10 law scan (no scores, levels, streaks, tests, homework, guilt), 11 content safety and the crisis keyword list. Checks 1, 4, 8, 10 and 11 are also code; the model judges the rest. On fail: one `repair` (writer, standard) with the instructions, one `recheck`; a second fail restarts as a `fallback` episode (facts, arc and callback dropped; checks 6 to 9 logged but non-blocking). Three fallbacks for one learner in 7 days page a human. Cost about $0.015.
+**Editor** (`editor/v1.md`, Gemini 3.8 Flash, a different vendor from the writer by rule): receives the package, the plan and the code-check results, returns `Verdict {pass: bool, checks: {1..11: {pass, note}}, repair_instructions[], flags[]}`. The eleven checks: 1 level fit (coverage and new-word budget, from the fitter), 2 targets present and natural, 3 facts used correctly and only the allowed ones, 4 names and entities allowed, 5 nothing false about the learner, 6 arc continuity, 7 bible consistency (voices, jokes), 8 sameness and format rotation, 9 stands alone, 10 law scan (no scores, levels, streaks, tests, homework, guilt, and nothing that reads as a correction or a lesson, ADR-06), 11 content safety and the crisis keyword list. Checks 1, 4, 8, 10 and 11 are also code; the model judges the rest. On fail: one `repair` (writer, standard) with the instructions, one `recheck`; a second fail restarts as a `fallback` episode (facts, arc and callback dropped; checks 6 to 9 logged but non-blocking). Three fallbacks for one learner in 7 days page a human. Cost about $0.015.
 
 ## 8. Step 5: the voice studio
 
@@ -143,7 +144,7 @@ Render jobs per segment (scene, article read-aloud, recap, feed tag, shadow line
 
 | Cache | Key | Store | Hit rate expected |
 |---|---|---|---|
-| Gloss cache | `(pair, lemma, sense_key)` | `gloss_cache` table + S3 audio | > 90% after week 2; the only cross-learner content store |
+| Gloss cache | `(target_language, native_language, lemma, sense_key)` | `gloss_cache` table + S3 audio | > 90% after week 2; the only cross-learner content store |
 | Prompt cache | static system blocks per role (teacher rules, writer rules, editor rules, host bible) | Anthropic prompt caching, breakpoint 1; Gemini context cache for the editor | every call after the first per hour |
 | Compiled briefs | `(learner_id, role, lm_version)` | `briefs` + S3 | one compile per learner-model version |
 | Pre-written swap | `(learner_id, local_date, rank 2)` | `episodes.state = prewritten` | swap-prone learners only (taste.swap_n ≥ 2) |
@@ -161,6 +162,7 @@ One transaction after all uploads: `episode_artifacts` rows, `episodes.state = r
 
 | Kind | Difference | First sound |
 |---|---|---|
+| daily_extra (episode 2 or 3) | no teacher run: the nightly plan already holds a brief per slot; starts at the writer on standard pricing, scene 1 first; `prewrite_extra` pre-produces slot 2 overnight for learners with 5+ extras in the last 7 days; an unused extra ends `superseded` | < 30 s |
 | swap | no teacher; brief from the stored plan's rank-2 idea; scene 1 voiced first; pre-written text if it exists | < 30 s |
 | return | plan and text made at day 5 by `return/plan`; re-filter facts and claims; re-write only if stale | < 30 s |
 | pilot | rule-based brief from intake facts; short call brief; name respellings in parallel | < 45 s after intake |
@@ -175,7 +177,7 @@ One transaction after all uploads: `episode_artifacts` rows, `episodes.state = r
 | Fitter, glosses, editor, embedding | Haiku 5.5, Gemini 3.8 Flash, embedder | $0.018 |
 | Voice studio | Gemini TTS 15k tokens + align + re-listen + mix | $0.217 |
 | Pipeline total per episode | | **$0.367** |
-| Call, verbatim, notes/chat, after-pass, proof share, swap allowance | see 04, 06, 09 | $0.271 |
+| Call, verbatim, Salma (when asked) and chat, after-pass, proof share, swap allowance | see 04, 06, 09 | $0.271 |
 | **Per session** | | **$0.638** against a $0.60 budget |
 
 Levers in order: batch TTS where offered (−$0.07, P1); episodes at 5 to 6 min (−$0.03); Sonnet teacher in `conserve` (−$0.05); cheaper voice that passes the blind test. Gemini prices double on 2027-01-01, which moves the Gemini-voice total to about $0.82; the understudy choice must be made with that date in view.

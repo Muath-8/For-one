@@ -106,7 +106,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
 
 <div class="wrap">
 <header class="top">
-  <div class="eyebrow">Technical design, version 1.0 · 6 November 2026 · the level below the nine architecture documents</div>
+  <div class="eyebrow">Technical design, version 1.1 · 7 November 2026 · aligned with the 23 architecture decision records</div>
   <h1>For one technical design</h1>
   <p class="measure">One private podcast per learner, written overnight at 95% known words, a live call with a host who corrects only by recasting, and a learner model rebuilt from an append-only log. This page is the entry point; the eleven files on GitHub hold every table, endpoint, prompt and state machine.</p>
   <div class="facts">
@@ -129,7 +129,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
     </defs>
     <!-- region frame -->
     <rect x="300" y="18" width="440" height="396" rx="8" class="box" style="fill:none;stroke-dasharray:5 4"/>
-    <text x="316" y="40" class="sm mono muted">AWS home region · me-central-1 pending counsel · VPC, ALB + WAF, RDS Multi-AZ, S3, KMS</text>
+    <text x="316" y="40" class="sm mono muted">AWS home region · eu-central-1 default, me-central-1 alternative, counsel open · VPC, ALB + WAF, RDS Multi-AZ, S3, KMS</text>
     <!-- client -->
     <rect x="24" y="80" width="200" height="74" rx="6" class="box svc"/>
     <text x="40" y="106" class="md" font-weight="600">apps/web</text>
@@ -356,7 +356,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
           <text x="0" y="82">Live call (STT, host, TTS, LiveKit)</text><rect x="220" y="70" width="85" height="18" class="bar"><title>$0.122</title></rect><text x="311" y="84" class="mono">0.122</text>
           <text x="0" y="112">Teacher</text><rect x="220" y="100" width="54" height="18" class="bar"><title>$0.077</title></rect><text x="280" y="114" class="mono">0.077</text>
           <text x="0" y="142">Writer and rewrites</text><rect x="220" y="130" width="39" height="18" class="bar"><title>$0.055</title></rect><text x="265" y="144" class="mono">0.055</text>
-          <text x="0" y="172">Chat host (notes off)</text><rect x="220" y="160" width="26" height="18" class="bar"><title>$0.037</title></rect><text x="252" y="174" class="mono">0.037</text>
+          <text x="0" y="172">Salma when asked, chat host</text><rect x="220" y="160" width="26" height="18" class="bar"><title>$0.037</title></rect><text x="252" y="174" class="mono">0.037</text>
           <text x="0" y="202">Verbatim re-transcription, pronunciation</text><rect x="220" y="190" width="25" height="18" class="bar"><title>$0.036</title></rect><text x="251" y="204" class="mono">0.036</text>
           <text x="0" y="232">Swap allowance (5% of sessions)</text><rect x="220" y="220" width="18" height="18" class="bar"><title>$0.025</title></rect><text x="244" y="234" class="mono">0.025</text>
           <text x="0" y="262">Round two, 50% uptake [P1]</text><rect x="220" y="250" width="18" height="18" class="bar soft"><title>$0.025</title></rect><text x="244" y="264" class="mono">0.025</text>
@@ -379,13 +379,13 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
   <div class="tablewrap"><table>
     <thead><tr><th>Law or promise</th><th>Mechanism</th></tr></thead>
     <tbody>
-      <tr><td>Teaching is invisible</td><td>Host prompt forbids grading; governor rejects undeclared or disallowed moves; <code>notes.enabled</code> defaults off (open question 1).</td></tr>
-      <tr><td>Finite portion, by plan</td><td><code>episodes unique (learner_id, local_date, kind, slot)</code>; allowance from <code>subscriptions.episodes_per_day</code> checked in api; no next-episode route; no autoplay.</td></tr>
+      <tr><td>Teaching is invisible</td><td>Host prompt forbids grading; governor rejects undeclared or disallowed moves; a correction guard counts explicit corrections with a ceiling of zero; no after-call notes, polish card or margin note exist (ADR-06).</td></tr>
+      <tr><td>Finite portion, by plan</td><td><code>episodes unique (learner_id, local_date, kind, slot)</code>; allowance from <code>plan.episodes_per_day</code> checked in api; episodes 2 and 3 are <code>daily_extra</code>, made on demand only after the current one is heard; no autoplay.</td></tr>
       <tr><td>Three message kinds only</td><td>Only <code>forone.core.messaging</code> may import the email or push client (Ruff banned-api rule); a unit test asserts the enum size.</td></tr>
       <tr><td>No claim without proof</td><td><code>claims.text_native</code> is written by <code>gate()</code> in code and is the only progress sentence any surface may speak.</td></tr>
       <tr><td>Told, not inferred</td><td><code>life_facts.quote_event_id not null</code>; validator refuses a fact whose quote is not in a verbatim or chat event; no enrichment adapters exist.</td></tr>
       <tr><td>Data is theirs</td><td>Export within 1 h; deletion ends access at once, live purge 24 h, backups 30 d; destroying the learner's data key crypto-shreds all voice.</td></tr>
-      <tr><td>Nothing per country</td><td>No default time zone; <code>native_lang</code>/<code>target_lang</code> columns; one language package directory per pair; USD list prices.</td></tr>
+      <tr><td>Nothing per country</td><td>No default time zone; <code>native_language</code>, <code>target_language</code> and <code>residence_country</code> columns; two package axes, <code>packages/languages/&lt;target&gt;/</code> and <code>packages/native/&lt;lang&gt;/</code>; USD list prices.</td></tr>
       <tr><td>Inngest sees pointers</td><td>CI fails any event model with a field named name, email, text, topic, quote, transcript or audio, or a string over 200 chars.</td></tr>
     </tbody>
   </table></div>
@@ -404,15 +404,15 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
 </section>
 
 <section id="open">
-  <div class="sec-head"><span class="num">10</span><h2>What the architecture got wrong since 23 October, and what is still owed</h2>
-    <p class="measure">The nine architecture documents predate Muath's decisions of 23 October. The design takes a stance on each conflict and leaves the architecture files untouched; the full list of 20 items is in the open-questions file.</p></div>
+  <div class="sec-head"><span class="num">10</span><h2>What the decision records settled, and what is still owed</h2>
+    <p class="measure">The architecture was revised on 6 November with 23 decision records. Three of this design's first stances were overridden and are now corrected; the rest of the list, 21 items, is in the open-questions file.</p></div>
   <div class="oq">
-    <div class="oq-item"><span class="k">1 · notes</span><p><b>Salma's after-call notes, the polish card and the chat margin note were dropped by decision 3.</b> The architecture still builds them. The design keeps the tables behind a flag that defaults off. Muath decides whether a non-corrective "new for you" card survives.</p></div>
-    <div class="oq-item"><span class="k">2 · country</span><p><b>Arabic, Riyadh and SAR are baked into the architecture.</b> The design moves them into the first language package, removes the time-zone default and adds language columns.</p></div>
-    <div class="oq-item"><span class="k">3 · plans</span><p><b>Plans sell 1, 2 or 3 episodes a day; the schema allowed one.</b> A slot column and a server-side allowance fix the data; how a second episode interacts with "one open session" needs a PRD rule.</p></div>
+    <div class="oq-item"><span class="k">1 · notes · settled</span><p><b>After-call notes, the polish card and the margin note do not exist (ADR-06).</b> The after-session pass is one function inside 10 minutes; corrections are recasts planned by the teacher's echo plan; Salma explains only when asked; a "New for you" card comes only from passed claims.</p></div>
+    <div class="oq-item"><span class="k">2 · languages · settled</span><p><b>Two package axes, not pairs (ADR-02).</b> <code>packages/languages/&lt;target&gt;/</code> holds voices, recognizers, lexicon and inventory; <code>packages/native/&lt;lang&gt;/</code> holds interface strings, consent, Salma and crisis resources. The pilot runs on <code>languages/en</code> and <code>native/ar</code>; a target opens by the five-check gate in code.</p></div>
+    <div class="oq-item"><span class="k">3 · plans · settled</span><p><b>Plans <code>one_a_day</code>, <code>two_a_day</code>, <code>three_a_day</code> (ADR-04, ADR-05).</b> Episodes 2 and 3 are <code>daily_extra</code>: planned overnight with the drop, made on demand through <code>POST /v1/episodes/next</code> after the current episode is heard, never autoplayed. Still open: whether an extra gets its own call.</p></div>
     <div class="oq-item"><span class="k">13 · vendors</span><p><b>Voice and recognizer vendors are open</b> until the blind test, the 30 clips and the 50 calls run in week 1. Defaults: Gemini 3.8 Flash TTS, Soniox, AssemblyAI. Hume is excluded.</p></div>
     <div class="oq-item"><span class="k">15 · bibles</span><p><b>Nobody has written Karim, Mona and Salma.</b> Week 2 cannot test real voices without them; due before 18 November.</p></div>
-    <div class="oq-item"><span class="k">12 · counsel</span><p><b>Home region and processor register</b> wait on the legal review; the region is a Terraform variable, not code.</p></div>
+    <div class="oq-item"><span class="k">12 · counsel</span><p><b>Home region defaults to eu-central-1 (ADR-08), me-central-1 the alternative.</b> Counsel's answers on region, transfer basis, regimes covered and crisis lines are due 17 November, before build week 1.</p></div>
   </div>
 </section>
 
@@ -426,13 +426,13 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
     <div class="file"><span class="num">03</span><div><h3>Generation pipeline</h3><p>Steps, deadlines, prompt templates with variables, the coverage algorithm, caches, cost per step.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/03-generation-pipeline.md">03-generation-pipeline.md</a></div></div>
     <div class="file"><span class="num">04</span><div><h3>Live call</h3><p>Room lifecycle, phase and turn machines, the declare-then-speak protocol, recast rules, verbatim path, latency budget.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/04-live-call.md">04-live-call.md</a></div></div>
     <div class="file"><span class="num">05</span><div><h3>Learner model and notebook</h3><p>Facts ladder and validator, word probabilities and FSRS, structures and mistakes, replanning, briefs.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/05-learner-model.md">05-learner-model.md</a></div></div>
-    <div class="file"><span class="num">06</span><div><h3>After-session pass and proof</h3><p>Seven stages, the analyst schema, the claim gate, weekly proof modes, then-and-now, flags for notes.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/06-after-session-and-proof.md">06-after-session-and-proof.md</a></div></div>
+    <div class="file"><span class="num">06</span><div><h3>After-session pass and proof</h3><p>Seven stages in one function, the analyst schema, the claim gate, weekly proof modes, then-and-now, why there are no notes.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/06-after-session-and-proof.md">06-after-session-and-proof.md</a></div></div>
     <div class="file"><span class="num">07</span><div><h3>Client</h3><p>Routes, state, player, word sheet, call screen, offline PWA, feed and push, onboarding.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/07-client.md">07-client.md</a></div></div>
     <div class="file"><span class="num">08</span><div><h3>Security and privacy</h3><p>Threat model, keys, isolation, consent machine, deletion jobs, crisis protocol, payments, residency.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/08-security-privacy.md">08-security-privacy.md</a></div></div>
     <div class="file"><span class="num">09</span><div><h3>Observability and cost</h3><p>Tracing, measures, alarms, spend modes, offline suite, flags, deploys and on-call.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/09-observability.md">09-observability.md</a></div></div>
-    <div class="file"><span class="num">10</span><div><h3>Open questions</h3><p>Eight contradictions with the architecture, twelve decisions owed, seven assumptions to measure.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/10-open-questions.md">10-open-questions.md</a></div></div>
+    <div class="file"><span class="num">10</span><div><h3>Open questions</h3><p>Eight conflicts and how the decision records settled them, thirteen decisions owed, seven assumptions to measure.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/10-open-questions.md">10-open-questions.md</a></div></div>
   </div>
 </section>
 
-<footer>Written 6 November 2026 against concept v2, decisions.md (23 October), the nine architecture documents and PRD-v2 v3.1. Numbers marked as assumptions in the files are to be replaced by measurements in build weeks 1 and 2.</footer>
+<footer>Written 6 November 2026 against concept v2, decisions.md (23 October), the nine architecture documents and PRD-v2 v3.1; aligned 7 November with architecture/10-decision-records.md (ADR-01 to ADR-22 and the naming rulings). Numbers marked as assumptions in the files are to be replaced by measurements in build weeks 1 and 2.</footer>
 </div>

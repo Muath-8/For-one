@@ -1,6 +1,6 @@
 # For one: technical design, 00. Overview and module map
 
-*Technical design document (TDD), version 1.0, 2026-11-06. The level below the nine architecture documents in `/architecture/`: what an engineer opens to start coding. Where this document and an architecture document disagree, the disagreement is listed in [10-open-questions.md](10-open-questions.md), and the architecture file is left as it is.*
+*Technical design document (TDD), version 1.1, 2026-11-07 (v1.0 2026-11-06; aligned with the architecture decision records ADR-01 to ADR-22 and the naming rulings in `architecture/10-decision-records.md` §4). The level below the nine architecture documents in `/architecture/`: what an engineer opens to start coding. Where this document and an architecture document disagree, the disagreement is listed in [10-open-questions.md](10-open-questions.md), and the architecture file is left as it is.*
 
 ## 0. How to read this set
 
@@ -32,7 +32,7 @@ flowchart LR
     web["apps/web<br/>Next.js 15 PWA"]
     feed["Private podcast feed<br/>(RSS per learner)"]
   end
-  subgraph Edge["AWS home region (me-central-1 pending counsel)"]
+  subgraph Edge["AWS home region (HOME_REGION default eu-central-1; me-central-1 the alternative, counsel open)"]
     api["apps/api<br/>FastAPI"]
     wf["apps/workflows<br/>FastAPI + Inngest functions"]
     cw["apps/call-worker<br/>LiveKit Agents (Python)"]
@@ -90,11 +90,12 @@ One Docker image `forone-python`, three entrypoints selected by `FORONE_SERVICE`
 | `adapters` | `forone.adapters` | one interface per capability, one module per vendor, `vendors.yaml` loader, tracing middleware, `prices.yaml` | 03, 04, 09 |
 | `pipeline` | `forone.pipeline` | teacher, writer, fitter, editor, variety, voice studio, glosses, publish | 03 |
 | `learner` | `forone.learner` | event log, nine stores, scheduler (FSRS), facts validator, compiled briefs | 05 |
-| `assess` | `forone.assess` | verbatim merge, analyst, edit classifier, measures, updater, memory keeper, claim gate, proof producer, rater | 06 |
-| `language/<pair>` | `forone.language` | one directory per language pair; `ar-en` first: bibles, voices, lexicon, structure inventory, crisis resources, consent texts, UI strings | 03, 05, 08 |
+| `assess` | `forone.assess` | verbatim merge, analyst, edit classifier, measures, updater, memory keeper, claim gate, proof producer, rater, `salma_explain` | 06 |
+| `languages/<target>` | `forone.languages` | one directory per **target** language (`en` first): episode and call voices, recognizers and thresholds, lexicon, structure inventory and rules, calibration set, law and correction phrases, crisis keywords, host prompts, format patterns, ban list, `gate.yaml` | 03, 05, 08 |
+| `native/<lang>` | `forone.native` | one directory per **native** language (`ar` first, `en` the universal fallback): interface strings and `dir`, consent texts and privacy notice, gloss target, Salma's voice and persona lines, crisis clips and resources card by country, talkback language hint | 02, 07, 08 |
 | `call` | `forone_call` (inside `apps/call-worker`) | governor, turn controller, recorder, talkback, Salma onboarding | 04 |
 
-**Language package rule [DECISION].** Since the 2026-10-23 decision removed the launch country, nothing in code may assume Arabic or Saudi Arabia. `package_ar_en` in the architecture becomes `packages/language/ar-en/`; every string, voice, inventory and threshold is read through `forone.language.load(pair)`; `learners.tz` has no default and comes from the client; `learners.native_lang` and `target_lang` are columns. Adding a pair is a directory plus the five-check language gate (concept v2 §8), not a code change.
+**Language package rule (ADR-02, ADR-03).** Since the 2026-10-23 decision removed the launch country, nothing in code may assume Arabic or Saudi Arabia. Packages have two axes, never pairs: `packages/languages/<target>/` and `packages/native/<lang>/`. Every brief compiler, prompt loader and TTS request reads the pair from the learner row (`learners.native_language`, `target_language`, `residence_country`); `learners.tz` has no default and comes from the client. Opening a target language is a directory plus the five-check gate run by `forone.langgate` (evidence in `langgate/<target>/<date>/`, the pass recorded in `gate.yaml`), not a code change. The pilot's packages are `languages/en` and `native/ar`.
 
 ### 2.3 Roles (model calls), where they run
 
@@ -158,8 +159,8 @@ The twelve laws and eight trust promises (PRD-v2 1.2, 1.3; concept v2) are not U
 | Law or promise | Mechanism in code |
 |---|---|
 | No game furniture | no component for percent, chart, streak or level exists in `web`; the editor's law scan (check 10) rejects generated text that mentions scores, streaks, levels or homework; notebook shows only monotonic plain counts |
-| Teaching is invisible (2026-10-23) | the host prompt forbids grading and grammar explanation; the governor rejects a reply whose `@moves` header declares a disallowed move; `notes.enabled` flag defaults **off** (see 10-open-questions #1) |
-| Finite portion, allowance | `episodes` has `unique (learner_id, local_date, kind, slot)`; the plan's `episodes_per_day` is checked in `api` before any `idea.chosen`; no "next episode" route exists; the player never autoplays |
+| Teaching is invisible (2026-10-23, ADR-06) | the host prompt forbids grading and grammar explanation; the governor rejects a reply whose `@moves` header declares a disallowed move; the correction guard (`guard.check_output` item 6, `guard/correction_words.yaml` per language) counts explicit corrections with a ceiling of 0 per 100 turns; the editor's check 10 rejects anything that reads as a correction or a lesson; there are no after-call notes, no polish card and no margin note; Salma explains only when asked (`salma_explain`) |
+| Finite portion, allowance (ADR-04, ADR-05) | `episodes` has `unique (learner_id, local_date, kind, slot)`; `plan.episodes_per_day` from `plans.yaml` is checked in `api` (`episodes_today < plan.episodes_per_day`); episodes 2 and 3 are `daily_extra`, made on demand through `POST /v1/episodes/next` only after the current episode is heard; no autoplay, no feed for unplayed extras |
 | Three message kinds only | `forone.core.messaging` is the only module allowed to import the email or push client (Ruff `banned-api` rule); its enum has exactly three members plus transactional; a unit test asserts the count |
 | No claim without proof | `claims.text_ar` is the only sentence any surface may speak about progress; it is written by `forone.assess.claims.gate()`, never by a model |
 | Told, not inferred | `life_facts.quote_event_id` is `not null`; the validator refuses a fact whose quote is not a substring of a verbatim or chat event; no enrichment adapters exist |
@@ -186,7 +187,8 @@ forone/
   apps/workflows/      Inngest functions: functions/<id>.py, one file per function id
   apps/call-worker/    forone_call/: agent.py, governor.py, turns.py, recorder.py, talkback.py, salma.py
   packages/core|adapters|pipeline|learner|assess
-  packages/language/ar-en/   bibles/, voices/, lexicon/, inventory/, crisis/, consent/, ui/
+  packages/languages/en/     voices/, recognizers/, lexicon/, inventory/, calibration/, guard/, crisis/keywords.yaml, prompts/, formats/, ban_list, gate.yaml
+  packages/native/ar/        ui_strings/, consent/, notice, salma/, crisis/resources.yaml (by ISO country), talkback.yaml
   tools/vendor-lab, call-bench, cost-model, m0_import.py
   infra/terraform/     one module per env; docker-compose.yml for dev
   .github/workflows/   ci.yml, deploy-staging.yml, deploy-prod.yml
@@ -204,4 +206,4 @@ Tooling: `uv`, Ruff, Pyright strict, pytest; `pnpm`, TypeScript strict, Vitest, 
 | 4 | call worker: governor, turn-taking, talkback, hold-to-talk, recorder, verbatim path; voice-note fallback; chat | 04 |
 | 5 | after-session pass; memory keeper; claim gate; notebook; Controls; simple weekly proof; first then-and-now; deletion and export jobs; crisis protocol; end-to-end run with Milestone 0 learners | 05, 06, 08 |
 
-Exit on 2026-12-22: every P0 works; measured cost per session from `vendor_calls`; a costed path to $0.35 or less.
+Exit on 2026-12-22: every P0 works; measured cost per session from `vendor_calls`; a costed path to $0.35 or less. Beta 2026-12-23 to 2027-01-26 (gate review 2027-01-26); freezes 2026-12-21 12:00 to 12-24 12:00 UTC and 2026-12-31 to 2027-01-02 (ADR-07).

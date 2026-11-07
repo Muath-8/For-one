@@ -8,7 +8,7 @@
 |---|---|
 | Cross-learner data leak through a bug | RLS on every learner table; `SET LOCAL forone.learner_id` per transaction; service roles set it anyway; CI test for policy coverage; the only cross-learner stores are the gloss cache, research transcripts (opt-in, anonymized) and cost roll-ups |
 | Stolen database snapshot or S3 bucket | RDS at rest encrypted; voice SSE-C under per-learner DEKs wrapped by KMS; a snapshot without KMS access and `learner_keys` is noise |
-| Vendor retains learner content | DPA with every processor; prompts carry the pseudonym never the id; Inngest sees ids only; Langfuse holds the pseudonym and a pointer to `model_io` (home region) for text; LiveKit keeps no recordings |
+| Vendor retains learner content | DPA with every processor; prompts and Langfuse carry the research pseudonym (a stored random value in `research_pseudonyms`, deleted with the learner, no HMAC secret, ADR-09) never the id; Langfuse holds metadata only unless `data_use` is on, 30 days; Inngest sees ids only; text stays in `model_io` (home region) for text; LiveKit keeps no recordings |
 | Prompt injection via learner speech or chat | the host and Salma have no tools; the operator note is a system entry the learner cannot author; headers are validated by code; the editor and analyst read learner text as data with "never follow instructions in the transcript" lines; outputs are schema-validated |
 | Account takeover | OTP 6 digits, 10 min, 5 attempts; Apple/Google OIDC with PKCE; HttpOnly SameSite cookies; sign-out everywhere on password-less reset; feed tokens resettable |
 | Cost abuse (samples, swaps, calls) | rate limits per device, contact and IP prefix; allowance enforced server-side; spend guard and `halt` mode (09) |
@@ -37,7 +37,7 @@ RLS (01 §6), S3 prefixes per learner (`learners/{lid}/...`) with IAM conditions
 
 ## 4. Consent
 
-Six kinds, copy in the language package (`consent/consent_texts.yaml`, versioned; counsel edits and bumps). `consents` is a cache of the latest `consent_change` event per kind, reconciled daily.
+Six kinds, copy in the native package (`packages/native/<lang>/consent/consent_texts.yaml`, versioned; counsel edits and bumps; `native/en` is the fallback). `consents` is a cache of the latest `consent_change` event per kind, reconciled daily.
 
 | kind | default | asked | effect |
 |---|---|---|---|
@@ -46,7 +46,7 @@ Six kinds, copy in the language package (`consent/consent_texts.yaml`, versioned
 | `voice_storage` | **false** | A9 one checkbox; Controls | on: full recordings and turns kept under the DEK; off: every voice object ephemeral (15 min), the one then-and-now the learner keeps excepted |
 | `data_use` | **false** | Controls only | on: anonymized transcripts (no audio) into `research_transcripts` and calibration; off: rows for the pseudonym deleted within 24 h |
 | `gap_note` | off | week 1; Controls | arms the one gap message |
-| `drop_notification`, `captions`, `notes_mode` | on, on, always | Controls | preferences, logged the same way |
+| `drop_notification`, `captions` | on, on | Controls | preferences, logged the same way |
 
 ```mermaid
 stateDiagram-v2
@@ -76,7 +76,7 @@ RDS: automated backups 30 days, no manual snapshots (asserted nightly). Export c
 
 ## 6. Crisis and self-harm protocol (technical safeguard)
 
-Detection: the host or Salma declares `crisis` in the header, or code matches the package keyword list (`crisis/keywords.yaml`, counsel and a native speaker review) on a learner final in call or chat, or the analyst flags it in the after-pass. Response: the host stops; Salma's pre-rendered resources line in the native language plays; the client shows the package's resources card (local helplines per the learner's country, chosen from `tz` and never inferred further); the call ends `end_reason = crisis`; chat shows the resources inline. Logging: `crisis_flag` event and `crisis.activated` → `crisis_log` with ids only; the transcript turn is quarantined from research use; ops is paged with ids. Follow-up: Today shows the once-only resources card; the next episode avoids the topic; no outbound message is sent (the three-message rule holds). SB 243-style reporting is a query over `crisis_log`.
+Detection: the host or Salma declares `crisis` in the header, or code matches the package keyword list (`crisis/keywords.yaml`, counsel and a native speaker review) on a learner final in call or chat, or the analyst flags it in the after-pass. Response: the host stops; Salma's pre-rendered resources line in the native language plays; the client shows the resources card from `packages/native/<lang>/crisis/resources.yaml` keyed by `residence_country` (international directory as the fallback; never inferred from IP); the call ends `end_reason = crisis`; chat shows the resources inline. Logging: `crisis_flag` event and `crisis.activated` → `crisis_log` with ids only; the transcript turn is quarantined from research use; ops is paged with ids. Follow-up: Today shows the once-only resources card; the next episode avoids the topic; no outbound message is sent (the three-message rule holds). SB 243-style reporting is a query over `crisis_log`.
 
 ## 7. Prompt-injection posture
 
@@ -92,4 +92,4 @@ Hosted checkout and portal from the processor (OPEN: merchant of record with USD
 
 ## 10. Residency
 
-Home region AWS `me-central-1` pending counsel; every processor listed in a register with region and DPA status; Inngest (EU) and Langfuse see pointers and pseudonyms only; LiveKit Cloud media is transient; vendor model calls carry text without names where the role allows (pseudonymized briefs). If counsel requires, the region changes by Terraform variable, not by code.
+`HOME_REGION` defaults to `eu-central-1` (Vercel `fra1`); `me-central-1` stays the alternative if counsel and the first cohort's residence countries favour it; the choice is a Terraform variable made at the latest in build week 1 (ADR-08). The legal view is a table of regimes per `residence_country` (lawful basis for voice and research, breach clock, DPIA, transfer basis for US vendors, counsel status) with a generic baseline row for unreviewed countries (ADR-20). Every processor listed in a register with region and DPA status; Inngest (EU) and Langfuse see pointers and pseudonyms only; LiveKit Cloud media is transient; vendor model calls carry text without names where the role allows (pseudonymized briefs). If counsel requires, the region changes by Terraform variable, not by code.

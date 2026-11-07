@@ -45,11 +45,11 @@ stateDiagram-v2
 
 | Method, path | Purpose | Request → Response |
 |---|---|---|
-| `POST /onboarding/start` | A2 Talk or Type; creates the `pre_account` learner | `{invite_code?, tz, native_lang, target_lang, mode: "talk"|"type"}` → `{learner_id, call: {call_id, room_url, token}}` |
+| `POST /onboarding/start` | A2 Talk or Type; creates the `pre_account` learner | `{invite_code?, tz, native_language, target_language, mode: "talk"|"type"}` → `{learner_id, call: {call_id, room_url, token}}` |
 | `GET /onboarding` | A4, A5, A10 data | → `OnboardingDoc {word_check: {items: [{item_id, text, band}]}, casting: {hosts: {karim: {voices: [{voice_id, hello_clip_url}]}, mona: {...}}, accents[]}, name: {candidates: [{index, clip_url}], chosen, verified}, pilot: {episode_id, state, first_segment_url?}, ideas: Idea[]}` |
 | `PUT /onboarding/casting` | A5 | `{karim_voice_id, mona_voice_id, accent}` → 204 |
 | `PUT /onboarding/name` | A5 "say it differently" | `{candidate_index}` → 204 |
-| `PUT /me` | A9 account facts | `{birth_date, drop_time_local, backup_time_local?, anchor_text, display_name?, rhythm_days?}` → 204, or `403 under_18` (deletes the pre-account learner) |
+| `PUT /me` | A9 account facts | `{birth_date, residence_country, drop_time_local, backup_time_local?, anchor_text, display_name?, rhythm_days?}` → 204, or `403 under_18` (deletes the pre-account learner) |
 
 ### 3.3 Auth
 
@@ -67,9 +67,10 @@ stateDiagram-v2
 | Method, path | Purpose | Request → Response |
 |---|---|---|
 | `GET /today` | the home document | → `TodayDoc` (§4.1); `ETag`; `?ack=crisis` acknowledges the once-only resources card |
-| `GET /stream` | SSE | events `episode.manifest`, `notes.ready`, `chat.message`, `talkback.answer`, `proof.ready`, `lm.version`; heartbeat every 25 s; `Last-Event-ID` resumes |
+| `GET /stream` | SSE | events `episode.manifest`, `chat.message`, `talkback.answer`, `proof.ready`, `lm.version`; heartbeat every 25 s; `Last-Event-ID` resumes |
 | `GET /ideas` | tonight's three | → `{plan_id, ideas: Idea[], cutoff_at}` |
-| `POST /ideas/choose` | pick, remix or tell Salma | `{idea_id|null, source: "pick"|"tell_salma"|"remix", remix?: {topic?, format?, cast?}, salma_text?}` → `{picked: Idea, episode_id}`; `409 allowance_used` when today's slots for the plan are spent; `409 cutoff_passed` after the cutoff unless the cutoff episode is still `< writing` |
+| `POST /ideas/choose` | pick, remix or tell Salma | `{idea_id|null, source: "pick"|"tell_salma"|"remix", remix?: {topic?, format?, cast?}, salma_text?}` → `{picked: Idea, episode_id}`; `409 cutoff_passed` after the cutoff unless the cutoff episode is still `< writing` |
+| `POST /episodes/next` | episode 2 or 3 of the day (ADR-05) | `{}` → `202 {episode_id, slot}` then `episode.manifest` on the stream (on-demand path, scene 1 first); `409 allowance_used` when `episodes_today >= plan.episodes_per_day`; `409 current_unheard` until the current episode is heard; never autoplayed; sends Inngest `learner.extra_requested {learner_id, local_date, slot, episode_id}` |
 | `GET /episodes/{id}` | episode page | → `EpisodeDoc {episode_id, kind, slot, title, cast, length_s, state, manifest_url, word_index_url, article: {html, read_aloud_url}, call: {state, call_id?}, chat_thread_id, why_url, cover}` |
 | `GET /episodes/{id}/media/{asset}` | `full.mp3`, `seg-{n}.mp3`, `read_aloud.mp3`, `recap.mp3`, `manifest.json`, `word_index.json` | Range; signed, 1 h |
 | `GET /episodes/{id}/why` | "why this episode" | → `{reasons: [{text_native, kind}]}` (2 to 4) |
@@ -93,13 +94,13 @@ stateDiagram-v2
 
 Internal, for the worker: `GET /internal/calls/{id}/brief` → `CallBundle` (04 §3); `POST /internal/events` (same body as `/events`, with `learner_id` in the JWT); `POST /internal/calls/{id}/end` `{end_reason, metrics}`; `POST /internal/media` presigned-PUT minting `{kind, call_id, turn_index, ephemeral}` → `{media_object_id, put_url, headers}`.
 
-### 3.6 Chat, notes, proof
+### 3.6 Chat, Salma, proof
 
 | Method, path | Request → Response |
 |---|---|
 | `GET /chat/{host}?before=` | → `ChatDoc {thread_id, messages: [{index, speaker, text, at, in_reply_to?}], closed, ideas?: Idea[]}` |
 | `POST /chat/{host}/messages` | `{text, event_id}` → `{message_index}`; `409 chat_closed` after the host's fifth message |
-| `GET /sessions/{id}/notes` | → `NotesDoc` (flag `notes.enabled`; `404 notes_off` otherwise) |
+| `POST /salma/explain` | "why do we say it like that?" (ADR-06: Salma explains only when asked, never corrects) | `{question, episode_id?, line_id?}` → `{text_native, audio_url?}`; role `salma_explain`, Sonnet 5.5 |
 | `GET /proof/{proof_id}` | → `ProofDoc {proof_id, episode_id, week_start, mode: "good"|"flat"|"slow"|"worse", audio_url, claims: [{claim_id, text_native, how_we_know: Evidence[]}], working_on: WorkingOnItem[], worth_it_asked}` |
 
 ### 3.7 Notebook and controls
@@ -118,7 +119,7 @@ Internal, for the worker: `GET /internal/calls/{id}/brief` → `CallBundle` (04 
 | `POST /push/subscribe`, `DELETE /push/subscribe` | `{subscription, ua_hint}` → 204 |
 | `POST /me/export`, `GET /me/exports` | → `202 {export_id, passphrase}` (shown once); list `[{export_id, state, ready_at, url_expires_at}]` |
 | `DELETE /me` | → 202; every later call `410 deleted` |
-| `POST /billing/checkout`, `GET /billing`, `POST /billing/portal` | `{plan: "one"|"two"|"three"}` → `{checkout_url}`; `GET` → `{plan, state, episodes_per_day, current_period_end, founding}` |
+| `POST /billing/checkout`, `GET /billing`, `POST /billing/portal` | `{plan: "one_a_day"|"two_a_day"|"three_a_day"}` → `{checkout_url}`; `GET` → `{plan, state, episodes_per_day, current_period_end, founding}` |
 
 ### 3.8 Admin (staff)
 
@@ -132,13 +133,13 @@ Internal, for the worker: `GET /internal/calls/{id}/brief` → `CallBundle` (04 
 type TodayDoc = {
   lm_version: number;
   learner: { display_name: string; status: "pre_account"|"trial"|"paid"|"trial_ended"; trial_day: number|null; tz: string;
-             plan: { episodes_per_day: 1|2|3; used_today: number } };
+             plan: { id: "one_a_day"|"two_a_day"|"three_a_day"; episodes_per_day: 1|2|3; used_today: number } };
   show: { color: string; hosts: { karim: {display_name}; mona: {display_name} }; season: { number; title_native: string|null; day: number } };
   host_line: { who: "karim"|"mona"; text: string; canon_id: string } | null;      // always a confirmed memory
-  hero: { state: "ready"|"in_progress"|"notes_waiting"|"done"|"none"; episode: EpisodeCard|null;
+  hero: { state: "ready"|"in_progress"|"done"|"none"; episode: EpisodeCard|null;
           doors: Record<"listen"|"read"|"call"|"chat"|"small_door"|"round_two"|"shadow", DoorState|null>;
           swap_available: boolean; streaming: boolean };
-  next_slot: { available: boolean; ideas_due: boolean } ;                          // plans with 2 or 3 a day [DECISION]
+  next_episode: { available: boolean; slot: 2|3; reason_unavailable: "allowance_used"|"current_unheard"|null } | null;   // the "next one" control (ADR-05); null on one_a_day
   proof: { proof_id; title; length_s; cover } | null;
   tomorrow: { drop_at: string; teaser: string|null; picked: boolean } | null;
   recording_offer: { recording_id; text_native } | null;
@@ -194,10 +195,10 @@ The catalogue is `forone.core.events` (architecture 01 §4.3); the contract ever
 
 | Event | Sender | Consumer |
 |---|---|---|
-| `day.became_active`, `idea.chosen`, `learner.swap_requested`, `learner.return_detected`, `onboarding.intake_completed`, `sample.requested`, `working_on.changed`, `learner.schedule_changed` | api | `day/next`, `episode/produce` |
+| `day.became_active`, `idea.chosen`, `learner.extra_requested`, `learner.swap_requested`, `learner.return_detected`, `onboarding.intake_completed`, `sample.requested`, `working_on.changed`, `learner.schedule_changed` | api | `day/next`, `episode/produce` |
 | `learner.cutoff_reached`, `episode.ready`, `episode.streaming_started`, `episode.failed`, `ideas.ready`, `drop.published`, `pipeline.human_page` | workflows | `day/next`, api (stream), ops |
 | `call.turn_audio_ready`, `call.ended`, `voicenote.received`, `recording.turn_audio_ready`, `pronunciation.requested`, `crisis.activated` | call-worker via api | `call/verbatim-turn`, `session/after-pass`, `call/voice-note-reply`, `crisis/activate` |
-| `verbatim.turn_completed`, `notes.ready`, `session.after_pass.completed`, `proof.requested`, `season.boundary` | workflows | `session/after-pass`, api (stream), `proof/make` |
+| `verbatim.turn_completed`, `session.after_pass.completed`, `proof.requested`, `season.boundary` | workflows | `session/after-pass`, api (stream), `proof/make` |
 | `media.object_created`, `learner.consent_changed`, `gap.armed`, `learner.deletion_requested`, `learner.export_requested` | api | `audio/expire`, `learner/purge-audio`, `gap/note`, `learner/delete`, `learner/export` |
 | `vendor.degraded`, `voice.vendor_failover` | workflows, admin | adapters, pipeline |
 

@@ -77,7 +77,9 @@ Column lists are complete. Types are Postgres. `pk` marks the primary key, `fk` 
 | birth_date | date | null until A9; under-18 refused at write |
 | age_attested_at | timestamptz | A1 checkbox |
 | tz | text not null | IANA, from the client; **no default** [DECISION] |
-| native_lang, target_lang | text not null | BCP-47; the language package key is `{native}-{target}` [DECISION] |
+| native_language, target_language | text not null | BCP-47; select `packages/native/<native_language>/` and `packages/languages/<target_language>/` (ADR-02) |
+| residence_country | text | ISO 3166-1, asked at A9 with a country picker, never from IP (ADR-20); selects the crisis resources and the legal regime row |
+| plan | text | mirror of `subscriptions.plan` for cheap allowance reads |
 | invite_id | uuid fk invites | |
 | trial_started_at, trial_ends_at | timestamptz | trial = 7 days |
 | deletion_requested_at | timestamptz | |
@@ -89,9 +91,9 @@ Column lists are complete. Types are Postgres. `pk` marks the primary key, `fk` 
 **otp_codes** `{email citext, code_hash text, expires_at, attempts smallint; pk (email, code_hash)}`; ret 10 min.
 **auth_sessions** `{id bytea pk (32 random bytes), learner_id fk, scope (full|pre_account|feed_link), episode_id uuid, created_at, last_seen_at, expires_at, ua_hint text}`; ret 90 days rolling.
 **learner_keys** `{learner_id pk fk, dek_wrapped bytea, kms_key_id text, created_at, destroyed_at}`; the envelope-encrypted DEK; see [08](08-security-privacy.md).
-**learner_schedule** `{learner_id pk fk, drop_time_local time, backup_time_local time, anchor_text text, rhythm_days smallint 3..6, spare_days smallint default 2, proof_weekday smallint, onboarded_weekday smallint, version int, updated_at}`.
-**consents** `{learner_id pk fk, privacy_notice_version text, voice_storage bool default false, voice_storage_version text, data_use bool default false, data_use_version text, gap_note bool default false, gap_days smallint, drop_notification bool default true, captions bool default true, notes_mode text default 'always', updated_at}`; a cache of the latest `consent_change` event per kind, reconciled daily.
-**subscriptions** `{learner_id pk fk, plan text (one|two|three), episodes_per_day smallint generated (1|2|3), state (trialing|active|past_due|canceled|expired), founding_seq int, current_period_end timestamptz, processor text, customer_ref text, updated_at}` [DECISION: plan enum carries the 2026-10-23 tiers].
+**learner_schedule** `{learner_id pk fk, drop_time_local time, backup_time_local time, anchor_text text, rhythm_days smallint 3..6, spare_days smallint default 2, proof_weekday smallint, onboarded_weekday smallint, expects_drop bool (set when the previous local day was active), version int, updated_at}`.
+**consents** `{learner_id pk fk, privacy_notice_version text, voice_storage bool default false, voice_storage_version text, data_use bool default false, data_use_version text, gap_note bool default false, gap_days smallint, drop_notification bool default true, captions bool default true, updated_at}`; a cache of the latest `consent_change` event per kind, reconciled daily.
+**subscriptions** `{learner_id pk fk, plan text (one_a_day|two_a_day|three_a_day), state (trialing|active|past_due|canceled|expired), founding_seq int 1..100, founding_locked bool, current_period_end timestamptz, processor text, customer_ref text, updated_at}` (ADR-04). `episodes_per_day` is read from `plans.yaml` by plan, not stored.
 **payment_events** `{id pk, learner_id fk, processor, event_type, amount_minor int, currency, raw jsonb, received_at}`; ret 7 years (tax).
 **waitlist**, **invites**, **sample_requests**: as `architecture/01 §4.2`, unchanged.
 
@@ -104,9 +106,9 @@ Column lists are complete. Types are Postgres. `pk` marks the primary key, `fk` 
 | id | uuid pk | |
 | learner_id | uuid fk | null only for `kind = sample` |
 | sample_request_id | uuid fk | samples only |
-| kind | text | `pilot, daily, swap, return, sample, proof, finale, rehearsal, fallback` |
-| slot | smallint not null default 1 | 1..3, the position within the day's allowance [DECISION] |
-| state | text | `requested, planning, writing, fitting, editing, voicing, checking, glossing, ready, published, closed, prewritten, failed, superseded` (one enum merging 01 and 02; `streaming` is a flag) |
+| kind | text | `pilot, daily, daily_extra, swap, return, sample, proof, finale, rehearsal, fallback, canary` (ADR-05: `daily_extra` is episode 2 or 3, made on demand) |
+| slot | smallint not null default 1 | 1..3, the position within the day's allowance; unused extras end in `superseded` |
+| state | text | `planned, requested, planning, writing, fitting, editing, voicing, checking, glossing, ready, published, closed, prewritten, failed, superseded` (`episodes.state`, never `status`; `streaming` is a flag; `planned` is the row `day/next` creates for each slot of the day) |
 | streaming | bool default false | on-demand kinds while segment 1 is published and later ones render |
 | local_date | date not null | the learner's day |
 | idea_id, plan_id | uuid | |
@@ -132,12 +134,12 @@ Column lists are complete. Types are Postgres. `pk` marks the primary key, `fk` 
 **series_bible** `{learner_id pk fk, hosts jsonb, side_characters jsonb (3..5), places jsonb, running_jokes jsonb, version int, updated_at}`.
 **voice_casting** `{learner_id pk fk, karim_voice_id, mona_voice_id, accent (british|american), vendor, name_respelling text, name_candidate_index smallint, version int}`.
 **sessions** `{id pk, learner_id fk, episode_id fk, state (ready|open|done|closed), opened_at, done_at, closed_at, active_day_marked bool, swap_used bool, created_at}`; partial unique index `one_open_session on (learner_id) where state in ('ready','open','done')`.
-**doors** `{session_id fk, door (listen|shadow|read|call|notes|chat|round_two|small_door), state (not_started|in_progress|done|skipped), position jsonb, updated_at; pk (session_id, door)}`.
+**doors** `{session_id fk, door (listen|shadow|read|call|chat|round_two|small_door), state (not_started|in_progress|done|skipped), position jsonb, updated_at; pk (session_id, door)}`.
 **feed_items** `{id pk, learner_id fk, episode_id fk, guid text unique, title, description_ar, enclosure_media_object_id fk, duration_s, published_at}`.
 **feed_tokens** `{token text pk (32 bytes base64url), learner_id fk, created_at, revoked_at}`.
 **feed_fetches** `{token fk, fetched_at, ua_hint text}`; ret 30 days; counts only.
 **push_subscriptions** `{id pk, learner_id fk, endpoint text unique, p256dh, auth, ua_hint, created_at, failed_n smallint}`.
-**media_objects** as `architecture/01 §4.2`, with `encryption (sse-c-learner|sse-kms-service)`, `key_derivation`, `ephemeral`, `kept_explicitly`, `expires_at`, `deleted_at`; idx `(ephemeral, expires_at) where deleted_at is null`. Kinds that count as learner voice: `call_turn, call_full, recording_retell, recording_opinion, recording_repeat, voice_note, say_it_once, shadow, clip`.
+**media_objects** as `architecture/01 §4.2`, with `encryption (sse_c_learner|sse_kms_env)` set by kind (ADR-12: learner voice under the DEK and served only through `api`; show audio under the environment KMS key and served by 10-minute presigned URLs), `key_derivation`, `ephemeral`, `kept_explicitly`, `expires_at`, `deleted_at`; idx `(ephemeral, expires_at) where deleted_at is null`. Kinds that count as learner voice: `call_turn, call_full, recording_retell, recording_opinion, recording_repeat, voice_note, say_it_once, shadow, clip`.
 
 ### 3.3 Calls and chat
 
@@ -188,7 +190,7 @@ All RLS, all with `lm_version int` and `updated_at`, all rebuildable. Full DDL i
 | 8 taste | `taste` | learner_id | `format_completion, host_completion, words_per_min jsonb`, `length_pref_min`, `time_of_day_hist`, `swap_n`, `skip_patterns` |
 | 9 show canon | `show_canon` | canon_id | `kind (position_learner|position_host|thing_said|joke_used|callback_made|retold)`, `who`, `text, quote, event_id, episode_id, topic_key, at`; plus `canon_embeddings (canon_id pk, embedding vector(1024))` for callback search, the only pgvector use |
 
-Plus `notebook_counts {learner_id pk, words_owned, hours_heard_s, hours_spoken_s}` (monotonic), `out_in_world`, `working_on_items`, `learner_model_versions {learner_id, version, cause, session_id, high_water_seq, code_versions jsonb, stores_touched text[]}` and `briefs {id, learner_id, role, learner_model_version, compiled_at, s3_key, token_count}` (the compiled-brief cache).
+Plus `word_uses (learner_id, unit_id, event_id, occurred_at, clean, correct, prompted, quote)` (owned here, written by the after-session pass; the evidence behind `word_owned` claims), `notebook_counts {learner_id pk, words_owned, hours_heard_s, hours_spoken_s}` (monotonic), `out_in_world`, `working_on_items`, `learner_model_versions {learner_id, version, cause, session_id, high_water_seq, code_versions jsonb, stores_touched text[]}` and `briefs {id, learner_id, role, learner_model_version, compiled_at, s3_key, token_count}` (the compiled-brief cache).
 
 ### 3.6 Language package tables (loaded at deploy, per pair, not RLS)
 
@@ -196,18 +198,18 @@ Plus `notebook_counts {learner_id pk, words_owned, hours_heard_s, hours_spoken_s
 
 ### 3.7 Assessment, claims and proof
 
-Owned by `forone.assess`; DDL in `architecture/05 §4.16`. Tables: `session_summaries` (one per session: `evidence_quality (full|partial|text_only)`, speech ms, talk share, uptake, `errors_per_100`, `targets jsonb`, `anxiety_mode`), `comparable_segments` (fluency and complexity measures per retell/round-two/recording segment with `measurable`, `clean_share`, `assessment_version`), `claims` (`kind` of 10, `direction (better|worse|event)`, `subject jsonb`, before/after values and points, `sem_used`, `threshold_used`, `text_native not null`, `status (candidate|passed|failed|shown|retracted)`, `failed_rule`, `notice_pending`), `claim_evidence (claim_id, ord, event_id, segment_id, quote, media_object_id, t_start_ms, t_end_ms, clean, label)`, `metric_calibration (metric, task_type, n_pairs, sem, assessment_version)`, `test_retest_pairs`, `recordings (learner_id, season_number, kind (then|now), form, tasks, kept, skipped)`, `recording_ratings`, `rater_versions`, `calibration_samples`, `calibration_runs`, `skill_calibration`, `notes` (kept, flag-gated, see 10-open-questions #1), `proofs (learner_id, week_start, mode, plan, episode_id, headline_claim_id, more_claim_ids, worse_claim_ids, worth_it_answer)`, `external_tests` [P1], `working_on_items`.
+Owned by `forone.assess`; DDL in `architecture/05 §4.16`. Tables: `session_summaries` (one per session: `evidence_quality (full|partial|text_only)`, speech ms, talk share, uptake, `errors_per_100`, `targets jsonb`, `anxiety_mode`), `comparable_segments` (fluency and complexity measures per retell/round-two/recording segment with `measurable`, `clean_share`, `assessment_version`), `claims` (`kind` of 10, `direction (better|worse|event)`, `subject jsonb`, before/after values and points, `sem_used`, `threshold_used`, `text_native not null`, `status (candidate|passed|failed|shown|retracted)`, `failed_rule`, `notice_pending`), `claim_evidence (claim_id, ord, event_id, segment_id, quote, media_object_id, t_start_ms, t_end_ms, clean, label)`, `metric_calibration (metric, task_type, n_pairs, sem, assessment_version)`, `test_retest_pairs`, `recordings (learner_id, season_number, kind (then|now), form, tasks, kept, skipped)`, `recording_ratings`, `rater_versions`, `calibration_samples`, `calibration_runs`, `skill_calibration`, `proofs (learner_id, week_start, mode, plan, episode_id, headline_claim_id, more_claim_ids, worse_claim_ids, worth_it_answer)`, `external_tests` [P1], `working_on_items`.
 
 ### 3.8 Platform, cost and operations
 
-`vendor_calls` (partitioned monthly; `role, capability, vendor, model, pricing_mode, prompt_version, learner_model_version, units jsonb, cost_usd numeric(10,6), price_book_ids int[], latency_ms, outcome, fallback_from_vendor`), `price_book` (rows loaded from `prices.yaml`), `learner_costs_daily`, `model_io` (prompt and completion text per span, partitioned, dropped after 90 days), `vendor_config`, `vendor_health`, `outbox`, `feature_flags`, `audit_log (actor, action, target, learner_id, at, detail jsonb)`, `crisis_log`, `privacy_audit_runs`, `deletion_ledger`, `research_transcripts (pseudonym, surface, text, created_at)`, `staff_accounts`, `rate_limits`.
+`vendor_calls` (partitioned monthly; `role, capability, vendor, model, pricing_mode, prompt_version, learner_model_version, units jsonb, cost_usd numeric(10,6), price_book_ids int[], latency_ms, outcome, fallback_from_vendor`), `price_book` (rows loaded from `prices.yaml`), `learner_costs_daily`, `model_io` (prompt and completion text per span, partitioned, dropped after 90 days), `vendor_config`, `vendor_health`, `outbox`, `feature_flags`, `audit_log (actor, action, target, learner_id, at, detail jsonb)`, `crisis_log`, `privacy_audit_runs`, `deletion_ledger`, `research_pseudonyms (learner_id, pseudonym)` (a stored random value, no HMAC secret; deleted with the learner, ADR-09), `research_transcripts (pseudonym, surface, text, created_at)`, `session_costs` (a table filled by `cost/rollup`, with `plan`), `staff_accounts`, `rate_limits`.
 
 ## 4. Encryption classes
 
 | Class | Where | Mechanism |
 |---|---|---|
-| Learner voice | S3 `forone-voice` | SSE-C under the learner DEK, or a per-call key `HKDF(DEK, 'call:'||call_id)`; DEK wrapped by the environment's KMS CMK and stored in `learner_keys`; deleting the row makes every object unreadable |
-| Episode audio and text artifacts | S3 `forone-media` | SSE-KMS service key (episodes are not learner speech, but they are personal: deleted by `learner/delete` through `media_objects`) |
+| Learner voice (`sse_c_learner`) | S3 `forone-voice`, keys `learners/{lid}/...`; storage-off objects under the bucket-level prefix `ephemeral/learners/{lid}/...` so a lifecycle rule matches them | SSE-C under the learner DEK, or a per-call key `HKDF(DEK, 'call:'||call_id)`; DEK wrapped by the environment's KMS CMK and stored in `learner_keys`; deleting the row makes every object unreadable; served only through `api` |
+| Show audio and text artifacts (`sse_kms_env`) | S3 `forone-media`, keys `learners/{lid}/episodes/{episode_id}/...` | SSE-KMS under the environment key; served by 10-minute presigned URLs (feed enclosures stay proxied because podcast apps cache URLs); deleted by prefix in `learner/delete` before the DEK is destroyed |
 | Exports | S3 `forone-exports` | zip with a one-time passphrase shown once; link valid 7 days |
 | Postgres | RDS | encryption at rest (KMS), TLS in transit; column-level encryption is not used, isolation is RLS |
 | Secrets | AWS Secrets Manager | vendor keys, VAPID keys, LiveKit API secret; never in env files |
@@ -229,4 +231,4 @@ Owned by `forone.assess`; DDL in `architecture/05 §4.16`. Tables: `session_summ
 
 ## 6. Roles
 
-`forone_app` (api, RLS enforced), `forone_workflows` (bypass RLS, pgaudit, sets `forone.learner_id` anyway so a cross-learner query is a caught bug), `forone_purge` (learner/delete only), `forone_cost` (cross-learner read on `vendor_calls`), `forone_readonly` (admin pages). Migrations run as the owner in a one-off task.
+`forone_app` (api, RLS enforced), `forone_workflows` (bypass RLS, pgaudit, sets `forone.learner_id` anyway so a cross-learner query is a caught bug), `forone_purge` (learner/delete only), `forone_cost` (cross-learner read on `vendor_calls`), `forone_admin` (admin pages), `forone_human` (psql, pgaudit), `forone_readonly`. Migrations run as the owner in a one-off task.
