@@ -1,0 +1,370 @@
+<title>For one release plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@75,500;75,700;87.5,600&family=Readex+Pro:wght@300;400;500&family=Martian+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a production schedule for a show. One wide board (the timeline) scrolls sideways; everything else stacks in a 1040px column. Night studio, dark first. */
+:root{
+  --bg:#141412; --bg-2:#1c1c19; --bg-3:#242421; --line:#34342f; --line-2:#44443d;
+  --fg:#f0efe9; --fg-2:#bdbcb1; --fg-3:#86857a;
+  --amber:#f2a93b; --amber-ink:#141412;
+  --g1:#3987e5; --g2:#d95926; --g3:#199e70; --g4:#9085e9;
+  --p1:#5e5d55;
+  --display:"Anybody","Arial Narrow",sans-serif; --body:"Readex Pro","Segoe UI",system-ui,sans-serif; --mono:"Martian Mono","SFMono-Regular",Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){
+  --bg:#f6f5f0; --bg-2:#fdfdfb; --bg-3:#ecebe4; --line:#d8d7cd; --line-2:#c2c1b5;
+  --fg:#17170f; --fg-2:#4d4c43; --fg-3:#7d7c70; --amber:#c97a08; --amber-ink:#fdfdfb;
+  --g1:#2a78d6; --g2:#eb6834; --g3:#1baf7a; --g4:#6250d6; --p1:#a9a89c; color-scheme:light; } }
+:root[data-theme="light"]{
+  --bg:#f6f5f0; --bg-2:#fdfdfb; --bg-3:#ecebe4; --line:#d8d7cd; --line-2:#c2c1b5;
+  --fg:#17170f; --fg-2:#4d4c43; --fg-3:#7d7c70; --amber:#c97a08; --amber-ink:#fdfdfb;
+  --g1:#2a78d6; --g2:#eb6834; --g3:#1baf7a; --g4:#6250d6; --p1:#a9a89c; color-scheme:light; }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-weight:300;font-size:15px;line-height:1.55;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+a{color:inherit}
+.wrap{max-width:1040px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-stretch:75%;font-weight:700;letter-spacing:.005em;text-wrap:balance;margin:0;line-height:1.02}
+h1{font-size:clamp(44px,8vw,86px)}
+h2{font-size:clamp(26px,3.6vw,38px);margin-bottom:6px}
+h3{font-size:18px;font-stretch:87.5%;font-weight:600;line-height:1.2}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-3)}
+p{max-width:64ch;margin:0}
+.lede{font-size:17px;color:var(--fg-2);max-width:60ch}
+.mono{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+section{padding-block:48px 0}
+.sec-head{display:flex;flex-direction:column;gap:6px;margin-bottom:22px}
+.sec-head p{color:var(--fg-2)}
+header.top{padding-block:40px 8px;border-bottom:1px solid var(--line)}
+.facts{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:22px;font-family:var(--mono);font-size:12px;color:var(--fg-2)}
+.facts b{color:var(--fg);font-weight:600;font-variant-numeric:tabular-nums}
+.facts i{font-style:normal;color:var(--amber)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12px;color:var(--fg-2);margin-top:12px;align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block}
+.sw.hatch{background:repeating-linear-gradient(135deg,var(--p1) 0 3px,transparent 3px 6px);border:1px solid var(--p1)}
+.board{overflow-x:auto;border:1px solid var(--line);background:var(--bg-2);border-radius:6px}
+.board svg{display:block;min-width:960px;width:100%;height:auto}
+svg text{font-family:var(--body);font-weight:400}
+.tip{position:fixed;z-index:20;pointer-events:none;background:var(--bg-3);color:var(--fg);border:1px solid var(--line-2);border-radius:6px;padding:10px 12px;max-width:300px;font-size:13px;line-height:1.4;box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;transition:opacity .12s}
+.tip b{display:block;font-family:var(--display);font-stretch:87.5%;font-weight:600;font-size:15px;margin-bottom:4px}
+.tip .k{color:var(--fg-3);font-family:var(--mono);font-size:11px}
+/* critical path */
+.path{display:grid;grid-template-columns:120px 1fr;gap:0 18px;position:relative}
+.path .d{font-family:var(--mono);font-size:12px;color:var(--amber);padding-block:11px;text-align:right;font-variant-numeric:tabular-nums}
+.path .t{padding-block:10px 10px;padding-left:22px;border-left:2px solid var(--amber);position:relative;color:var(--fg-2)}
+.path .t::before{content:"";position:absolute;left:-7px;top:16px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--amber)}
+.path .t b{color:var(--fg);font-weight:500}
+.path .t.beta{border-left-color:transparent}
+.path .t.beta::before{background:var(--amber)}
+/* epic cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:12px}
+.card{background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:8px;min-width:0;position:relative}
+.card .id{font-family:var(--mono);font-size:11px;color:var(--fg-3);display:flex;justify-content:space-between;align-items:center}
+.card .id em{font-style:normal;color:var(--fg-2)}
+.card .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:-1px}
+.card h3{font-size:17px}
+.card p{font-size:13px;color:var(--fg-2);flex:1}
+.card .meta{display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:11px;color:var(--fg-3);gap:8px}
+.sz{display:flex;gap:2px;height:8px;align-items:flex-end}
+.sz i{display:block;width:5px;border-radius:1px;background:var(--fg-3)}
+.card .blk{position:absolute;top:10px;right:12px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:1px 5px}
+.group-h{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin-top:10px}
+.group-h .eyebrow{color:var(--fg-2)}
+.group-h .bar{flex:1;height:1px;background:var(--line)}
+/* decisions */
+.dec{display:grid;grid-template-columns:1fr;gap:0}
+.dec .row{display:grid;grid-template-columns:52px 110px 1fr;gap:14px;padding-block:13px;border-top:1px solid var(--line);align-items:baseline}
+.dec .row:last-child{border-bottom:1px solid var(--line)}
+.dec .b{font-family:var(--mono);font-size:12px;color:var(--amber)}
+.dec .due{font-family:var(--mono);font-size:12px;color:var(--fg-2);font-variant-numeric:tabular-nums}
+.dec .q b{font-weight:500}
+.dec .q span{display:block;color:var(--fg-2);font-size:13px;margin-top:3px}
+/* scope columns */
+.scope{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.scope > div{background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:16px;min-width:0}
+.scope h3{margin-bottom:8px}
+.scope ul{margin:0;padding-left:18px;color:var(--fg-2);font-size:13.5px;display:flex;flex-direction:column;gap:5px}
+.scope .k{font-family:var(--mono);font-size:11px;color:var(--fg-3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+/* capacity */
+.cap{display:grid;grid-template-columns:1fr;gap:4px}
+.cap .r{display:grid;grid-template-columns:230px 1fr 48px;gap:10px;align-items:center;font-size:13px}
+.cap .r .n{color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cap .bar{height:12px;border-radius:0 3px 3px 0;background:var(--g1);position:relative}
+.cap .bar.p1{background:repeating-linear-gradient(135deg,var(--p1) 0 3px,transparent 3px 6px);border:1px solid var(--p1);border-left:0}
+.cap .bars{display:flex;gap:2px;position:relative}
+.cap .v{font-family:var(--mono);font-size:11px;color:var(--fg-3);text-align:right;font-variant-numeric:tabular-nums}
+.cap .axis{grid-column:2;position:relative;height:18px;font-family:var(--mono);font-size:10px;color:var(--fg-3)}
+.cap .axis span{position:absolute;transform:translateX(-50%)}
+.callout{border-left:3px solid var(--amber);padding:10px 16px;background:var(--bg-2);color:var(--fg-2);font-size:14px;max-width:72ch;margin-top:18px}
+.callout b{color:var(--fg);font-weight:500}
+footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--fg-3);display:flex;flex-wrap:wrap;gap:6px 20px}
+footer code{font-family:var(--mono);font-size:11.5px;color:var(--fg-2)}
+@media (max-width:720px){
+  .path{grid-template-columns:78px 1fr;gap:0 10px}
+  .scope{grid-template-columns:1fr}
+  .dec .row{grid-template-columns:44px 1fr;gap:6px 12px}
+  .dec .row .q{grid-column:1/-1}
+  .cap .r{grid-template-columns:120px 1fr 40px}
+}
+@media (prefers-reduced-motion:reduce){ .tip{transition:none} }
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">For one · implementation backlog · written 6 Nov 2026</div>
+  <h1 style="margin-top:10px">The release plan</h1>
+  <p class="lede" style="margin-top:14px">Five build weeks from the pilot gate on 18 November, a paid founding beta from 23 December, the gate read on 26 January, and one season after. Sixteen epics, sequenced by what must exist before the next thing can be built.</p>
+  <div class="facts">
+    <span><b>16</b> epics</span><span><b>164</b> stories <i>+ 27</i> cross-cutting</span><span><b>173</b> P0 · <b>16</b> P1 · <b>2</b> later</span><span>build <b>18 Nov → 22 Dec</b></span><span>beta <b>23 Dec → 26 Jan</b></span><span>freeze <i>19 Dec 12:00</i></span>
+  </div>
+</header>
+
+<section id="timeline">
+  <div class="sec-head">
+    <div class="eyebrow">01 · The board</div>
+    <h2>Fourteen weeks, sixteen epics</h2>
+    <p>Each bar is where an epic's stories land. Hatched means P1: built during the beta behind a flag. Amber marks are the dates nothing can slip past. Hover a bar for the goal.</p>
+  </div>
+  <div class="board" id="gantt"></div>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--g1)"></i>Engine</span>
+    <span><i class="sw" style="background:var(--g2)"></i>What the learner meets</span>
+    <span><i class="sw" style="background:var(--g3)"></i>Business and operations</span>
+    <span><i class="sw" style="background:var(--g4)"></i>The beta itself</span>
+    <span><i class="sw hatch"></i>P1, during the beta</span>
+    <span><i class="sw" style="background:var(--amber);width:4px"></i>Fixed date</span>
+  </div>
+</section>
+
+<section id="critical">
+  <div class="sec-head">
+    <div class="eyebrow">02 · Critical path</div>
+    <h2>The longest chain runs through the call</h2>
+    <p>Nine dated handoffs. A slip on any of them moves 23 December. Three side chains come within days of it: counsel's view on the region, the merchant of record, and who writes the hosts.</p>
+  </div>
+  <div class="path" id="path"></div>
+</section>
+
+<section id="deps">
+  <div class="sec-head">
+    <div class="eyebrow">03 · Dependency map</div>
+    <h2>What has to exist first</h2>
+    <p>Left to right is build order. An arrow means the right-hand epic reads something the left-hand one writes. Nothing on the right can be finished before everything it points back to.</p>
+  </div>
+  <div class="board" id="depmap"></div>
+</section>
+
+<section id="epics">
+  <div class="sec-head">
+    <div class="eyebrow">04 · The epics</div>
+    <h2>Sixteen pieces of work</h2>
+    <p>The bars at the bottom of each card are its stories by size (small, medium, large). An amber tag means a decision only Muath can make is in its way.</p>
+  </div>
+  <div class="cards" id="cards"></div>
+</section>
+
+<section id="decisions">
+  <div class="sec-head">
+    <div class="eyebrow">05 · Blocking decisions</div>
+    <h2>Six answers the build is waiting for</h2>
+    <p>Each has a date the build needs it by and a default the backlog assumes meanwhile. The full list of ten is in the risks file.</p>
+  </div>
+  <div class="dec" id="dec"></div>
+</section>
+
+<section id="scope">
+  <div class="sec-head">
+    <div class="eyebrow">06 · Scope</div>
+    <h2>In, during, and not in the beta</h2>
+  </div>
+  <div class="scope">
+    <div><div class="k">On 23 December · P0</div><h3>In the beta</h3><ul>
+      <li>Sample episode, then Salma's intake, the word check, casting, the pilot and the first call before any account</li>
+      <li>Today, Show, Notebook; the player with Huh?, speeds and tap-to-hear; the article</li>
+      <li>The daily call: hold-to-talk, the word button, recall gaps, the retell, voice-note fallback</li>
+      <li>Chat that ends in three ideas; one swap; the small door; the return episode</li>
+      <li>Private podcast feed, the drop push, one opt-in gap note, rhythm in words</li>
+      <li>After-session pass; notebook with veto and add; wrong-memory fix</li>
+      <li>Weekly proof through the claim gate; the then-and-now recording; seasons with a goal</li>
+      <li>Three plans, 7-day trial on 2 a day, web checkout, founding price lock, one-tap cancel</li>
+      <li>Per-learner keys, consent versions, age gate, deletion and export on the clock, crisis protocol</li>
+      <li>Cost tracing and caps; paging, runbooks, the eval gate, the gates page</li>
+    </ul></div>
+    <div><div class="k">23 Dec → 26 Jan · P1, behind flags</div><h3>During the beta</h3><ul>
+      <li>Round two</li>
+      <li>The season finale with both recordings side by side</li>
+      <li>The tape in the notebook; shadowing</li>
+      <li>Apple and Google sign-in</li>
+      <li>The dial-in experiment</li>
+      <li>The language gate harness and a second-language dry run</li>
+      <li>Metric unlock at 12 test-retest pairs; the external test</li>
+      <li>Billing reconcile; the full offline suite; vendor regression</li>
+    </ul></div>
+    <div><div class="k">After the gate · later</div><h3>Not in the beta</h3><ul>
+      <li>Character creation and the six chassis</li>
+      <li>The scout (news per interest)</li>
+      <li>The observer in the call (first thing after the beta)</li>
+      <li>Languages that have not passed the gate</li>
+      <li>Native apps; paid acquisition; referrals</li>
+      <li>The learner's cloned voice; regional prices</li>
+      <li>Employer seats; human bridges</li>
+      <li><b>Never built, by decision 3:</b> correction notes after the call, the margin note, the polish card</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="capacity">
+  <div class="sec-head">
+    <div class="eyebrow">07 · Capacity</div>
+    <h2>The honest arithmetic</h2>
+    <p>Story sizes counted as half a day, one day and two and a half days. Solid is P0, hatched is P1. Two engineers have about 50 working days before 23 December.</p>
+  </div>
+  <div class="cap" id="cap"></div>
+  <div class="callout"><b>About 110 engineer-days of P0 against 50 available.</b> The plan holds only if the architecture's single-engineer cut lists are applied from day one even with two engineers, the P1 set waits for the beta, and the week 1 and 2 vendor tests are Muath's time rather than engineering time. The Show tab, admin pages, Sign in with Apple and the invites page are already accepted as beta-week-one items. If the week 3 exit (pilot under 45 s, first sentence under 5 minutes) is missed, the beta moves to 6 January. This is risk R1.</div>
+</section>
+
+<footer>
+  <span>Source: <code>backlog/00-release-plan.md</code> · <code>01-epics.md</code> · <code>02-stories/</code> · <code>03-non-functional-stories.md</code> · <code>04-risks-and-blockers.md</code> · <code>stories.csv</code></span>
+  <span>Dates follow the pilot kit: build 18 Nov to 22 Dec, beta 23 Dec to 26 Jan. Architecture build plans dated 2 Nov to 6 Dec are moved forward 16 days.</span>
+</footer>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+const EPICS=[
+ {id:'E01',g:1,name:'Platform foundation',goal:'One repo, staging and production, and the shared services every other epic calls, stood up in the first two weeks.',n:9,s:[3,4,2],p1:0,w:[0,2],blk:'B4'},
+ {id:'E02',g:1,name:'Vendor tests and the language gate',goal:'Choose every voice and speech vendor on measured pilot data, freeze by 27 Nov, make the gate a repeatable test.',n:9,s:[1,6,2],p1:2,w:[0,2],bw:[5,11],blk:'B3'},
+ {id:'E03',g:1,name:'Learner model and event log',goal:'One append-only log and one model of words, structures, errors and quote-backed facts; live roles never write.',n:11,s:[0,7,4],p1:0,w:[0,5]},
+ {id:'E04',g:1,name:'Episode generation pipeline',goal:'A new episode before every drop, at about 95% known words, checked by a second-vendor editor, at a measured cost.',n:13,s:[1,8,4],p1:0,w:[1,5],blk:'B3'},
+ {id:'E05',g:1,name:'The live call',goal:'A 5 to 7 minute argument with a host who answers in about a second, waits for you, and never says you were wrong.',n:13,s:[1,9,3],p1:1,w:[1,5],bw:[5,10]},
+ {id:'E06',g:2,name:'Onboarding: the first ten minutes',goal:'Sound in under a minute, your first sentence inside five, and an account only after you heard yourself.',n:11,s:[1,8,2],p1:1,w:[2,3],bw:[5,8],blk:'B2'},
+ {id:'E07',g:2,name:'The daily loop in the web app',goal:'An installable web app with Today, Show and Notebook and four doors, in your own language, right-to-left included.',n:12,s:[2,6,4],p1:0,w:[0,5],blk:'B1'},
+ {id:'E08',g:2,name:'Private feed, drop and the one cue',goal:'The episode arrives once, where and when you chose, in the app and your podcast app. Nothing else is ever sent.',n:7,s:[3,3,1],p1:0,w:[2,5]},
+ {id:'E09',g:2,name:'After-session assessment',goal:'Within ten minutes of a session the call is re-transcribed verbatim, errors classified, the model updated.',n:10,s:[1,6,3],p1:0,w:[0,5]},
+ {id:'E10',g:2,name:'Notebook, controls and Salma on demand',goal:'Nothing is hidden: see what the teacher knows and works on, veto or add, fix a wrong memory.',n:9,s:[1,8,0],p1:1,w:[4,5],bw:[5,9]},
+ {id:'E11',g:2,name:'Proof, claim gate, recordings, seasons',goal:'One checked piece of evidence a week, your own voice then and now every four weeks, a finale with the next goal.',n:10,s:[2,6,2],p1:3,w:[0,5],bw:[5,11]},
+ {id:'E12',g:3,name:'Plans, trial and payments',goal:'Three plans by episodes a day, a 7-day trial with no card, founding members keep their price, cancel in one tap.',n:9,s:[4,4,1],p1:1,w:[2,5],bw:[6,9],blk:'B5'},
+ {id:'E13',g:3,name:'Privacy, security and compliance',goal:'Per-learner keys, consent with versions, deletion and export on the clock, counsel’s answers loaded before day one.',n:12,s:[3,7,2],p1:0,w:[0,5],blk:'B4'},
+ {id:'E14',g:3,name:'Cost tracing and vendor control',goal:'Every model, voice and speech call a priced row from the first test render; the exit cost is a query.',n:8,s:[2,6,0],p1:0,w:[0,5]},
+ {id:'E15',g:3,name:'Evals, observability and operations',goal:'Scrubbed logs, paging, twelve runbooks, and an eval gate that stops a prompt change from breaking law 7.',n:11,s:[1,9,1],p1:1,w:[0,5],bw:[5,11]},
+ {id:'E16',g:4,name:'Founding beta and season one',goal:'About 50 learners a week into trials from 23 Dec, gates read honestly on 26 Jan, a decision on the day.',n:10,s:[5,4,1],p1:6,w:[5,10],bw:[10,14]},
+];
+const SHORT={E01:'Platform foundation',E02:'Vendor tests, language gate',E03:'Learner model',E04:'Generation pipeline',E05:'The live call',E06:'Onboarding',E07:'Daily loop web app',E08:'Feed and the one cue',E09:'After-session pass',E10:'Notebook and controls',E11:'Proof and seasons',E12:'Plans and payments',E13:'Privacy and security',E14:'Cost tracing',E15:'Evals and operations',E16:'Founding beta'};
+const GC={1:'var(--g1)',2:'var(--g2)',3:'var(--g3)',4:'var(--g4)'};
+const GN={1:'Engine',2:'What the learner meets',3:'Business and operations',4:'The beta itself'};
+// week columns: index 0 = week of 18 Nov (Tue) ... 14 weeks to 23 Feb
+const WEEKS=['18 Nov','25 Nov','2 Dec','9 Dec','16 Dec','23 Dec','30 Dec','6 Jan','13 Jan','20 Jan','27 Jan','3 Feb','10 Feb','17 Feb'];
+const PHASES=[{a:0,b:5,l:'BUILD · W1 to W5'},{a:5,b:10,l:'FOUNDING BETA · cohorts 1 to 5'},{a:10,b:14,l:'SEASON TWO · after the gate'}];
+const MARKS=[{x:0,l:'Pilot gate',d:'18 Nov'},{x:1.3,l:'Vendors frozen',d:'27 Nov'},{x:4.45,l:'Freeze',d:'19 Dec'},{x:5,l:'Beta opens',d:'23 Dec'},{x:6.3,l:'Claim audit',d:'1 Jan'},{x:9,l:'First finales',d:'20 Jan'},{x:9.85,l:'Gate review',d:'26 Jan'}];
+
+const tip=document.getElementById('tip');
+function showTip(e,html){tip.innerHTML=html;tip.style.opacity=1;moveTip(e)}
+function moveTip(e){const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tip.style.left=x+'px';tip.style.top=y+'px'}
+function hideTip(){tip.style.opacity=0}
+const NS='http://www.w3.org/2000/svg';
+function el(n,a,t){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;return e}
+
+/* ---------- Gantt ---------- */
+(function(){
+  const L=232,R=16,T=64,rowH=26,W=1040,cw=(W-L-R)/14,H=T+EPICS.length*rowH+36;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Timeline of sixteen epics across fourteen weeks'});
+  const defs=el('defs');defs.innerHTML=`<pattern id="hp" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.5" height="6" fill="var(--p1)"/></pattern>`;svg.appendChild(defs);
+  // phase bands
+  PHASES.forEach((p,i)=>{svg.appendChild(el('rect',{x:L+p.a*cw,y:0,width:(p.b-p.a)*cw,height:H,fill:i%2?'var(--bg-3)':'transparent',opacity:.5}));
+    const t=el('text',{x:L+p.a*cw+8,y:18,fill:'var(--fg-3)','font-size':10,'letter-spacing':'.1em','font-family':'var(--mono)'},p.l);svg.appendChild(t);});
+  // week grid + labels
+  for(let i=0;i<=14;i++){svg.appendChild(el('line',{x1:L+i*cw,y1:T-18,x2:L+i*cw,y2:H-18,stroke:'var(--line)','stroke-width':1}));
+    if(i<14)svg.appendChild(el('text',{x:L+i*cw+cw/2,y:T-24,'text-anchor':'middle',fill:'var(--fg-2)','font-size':11,'font-family':'var(--mono)'},WEEKS[i]));}
+  // rows
+  EPICS.forEach((ep,i)=>{const y=T+i*rowH;
+    if(i%2)svg.appendChild(el('rect',{x:0,y:y,width:W,height:rowH,fill:'var(--fg)',opacity:.025}));
+    svg.appendChild(el('text',{x:10,y:y+17,fill:'var(--fg-3)','font-size':10.5,'font-family':'var(--mono)'},ep.id));
+    const nm=el('text',{x:40,y:y+17,fill:'var(--fg)','font-size':12},SHORT[ep.id]);svg.appendChild(nm);
+    const bar=el('rect',{x:L+ep.w[0]*cw+1,y:y+6,width:(ep.w[1]-ep.w[0])*cw-2,height:rowH-12,rx:3,fill:GC[ep.g]});svg.appendChild(bar);
+    let hb=null;if(ep.bw){hb=el('rect',{x:L+ep.bw[0]*cw+1,y:y+6,width:(ep.bw[1]-ep.bw[0])*cw-2,height:rowH-12,rx:3,fill:'url(#hp)',stroke:'var(--p1)','stroke-width':1});svg.appendChild(hb);}
+    const hit=el('rect',{x:L,y:y,width:W-L-R,height:rowH,fill:'transparent'});
+    const html=`<b>${ep.id} · ${ep.name}</b>${ep.goal}<div class="k" style="margin-top:6px">${ep.n} stories · ${ep.n-ep.p1} P0${ep.p1?' · '+ep.p1+' P1':''} · ${GN[ep.g]}</div>`;
+    hit.addEventListener('mousemove',e=>{showTip(e,html)});hit.addEventListener('mouseleave',hideTip);svg.appendChild(hit);
+  });
+  // marks
+  MARKS.forEach((m,mi)=>{const x=L+m.x*cw;svg.appendChild(el('line',{x1:x,y1:T-18,x2:x,y2:H-18,stroke:'var(--amber)','stroke-width':1.5,'stroke-dasharray':'3 3'}));
+    const g=el('g');const t=el('text',{x:x+4,y:H-6-(mi%2?12:0),fill:'var(--amber)','font-size':10,'font-family':'var(--mono)'},m.d+' '+m.l);g.appendChild(t);svg.appendChild(g);});
+  document.getElementById('gantt').appendChild(svg);
+})();
+
+/* ---------- Critical path ---------- */
+(function(){
+  const steps=[
+   ['18 Nov','<b>Consent addenda signed; 30 clips through four recognizers.</b> Nothing leaves the building without the pilot learners’ yes. E02-S01, E02-S02'],
+   ['24 Nov','<b>Recognizer and voice tables exist; the minimal call-worker is on staging.</b> E05-S01'],
+   ['27 Nov','<b>Vendors frozen; 50 scripted calls measured.</b> Host reply median under 1.5 s. E02-S05, E02-S04'],
+   ['1 Dec','<b>Governor replayed clean on pilot transcripts; verbatim per turn; first episodes end to end.</b> E05-S02, E05-S03, E04-S07'],
+   ['8 Dec','<b>Salma’s intake and the first call live on real phones.</b> Pilot plays under 45 s after intake. E06-S04, E06-S07'],
+   ['15 Dec','<b>The full call; the after-session pass under ten minutes on live calls.</b> E05-S06 to S11, E09-S06'],
+   ['19 Dec','<b>Freeze at 12:00. Proof and notebook on production.</b> E11-S03, E10-S02'],
+   ['22 Dec','<b>The 15 pilot learners re-onboarded on production; cost per session measured; restore drill done.</b> E06-S11, E14-S08, E01-S09'],
+   ['23 Dec','<b>Cohort 1 invited.</b> E16-S01'],
+  ];
+  const p=document.getElementById('path');
+  steps.forEach((s,i)=>{const d=document.createElement('div');d.className='d';d.textContent=s[0];const t=document.createElement('div');t.className='t'+(i===steps.length-1?' beta':'');t.innerHTML=s[1];p.append(d,t);});
+})();
+
+/* ---------- Dependency map ---------- */
+(function(){
+  const cols=[['E01','E13','E14','E02'],['E03','E04','E05','E15'],['E06','E07','E08','E09'],['E10','E11','E12'],['E16']];
+  const edges=[['E01','E03'],['E01','E04'],['E01','E05'],['E01','E15'],['E13','E03'],['E13','E05'],['E14','E04'],['E02','E04'],['E02','E05'],['E02','E03'],
+    ['E03','E04'],['E04','E05'],['E05','E06'],['E04','E07'],['E04','E08'],['E05','E09'],['E03','E09'],['E15','E09'],['E04','E06'],
+    ['E09','E10'],['E09','E11'],['E07','E10'],['E07','E12'],['E13','E12'],['E08','E11'],['E07','E11'],
+    ['E10','E16'],['E11','E16'],['E12','E16']];
+  const W=1040,H=330,cw=W/5,bw=172,bh=46,pos={};
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Dependency map of the sixteen epics'});
+  const defs=el('defs');defs.innerHTML=`<marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--fg-3)"/></marker>`;svg.appendChild(defs);
+  const labels=['Foundation · W1','Engine · W1 to W2','Learner-facing · W3 to W4','Proof, notebook, plans · W5','Beta · 23 Dec'];
+  cols.forEach((c,ci)=>{svg.appendChild(el('text',{x:ci*cw+cw/2,y:18,'text-anchor':'middle',fill:'var(--fg-3)','font-size':10,'font-family':'var(--mono)','letter-spacing':'.08em'},labels[ci].toUpperCase()));
+    const total=c.length*bh+(c.length-1)*18,y0=(H+22)/2-total/2;
+    c.forEach((id,ri)=>{pos[id]={x:ci*cw+cw/2,y:y0+ri*(bh+18)};});});
+  edges.forEach(([a,b])=>{const A=pos[a],B=pos[b];const x1=A.x+bw/2,y1=A.y+bh/2,x2=B.x-bw/2,y2=B.y+bh/2;const mx=(x1+x2)/2;
+    svg.appendChild(el('path',{d:`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2-3},${y2}`,fill:'none',stroke:'var(--fg-3)','stroke-width':1,opacity:.55,'marker-end':'url(#ar)'}));});
+  EPICS.forEach(ep=>{const P=pos[ep.id];const g=el('g');
+    g.appendChild(el('rect',{x:P.x-bw/2,y:P.y,width:bw,height:bh,rx:4,fill:'var(--bg-3)',stroke:'var(--line-2)'}));
+    g.appendChild(el('rect',{x:P.x-bw/2,y:P.y,width:4,height:bh,rx:2,fill:GC[ep.g]}));
+    g.appendChild(el('text',{x:P.x-bw/2+12,y:P.y+18,fill:'var(--fg-3)','font-size':10,'font-family':'var(--mono)'},ep.id));
+    const nm=SHORT[ep.id];
+    g.appendChild(el('text',{x:P.x-bw/2+12,y:P.y+35,fill:'var(--fg)','font-size':12.5},nm));
+    const html=`<b>${ep.id} · ${ep.name}</b>${ep.goal}`;g.addEventListener('mousemove',e=>showTip(e,html));g.addEventListener('mouseleave',hideTip);svg.appendChild(g);});
+  document.getElementById('depmap').appendChild(svg);
+})();
+
+/* ---------- Epic cards ---------- */
+(function(){
+  const c=document.getElementById('cards');let g=0;
+  EPICS.forEach(ep=>{if(ep.g!==g){g=ep.g;const h=document.createElement('div');h.className='group-h';h.innerHTML=`<span class="dot" style="background:${GC[g]};width:10px;height:10px;border-radius:50%;display:inline-block"></span><span class="eyebrow">${GN[g]}</span><span class="bar"></span>`;c.appendChild(h);}
+    const d=document.createElement('div');d.className='card';
+    const wk=w=>w<5?'W'+(w+1):w<10?'beta':'after';const range=ep.w[0]===4&&ep.w[1]===5?'W5':`${wk(ep.w[0])} → ${wk(ep.w[1]-1)}`;
+    const sz=`<span class="sz" title="${ep.s[0]} small, ${ep.s[1]} medium, ${ep.s[2]} large">${'<i style="height:3px"></i>'.repeat(ep.s[0])}${'<i style="height:6px"></i>'.repeat(ep.s[1])}${'<i style="height:9px"></i>'.repeat(ep.s[2])}</span>`;
+    d.innerHTML=`<div class="id"><span><span class="dot" style="background:${GC[ep.g]}"></span>${ep.id}</span>${ep.blk?`<span class="blk">waits on ${ep.blk}</span>`:''}</div><h3>${ep.name}</h3><p>${ep.goal}</p><div class="meta"><span>${ep.n} stories · ${range}${ep.p1?' · '+ep.p1+' P1':''}</span>${sz}</div>`;
+    c.appendChild(d);});
+})();
+
+/* ---------- Decisions ---------- */
+(function(){
+  const D=[['B1','18 Nov','Web or native for the beta','Default: installable web app plus a private podcast feed; calls screen-on; native after the gates. Blocks the whole client shell (E07, E08).'],
+   ['B2','25 Nov','First-session order','Default: Salma’s talk, optional word check, casting while the pilot renders, pilot, first call, then the account. Blocks E06 and the onboarding call kinds.'],
+   ['B3','25 Nov','Who writes Karim, Mona and Salma','Default: Muath drafts with model help from the pilot bible; a native-speaker editor reviews by 1 Dec. Blocks the writer and host prompts in W2.'],
+   ['B4','24 Nov','Legal view on storing learner voice in AWS me-central-1 or the EU','Default: staging in the EU; the production region is one variable. Blocks production Terraform, the consent copy and the crisis lines.'],
+   ['B5','1 Dec','Merchant of record and payment processor','Default: Stripe test mode until decided. A merchant of record removes per-country tax filing, which matters with no launch country. Blocks checkout in W5.'],
+   ['B6','1 Dec','Confirm the three prices ($19.99 / $29.99 / $44.99)','Default: as costed. The rule holds: no plan loses money at full use at $0.35 a session. Blocks the plan page and the founding price lock.']];
+  const d=document.getElementById('dec');D.forEach(r=>{const e=document.createElement('div');e.className='row';e.innerHTML=`<span class="b">${r[0]}</span><span class="due">by ${r[1]}</span><div class="q"><b>${r[2]}</b><span>${r[3]}</span></div>`;d.appendChild(e);});
+})();
+
+/* ---------- Capacity ---------- */
+(function(){
+  const c=document.getElementById('cap');const days=ep=>ep.s[0]*.5+ep.s[1]*1+ep.s[2]*2.5;
+  const max=24;
+  EPICS.forEach(ep=>{const t=days(ep);const p1=Math.min(t,ep.p1*1.2);const p0=t-p1;const r=document.createElement('div');r.className='r';
+    r.innerHTML=`<span class="n">${ep.id} ${ep.name}</span><span class="bars"><span class="bar" style="width:${p0/max*100}%;background:${GC[ep.g]}"></span>${p1?`<span class="bar p1" style="width:${p1/max*100}%"></span>`:''}</span><span class="v">${t.toFixed(1)}</span>`;c.appendChild(r);});
+  const ax=document.createElement('div');ax.className='axis';[0,5,10,15,20].forEach(v=>{const s=document.createElement('span');s.style.left=(v/max*100)+'%';s.textContent=v+(v===20?' days':'');ax.appendChild(s);});c.appendChild(ax);
+})();
+</script>
