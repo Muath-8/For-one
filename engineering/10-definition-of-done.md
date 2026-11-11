@@ -12,7 +12,7 @@ Part of the For one engineering handbook. Written 2026-11-06. Three checklists: 
 
 **It respects the product**
 - [ ] No law is broken: no points, streaks, levels or "next episode" control; no "you are wrong"; claims only through the gate; nothing cost-related reaches a learner.
-- [ ] Any learner-facing text is in `ui_strings`, in the learner's language first, and reads like Salma, not like a system.
+- [ ] Any learner-facing text is in the native package (`packages/native/<lang>/`), in the learner's language first, and reads like Salma, not like a system.
 
 **It respects the learner's data**
 - [ ] Every new query is learner-scoped and under RLS; every new table has a policy and `learner_id`.
@@ -55,16 +55,16 @@ Part of the For one engineering handbook. Written 2026-11-06. Three checklists: 
 - [ ] Any flag the release depends on is at the intended state and recorded in the manifest.
 - [ ] The handover note mentions it if the on-call changes before the next release.
 
-## 4. The build is done (2026-12-22) when
+## 4. The build is done (the exit, 2027-03-12) when
 
 The beta gate in PRD-v2 19 and architecture 09 D13 own the product criteria. The engineering criteria that sit under them:
 
-- [ ] Every P0 item has a story that met section 1.
+- [ ] Every *Day-1* P0 item has a story that met section 1; every *Later in the beta* P0 item has a story with the beta day the release plan gives it (ADR-24.11).
 - [ ] `calls_50` passes every PRD 15 latency gate on staging two weeks running.
 - [ ] `privacy/verify` has been green for 14 consecutive days on staging with daily synthetic traffic.
 - [ ] The restore drill (week 5) restored staging from a prod-shaped backup in under 30 minutes.
 - [ ] The incident tabletop (week 5) ran and its findings are closed.
-- [ ] The processor register has a signed or accepted DPA for every vendor in `vendors.yaml`, and counsel has answered the region question.
+- [ ] The processor register has a signed or accepted DPA for every vendor in `vendors.yaml`, and counsel has confirmed the region and transfer basis of ADR-24.8 (register A1).
 - [ ] The on-call rota, Better Stack escalation and the twelve runbooks exist and the first on-call has read them.
 - [ ] Cost per session on staging's synthetic traffic is under $0.70 with the chosen voice vendor, and the January price book shows the plan.
 - [ ] Every account in handbook 07 §1 is open, in the company's name, with two-factor on and the engineers as members.

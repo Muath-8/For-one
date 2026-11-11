@@ -36,7 +36,7 @@ apps/workflows/functions/learner_delete.py  @engineer-a @Muath-8
 apps/workflows/functions/learner_export.py  @engineer-a @Muath-8
 apps/workflows/functions/audio_expire.py    @engineer-a @Muath-8
 apps/workflows/functions/privacy_verify.py  @engineer-a @Muath-8
-docs/ropa.md                                @Muath-8
+legal/                                      @Muath-8
 
 # Migrations: an engineer who did not write it
 packages/core/forone/core/migrations/       @engineer-a @engineer-b

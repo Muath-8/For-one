@@ -123,4 +123,4 @@ The host's voice in the call must be the same voice as in the episode (one voice
 | Host reply latency (end of learner turn to first audio) | median ≤ 1.2s, p95 ≤ 2.5s | Conversation, not a machine |
 | Host barge-ins on learner speech | 0 per call | Floor control |
 | Huh? per minute, week 1 vs week 4 | Falling | Comprehension evidence (never shown) |
-| Calls abandoned on the commute (web) | Watched; high values argue for native | Decision 7 |
+| Calls abandoned on the commute (web) | Watched; high values move native earlier | ADR-24.1, GATE-M18 |

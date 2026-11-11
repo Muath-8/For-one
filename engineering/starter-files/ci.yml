@@ -41,7 +41,7 @@ jobs:
               - 'infra/**'
             web:
               - 'apps/web/**'
-              - 'ui_strings/**'
+              - 'packages/native/**'
             versioned:
               - 'packages/languages/**/prompts/**'
               - 'packages/languages/**/rules/**'
@@ -129,7 +129,7 @@ jobs:
         run: |
           uv run forone-package validate packages/languages
           uv run forone-vendors validate packages/adapters/vendors.yaml packages/adapters/prices.yaml
-          uv run forone-vendors check-register packages/adapters/vendors.yaml docs/ropa.md
+          uv run forone-vendors check-register packages/adapters/vendors.yaml legal/05-ropa.md
       - name: No Hume anywhere
         run: |
           ! grep -ri "hume" uv.lock packages/adapters/vendors.yaml

@@ -38,19 +38,19 @@ Sampling is 100% in the beta. At 10,000 learners Langfuse samples to 20% except 
 
 ## 4. The cost-per-session dashboard
 
-`/admin/costs` is the page Muath opens every morning. It reads `vendor_calls` (one row per vendor call, priced from `price_book` at the time of the call) rolled up by `cost/rollup` into `session_costs` and `cost_reports`. Its definition of **cost per session** follows architecture 01 §6 and 08 D1: every vendor call attributable to the learner's day (the episode's production including rewrites and escalations, the call, re-transcription and pronunciation, Salma's notes and chat, the analyst and memory keeper, the proof share, the swap allowance), excluding fixed infrastructure, which is a separate line, and excluding sample episodes, pilots, canaries and vendor tests, which have their own kind ceilings.
+`/admin/costs` is the page Muath opens every morning. It reads `vendor_calls` (one row per vendor call, priced from `price_book` at the time of the call) rolled up by `cost/rollup` into `session_costs` and `cost_reports`. Its definition of **cost per session** follows architecture 01 §6 and 08 D1: every vendor call attributable to the learner's day (the episode's production including rewrites and escalations, the call, re-transcription and pronunciation, Salma (when asked) and chat, the analyst and memory keeper, the proof share, the swap allowance), excluding fixed infrastructure, which is a separate line, and excluding sample episodes, pilots, canaries and vendor tests, which have their own kind ceilings.
 
 What the page shows, top to bottom:
 
 1. **The headline:** trailing 7-day mean cost per daily session against the $0.60 budget, the $0.80 warning and the $1.00 stop line, with the last 28 days as a line. The same number for the 2027-01-01 price book (what today would cost after the Gemini doubling), so the January jump is visible in December.
-2. **Where the money went today:** a stacked bar by role (voice studio, call, teacher and writer, verbatim, notes and chat, after-session, proof, swap) and the same by vendor.
+2. **Where the money went today:** a stacked bar by role (voice studio, call, teacher and writer, verbatim, Salma (when asked) and chat, after-session, proof, swap) and the same by vendor.
 3. **The levers:** batch share of teacher and writer calls, cache hit rate per text role (alarm under 85%), escalation rate from batch (alarm over 20%), average episode minutes, average call minutes, host model in use, `spend_mode`.
 4. **Distribution:** the ten most expensive sessions of the day with the reason column (`retry_storm`, `rewrite_loop`, `long_call`, `cache_miss`, `fallback_standard`) computed by the rollup, and a histogram.
 5. **Today's spend** against the daily cap by environment and by kind (`sample`, `pilot`, `daily`), with the cap formula shown.
 6. **Fixed cost** this month so far (AWS, Vercel, LiveKit, vendor minimums, pulled weekly from the billing APIs where they exist and entered by hand where they do not), divided by sessions, as its own line.
 7. **Reconciliation:** last month's `vendor_calls` sum against each vendor's invoice, variance per vendor, alarm above 5%.
 
-The weekly cost report (Monday 09:00 Riyadh, posted to Slack and stored in `cost_reports`) is the same page as a snapshot plus the stop-line plan text if one is open.
+The weekly cost report (Monday 06:00 UTC, posted to Slack and stored in `cost_reports`) is the same page as a snapshot plus the stop-line plan text if one is open.
 
 ## 5. Alerts
 
@@ -67,7 +67,7 @@ The P1 families, the only ones that ring a phone:
 | Privacy | `privacy.audit_failed` for any window; a break-glass role assumption | R11, incident runbook |
 | Crisis | `crisis.activated` (Slack to Muath at any hour; the in-product protocol has already run) | R10 |
 
-P2 (Slack, within the day): latency budgets missed at p95, `fallback_3_in_7`, `notes_late`, cache hit rate low, vendor error rate over 5%, canary failed, `wrong_memory_rate`, reconciliation variance. P3 (digest at 08:30): everything else, including the nightly's findings.
+P2 (Slack, within the day): latency budgets missed at p95, `fallback_3_in_7`, cache hit rate low, vendor error rate over 5%, canary failed, `wrong_memory_rate`, reconciliation variance. P3 (digest at 06:00 UTC): everything else, including the nightly's findings.
 
 Every alert links a runbook. A rule without a runbook path fails the `package` CI job.
 
@@ -75,7 +75,7 @@ Every alert links a runbook. A rule without a runbook path fails the `package` C
 
 Twelve one-page runbooks in `ops/runbooks/`, each with the same five headings: detect, first five minutes, fix, verify, tell the learner. They are summarised in architecture 09 §4.8 and are copied into the repo as the first ops task of build week 4, with these additions from this handbook:
 
-- **R0 Handover** (`handover.md`): what the outgoing on-call writes on Tuesday at 12:00 Riyadh: open incidents, flags flipped this week, vendor state, anything degraded, the staging lock holder.
+- **R0 Handover** (`handover.md`): what the outgoing on-call writes on Tuesday at 12:00 UTC: open incidents, flags flipped this week, vendor state, anything degraded, the staging lock holder.
 - **R13 Incident** (`incident.md`, from architecture 07 §4.15): the four severities, the `security_incidents` row, the 72-hour regulator clock, who speaks to whom. Rehearsed once in build week 5 as a tabletop.
 - **R14 Deploy went wrong**: rollback with `tools/release rollback`, when a prompt version is the cause (revert the PR, cut again), when a migration is the cause (expand-then-contract means the old image still runs; if it does not, that is the incident).
 
@@ -85,15 +85,15 @@ The two admin actions runbooks rely on, both audited and idempotent: `pull episo
 
 From `ops/oncall.yaml` (architecture 09 §4.11), as policy:
 
-- Weekly rotation, handover Tuesday 12:00 Riyadh. With two engineers, alternate weeks; with one, the engineer every week and Muath as primary on Fridays.
+- Weekly rotation, handover Tuesday 12:00 UTC. With two engineers, alternate weeks; with one, the engineer every week and Muath as primary on Fridays.
 - Escalation to Muath after 15 minutes unacknowledged on P1.
-- Protected hours 05:00 to 08:30 Riyadh: the drop window; a P1 is acknowledged within five minutes. Quiet hours 23:00 to 05:00: only a P1 can page.
-- The 08:30 checklist every morning: `/admin/alerts` clear, every learner's drop published, yesterday's canary green, `/admin/costs` headline, `/admin/privacy` all windows green, the review queue depth, the nightly result.
+- There is no protected hour (architecture 09 D11, ADR-16): learners are in every timezone, so some learner's drop is always near. Only a P1 can page, at any hour; a systemic drop failure (`drops_late_systemic`) escalates by phone; other overnight P1s are held by the product's fallbacks and answered at the next working hour (ADR-24.12). Everything below P1 waits for the next working hour.
+- The first-working-hour checklist every day (architecture 09 §4.10): `/admin/alerts` clear, every learner's drop published, yesterday's canary green, `/admin/costs` headline, `/admin/privacy` all windows green, the review queue depth, the nightly result.
 - A weekly 30-minute ops review on Tuesdays: alerts fired, false positives to tune, flags flipped, cost trend, the review backlog.
 - What the on-call never does alone: flip a vendor back from an understudy outside the release window, change a prompt version in prod, read learner audio without a reason row, send any message to a learner.
-- What is accepted because the team is small: no second responder at night; a P2 found at 02:00 waits for 08:30; both voice vendors down at 03:00 means voice notes until morning.
+- What is accepted because the team is small: no second responder at night; a P2 found at night waits for the next working hour; both voice vendors down at 03:00 means voice notes until morning.
 
-Open for Muath (architecture 09 §10 #1): who is primary in the beta's first three days, whether Muath is the escalation at any hour, and whether the Better Stack on-call plan (about $30 a month) is in the budget.
+Decided 2026-11-12 (ADR-24.12): the one-engineer rota is accepted for the beta as an honest statement; overnight P1s are answered by the product's fallbacks (yesterday's episode stays; voice notes) and by a human at the next working hour, with phone escalation for a systemic drop failure. The Better Stack on-call plan (about $30 a month) is approved. The beta's first three days follow the rota above, with Muath as the escalation.
 
 ## 8. Postmortems
 

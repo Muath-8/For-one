@@ -34,7 +34,8 @@ Conventions: trace ids `episode:{id}`, `call:{id}`, `session:{id}`; span names `
 | ephemeral audio past expiry | any row | yes |
 | revoke not purged in 24 h | any | yes |
 | deletion not complete in 24 h | any | yes |
-| cost per session (7-day mean) | > $0.75 warn (`cost_runaway`, P1); > $1.00 stop line (`cost_stop_line`, P3 plus the ticket) | yes / ticket |
+| cost per session (7-day mean) | > $0.80 (`cost_p50_7d_over_080`, P2); > $1.00 stop line (`cost_stop_line`, P3 plus the ticket) | Slack / ticket |
+| runaway spend | `cost_guard.tripped {level: hard}` for one learner, or the day's spend over the daily cap (`daily_spend_100`): `cost_runaway`, P1 (`architecture/09` D15) | yes |
 | daily spend | > 1.5 × the 7-day mean | yes |
 | batch escalation rate | > 20% | day |
 | editor fail rate | > 15% first pass | day |
@@ -47,7 +48,7 @@ Conventions: trace ids `episode:{id}`, `call:{id}`, `session:{id}`; span names `
 ## 4. Cost controls
 
 - `prices.yaml` is the pull-request surface for every unit price with `valid_from`; the middleware prices each call at write time and stores the row ids used.
-- Spend modes (`tracing.spend_mode()`): `normal`; `conserve` (teacher on Sonnet batch, one rewrite round, batch TTS where offered, no pre-write) when the 7-day mean passes $0.75 or the month's forecast passes budget; `halt` (no new swaps, pilots or samples; dailies and returns proceed) at the $1.00 stop line or a vendor billing anomaly. Flips write `audit_log` and page.
+- Spend modes (`tracing.spend_mode()`): `normal`; `conserve` (batch TTS where offered, one rewrite round, no pre-write, canaries skipped, anonymizer deferred; no model change, ADR-14) at 80% of the daily cap; `halt` (no new swaps, extras, pilots or samples for the rest of the UTC day; dailies, returns and calls proceed) at 100% of the cap. The daily cap is `max(50, Σ plan.episodes_per_day × $1.00)` (ADR-15). The $1.00 stop line changes no mode: it is a P3 ticket that opens Muath's 48-hour plan window (`architecture/08` §4.5.3). Flips write `audit_log` and page.
 - `cost/rollup` fills `session_costs` (with `plan`); `cost/reconcile-spend` runs hourly against vendor dashboards; the weekly report carries "Margin by plan" (net price, measured episodes used, cost per learner-month, break-even at full use: $0.57 / $0.42 / $0.42).
 - Per-learner outliers (cost > 3× median for 3 days) go to the weekly report with the role breakdown.
 - Vendor risk calendar: Gemini price doubling 2027-01-01; ElevenLabs promo ended 2026-10-12; OpenAI TTS deprecation 2027-01-06; Hume voice shutdown 2026-11-13 (not used). The cost model (`tools/cost-model/assumptions.yaml`) is re-run on every price change in CI and the delta posted on the PR.
@@ -59,7 +60,7 @@ Conventions: trace ids `episode:{id}`, `call:{id}`, `session:{id}`; span names `
 
 **Online**: canary episode and canary call on the synthetic learner after every deploy; human review of 10 random episodes per learner per month; blind listening tests (5 native target-language listeners and 5 native-language listeners per voice vendor); the external test (20 to 30 learners, week 0 and week 8) [P1].
 
-**Model pinning**: every role's model id and prompt version in `vendors.yaml` (roles that depend on the target language are keyed by it) and `prompt_versions`; the rater pinned until 2027-02-16, next window from 2027-02-17; a model change triggers calibration re-run and, for the analyst or classifier, `assessment/rebuild`.
+**Model pinning**: every role's model id and prompt version in `vendors.yaml` (roles that depend on the target language are keyed by it) and `prompt_versions`; the rater pinned until 2027-05-11, next window from 2027-05-12; a model change triggers calibration re-run and, for the analyst or classifier, `assessment/rebuild`.
 
 ## 6. Feature flags and kill switches
 

@@ -1,6 +1,6 @@
 # For one: technical design (TDD)
 
-The level below `/architecture/`: what an engineer opens to start coding. Written 2026-11-06 against concept v2, decisions.md (2026-10-23), the nine architecture documents and PRD-v2 (v3.1).
+The level below `/architecture/`: what an engineer opens to start coding. Written 2026-11-06 against concept v2, decisions.md (2026-10-23), the nine architecture documents and PRD-v2 (v3.1). Revised 2026-11-12: the decisions it left owed are taken in ADR-24 (`architecture/10-decision-records.md`); file 10 §B records them.
 
 | File | Area |
 |---|---|
@@ -14,6 +14,6 @@ The level below `/architecture/`: what an engineer opens to start coding. Writte
 | [07-client.md](07-client.md) | routes, state, player, call screen, offline PWA, feed |
 | [08-security-privacy.md](08-security-privacy.md) | keys, isolation, consent, deletion jobs, crisis protocol |
 | [09-observability.md](09-observability.md) | tracing, measures, alarms, cost controls, evals, flags, ops |
-| [10-open-questions.md](10-open-questions.md) | contradictions with the architecture, decisions owed, assumptions |
+| [10-open-questions.md](10-open-questions.md) | contradictions with the architecture (settled), decisions taken under ADR-24, assumptions to measure |
 
 Readable entry page: `technical-design.html` in this folder, published at https://claude.ai/artifact/JQbc7a1UbnSuHGyCgsb8Zk

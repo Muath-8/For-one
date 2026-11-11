@@ -1,6 +1,6 @@
 # 01. Data model
 
-*Postgres 16 with pgvector on RDS Multi-AZ. One database, one schema `forone`, monthly partitions on the two high-volume tables (`events`, `vendor_calls`). SQLAlchemy 2 models in `forone.core.models`, migrations in Alembic. Every table below exists on 2026-12-22 unless tagged [P1].*
+*Postgres 16 with pgvector on RDS Multi-AZ. One database, one schema `forone`, monthly partitions on the two high-volume tables (`events`, `vendor_calls`). SQLAlchemy 2 models in `forone.core.models`, migrations in Alembic. Every table below exists at the build's exit (2027-03-12) unless tagged [P1].*
 
 ## 1. Principles
 
@@ -78,6 +78,9 @@ Column lists are complete. Types are Postgres. `pk` marks the primary key, `fk` 
 | age_attested_at | timestamptz | A1 checkbox |
 | tz | text not null | IANA, from the client; **no default** [DECISION] |
 | native_language, target_language | text not null | BCP-47; select `packages/native/<native_language>/` and `packages/languages/<target_language>/` (ADR-02) |
+| address_form | text | `neutral, masculine, feminine`; default `neutral`; set by the optional chip at A3 or in Controls, never inferred (ADR-24.B26, FR-122) |
+| interface_language | text null | null means use `native_language`; a native package code set in Controls (`PUT /controls`); `GET /v1/package/ui` serves it (architecture 06 §4.3) |
+| theme | text | `dark, light`; default `dark`; set in Controls (ADR-24.22) |
 | residence_country | text | ISO 3166-1, asked at A9 with a country picker, never from IP (ADR-20); selects the crisis resources and the legal regime row |
 | plan | text | mirror of `subscriptions.plan` for cheap allowance reads |
 | invite_id | uuid fk invites | |
@@ -170,7 +173,7 @@ revoke update, delete, truncate on events from forone_app, forone_workflows;
 -- trigger events_immutable() raises unless forone.purge_mode = 'on' (set only inside learner/delete)
 ```
 
-Event types (52) are registered in `forone.core.events.REGISTRY` with a Pydantic payload each; an unknown type is a 422. The full taxonomy, producers and consumers are in `architecture/04 §4.1.1`; the ones every engineer meets: `play, pause, seek, speed, replay_line, huh, tap, keep, mark, call_turn, call_turn_verbatim, talkback, hold_floor, silence, chat_message, idea_shown, idea_chosen, swap, small_door, fact_card_edit, notebook_edit, working_on_edit, claim_shown, consent_change, worth_it_answer, wrong_memory_flag, onboarding_answer, word_check_answer, recording, lm_write`.
+Event types (53) are registered in `forone.core.events.REGISTRY` with a Pydantic payload each; an unknown type is a 422. The full taxonomy, producers and consumers are in `architecture/04 §4.1.1`; the ones every engineer meets: `play, pause, seek, speed, replay_line, huh, tap, keep, mark, feed_heard (the learner's "Heard it" from a feed item; counts toward the active day; idempotent per episode), call_turn, call_turn_verbatim, talkback, hold_floor, silence, chat_message, idea_shown, idea_chosen, swap, small_door, fact_card_edit, notebook_edit, working_on_edit, claim_shown, consent_change, worth_it_answer, wrong_memory_flag, onboarding_answer, word_check_answer, recording, lm_write`.
 
 Ordering: per learner by `(occurred_at, seq)`; client clock skew over 300 s is corrected to `recorded_at` unless the batch is a tagged offline replay. Retention: life of the account; partitions created three months ahead by `retention/daily`. Volume at 10,000 learners: about 60M rows a month [ASSUMPTION].
 
@@ -210,7 +213,7 @@ Owned by `forone.assess`; DDL in `architecture/05 §4.16`. Tables: `session_summ
 |---|---|---|
 | Learner voice (`sse_c_learner`) | S3 `forone-voice`, keys `learners/{lid}/...`; storage-off objects under the bucket-level prefix `ephemeral/learners/{lid}/...` so a lifecycle rule matches them | SSE-C under the learner DEK, or a per-call key `HKDF(DEK, 'call:'||call_id)`; DEK wrapped by the environment's KMS CMK and stored in `learner_keys`; deleting the row makes every object unreadable; served only through `api` |
 | Show audio and text artifacts (`sse_kms_env`) | S3 `forone-media`, keys `learners/{lid}/episodes/{episode_id}/...` | SSE-KMS under the environment key; served by 10-minute presigned URLs (feed enclosures stay proxied because podcast apps cache URLs); deleted by prefix in `learner/delete` before the DEK is destroyed |
-| Exports | S3 `forone-exports` | zip with a one-time passphrase shown once; link valid 7 days |
+| Exports | S3 `forone-exports` | zip with no passphrase; the download is a presigned URL minted on click, valid 15 minutes; the file is kept 7 days (ADR-24.B7) |
 | Postgres | RDS | encryption at rest (KMS), TLS in transit; column-level encryption is not used, isolation is RLS |
 | Secrets | AWS Secrets Manager | vendor keys, VAPID keys, LiveKit API secret; never in env files |
 
@@ -226,8 +229,9 @@ Owned by `forone.assess`; DDL in `architecture/05 §4.16`. Tables: `session_summ
 | `pre_account` learners | 24 h | `pre_account_sweep` |
 | samples | 30 days | `retention/daily` |
 | failed claim candidates | 90 days | `retention/daily` |
-| trial ended, unpaid | 90 days then one email and delete | `retention/daily` |
+| trial ended, unpaid | 90 days then one email (`trial_deleting_soon`, ADR-24.B21) and delete | `retention/daily` |
 | payment events | 7 years | never automatically |
+| `crisis_log` (no content: date, residence country, resource shown, whether the call ended, `host_confirmed`, `learner_declined`; no `reviewed_by` or `false_positive` column, the false-positive rate is computed from the two booleans, ADR-24.B20) | on account deletion the learner id is dropped and the row kept 3 years for annual reporting (ADR-24.B15) | `retention/daily` |
 
 ## 6. Roles
 

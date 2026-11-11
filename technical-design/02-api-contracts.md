@@ -60,7 +60,8 @@ stateDiagram-v2
 | `GET /auth/apple/start`, `POST /auth/apple/callback`, `GET /auth/google/start`, `GET /auth/google/callback` | OIDC; `state` carries the pre-account session id |
 | `POST /auth/signout` | 204 |
 | `POST /handoff/mint`, `POST /handoff/exchange` | PWA install handoff: `{}` → `{h}`; `{h}` → sets cookie; single use, 10 min |
-| `POST /links/exchange` | feed link `{k, episode_id}` → sets a `feed_link` cookie |
+| `POST /links/exchange` | feed link `{k, episode_id}` → sets a `feed_link` cookie (scope: that episode's call, article and host thread; each `k` once, then `410 link_used`) |
+| `POST /links/heard` | "Heard it" from a feed item `{k}` → writes `feed_heard {episode_id}` (idempotent per episode; counts toward the active day), sets no session → 204 |
 
 ### 3.4 The day
 
@@ -72,7 +73,7 @@ stateDiagram-v2
 | `POST /ideas/choose` | pick, remix or tell Salma | `{idea_id|null, source: "pick"|"tell_salma"|"remix", remix?: {topic?, format?, cast?}, salma_text?}` → `{picked: Idea, episode_id}`; `409 cutoff_passed` after the cutoff unless the cutoff episode is still `< writing` |
 | `POST /episodes/next` | episode 2 or 3 of the day (ADR-05) | `{}` → `202 {episode_id, slot}` then `episode.manifest` on the stream (on-demand path, scene 1 first); `409 allowance_used` when `episodes_today >= plan.episodes_per_day`; `409 current_unheard` until the current episode is heard; never autoplayed; sends Inngest `learner.extra_requested {learner_id, local_date, slot, episode_id}` |
 | `GET /episodes/{id}` | episode page | → `EpisodeDoc {episode_id, kind, slot, title, cast, length_s, state, manifest_url, word_index_url, article: {html, read_aloud_url}, call: {state, call_id?}, chat_thread_id, why_url, cover}` |
-| `GET /episodes/{id}/media/{asset}` | `full.mp3`, `seg-{n}.mp3`, `read_aloud.mp3`, `recap.mp3`, `manifest.json`, `word_index.json` | Range; signed, 1 h |
+| `GET /episodes/{id}/media/{asset}` | `episode.m4a`, `scene_{n}.m4a`, `article.m4a`, `recap.m4a`, `manifest.json`, `timings.json`, `word_index.json` (audio names per `architecture/02` mix and 06) | Range; signed, 1 h |
 | `GET /episodes/{id}/why` | "why this episode" | → `{reasons: [{text_native, kind}]}` (2 to 4) |
 | `GET /media/{media_object_id}` | clips, kept recordings, proof | Range; refuses `deleted_at` or ephemeral past expiry |
 | `POST /sessions/{id}/swap` | one swap a day | `{}` → `202 {episode_id}` then `episode.manifest` on the stream; `409 swap_used`, `409 session_started` |
@@ -114,10 +115,10 @@ Internal, for the worker: `GET /internal/calls/{id}/brief` → `CallBundle` (04 
 | `DELETE /notebook/working-on/{id}` | veto → 204; same trigger |
 | `POST /notebook/out-in-world` | `{text, on_date}` → `{item}` |
 | `POST /notebook/wrong-memory` | `{fact_id?, canon_id?, said_by, learner_correction?}` → 204; synchronous fact fix |
-| `GET /controls`, `PUT /controls` | `{drop_time_local?, backup_time_local?, drop_notification?, captions?, transcript_default?, default_speed?, voice_storage?, data_use?, gap_note?, gap_days?, text_size?}` → `ControlsDoc`; each change appends `consent_change` |
+| `GET /controls`, `PUT /controls` | `{address_form?, drop_time_local?, backup_time_local?, drop_notification?, captions?, transcript_default?, default_speed?, voice_storage?, data_use?, gap_note?, gap_days?, text_size?}` → `ControlsDoc`; each change appends `consent_change` |
 | `GET /feed/url`, `POST /feed/reset` | → `{url}` (new token, old revoked) |
 | `POST /push/subscribe`, `DELETE /push/subscribe` | `{subscription, ua_hint}` → 204 |
-| `POST /me/export`, `GET /me/exports` | → `202 {export_id, passphrase}` (shown once); list `[{export_id, state, ready_at, url_expires_at}]` |
+| `POST /me/export`, `GET /me/exports` | → `202 {export_id}` (no passphrase); list `[{export_id, state, ready_at, url_expires_at}]`; the download URL is minted on click and valid 15 minutes; the file is kept 7 days; ready within 72 hours in the beta (ADR-24.B7) |
 | `DELETE /me` | → 202; every later call `410 deleted` |
 | `POST /billing/checkout`, `GET /billing`, `POST /billing/portal` | `{plan: "one_a_day"|"two_a_day"|"three_a_day"}` → `{checkout_url}`; `GET` → `{plan, state, episodes_per_day, current_period_end, founding}` |
 

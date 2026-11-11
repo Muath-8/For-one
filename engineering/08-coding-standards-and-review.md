@@ -19,7 +19,7 @@ Part of the For one engineering handbook. Written 2026-11-06. Most of this is or
 - Next.js 15 App Router, TypeScript strict, ESLint with `next/core-web-vitals`, `@typescript-eslint` strict, and the project's **law-furniture rule** (no streaks, points, levels, badges, "next episode" controls, or progress bars that are not the player's; the banned names list lives in `apps/web/eslint/law-furniture.js` and Muath reviews any extension).
 - No business logic in `web`. The app renders what `api` returns and sends what the learner did. If a rule is needed on both sides (an allowance, a window), `api` is the truth and `web` asks.
 - Generated API client from the committed OpenAPI document; hand-written fetches fail lint.
-- Arabic is the first UI language: every layout is tested right-to-left first; strings come from `ui_strings/ar.yaml` through one `t()` helper; no string literal in JSX that a learner can read.
+- Arabic is the first UI language: every layout is tested right-to-left first; strings come from `packages/native/ar/` through one `t()` helper; no string literal in JSX that a learner can read.
 - Audio and the service worker are the two hard parts; changes there need a reviewer who has run the PWA on a phone.
 
 ## 3. Pull requests
@@ -29,7 +29,7 @@ Part of the For one engineering handbook. Written 2026-11-06. Most of this is or
 - Squash merge; the squash message is the title plus the Why section.
 - Draft until CI is green. A reviewer is asked only when CI is green.
 - A reviewer replies within one working day. A review is a conversation; "request changes" is for a correctness problem, not for taste.
-- The author merges after approval. With one engineer, the exception in handbook 04 §5 applies.
+- The author merges after approval. Until the second engineer starts (ADR-24.11), the exception in handbook 04 §5 applies.
 
 Commit messages inside a PR do not matter (squash), but a commit that touches a prompt file says which version it bumps.
 
@@ -46,7 +46,7 @@ A prompt is code that a reviewer cannot read for correctness, which is why these
 7. **A prompt version rolls back by reverting the PR** and cutting a release. There is no admin prompt editor and there will not be one.
 8. **Bibles are Muath's** (CODEOWNERS): host and Salma bibles change only with his approval, because they are the characters.
 9. **Model changes are prompt changes.** Changing a role's model in `vendors.yaml` runs the same suites; a new model version from a vendor (same name, new weights) is caught by the nightly, and the first weekday after the nightly moves, the on-call opens a PR that re-baselines or rolls the model pin back.
-10. **Consent texts, the privacy notice and crisis resources** are not prompts, but the same discipline applies with counsel as the reviewer: versioned in `ui_strings`, changed only with Muath's approval, never edited for style by an engineer.
+10. **Consent texts, the privacy notice and crisis resources** are not prompts, but the same discipline applies with counsel as the reviewer: versioned in `packages/native/<lang>/`, changed only with Muath's approval, never edited for style by an engineer.
 
 ## 5. What a reviewer checks in this product
 

@@ -51,11 +51,13 @@ Compiled by `forone.core.briefs.compile_call_bundle(call_id)` at `POST /calls` s
 | kind | persona | close / hard end | clarify | recast per turn | nudge | recall gaps | retell | praise |
 |---|---|---|---|---|---|---|---|---|
 | `first` (onboarding A7) | host | 60 s / 90 s | 1, only if meaning lost | 0 | 0 | 0 | 0 | 1 at end |
-| `main` | host | 390 s / 480 s | 3 | 1 | 1 | 2 to 4 | 1 (window 2:00 to 4:30, after ≥1 gap) | 1 |
+| `main` | host | 390 s / 480 s | 3 | 1 | 0 | 2 to 4 | 1 (window 2:00 to 4:30, after ≥1 gap) | 1 |
 | `round_two` [P1] | same host | 120 s / 180 s | 2 | 1 | 0 | 0 to 1 | 1 first | 1 |
 | `onboarding` (A3) | Salma, native language | about 3 min, ≤ 8 Salma turns | own contract | | | | | |
 
-Anxiety mode (prior from last call abandoned, or median learner turn < 4 words in the first 2 min, or two 8 s silences): `nudge = 0`, `recall_gaps_max = 1`, simpler questions, more backchannel; recasts kept.
+The nudge (the "Wait, yesterday you...?" self-repair prompt) is dropped: its budget is 0 in every call kind and the governor rejects it (ADR-24.B23, FR-333).
+
+Anxiety mode (prior from last call abandoned, or median learner turn < 4 words in the first 2 min, or two 8 s silences): `recall_gaps_max = 1`, simpler questions, more backchannel; recasts kept.
 
 ## 4. State machines
 
@@ -74,7 +76,7 @@ stateDiagram-v2
   GOODBYE --> ENDED : line done
   ARGUE --> GOODBYE : learner ✕ (one in-character line)
   ARGUE --> CRISIS : header crisis or keyword
-  CRISIS --> ENDED : resources shown, Salma line
+  CRISIS --> ENDED : host stops, Salma's crisis clip, resources shown
   ARGUE --> GOODBYE : driving phrase
   ARGUE --> FALLBACK : pipeline failure ×2 or room lost > 5 s
   FALLBACK --> ENDED
@@ -98,7 +100,7 @@ stateDiagram-v2
   FLOOR_HELD --> LEARNER_SPEAKING : hold.up (300 ms grace), speech continues
   FLOOR_HELD --> TURN_ENDED : hold.up, silence
   LISTENING --> TALKBACK : talkback.down
-  TALKBACK --> LISTENING : talkback.up, Salma answered
+  TALKBACK --> LISTENING : talkback.up, host gives the word
   HOST_SPEAKING --> LEARNER_SPEAKING : barge-in ≥ interruption_min_ms and ≥ 2 words (host stops, cut text logged)
 ```
 
@@ -119,7 +121,7 @@ sequenceDiagram
   LLM-->>G: "@moves {...}\n" (first ~40 tokens, 100-200 ms)
   G->>G: check(moves, allowances)
   alt violation
-    G->>LLM: system "Do not use: nudge. Reply again." (once, ~600 ms)
+    G->>LLM: system "Do not use: recall_gap. Reply again." (once, ~600 ms)
   end
   LLM-->>TTS: text streamed, flushed per sentence (first . ? ! or 12 words)
   TTS-->>C: audio frames via LiveKit
@@ -144,7 +146,7 @@ A recast is the only correction the learner ever receives, and it is invisible a
 
 ## 7. Talkback (word button)
 
-`talkback.down` opens a recognizer stream with `talkback_stt.languages = [native_language, target_language]` (Soniox for the pilot's `ar` + `en`) for the held window; on `talkback.up` the final text goes to the talkback resolver (`claude-haiku-5-5`, 300 ms budget, with `salma_brief`): if the learner never produced the lemma, Salma gives the word; if they have, a hint first ("you used it Tuesday, about your manager"); `ui.talkback {text_native, word_target, mode}` plays in Salma's voice at a lower level while the host waits. Budget under 2 s. Event `talkback {asked_native, lemma_asked, gave, hint_kind, latency_ms}`.
+`talkback.down` opens a recognizer stream for the learner's **own** language (`talkback_stt.language = native_language`; Soniox for the pilot's `ar`), not the host's recognizer, for the held window; the host waits and the floor is held. On `talkback.up` the final text goes to the talkback resolver (`claude-haiku-5-5`, 300 ms budget, with `salma_brief` as the produced-word history): it returns the target word and a `mode` (`give`, or `hint` when the learner has produced the lemma before). The **host** says the word back in the target language inside its next reply ("A *selection*? Of what?") and carries on; `ui.talkback {text_native, word_target, mode}` shows the word in a small bubble. Salma never speaks in a call (ADR-24.B22, FR-325). Budget under 2 s. Event `talkback {asked_native, lemma_asked, gave, hint_kind, latency_ms}`.
 
 ## 8. Verbatim re-transcription
 
@@ -181,7 +183,7 @@ The learner's own silence window (the endpoint) is reported separately as `silen
 | Two pipeline failures in a row, or room lost > 5 s | worker | `ui.fallback_required`; the client switches to voice notes (`POST /calls/{id}/voicenotes`, host replies as audio via `call/voice-note-reply`); no session lost |
 | Screen lock on iOS Safari | `client.hidden` + audio stall | wake lock requested at start; on stall the client shows "earphones, screen on" once; the worker pauses the clock up to 20 s |
 | Driving phrase | code match on learner final | host says the parked line, `end_reason = driving` |
-| Crisis | header `crisis` or package keyword list on learner final | host stops; Salma's pre-rendered resources line in the native language; `ui.crisis`; `crisis.activated` with ids only; the call ends |
+| Crisis | header `crisis`, or the package keyword list on a learner final (it waits up to 2 s for the host's confirmation and fires anyway if none comes, ADR-24.B12) | the host stops; a pre-recorded clip in the learner's own language, in Salma's voice, says this is an AI that cannot help with this (FR-571; the one exception to Salma's silence in calls, ADR-24.B29), then the screen shows the resources; `ui.crisis`; `crisis.activated` with ids only; the call ends |
 | Learner silent 8 s twice | turn controller | smaller question, then an offer to wrap; anxiety mode |
 | Worker drain on deploy | `drained` | new calls refused inside call windows; running calls finish (hard end 8 min) |
 
@@ -191,4 +193,4 @@ The learner's own silence window (the endpoint) is reported separately as `silen
 
 ## 12. Cost per main call
 
-STT 7 min × 2 streams about $0.015; host Sonnet with cache about $0.05; call TTS about $0.03 (Gemini); talkback and Salma about $0.006; LiveKit 14 participant-minutes about $0.014; worker compute about $0.004: **about $0.12**. Verbatim re-transcription 7 min about $0.028 plus pronunciation $0.008.
+STT 7 min × 2 streams about $0.015; host Sonnet with cache about $0.05; call TTS about $0.03 (Gemini); talkback resolver about $0.006; LiveKit 14 participant-minutes about $0.014; worker compute about $0.004: **about $0.12**. Verbatim re-transcription 7 min about $0.028 plus pronunciation $0.008.

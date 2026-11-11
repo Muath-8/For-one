@@ -4,16 +4,16 @@ import json, re, sys, html
 from pathlib import Path
 import markdown
 
-SRC = Path("/mnt/project-files/architecture")
+SRC = Path(__file__).resolve().parents[2]
 OUT = SRC / "pages"
 HERE = Path(__file__).parent
-URLS = json.loads((HERE / "urls.json").read_text()) if (HERE / "urls.json").exists() else {}
+URLS = json.loads((HERE / "urls.json").read_text(encoding="utf-8")) if (HERE / "urls.json").exists() else {}
 HUB_URL = URLS.get("hub", "#")
 
 STATUS = {
-    "ok":   ("Reviewed twice, revised 2026-11-06", "Both reviews ran, every finding was applied, and the text was reconciled with the 2026-10-23 decisions and the decision records (document 10) on 2026-11-06."),
+    "ok":   ("Reviewed twice, revised 2026-11-12", "Both reviews ran, every finding was applied, and the text was reconciled with the decision records (document 10), including ADR-24 of 2026-11-12, which decided every open item and re-set the beta to 2027-03-17."),
     "one":  ("One review, revised 2026-11-06", "Only the conformance review ran; no skeptic review exists for this document. Its findings and the decision records were applied on 2026-11-06, so the text is current, but it has had one fewer pair of eyes than the others."),
-    "adr":  ("Decision records, written 2026-11-06", "The cross-domain rulings that the nine domain documents were revised to. It records why each ruling was made and what it changed; it has not itself been reviewed."),
+    "adr":  ("Decision records, revised 2026-11-12", "The cross-domain rulings that the nine domain documents were revised to, including ADR-24 (every open item decided on 2026-11-12) and its consistency rulings. It records why each ruling was made and what it changed."),
     "warn": ("Reviewed twice, not revised", "Both reviews found real problems that are not fixed in the text yet."),
     "none": ("Unreviewed first draft", "Nobody has checked this draft yet."),
 }
@@ -26,7 +26,7 @@ DOCS = [
   subgraph Vercel["Vercel, EU edge"]
     W["web<br/>Next.js PWA, no logic"]
   end
-  subgraph AWS["AWS eu-central-1 by default<br/>me-central-1 is the one-day alternative"]
+  subgraph AWS["AWS eu-central-1<br/>final for the beta (ADR-24.8)"]
     A["api<br/>FastAPI on Fargate"]
     WF["workflows<br/>Inngest functions"]
     CW["call-worker<br/>LiveKit Agents"]
@@ -114,7 +114,7 @@ DOCS = [
   Stores --> B["briefs.compile<br/>teacher, writer, host, Salma, chat, proof"]
   Stores -. "rebuild: drop and replay" .-> E"""),
  dict(n="05", slug="05-assessment-and-after-session", short="Assessment and after-session", status="ok",
-      q="What happens in the ten minutes after a session: Salma's notes in 90 seconds, measures by code, and a five-rule gate before any progress claim is shown.",
+      q="What happens in the ten minutes after a session: no notes and no corrections, measures by code, and a five-rule gate before any progress claim is shown.",
       diagram="""flowchart LR
   T["Each learner turn<br/>verbatim re-transcription"] --> CE(["call.ended"])
   CE --> S1["After-session pass, one function, by 10 min<br/>analyst, classify recasts and word uses,<br/>measure, update the model, memory"]
@@ -126,7 +126,7 @@ DOCS = [
   end
   C --> G1
   G5 --> O["Weekly proof, finale,<br/>return episode, teacher brief"]"""),
- dict(n="06", slug="06-client-and-delivery", short="Client and delivery", status="one",
+ dict(n="06", slug="06-client-and-delivery", short="Client and delivery", status="ok",
       q="The installable web app, the private podcast feed and the three messages the product may send, with every rule kept on the server.",
       diagram="""flowchart LR
   subgraph Phone["Learner's phone"]
@@ -166,7 +166,7 @@ DOCS = [
     AD["/admin<br/>every content read logged"]
   end
   subgraph B5["No learner_id column"]
-    RS["Research set<br/>opt-in, anonymized"]
+    RS["Research set<br/>opt-in, pseudonymized"]
   end
   CO["Counsel<br/>edits consent texts, crisis files,<br/>privacy notice, processor register"]
   W --> A
@@ -205,19 +205,19 @@ DOCS = [
   M0[("Milestone 0 files<br/>fixtures")] --> EV["forone.eval<br/>eval-gate in CI"]
   EV --> ER[("eval_runs")]"""),
  dict(n="10", slug="10-decision-records", short="Decision records", status="adr",
-      q="The twenty-two rulings that reconcile the nine domains with the 2026-10-23 decisions: no launch country, monthly USD plans, invisible teaching, the re-dated build, and every name two documents disagreed on.",
+      q="The twenty-four rulings, and ADR-24's consistency rulings, that reconcile the nine domains with the 2026-10-23 decisions: no launch country, monthly USD plans, invisible teaching, the re-dated build, and every name two documents disagreed on.",
       diagram="""flowchart LR
-  D["decisions.md<br/>2026-10-23"] --> ADR["10 Decision records<br/>ADR-01 to ADR-22"]
+  D["decisions.md<br/>2026-10-23"] --> ADR["10 Decision records<br/>ADR-01 to ADR-24"]
   C["concept-v2.md"] --> ADR
-  R["_review-findings.md<br/>17 reviews, second pass 2026-11-06"] --> ADR
+  R["_review-findings.md<br/>18 reviews, last 2026-11-12"] --> ADR
   ADR --> N["No launch country<br/>ADR-02, 03, 20"]
   ADR --> P["Plans and episodes a day<br/>ADR-04, 05, 15, 21"]
   ADR --> I["Invisible teaching<br/>ADR-06"]
   ADR --> T["Dates and operations<br/>ADR-07, 16"]
   ADR --> K["Keys, regions, tracing<br/>ADR-08, 09, 12, 17, 18"]
   ADR --> M["Names and interfaces<br/>ADR-19"]
-  N & P & I & T & K & M --> DOCS["01 to 09 revised 2026-11-06"]
-  ADR --> O["§10 Open for Muath<br/>15 items"]"""),
+  N & P & I & T & K & M --> DOCS["01 to 09 revised 2026-11-12"]
+  ADR --> O["§10 Register<br/>owner actions and measurements"]"""),
 ]
 
 MD_EXT = ["tables", "fenced_code", "sane_lists"]
@@ -310,7 +310,7 @@ def open_items(body):
     return res
 
 def parse_reviews():
-    text = (SRC / "_review-findings.md").read_text()
+    text = (SRC / "_review-findings.md").read_text(encoding="utf-8")
     reviews = {}
     for block in re.split(r"\n(?=## review:)", text):
         m = re.match(r"## review:(\w+):(\S+)", block)
@@ -343,13 +343,13 @@ def reviews_html(doc, revs):
     st = doc["status"]
     if not revs:
         if st == "adr":
-            return ('<div class="nore"><p><strong>This document has not been reviewed.</strong> It was written on 2026-11-06 '
+            return ('<div class="nore"><p><strong>This document has not had its own review.</strong> It was written on 2026-11-06 and revised on 2026-11-12 (ADR-24) '
                     'from the seventeen reviews of the nine domains and the 2026-10-23 decisions; section 9 says how each '
                     'finding was applied, and section 11 of every domain document logs what changed.</p></div>')
         return ('<div class="nore"><p><strong>No review ran on this document.</strong></p></div>')
     out = []
     if st in ("ok", "one"):
-        out.append('<p class="rv-note">These findings were raised against earlier drafts. Every one was applied on 2026-11-06 (see section 11 of the document for what changed), so they are kept here as history.</p>')
+        out.append('<p class="rv-note">These findings were raised against earlier drafts. Every one was applied, the last on 2026-11-12 (see section 11 of the document for what changed), so they are kept here as history.</p>')
     else:
         out.append('<p class="rv-note warnnote">These findings are <strong>not fixed</strong> in the text below. Where a finding names a section, the fix it proposes is the better guide.</p>')
     for rv in revs:
@@ -391,14 +391,14 @@ COST_CHART = """
       <div class="cc-row"><span class="cc-l">Inworld voice</span><div class="cc-bars"><div class="bar now" style="width:56.16%"><b>$0.70</b></div><div class="bar later" style="width:57.36%"><b>$0.72</b></div></div></div>
       <div class="cc-row"><span class="cc-l">ElevenLabs list</span><div class="cc-bars"><div class="bar now" style="width:96.4%"><b>$1.21</b></div><div class="bar later" style="width:97.6%"><b>$1.22</b></div></div></div>
     </div>
-    <div class="cc-key"><span><i class="k now"></i>Beta, standard TTS</span><span><i class="k later"></i>After 2027-01-01 (Gemini prices double)</span></div>
+    <div class="cc-key"><span><i class="k now"></i>Before 2027-01-01, standard TTS</span><span><i class="k later"></i>From 2027-01-01 (Gemini prices double; the whole beta runs at these)</span></div>
   </div>
-  <p class="muted small">Gemini with batch TTS reaches $0.61. The floor at scale is $0.45 at list prices after the doubling, $0.43 with a Sonnet teacher, against a $0.42 break-even on the 2 and 3 a day plans (section 6.5): the voice decision by 2026-11-17 and the contract in 10-decision-records §10 item 5 are the largest cost decisions in the beta.</p>
+  <p class="muted small">Gemini with batch TTS reaches $0.61. The floor at scale is $0.45 at list prices after the doubling, $0.43 with a Sonnet teacher, against a $0.42 break-even on the 2 and 3 a day plans (section 6.5): the voice decision by 2026-11-17 and the voice contract (ADR-24.6, register A7) are the largest cost decisions in the beta.</p>
 </figure>
 """
 
 def read_css():
-    return (HERE / "style.css").read_text()
+    return (HERE / "style.css").read_text(encoding="utf-8")
 
 def page(title, desc_meta, body):
     return f"""<title>{esc(title)}</title>
@@ -413,7 +413,7 @@ def page(title, desc_meta, body):
 """
 
 def build_doc(doc, reviews):
-    text = (SRC / f"{doc['slug']}.md").read_text()
+    text = (SRC / f"{doc['slug']}.md").read_text(encoding="utf-8")
     h1, pre, secs = split_sections(text)
     words = len(text.split())
     secmap = {h.split(".")[0].strip(): (h, b) for h, b in secs}
@@ -436,7 +436,9 @@ def build_doc(doc, reviews):
         full.append(f'<details class="fs" id="{sid}"><summary><h3>{esc(h)}</h3><span class="wc">{len(b.split()):,} words</span></summary><div class="prose">{md(b)}</div></details>')
 
     items_html = "\n".join(
-        f'<li class="oi"><div><h4>{md_inline(t) if t else "Open item"}</h4><div class="oi-b">{md(b)}</div></div></li>' for t, b in items)
+        f'<li class="oi"><div><h4>{md_inline(t) if t else "Item"}</h4><div class="oi-b">{md(b)}</div></div></li>' for t, b in items)
+    if not items:
+        items_html = '<li class="oi"><div class="oi-b">' + md(s10) + '</div></li>'
 
     extra = COST_CHART if doc["n"] == "08" else ""
 
@@ -444,7 +446,7 @@ def build_doc(doc, reviews):
 <div class="page">
 <nav class="crumbs"><a href="{HUB_URL}">For one architecture</a><span>/</span><span>{'Decision records' if doc['n']=='10' else f"Domain {int(doc['n'])} of 9"}</span></nav>
 <header class="hero">
-  <p class="eyebrow">{'Document 10 · Technical architecture · written 2026-11-06' if doc['n']=='10' else f"Domain {doc['n']} · Technical architecture · written 2026-10-16, revised 2026-10-17 and 2026-11-06"}</p>
+  <p class="eyebrow">{'Document 10 · Technical architecture · written 2026-11-06, revised 2026-11-12' if doc['n']=='10' else f"Domain {doc['n']} · Technical architecture · written 2026-10-16, revised 2026-10-17, 2026-11-06 and 2026-11-12"}</p>
   <h1>{esc(h1)}</h1>
   <p class="lede">{esc(doc['q'])}</p>
   <div class="meta">
@@ -481,13 +483,13 @@ def build_doc(doc, reviews):
 </section>
 
 <section class="block" id="open">
-  <h2>Open for Muath</h2>
-  <p class="muted">{'Section 10: the register of everything only you can settle, across all ten documents.' if doc['n']=='10' else 'Section 10. Items shared with other domains point to the register in document 10; the rest are specific to this domain.'}</p>
+  <h2>Section 10: decided items, owner actions, measurements</h2>
+  <p class="muted">{'Section 10: the register. Every decision was taken on 2026-11-12 (ADR-24); what remains is owner actions and numbers the tests produce.' if doc['n']=='10' else 'Section 10. Every item is decided under ADR-24 (2026-11-12); owner actions and measurements point to the register in document 10.'}</p>
   <ol class="openitems">{items_html}</ol>
 </section>
 
 <section class="block" id="build">
-  <h2>Build plan, 2026-11-18 to 2026-12-22</h2>
+  <h2>Build plan (order of work; the dated schedule is backlog/00-release-plan.md, beta opens 2027-03-17)</h2>
   <div class="prose">{md(s7)}</div>
 </section>
 
@@ -506,7 +508,7 @@ def build_doc(doc, reviews):
 
 <footer class="foot">
   <a href="{HUB_URL}">Back to the architecture hub</a>
-  <span class="muted">For one · architecture set, 2026-10-23, revised 2026-11-06</span>
+  <span class="muted">For one · architecture set, 2026-10-23, revised 2026-11-12</span>
 </footer>
 </div>
 <script>
@@ -525,11 +527,11 @@ def main():
     stats = {}
     for d in DOCS:
         title, h, st = build_doc(d, reviews)
-        (OUT / f"{d['slug']}.html").write_text(h)
+        (OUT / f"{d['slug']}.html").write_text(h, encoding="utf-8")
         stats[d["n"]] = dict(title=title, **{k: v for k, v in st.items() if k != "reviews"},
                              review_counts=[(r["lens"], {k: sum(1 for x in r["findings"] if x["sev"] == k) for k in ("blocker","major","minor")}) for r in st["reviews"]])
         print(d["n"], title, len(h), st["decisions"], st["open"])
-    (HERE / "stats.json").write_text(json.dumps(stats, indent=1))
+    (HERE / "stats.json").write_text(json.dumps(stats, indent=1), encoding="utf-8")
 
 if __name__ == "__main__":
     main()

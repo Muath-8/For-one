@@ -17,7 +17,7 @@ Part of the For one engineering handbook. Written 2026-11-06 against architectur
 | `ci.yml` | every PR, every push to `main` | `python`, `web`, `package`, `secrets`, `infra-plan` (if `infra/` changed), `eval-gate` (if versioned paths changed), `image` (main only) | 6 to 10 min; eval-gate adds 2 to 15 |
 | `deploy-staging.yml` | push to `main`, after `ci.yml` is green | migrate, roll services, drain-replace worker, smoke test, Slack | 8 to 12 min |
 | `deploy-prod.yml` | tag `v*` | manifest check, **approval**, migrate, roll, drain-replace (window-checked), canary, Slack; auto-rollback on canary failure | 15 to 25 min |
-| `nightly.yml` | 02:00 Riyadh, Sunday to Thursday | staging up, full eval smoke (`writer`, `editor`, `host` replay half, `analyst`, `notes`, `memory`, `recognizers`), `calls_50` weekly on Wednesday, Terraform drift check, dependency audit, staging down | 40 to 60 min |
+| `nightly.yml` | 02:00 UTC (architecture 09 §4.10; all job times are UTC) | full eval smoke on staging, which stays up (`writer`, `editor`, `host` replay half, `analyst`, `memory`, `recognizers`), `calls_50` weekly on Wednesday, Terraform drift check, dependency audit | 40 to 60 min |
 
 ## 3. Checks on every PR
 
@@ -27,7 +27,7 @@ Part of the For one engineering handbook. Written 2026-11-06 against architectur
 - `ruff check` and `ruff format --check`, including the custom rules: `banned-api` for `resend` and `pywebpush` outside `forone.core.messaging`, for `os.environ` outside `forone.core.settings`, for `boto3` outside `forone.core.media` and `forone.core.keys`, and for any `hume` import.
 - `pyright` strict on `packages/core`, `adapters`, `learner`, `assess`; standard elsewhere until week 4.
 - `import-linter` contracts for the package layering (handbook 01 §3).
-- `pytest` unit with `FORONE_FAKE_VENDORS=1`: every package, under 90 seconds, coverage reported but not gated (a coverage gate on a five-week build produces tests of the wrong things).
+- `pytest` unit with `FORONE_FAKE_VENDORS=1`: every package, under 90 seconds, coverage reported but not gated (a coverage gate on a short build produces tests of the wrong things).
 - `pytest -m integration` against services started with docker compose in the runner: the RLS policy walk (every learner-scoped table, every role, a cross-learner read must return zero rows), migrations up and down on a fresh database, the Inngest payload test (no event model has a field named `text`, `quote`, `transcript`, `audio`), the messaging enum test (exactly eight kinds, three senders), the PII scrub corpus (zero leaks over `eval/fixtures/pii_corpus.jsonl`), the language-literal grep (handbook 01 §4).
 
 **`web`**
@@ -36,9 +36,9 @@ Part of the For one engineering handbook. Written 2026-11-06 against architectur
 
 **`package`**
 
-- Validates every language package: bibles present, every character has a voice for both wired vendors, crisis resources and keywords present, consent texts present in every `ui_strings` file with matching version ids, `ban_list.yaml` schema, every prompt file's frontmatter declares every slot its body uses, `versions.yaml` lists every file under `prompts/` and `rules/`.
+- Validates every language package: bibles present, every character has a voice for both wired vendors, crisis resources and keywords present, consent texts present in every `packages/native/<lang>/` package with matching version ids, `ban_list.yaml` schema, every prompt file's frontmatter declares every slot its body uses, `versions.yaml` lists every file under `prompts/` and `rules/`.
 - Validates `vendors.yaml` against its schema (no `hume`; writer and editor never resolve to the same vendor without a `note`; every `pinned_until` role has an empty fallback) and `prices.yaml` (every role's model has a dated price row; a row older than 120 days warns).
-- Reads `docs/ropa.md` and fails if `vendors.yaml` names a vendor whose register row is not `dpa: signed` or `dpa: clickwrap-accepted`.
+- Reads `legal/05-ropa.md` (ADR-24.B11) and fails if `vendors.yaml` names a vendor whose register row is not `dpa: signed` or `dpa: clickwrap-accepted`.
 
 **`secrets`**
 
@@ -74,7 +74,7 @@ The backend has no preview environments (architecture 01 D14). A PR that needs a
 
 - Pull request required; no direct pushes, including by Muath.
 - Required checks: `python`, `web`, `package`, `secrets`, and `eval-gate` and `infra-plan` when they ran.
-- One approving review from someone other than the author. With one engineer, Muath is the reviewer for prompt and infra changes and the engineer self-merges pure code changes after CI, with the PR left open for an hour for a second look. That exception ends the day a second engineer starts.
+- One approving review from someone other than the author. The plan is two engineers (ADR-24.11; the second working from build start, 2026-11-18, register A2). While there is one, Muath is the reviewer for prompt and infra changes and the engineer self-merges pure code changes after CI, with the PR left open for an hour for a second look. That exception ends the day the second engineer starts.
 - Linear history (squash merge). The squash commit message is the PR title plus the PR body's "Why" section.
 - `CODEOWNERS` (starter file) routes prompt, rule, consent, infra and data-handling paths to the named reviewers.
 

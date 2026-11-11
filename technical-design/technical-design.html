@@ -106,15 +106,16 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
 
 <div class="wrap">
 <header class="top">
-  <div class="eyebrow">Technical design, version 1.1 · 7 November 2026 · aligned with the 23 architecture decision records</div>
+  <div class="eyebrow">Technical design, version 1.2 · aligned with the architecture decision records, ADR-24 included</div>
+  <p class="eyebrow" style="margin-top:6px">Updated 2026-11-12 · every owed decision taken (ADR-24) · beta opens 2027-03-17</p>
   <h1>For one technical design</h1>
   <p class="measure">One private podcast per learner, written overnight at 95% known words, a live call with a host who corrects only by recasting, and a learner model rebuilt from an append-only log. This page is the entry point; the eleven files on GitHub hold every table, endpoint, prompt and state machine.</p>
   <div class="facts">
     <div class="fact"><b>11</b><span>design files, 00 to 10</span></div>
     <div class="fact"><b>4 services</b><span>web · api · workflows · call-worker</span></div>
     <div class="fact"><b>~0.95 s</b><span>host reply design target (gate 1.5 s)</span></div>
-    <div class="fact"><b>$0.64</b><span>per session, beta stack, against $0.60</span></div>
-    <div class="fact"><b>18 Nov → 22 Dec</b><span>five build weeks</span></div>
+    <div class="fact"><b>$0.67 → $0.85</b><span>per session at list, before and after the 1 Jan 2027 Gemini doubling (architecture 08 §6)</span></div>
+    <div class="fact"><b>17 Mar 2027</b><span>beta opens with two engineers from build start (17 Feb with three); build 18 Nov to 12 Mar</span></div>
   </div>
 </header>
 
@@ -129,7 +130,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
     </defs>
     <!-- region frame -->
     <rect x="300" y="18" width="440" height="396" rx="8" class="box" style="fill:none;stroke-dasharray:5 4"/>
-    <text x="316" y="40" class="sm mono muted">AWS home region · eu-central-1 default, me-central-1 alternative, counsel open · VPC, ALB + WAF, RDS Multi-AZ, S3, KMS</text>
+    <text x="316" y="40" class="sm mono muted">AWS home region · eu-central-1, final for the beta (ADR-24.8) · VPC, ALB + WAF, RDS Multi-AZ, S3, KMS</text>
     <!-- client -->
     <rect x="24" y="80" width="200" height="74" rx="6" class="box svc"/>
     <text x="40" y="106" class="md" font-weight="600">apps/web</text>
@@ -162,11 +163,11 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
     <path d="M540 300 h180 v70 h-180 z" class="box store"/>
     <ellipse cx="630" cy="300" rx="90" ry="10" class="box store"/>
     <text x="556" y="330" class="md" font-weight="600">S3 · media, voice, exports</text>
-    <text x="556" y="348" class="sm muted">SSE-C, one data key per learner</text>
+    <text x="556" y="348" class="sm muted">voice SSE-C per learner; show audio SSE-KMS</text>
     <!-- vendors -->
     <g class="md">
       <rect x="800" y="60" width="236" height="46" rx="6" class="box vendor"/><text x="814" y="80" class="md">Anthropic</text><text x="814" y="96" class="sm muted">teacher · writer · host · Salma · analyst</text>
-      <rect x="800" y="116" width="236" height="46" rx="6" class="box vendor"/><text x="814" y="136" class="md">Google Gemini</text><text x="814" y="152" class="sm muted">editor (second vendor) · TTS</text>
+      <rect x="800" y="116" width="236" height="46" rx="6" class="box vendor"/><text x="814" y="136" class="md">Google Gemini</text><text x="814" y="152" class="sm muted">editor (second vendor) · embeddings · TTS</text>
       <rect x="800" y="172" width="236" height="46" rx="6" class="box vendor"/><text x="814" y="192" class="md">Soniox · AssemblyAI</text><text x="814" y="208" class="sm muted">streaming STT · verbatim re-transcription</text>
       <rect x="800" y="228" width="236" height="46" rx="6" class="box vendor"/><text x="814" y="248" class="md">Inworld · ElevenLabs</text><text x="814" y="264" class="sm muted">understudy voices, wired from day one</text>
       <rect x="800" y="284" width="236" height="46" rx="6" class="box vendor"/><text x="814" y="304" class="md">Langfuse · Sentry</text><text x="814" y="320" class="sm muted">pseudonym only; text stays in model_io</text>
@@ -204,7 +205,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
     <div class="mo"><span class="t">overnight</span><h3>Write, fit, check, voice</h3><p>Teacher → writer → fitter (95% known words) → editor (second vendor) → TTS, align, re-listen.</p><span class="b">ready before drop − 90 min</span></div>
     <div class="mo"><span class="t">07:40 local</span><h3>The drop</h3><p>Feed item plus one push with title and length. No other message, ever.</p><span class="b">dropped start &lt; 2 s</span></div>
     <div class="mo"><span class="t">+ 6 min</span><h3>Listen, read, tap</h3><p>Word-synced player, Huh? replays slower, word sheet from a precomputed index.</p><span class="b">sheet &lt; 300 ms · swap &lt; 30 s</span></div>
-    <div class="mo live"><span class="t">+ 7 min</span><h3>Call the host</h3><p>LiveKit room, governor and turn machine, recasts only, talkback to Salma, hold-to-talk.</p><span class="b">connect &lt; 3 s · reply p50 &lt; 1.5 s</span></div>
+    <div class="mo live"><span class="t">+ 7 min</span><h3>Call the host</h3><p>LiveKit room, governor and turn machine, recasts only, hold-to-talk; on the word button the host gives the word back.</p><span class="b">connect &lt; 3 s · reply p50 &lt; 1.5 s</span></div>
     <div class="mo"><span class="t">+ 15 min</span><h3>Re-transcribe verbatim</h3><p>Every learner turn, disfluencies kept; audio deleted at once when voice storage is off.</p><span class="b">audio gone ≤ 15 min</span></div>
     <div class="mo"><span class="t">+ 25 min</span><h3>After-session pass</h3><p>Analyst, classifier, measures, memory keeper, updater, claim gate; stores bumped to a new version.</p><span class="b">complete &lt; 10 min</span></div>
     <div class="mo"><span class="t">weekly</span><h3>The proof</h3><p>Salma speaks only claims that passed the gate. A flat week says so.</p><span class="b">~2 min · evidence, not tests</span></div>
@@ -237,7 +238,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
       <rect x="560" y="280" width="14" height="14" class="bar soft"><title>Editor, counted with the fitter line</title></rect>
       <rect x="740" y="120" width="174" height="174" class="bar"><title>Voice studio $0.217 (batch TTS $0.150, P1)</title></rect><text x="740" y="114" class="mono">$0.217</text>
       <rect x="920" y="291" width="3" height="3" class="bar"/><text x="920" y="286" class="mono">&lt; $0.006</text>
-      <text x="20" y="318" class="mono muted">Pipeline total $0.367 · with batch TTS where offered (P1) $0.300 · Gemini prices double 1 Jan 2027: voice +$0.135</text>
+      <text x="20" y="318" class="mono muted">Pipeline total $0.367 · with batch TTS where offered (P1) $0.300 · Gemini prices double 1 Jan 2027, during the build: voice +$0.135</text>
     </g>
   </svg>
   <p class="cap"><b>Coverage is code.</b> The fitter lemmatizes the script, scores every running unit with the learner's Beta mean (or the frequency prior from the 48-item word check), and fails any sentence holding an unplanned unit below p = 0.5. Prompts, schemas and the algorithm are in <a href="https://github.com/Muath-8/for-one/blob/main/technical-design/03-generation-pipeline.md">03-generation-pipeline.md</a>.</p>
@@ -277,7 +278,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
           <rect x="190" y="80" width="150" height="40" rx="6" class="box"/><text x="202" y="104">host model, cached brief</text>
           <rect x="370" y="80" width="150" height="40" rx="6" class="box svc"/><text x="382" y="104">check @moves header</text>
           <rect x="370" y="160" width="150" height="40" rx="6" class="box"/><text x="382" y="184">TTS, sentence by sentence</text>
-          <rect x="190" y="160" width="150" height="40" rx="6" class="box" style="stroke:var(--amber)"/><text x="202" y="184">"Do not use: nudge. Again."</text>
+          <rect x="190" y="160" width="150" height="40" rx="6" class="box" style="stroke:var(--amber)"/><text x="202" y="184">"Do not use: recall_gap. Again."</text>
         </g>
         <path d="M75 50 V76" class="arrow"/>
         <path d="M150 100 H186" class="arrow"/><text x="154" y="94" class="sm mono muted">operator note</text>
@@ -285,14 +286,14 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
         <path d="M445 120 V156" class="arrow"/><text x="452" y="142" class="sm mono muted">allowed</text>
         <path d="M370 110 H355 V180 H344" class="arrow hot"/><text x="250" y="150" class="sm mono" fill="var(--amber)">violation, once</text>
         <path d="M265 160 V124" class="arrow hot"/>
-        <text x="0" y="230" class="sm mono muted">@moves {"recast":{"heard":"I go","form":"went"},"clarify":false,"nudge":false,...}</text>
+        <text x="0" y="230" class="sm mono muted">@moves {"recast":{"heard":"I go","form":"went"},"clarify":false,...}</text>
         <text x="0" y="248" class="sm muted">You WENT to the derby with your manager? With who else?</text>
       </svg>
     </div>
   </div>
   <div class="ladder">
     <div class="rung"><span class="k">recast</span><p>At most one per learner turn, only on the session's grammar target or an error that blurred meaning, the corrected word stressed inside a reply with its own point. The caption brightens the span for one second with no label. Never in the first call.</p></div>
-    <div class="rung"><span class="k">clarify · nudge · gap</span><p>Three clarification requests, one nudge, two to four recall gaps and one 60 to 90 s retell per main call; anxiety mode (short turns or two 8 s silences) drops the nudge and keeps one gap.</p></div>
+    <div class="rung"><span class="k">clarify · gap · word</span><p>Three clarification requests, two to four recall gaps and one 60 to 90 s retell per main call; no self-repair nudge (ADR-24.B23); anxiety mode (short turns or two 8 s silences) keeps one gap. On the word button the learner's own-language recognizer hears the word and the host says it back; Salma never speaks in a call except the crisis clip (ADR-24.B22, B29).</p></div>
     <div class="rung"><span class="k">verbatim</span><p>Each turn's audio is encoded, stored under a per-call key and transcribed with disfluencies by a second recognizer; the analyst reads only that text. With voice storage off the audio is deleted the moment the transcript lands, and in any case within 15 minutes.</p></div>
     <div class="rung"><span class="k">never</span><p>"You said X, it should be Y", grammar names, praise for grammar, scores. The governor logs a violation, re-requests once, and the offline suite fails the build on a scripted call that produces any of them.</p></div>
   </div>
@@ -342,8 +343,8 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
 </section>
 
 <section id="cost">
-  <div class="sec-head"><span class="num">09</span><h2>Where a session's $0.64 goes</h2>
-    <p class="measure">Measured from <code>vendor_calls</code>, never estimated, once learners exist. The beta budget is $0.60; the stop line is $1.00 with no costed plan; the scale target is $0.35.</p></div>
+  <div class="sec-head"><span class="num">09</span><h2>Where a session's money goes</h2>
+    <p class="measure">Measured from <code>vendor_calls</code>, never estimated, once learners exist. The beta budget is $0.60; the stop line is $1.00 with no costed plan; the scale target is $0.35. These bars are the first pre-doubling estimate; <code>architecture/08</code> §6 is the single home of cost numbers: about $0.85 a session on Gemini after 1 Jan 2027, $0.43 to $0.45 with the levers pulled.</p></div>
   <div class="fig">
     <svg viewBox="0 0 1060 400" role="img" aria-label="Horizontal bars of cost per session by component, with the $0.60 budget and $1.00 stop line marked">
       <g class="sm">
@@ -367,7 +368,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
         <line x1="640" x2="640" y1="30" y2="356" class="mark"/><text x="646" y="42" class="mono" fill="var(--amber)">budget $0.60</text>
         <line x1="667" x2="667" y1="30" y2="356" class="axis" style="stroke:var(--ink)"/><text x="673" y="60" class="mono">total $0.638</text>
         <line x1="920" x2="920" y1="30" y2="356" class="mark" style="stroke:var(--warn)"/><text x="846" y="42" class="mono" fill="var(--warn)">stop line $1.00</text>
-        <text x="0" y="394" class="mono muted">Levers in order: batch TTS where offered (−$0.07, P1) · 5 to 6 min episodes (−$0.03) · Sonnet teacher in conserve mode (−$0.05) · cheapest voice that passes the blind test.</text>
+        <text x="0" y="394" class="mono muted">Levers in order: batch TTS where offered (−$0.07, P1) · 5 to 6 min episodes (−$0.03) · Sonnet teacher as a flag a person flips (−$0.05; no automatic model swap, ADR-14) · cheapest voice that passes the blind test.</text>
       </g>
     </svg>
   </div>
@@ -384,35 +385,36 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
       <tr><td>Three message kinds only</td><td>Only <code>forone.core.messaging</code> may import the email or push client (Ruff banned-api rule); a unit test asserts the enum size.</td></tr>
       <tr><td>No claim without proof</td><td><code>claims.text_native</code> is written by <code>gate()</code> in code and is the only progress sentence any surface may speak.</td></tr>
       <tr><td>Told, not inferred</td><td><code>life_facts.quote_event_id not null</code>; validator refuses a fact whose quote is not in a verbatim or chat event; no enrichment adapters exist.</td></tr>
-      <tr><td>Data is theirs</td><td>Export within 1 h; deletion ends access at once, live purge 24 h, backups 30 d; destroying the learner's data key crypto-shreds all voice.</td></tr>
+      <tr><td>Data is theirs</td><td>Export within 72 h in the beta (1 h once automated), no passphrase, a 15-minute link; deletion by typed "delete" with no grace period ends access at once, live purge 24 h, backups 30 d; destroying the learner's data key crypto-shreds all voice.</td></tr>
       <tr><td>Nothing per country</td><td>No default time zone; <code>native_language</code>, <code>target_language</code> and <code>residence_country</code> columns; two package axes, <code>packages/languages/&lt;target&gt;/</code> and <code>packages/native/&lt;lang&gt;/</code>; USD list prices.</td></tr>
+      <tr><td>Sensitive facts</td><td>Six classes (health, money, relationships, religion, politics, sexuality) are used in the session only, and later only after a one-tap card in the notebook (ADR-24.10, B5).</td></tr>
       <tr><td>Inngest sees pointers</td><td>CI fails any event model with a field named name, email, text, topic, quote, transcript or audio, or a string over 200 chars.</td></tr>
     </tbody>
   </table></div>
 </section>
 
 <section id="weeks">
-  <div class="sec-head"><span class="num">00</span><h2>Five build weeks</h2>
-    <p class="measure">P0 only. Exit on 22 December: every P0 works end to end with the Milestone 0 learners, cost per session measured, and a costed path to $0.35.</p></div>
+  <div class="sec-head"><span class="num">00</span><h2>Build weeks W1 to W5</h2>
+    <p class="measure">Build 18 November 2026 to 12 March 2027; the week dates are in <code>backlog/00-release-plan.md</code>. P0 is split into <b>Day-1</b> (built before the open) and <b>Later in the beta</b> (each with the beta day a learner first reaches it). Exit on 12 March: every Day-1 P0 works end to end, cost per session measured, a costed path to $0.35. The beta opens 17 March 2027 with two engineers from build start (17 February with three), gate review 20 April (ADR-24.11).</p></div>
   <div class="weeks">
-    <div class="wk"><span class="eyebrow">Week 1 · 18 Nov</span><p>Schema and migrations, event ingestion, RLS and roles, adapters with tracing, lexicon and FSRS scheduler, language package skeleton, the 30-clip and 50-call vendor tests.</p><span class="files">01 · 02 · 05 · 09</span></div>
-    <div class="wk"><span class="eyebrow">Week 2 · 25 Nov</span><p>Teacher, writer, fitter, editor and voice studio end to end on test learners; gloss cache; episode state machine; publish.</p><span class="files">03</span></div>
-    <div class="wk"><span class="eyebrow">Week 3 · 2 Dec</span><p>Onboarding A1 to A10 with Salma, Today, player, word sheet, feed, push, payments, account.</p><span class="files">02 · 07</span></div>
-    <div class="wk"><span class="eyebrow">Week 4 · 9 Dec</span><p>Call worker: governor, turn-taking, talkback, hold-to-talk, recorder, verbatim path; voice-note fallback; chat.</p><span class="files">04</span></div>
-    <div class="wk"><span class="eyebrow">Week 5 · 16 Dec</span><p>After-session pass, memory keeper, claim gate, notebook, Controls, simple weekly proof, first then-and-now, deletion and export jobs, crisis protocol.</p><span class="files">05 · 06 · 08</span></div>
+    <div class="wk"><span class="eyebrow">W1</span><p>Schema and migrations, event ingestion, RLS and roles, adapters with tracing, lexicon and FSRS scheduler, language package skeleton, the 30-clip and 50-call vendor tests.</p><span class="files">01 · 02 · 05 · 09</span></div>
+    <div class="wk"><span class="eyebrow">W2</span><p>Teacher, writer, fitter, editor and voice studio end to end on test learners; gloss cache; episode state machine; publish.</p><span class="files">03</span></div>
+    <div class="wk"><span class="eyebrow">W3</span><p>Onboarding A1 to A10 with Salma in order A, Today, player, word sheet, feed, push, payments on Paddle, account.</p><span class="files">02 · 07</span></div>
+    <div class="wk"><span class="eyebrow">W4</span><p>Call worker: governor, turn-taking, the word button, hold-to-talk, recorder, verbatim path; voice-note fallback; chat.</p><span class="files">04</span></div>
+    <div class="wk"><span class="eyebrow">W5</span><p>After-session pass, memory keeper, claim gate, notebook, Controls, simple weekly proof, first then-and-now, deletion and export jobs, crisis protocol.</p><span class="files">05 · 06 · 08</span></div>
   </div>
 </section>
 
 <section id="open">
-  <div class="sec-head"><span class="num">10</span><h2>What the decision records settled, and what is still owed</h2>
-    <p class="measure">The architecture was revised on 6 November with 23 decision records. Three of this design's first stances were overridden and are now corrected; the rest of the list, 21 items, is in the open-questions file.</p></div>
+  <div class="sec-head"><span class="num">10</span><h2>What the decision records settled, and what ADR-24 decided</h2>
+    <p class="measure">The architecture was revised on 6 November with 23 decision records, and on 12 November ADR-24 took every decision this design still owed. What remains is owner actions and measurements, listed in <code>architecture/10</code> §10 and in the open-questions file.</p></div>
   <div class="oq">
     <div class="oq-item"><span class="k">1 · notes · settled</span><p><b>After-call notes, the polish card and the margin note do not exist (ADR-06).</b> The after-session pass is one function inside 10 minutes; corrections are recasts planned by the teacher's echo plan; Salma explains only when asked; a "New for you" card comes only from passed claims.</p></div>
     <div class="oq-item"><span class="k">2 · languages · settled</span><p><b>Two package axes, not pairs (ADR-02).</b> <code>packages/languages/&lt;target&gt;/</code> holds voices, recognizers, lexicon and inventory; <code>packages/native/&lt;lang&gt;/</code> holds interface strings, consent, Salma and crisis resources. The pilot runs on <code>languages/en</code> and <code>native/ar</code>; a target opens by the five-check gate in code.</p></div>
-    <div class="oq-item"><span class="k">3 · plans · settled</span><p><b>Plans <code>one_a_day</code>, <code>two_a_day</code>, <code>three_a_day</code> (ADR-04, ADR-05).</b> Episodes 2 and 3 are <code>daily_extra</code>: planned overnight with the drop, made on demand through <code>POST /v1/episodes/next</code> after the current episode is heard, never autoplayed. Still open: whether an extra gets its own call.</p></div>
-    <div class="oq-item"><span class="k">13 · vendors</span><p><b>Voice and recognizer vendors are open</b> until the blind test, the 30 clips and the 50 calls run in week 1. Defaults: Gemini 3.8 Flash TTS, Soniox, AssemblyAI. Hume is excluded.</p></div>
-    <div class="oq-item"><span class="k">15 · bibles</span><p><b>Nobody has written Karim, Mona and Salma.</b> Week 2 cannot test real voices without them; due before 18 November.</p></div>
-    <div class="oq-item"><span class="k">12 · counsel</span><p><b>Home region defaults to eu-central-1 (ADR-08), me-central-1 the alternative.</b> Counsel's answers on region, transfer basis, regimes covered and crisis lines are due 17 November, before build week 1.</p></div>
+    <div class="oq-item"><span class="k">3 · plans · settled</span><p><b>Plans <code>one_a_day</code>, <code>two_a_day</code>, <code>three_a_day</code> (ADR-04, ADR-05).</b> Episodes 2 and 3 are <code>daily_extra</code>: planned overnight with the drop, made on demand through <code>POST /v1/episodes/next</code> after the current episode is heard, never autoplayed. Each extra gets its own call and chat (ADR-24.21).</p></div>
+    <div class="oq-item"><span class="k">13 · vendors · measured</span><p><b>The blind test, the 30 clips and the 50 calls pick the vendors</b>, on post-doubling prices; no mid-beta voice swap (ADR-24.6). Working stack: Gemini 3.8 Flash TTS, Soniox, AssemblyAI; embeddings on Google's model (ADR-10). Hume is excluded.</p></div>
+    <div class="oq-item"><span class="k">15 · bibles · decided</span><p><b>Drafted in <code>content/bibles/</code> (ADR-24.3).</b> A paid native English editor reads the hosts' bible and Muath reads Salma's Arabic by 1 December.</p></div>
+    <div class="oq-item"><span class="k">12 · region · decided</span><p><b><code>eu-central-1</code> is final for the beta (ADR-24.8).</b> Standard contractual clauses with a transfer impact assessment, never consent; EU and UK GDPR, Saudi PDPL and a generic baseline; payments through Paddle (ADR-24.4). Counsel confirms by 17 November.</p></div>
   </div>
 </section>
 
@@ -430,9 +432,9 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
     <div class="file"><span class="num">07</span><div><h3>Client</h3><p>Routes, state, player, word sheet, call screen, offline PWA, feed and push, onboarding.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/07-client.md">07-client.md</a></div></div>
     <div class="file"><span class="num">08</span><div><h3>Security and privacy</h3><p>Threat model, keys, isolation, consent machine, deletion jobs, crisis protocol, payments, residency.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/08-security-privacy.md">08-security-privacy.md</a></div></div>
     <div class="file"><span class="num">09</span><div><h3>Observability and cost</h3><p>Tracing, measures, alarms, spend modes, offline suite, flags, deploys and on-call.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/09-observability.md">09-observability.md</a></div></div>
-    <div class="file"><span class="num">10</span><div><h3>Open questions</h3><p>Eight conflicts and how the decision records settled them, thirteen decisions owed, seven assumptions to measure.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/10-open-questions.md">10-open-questions.md</a></div></div>
+    <div class="file"><span class="num">10</span><div><h3>Open questions, now decided</h3><p>Eight conflicts and how the decision records settled them, thirteen decisions taken under ADR-24 with the owner actions left, seven assumptions to measure in the beta.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/10-open-questions.md">10-open-questions.md</a></div></div>
   </div>
 </section>
 
-<footer>Written 6 November 2026 against concept v2, decisions.md (23 October), the nine architecture documents and PRD-v2 v3.1; aligned 7 November with architecture/10-decision-records.md (ADR-01 to ADR-22 and the naming rulings). Numbers marked as assumptions in the files are to be replaced by measurements in build weeks 1 and 2.</footer>
+<footer>Written 6 November 2026 against concept v2, decisions.md (23 October), the nine architecture documents and PRD-v2 v3.1; aligned 7 November with architecture/10-decision-records.md (ADR-01 to ADR-22 and the naming rulings); updated 12 November for ADR-24. Numbers marked as assumptions in the files are to be replaced by measurements in build weeks 1 and 2.</footer>
 </div>

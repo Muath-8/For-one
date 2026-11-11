@@ -1,27 +1,29 @@
 # For one: risks and blockers
 
-*Written 2026-11-06. Blockers are decisions only Muath (or counsel) can make; each has a date by which the build needs it, what it blocks, and the default the backlog assumes if no answer comes. Risks are things that could move 23 December or break a gate, with what tests them and the fallback.*
+*Written 2026-11-06; blockers decided 2026-11-12 (ADR-24). Blockers are decisions only Muath (or counsel) can make; each has a date by which the build needs it, what it blocks, and the default the backlog assumes if no answer comes. Risks are things that could move 23 December or break a gate, with what tests them and the fallback.*
 
-## A. Blocking decisions
+## A. Blocking decisions (all decided 2026-11-12)
 
-| Id | Decision | Needed by | Blocks | Default assumed in the backlog | Recommendation |
-|---|---|---|---|---|---|
-| B1 | **Web or native for the beta** | 18 Nov | E07 (the whole client shell), E08 (feed as the lock-screen answer), E01 (Vercel), the beta date | Installable web app plus a private podcast feed plus web checkout; calls screen-on with earphones; native after the beta gates | Web plus feed. One person ships web weeks faster, the feed carries the lock-screen listening that is 60 to 70% of the time, and web keeps about 96% of revenue against 85%. Switch to native early if the beta shows calls dying on the commute |
-| B2 | **First-session order** | 25 Nov | E06-S05 to S07 (word check, casting, pilot, first call), E05-S04 to S05 | Salma's talk, optional word check, casting while the pilot renders, pilot, first call, then the account | Keep the default; it puts sound inside a minute and speech inside five. The only alternative worth testing is the word check after the first call, which the beta can A/B |
-| B3 | **Who writes the hosts (Karim, Mona) and Salma** | 25 Nov, before the writer and host prompts in W2 | E02-S07 (bibles), E04-S02 (writer), E05-S02 (host), E05-S04 (Salma) | Muath drafts with model help from the Milestone 0 bible; a native-speaker editor reviews before 1 Dec; the model writes only the episodes | Hire one writer with a podcast or sitcom background for two weeks (bibles, 30 sample lines per host, Salma's strings) and keep the native-speaker read in the language gate |
-| B4 | **Legal view on storing learner voice in AWS me-central-1 or the EU** | 24 Nov (counsel's yes or no); region final 1 Dec | E01-S05 production apply, E13-S03 consent copy, E13-S08 crisis lines, `docs/ropa.md` transfer basis | Staging in the EU (eu-central-1); production region is a single variable; consent copy drafted from the pilot's 02-consent.md for counsel | Send the six questions on 18 Nov (region and transfer basis, consent copy, crisis lines, California SB 243, subscription and refund rules, under-18 handling). If no answer by 1 Dec, build production in the EU and move later only if counsel requires it |
-| B5 | **Merchant of record and payment processor** | 1 Dec | E12-S04 checkout, E12-S05 to S08, Apple Pay domain file, tax handling | Stripe test mode scaffold; real processor swapped in W5 | A merchant of record (Paddle or Lemon Squeezy class) removes tax filing per country, which matters with no launch country; Stripe if counsel prefers a direct relationship |
-| B6 | **Confirm the three prices** ($19.99 / $29.99 / $44.99) | 1 Dec | E12-S01 plan page, the founding-member lock | The three prices as costed in concept v2 | Confirm. The rule "no plan loses money at full use at $0.35" holds; revisit only if the beta's measured cost stays above $0.42 for 2 and 3 a day |
-| B7 | **Beta countries and invite source** | 15 Dec | E16-S01 invites, the waitlist copy, the external test | Anyone from Muath's network and the sample-episode waitlist, English only | Decide only what the consent and tax need; keep "no launch country" |
-| B8 | **External test choice** (20 to 30 learners at week 0 and week 8) | 23 Dec | E16-S03 | A recognized online test (Duolingo English Test class), about $50 to $250 a sitting | Pick the cheapest recognized test with a speaking section |
-| B9 | **Penetration test budget** (about $5,000 to $10,000) | Before public launch, not the beta | S2 | None in the beta | Budget it for February |
-| B10 | **Second engineer, or the single-engineer cut list** | 18 Nov | Every epic's scope (see risk R1) | Two engineers | Decide on day one; the cut list is written in each architecture document and in `00-release-plan.md` section 5 |
+Muath delegated these on 2026-11-12. Each is recorded in ADR-24 ([architecture/10-decision-records.md](../architecture/10-decision-records.md)); what is left is an owner action (A#) or a measurement (M#) from that document's §10 register.
+
+| Id | Decision | Decided | ADR | Action left |
+|---|---|---|---|---|
+| B1 | Web or native for the beta | Installable web app plus private podcast feed plus web checkout; calls screen-on with earphones; native after the gates or when GATE-M18 fires | 24.1 | none |
+| B2 | First-session order | Order A: Salma's talk, optional word check, casting while the pilot renders, pilot, first call, then the account; the beta may A/B the word check after the first call | 24.2 | none |
+| B3 | Who writes the hosts (Karim, Mona) and Salma | Drafted in `content/bibles/` (this pass); Muath owns them; a paid native English editor reads them by 2026-12-01; Muath reads Salma's Arabic; no outside writer for the beta | 24.3 | A4, A5 |
+| B4 | Region and the legal view on learner voice | `eu-central-1` final for the beta; SCCs with a transfer impact assessment, never consent (24.B13); voice handled at the biometric standard; `me-central-1` only if counsel requires it | 24.8 | A1 (counsel confirms by 2026-11-17) |
+| B5 | Merchant of record and payment processor | Paddle; Stripe with Stripe Tax only if Paddle declines | 24.4 | A6 by 2026-12-02 |
+| B6 | The three prices | $19.99 / $29.99 / $44.99 kept; price rises for post-founding signups on any plan whose margin at measured use is below zero (`two_a_day` $34.99, `three_a_day` $54.99) | 24.5 | M6 |
+| B7 | Beta countries and invite source | Waitlist learners in any country, 18+, under the generic notice, where Paddle sells; English target only | 24.9, 24.20 | none |
+| B8 | External test | Duolingo English Test | 24.19 | A10 |
+| B9 | Penetration test budget | $5,000 to $10,000, February, before public launch | 24.13 | A11 |
+| B10 | Second engineer, or the single-engineer cut list | Two engineer-equivalents; the cut list applies from day one regardless; P0 split into Day-1 and later (release plan §5 and §6); **the beta opens when the Day-1 work is done: 2027-03-17 with two engineers from build start (a week later per week of delay), 2027-02-17 with a third from 2026-12-01, 2027-07-07 with one** | 24.11 | A2 |
 
 ## B. Risks
 
 | Id | Risk | Why it matters | What tests it | Fallback |
 |---|---|---|---|---|
-| R1 | **The P0 set does not fit five weeks** (about 110 engineer-days of P0 against about 50 available for two engineers) | The beta date moves or quality drops | The capacity table in `00-release-plan.md` section 6; the W2 and W3 exit checks | Apply the single-engineer cut lists from day one even with two engineers; move the Show tab, admin pages, Apple sign-in and the invites page to beta week 1; if W3's exit (pilot under 45 s, first sentence under 5 minutes) is missed, move the beta to 6 January and tell the waitlist |
+| R1 | **The P0 set does not fit** (re-counted 2026-11-12: Day-1 P0 136.5 engineer-days after the rulings, later P0 37, against about 41 before the old 2026-12-21 freeze); settled by ADR-24.11, which moves the open to 2027-03-17 with two engineers. The risk that remains is velocity below the sizes | The open date moves again | The capacity table in `00-release-plan.md` section 6; the W2 and W3 exit checks | Apply the single-engineer cut lists from day one even with two engineers; move the Show tab, admin pages, Apple sign-in and the invites page to beta week 1; if W3's exit (pilot under 45 s, first sentence under 5 minutes) is missed, move the beta to 6 January and tell the waitlist |
 | R2 | **Speech-to-text smooths the learner's errors** | The teacher never sees the mistakes it is meant to bring back; invisible teaching then has nothing to work with | E02-S02 (30 clips), E09-S01 error-survival baseline, per-language in the gate | Choose the verbatim vendor on error survival, not accuracy; keep per-turn audio for re-transcription; flag low-confidence turns and never build a claim on them |
 | R3 | **Learners do not fix errors when nobody says "wrong"** | Every lens recommended explicit notes; Muath chose invisible teaching (decision 3). Recasts are the least-noticed feedback | The day-14 pilot recordings and the 4-weekly recordings judged blind: do the errors the show worked on fall? | If an error survives two recordings, the teacher raises how often the right form comes back and how often the host echoes it, still without saying it was wrong; the observer is the first thing to add after the beta |
 | R4 | **The host is too slow** (over 1.5 s median) | The call stops feeling like a conversation | E02-S04 and the W4 and W5 reruns of the 50 calls | Cached brief, the Haiku-host comparison (E14-S06), the runner-up voice for the call, worker placement closer to the vendor |
@@ -41,6 +43,6 @@
 
 1. The pilot gate passes on 18 November, or fails on a claim the build can proceed around.
 2. The architecture documents' build plans are right in content and 16 days early in date; their stale decisions (a Saudi launch, Arabic only, Salma's notes after the call) are overridden by the 23 October decisions and do not appear in the stories.
-3. Two engineers plus Muath, as the architecture assumes; the single-engineer cut lists are applied if not.
+3. Two engineers plus Muath, with the single-engineer cut lists applied from day one, except Terraform (ADR-24.11, 24.B19). The open follows the Day-1 work: 2027-03-17 with two engineers from build start, 2027-02-17 with three, re-forecast every build week.
 4. English is the only target language in the beta; the learner's own language can be any language with interface strings, glosses and a recognizer that catches it mid-sentence.
-5. The exact A4 to A7 order and the bibles' authorship are the two product decisions that most change W2 and W3 work; they are asked for by 25 November.
+5. The A4 to A7 order (order A) and the bibles' authorship (drafted, then read by a native editor) were decided on 2026-11-12 (ADR-24.2, 24.3).

@@ -1,6 +1,6 @@
 # For one: technical design, 00. Overview and module map
 
-*Technical design document (TDD), version 1.1, 2026-11-07 (v1.0 2026-11-06; aligned with the architecture decision records ADR-01 to ADR-22 and the naming rulings in `architecture/10-decision-records.md` §4). The level below the nine architecture documents in `/architecture/`: what an engineer opens to start coding. Where this document and an architecture document disagree, the disagreement is listed in [10-open-questions.md](10-open-questions.md), and the architecture file is left as it is.*
+*Technical design document (TDD), version 1.2, 2026-11-12 (v1.0 2026-11-06; v1.1 2026-11-07, aligned with the architecture decision records ADR-01 to ADR-22 and the naming rulings in `architecture/10-decision-records.md` §4; v1.2 applies ADR-24, the decisions taken on Muath's delegation: region final, Paddle, sensitive facts by confirmation card, the crisis keyword rule, the English inventory from open sources, and the staffing and Day-1 split of ADR-24.11). The level below the nine architecture documents in `/architecture/`: what an engineer opens to start coding. Where this document and an architecture document disagree, the disagreement is listed in [10-open-questions.md](10-open-questions.md), and the architecture file is left as it is.*
 
 ## 0. How to read this set
 
@@ -16,9 +16,9 @@
 | [07-client](07-client.md) | routes, state, offline/PWA, audio | week 3 |
 | [08-security-privacy](08-security-privacy.md) | keys, consent, deletion, isolation, crisis protocol | week 1 and week 5 |
 | [09-observability](09-observability.md) | tracing, evals, alarms, cost controls | week 1 (tracing) onward |
-| [10-open-questions](10-open-questions.md) | contradictions found, decisions still owed | now |
+| [10-open-questions](10-open-questions.md) | contradictions found (settled), decisions taken under ADR-24 | now |
 
-Conventions. `[DECISION]` marks a choice this TDD makes that the architecture left open or that this TDD changes; `[ASSUMPTION]` marks a number nobody has measured; `[P0]`, `[P1]`, `[LATER]` are PRD-v2's priority tags (P0 works on the first beta day, P1 before the gate review, LATER is out of the beta). Dates follow the pilot kit: build 2026-11-18 to 2026-12-22, paid beta from 2026-12-23. The architecture documents still carry the older 2026-11-02 to 2026-12-06 build weeks; the week numbers (1 to 5) are the same, only the calendar moved.
+Conventions. `[DECISION]` marks a choice this TDD makes that the architecture left open or that this TDD changes; `[ASSUMPTION]` marks a number nobody has measured; `[P0]`, `[P1]`, `[LATER]` are PRD-v2's priority tags (P0 is in the beta: the release plan splits it into *Day-1*, reachable in the first beta week, and *Later in the beta*, each with the beta day by which a learner can first reach it, ADR-24.11; P1 before the gate review; LATER is out of the beta). Dates follow `architecture/10-decision-records.md` §6 (ADR-24.11): build 2026-11-18 to 2027-03-12, paid beta from 2027-03-17; the build weeks keep their labels W1 to W5 and their order, and their exact dates are in `backlog/00-release-plan.md`.
 
 ## 1. What the system is, in one paragraph
 
@@ -32,12 +32,12 @@ flowchart LR
     web["apps/web<br/>Next.js 15 PWA"]
     feed["Private podcast feed<br/>(RSS per learner)"]
   end
-  subgraph Edge["AWS home region (HOME_REGION default eu-central-1; me-central-1 the alternative, counsel open)"]
+  subgraph Edge["AWS home region (HOME_REGION eu-central-1, final for the beta, ADR-24.8)"]
     api["apps/api<br/>FastAPI"]
     wf["apps/workflows<br/>FastAPI + Inngest functions"]
     cw["apps/call-worker<br/>LiveKit Agents (Python)"]
     pg[("Postgres 16 + pgvector<br/>RDS Multi-AZ")]
-    s3[("S3: media, voice, exports<br/>SSE-C per learner")]
+    s3[("S3: media, voice, exports<br/>voice SSE-C per learner; show audio SSE-KMS")]
   end
   subgraph Vendors["Vendors behind adapters"]
     llm["Anthropic (teacher, writer, host, Salma, analyst)"]
@@ -106,7 +106,7 @@ flowchart TB
   end
   subgraph Live["Live (call-worker, read-only)"]
     H["Host<br/>Sonnet 5.5, cached brief, effort low"]
-    S["Salma talkback / onboarding<br/>Sonnet 5.5 + Arabic TTS"]
+    S["Salma onboarding (never in calls)<br/>Sonnet 5.5 + Arabic TTS"]
   end
   subgraph After["After the session (workflows, writes the learner model)"]
     VT["Verbatim re-transcription<br/>AssemblyAI / Scribe"] --> A["Analyst<br/>Haiku 5.5, fixed schema"] --> MK["Memory keeper<br/>Haiku 5.5 + rules"] --> U["Updater (code)"] --> CG["Claim gate (code)"]
@@ -196,14 +196,16 @@ forone/
 
 Tooling: `uv`, Ruff, Pyright strict, pytest; `pnpm`, TypeScript strict, Vitest, Playwright. Migrations: Alembic, one revision per PR, `alembic upgrade head` as a one-off ECS task before each deploy. Environments: `dev` (docker-compose: postgres+pgvector, minio, inngest dev server, livekit-server --dev, mailpit), `staging`, `prod`.
 
-## 7. Build order (five weeks, 2026-11-18 to 2026-12-22)
+## 7. Build order (W1 to W5; build 2026-11-18 to 2027-03-12, week dates in `backlog/00-release-plan.md`)
 
 | Week | Lands | TDD files |
 |---|---|---|
 | 1 | schema and migrations; event ingestion; RLS and roles; adapters with tracing; lexicon and FSRS scheduler; language package skeleton; vendor tests (30 clips, 50 calls) | 01, 02, 05, 09 |
 | 2 | teacher, writer, fitter, editor, voice studio end to end on test learners; gloss cache; episode state machine; publish | 03 |
-| 3 | onboarding A1 to A10 with Salma; Today; player; word sheet; feed; push; payments; account | 02, 07 |
+| 3 | onboarding A1 to A10 with Salma; Today; player; word sheet; feed; push; payments on Paddle (ADR-24.4); account | 02, 07 |
 | 4 | call worker: governor, turn-taking, talkback, hold-to-talk, recorder, verbatim path; voice-note fallback; chat | 04 |
 | 5 | after-session pass; memory keeper; claim gate; notebook; Controls; simple weekly proof; first then-and-now; deletion and export jobs; crisis protocol; end-to-end run with Milestone 0 learners | 05, 06, 08 |
 
-Exit on 2026-12-22: every P0 works; measured cost per session from `vendor_calls`; a costed path to $0.35 or less. Beta 2026-12-23 to 2027-01-26 (gate review 2027-01-26); freezes 2026-12-21 12:00 to 12-24 12:00 UTC and 2026-12-31 to 2027-01-02 (ADR-07).
+Staffing and the date (ADR-24.11, `architecture/10` §6): the beta opens when the Day-1 work is done. The plan of record is two engineers from build start (2026-11-18) and an open on **2027-03-17** (2027-02-17 with a third engineer from 2026-12-01). The date is re-forecast at the end of every build week from measured velocity; it moves earlier only in whole weeks and never later without the waitlist being told. The single-engineer cut list applies from day one regardless, except Terraform: a console setup with a runbook is the fallback only if Terraform is not applying by the end of build week 1 (ADR-24.B19).
+
+Exit on 2027-03-12: every Day-1 P0 works (the *Later in the beta* P0 items land by the beta day the release plan gives them); measured cost per session from `vendor_calls`; a costed path to $0.35 or less. Beta from 2027-03-17 (first finales 2027-04-13, gate review 2027-04-20); pre-open freeze 2027-03-15 12:00 to 03-17 12:00 UTC; no releases 2026-12-31 to 2027-01-02, which now falls inside the build (`architecture/10` §6).

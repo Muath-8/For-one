@@ -2,6 +2,8 @@
 
 *Part 1 of 8. Tokens live in tokens.css and tokens.json beside this file. The system formalizes the look the v2 prototype arrived at (night studio, Anybody / Readex Pro / Martian Mono, voice orbs, generated cover art) and adds the light theme, accessibility rules and the component inventory.*
 
+*Revised 2026-11-12: platform notes (§11) follow ADR-24.1 (web plus feed for the beta; native later).*
+
 ## 1. Character
 
 **A night studio with the window open.** The default surface is near-black with a violet cast, so the voice orbs and the episode art are the light in the room. The daylight theme is warm paper, not clinical white. Type does the work illustration would do elsewhere: the display face is condensed and loud on covers and quiet everywhere else. Nothing is a mascot. Nothing is a chip grid.
@@ -126,6 +128,6 @@ Dark is the default because the product is used at 7:40 on a bus and at night in
 
 ## 11. Platform notes
 
-- **Web (PWA):** the tokens are CSS variables; fonts self-hosted; Media Session API for lock-screen metadata and the two custom actions (replay sentence, mark moment); web push on installed PWAs only; the call runs foreground.
-- **Native (if chosen):** tokens.json feeds the theme; the audio session is category playback for episodes and playAndRecord for calls; Now Playing carries the cover; CarPlay / Android Auto get the standard Now Playing only, so the call is never offered in the car UI.
+- **Web (PWA), the beta's platform (ADR-24.1):** the tokens are CSS variables; fonts self-hosted; Media Session API for lock-screen metadata and the two custom actions (replay sentence, mark moment); web push on installed PWAs only; the call runs foreground.
+- **Native (the later path, ADR-24.1: after the beta gates, or earlier if GATE-M18 fires):** tokens.json feeds the theme; the audio session is category playback for episodes and playAndRecord for calls; Now Playing carries the cover; CarPlay / Android Auto get the standard Now Playing only, so the call is never offered in the car UI.
 - Both share the same screens and components; 02 §6 lists the exact differences.

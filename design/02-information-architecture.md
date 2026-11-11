@@ -2,6 +2,8 @@
 
 *Part 2 of 8. What exists, where it lives, and how the learner moves between places. Three destinations, a handful of sheets, and two full-screen modes (player, call) that hide the navigation.*
 
+*Revised 2026-11-12: §6 and §7 record the decisions of ADR-24.1 (web plus feed) and ADR-24.2 (order A); the other variants stay documented as the later or alternative path.*
+
 ## 1. The map
 
 ```
@@ -82,26 +84,28 @@ The tab bar is a three-item bar with text labels, no badges, no counts, no dots.
 
 A per-learner RSS feed (unguessable URL, revocable in Controls) carries each episode's audio and cover. Its episode notes hold one line and a deep link: "Karim wants your take. Open For one to call in." The feed is for the Ears mode on commutes; the call, the article, the chat and the notebook live only in the app. The proof episode is also in the feed. On web-for-beta, this feed is what makes lock-screen play reliable on iPhone.
 
-## 6. Web vs native: what changes in the architecture (open decision 7, both designed)
+## 6. Web vs native: what changes in the architecture (decided: web plus feed, ADR-24.1; native designed as the later path)
 
-| | Web app (PWA) + feed | Native app (one codebase) |
+The beta ships the left column. The right column is the path taken after the beta gates, or earlier if GATE-M18 fires (calls abandoned on the move, or the feed-to-call handoff loses most learners).
+
+| | Web app (PWA) + feed (the beta) | Native app, one codebase (later) |
 |---|---|---|
 | Today, Show, Notebook, Read, Chat, plans | Identical | Identical |
 | Player | Foreground or background via Media Session; lock-screen artwork and replay/mark actions where the browser supports them; the feed covers the rest | Full Now Playing, CarPlay/Android Auto, headphone actions guaranteed |
 | Call | Screen on, earphones recommended; a "keep the screen on" hint before the call; the call pauses if the tab is backgrounded and resumes on return (host: "you still there?") | Hands-free, screen off, accept from the lock screen like a phone call |
 | Drop notification | Web push on installed PWAs; the feed's own new-episode alert | Local notification at the chosen time |
-| Checkout | Web checkout (Stripe-style), keeps ~96% | In-app purchase required for digital goods on iOS (~85%), or web checkout with store rules respected |
+| Checkout | Paddle hosted checkout as merchant of record (ADR-24.4), keeps ~96% | In-app purchase required for digital goods on iOS (~85%), or web checkout with store rules respected |
 | Install | "Add to home screen" shown once after the first call, with a two-step picture | App Store / Play |
 | Offline | Today's episode cached after first play; the notebook cached read-only | Same, plus prefetch at the drop time |
 
 The screens are designed so that the native build adds capabilities and removes hints (the "keep the screen on" hint disappears, the install card disappears); nothing is laid out differently.
 
-## 7. First-session order: two architectures (open, both designed)
+## 7. First-session order: two architectures (decided: order A, ADR-24.2; order B kept as the alternative)
 
-- **Order A (recommended by the UI lens and concept v2):** Open → Salma (3 min) → Casting → Pilot → First call → Keep your show (account, drop time, consent, trial). Sound in under 60 seconds; the account comes after there is something to keep.
-- **Order B (PRD order):** Open → Account → Languages → Salma → Pilot → First call → Drop time and consent. The account first; useful if abandoned sessions with no account turn out to be costly, or if the store requires sign-in before purchase.
+- **Order A (recommended by the UI lens and concept v2; the beta's order, ADR-24.2):** Open → Salma (3 min) → Casting → Pilot → First call → Keep your show (account, drop time, consent, trial). Sound in under 60 seconds; the account comes after there is something to keep.
+- **Order B (PRD order; the alternative, not run in the beta):** Open → Account → Languages → Salma → Pilot → First call → Drop time and consent. The account first; useful if abandoned sessions with no account turn out to be costly, or if the store requires sign-in before purchase.
 
-03-user-flows.md specifies both; 04 screens are shared, only the sequence differs. The onboarding screens are built as independent steps with a configurable order so the pilot can A/B them.
+03-user-flows.md specifies both; 04 screens are shared, only the sequence differs. The onboarding screens are built as independent steps, so order B stays a configuration change if the beta's drop-off at the account step argues for it. The beta runs order A only; the one onboarding A/B it may run is the word check after the first call (ADR-24.2).
 
 ## 8. Object model (what the screens are made of)
 

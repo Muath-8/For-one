@@ -1,6 +1,8 @@
 # For one — 06. Content and voice guidelines (hosts, Salma, interface copy)
 
-*Part 6 of 8. How the three voices on screen speak, what they may never say, and how interface copy is written. The host and Salma "bibles" (full character documents) are still unassigned (open item); this document is the brief for whoever writes them and the rules the product enforces regardless.*
+*Part 6 of 8. How the three voices on screen speak, what they may never say, and how interface copy is written. The host and Salma "bibles" (full character documents) are drafted in `content/bibles/` under ADR-24.3; this document is the brief those drafts follow and the rules the product enforces regardless.*
+
+*Revised 2026-11-12: §7 records ADR-24.3 (who writes what).*
 
 ## 1. The three voices at a glance
 
@@ -55,7 +57,7 @@
 - "Making your first episode."
 - "I'll remember these. You can change or delete any of them, now or later."
 - "Keep my recordings so I can hear my progress. Only for you, delete any time."
-- "Your 7-day trial is on 2 episodes a day. After that it's $29.99 a month unless you pick another plan. Cancel in one tap."
+- "Your 7-day trial is on 2 episodes a day. No card needed. On day 7 you choose a plan." (`trial.line`, ADR-24.B27: the trial takes no card, so the line never implies an automatic charge)
 - "That's today's show. Tomorrow at {time}: {teaser}."
 - "You can have one more episode today."
 - "That's two today. Tomorrow's is ready at {time}."
@@ -72,7 +74,7 @@
 - **Plain words, present tense, no exclamation marks, no emoji in the product** (the single 🎙 glyph is an icon, not emoji; use the icon set).
 - **Numbers only where they are evidence:** lengths, dates, hours, prices. Never counts of things to do.
 - **Time in life terms** where the learner set it that way: "On my commute, 7:40".
-- **Errors** (system only): what happened and the one thing to do. "No connection. Today's episode is ready." "Payment didn't go through. Try again, or later; your show keeps playing for two days."
+- **Errors** (system only): what happened and the one thing to do. "No connection. Today's episode is ready." "Payment didn't go through. Try again, or later; your show keeps playing for seven days." (ADR-24.B2)
 - **Consent** sentences: what is stored, for whom, how to undo. One sentence, unticked.
 - **Pricing copy** states facts: price, per day, per episode, what every plan includes, the tutor comparison, the founding promise. Allowed: "Recommended". Not allowed: "Most popular" (until true), "Best value", "Limited", "Only today", "Don't miss", crossed-out prices, "Save 40%".
 - **Legal and disclosure:** "Karim, Mona and Salma are AI. This show is made for you and nobody else." appears once in onboarding (A7 caption area) and in Controls › About.
@@ -91,5 +93,5 @@
 - A slow week is about what has built up over time; the days missed are never mentioned.
 - The finale sets next season's goal inside the finale, in the learner's own words.
 
-## 7. Who writes what (open)
-The host and Salma bibles, the sting library, the ban lists per language and the translation of Salma's strings need owners before the build starts on Nov 18 (07-open-questions.md #4). The model writes episodes, calls and chats inside those documents; it never writes the documents.
+## 7. Who writes what (decided, ADR-24.3)
+The host and Salma bibles are drafted in `content/bibles/`; the sting library, the ban lists per language and the translation of Salma's strings are owned the same way. Muath is the owner of record. A paid native English editor reads the hosts' bible and 30 sample lines per host by 2026-12-01; Muath reads Salma's Arabic by the same date (register A4, A5 in `architecture/10-decision-records.md` §10). There is no outside writer for the beta; one is hired for season two if episodes feel alike by week 4 (R9). See 07 #4. The model writes episodes, calls and chats inside those documents; it never writes the documents.

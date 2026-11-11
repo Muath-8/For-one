@@ -24,19 +24,19 @@
 **Never:** a carousel, testimonials, a sign-up form.
 
 ## A2. Mic primer
-**Layout:** Salma's 40px orb · "Salma, your producer, will talk with you for 3 minutes. You can talk back or type." · **Talk** (primary) · Type (quiet).
+**Layout:** Salma's 40px orb · "Salma, your producer, will talk with you for 3 minutes. You can talk or type." · **Talk** (primary) · Type (quiet) · under the buttons, in caption size, the notice line "Salma is an AI. Your voice is used only to run this talk and build your show; nothing is kept unless you make an account." with a **Privacy notice** link (ADR-24.B14, PRD FR-111).
 **States:** mic refused (continues as Type; one toast "No mic. You can type, and still hear Salma.") · silent phone (toast "Turn your sound on to hear Salma").
 
 ## A3. Meet Salma
 **Mode:** Voice · **Purpose:** intake as a conversation that shows its work.
-**Layout:** "Salma · producer" label · 120px lilac orb with live captions under it (Readex Pro 20, learner's language, RTL when needed) · "Salma's notes" divider · fact cards sliding in as spoken (quote in mono 12, the fact in body 16, ✎ ✕) · bottom: hold-to-talk pad (shorter, 72px) and a keyboard toggle.
+**Layout:** "Salma · producer" label · 120px lilac orb with live captions under it (Readex Pro 20, learner's language, RTL when needed) · "What you told Salma" divider · fact cards sliding in as spoken (quote in mono 12, the fact in body 16, ✎ ✕) · in a native language with a gendered "you" (Arabic first), an optional address-form chip for how Salma and the interface say "you": masculine, feminine or neutral wording; neutral by default, never inferred, changeable in Controls (ADR-24.B26, FR-122) · bottom: hold-to-talk pad (shorter, 72px) and a keyboard toggle.
 **Components:** voice orb, caption row, fact card, hold pad (short).
 **States:** listening (pad ring breathes) · Salma speaking (pad dims) · typing · network pause (Salma: "One moment." cards stay) · sparse answers (Salma offers two examples once).
 **Copy (Salma, in the learner's language):** "What should Karim and Mona call you?" · "What could you talk about for an hour?" · "What do you need English for?" · "Can I try something? I'll say one line in English. Tell me what you heard, in any language." · "Now say anything back in English. Anything is fine." · "I'll remember these. You can change or delete any of them, now or later."
 **Never:** a form, a progress indicator, a level label.
 
 ## A3b. Word check (optional)
-**Layout:** "Help the show pitch at your level. Tap the words you know." · a flowing cloud of 40 to 60 words in the target language (16, s2 pills; selected becomes s3 with text) incl. 10 fakes · **Done** · Skip (quiet).
+**Layout:** "Want to help me pitch your show just right? 60 seconds: tap the words you know." (FR-113; never "level", ADR-24.B25) · a flowing cloud of 40 to 60 words in the target language (16, s2 pills; selected becomes s3 with text) incl. 10 fakes · **Done** · Skip (quiet).
 **States:** default · skipped.
 **Never:** a score, a count, a level, any feedback on fakes.
 
@@ -56,7 +56,7 @@ Audio only; the Today card beneath is dimmed; a single line of caption in the ho
 
 ## A8. Keep your show
 **Mode:** Eyes · **Purpose:** the account after there is something to keep.
-**Layout:** title "Keep your show?" · Continue with Apple / Google · Use email (quiet) · divider · "When should tomorrow's episode drop?" radios in life terms (On my commute 7:40 · Lunch break · Evening walk · Pick a time) · "How many days a week?" (default "4 days, 2 spare", stepper 2–7) · consent row "Keep my recordings so I can hear my progress. Only for you, delete any time." (unticked) · consent row "Use my transcripts, with my name removed, to improve the teacher." (unticked) · one sentence: "Your 7-day trial is on 2 episodes a day. After that it's $29.99 a month unless you pick another plan. Cancel in one tap." · **Keep my show**.
+**Layout:** title "Keep your show?" · Continue with Apple / Google · Use email (quiet) · divider · "When should tomorrow's episode drop?" radios in life terms (On my commute 7:40 · Lunch break · Evening walk · Pick a time) · "How many days a week?" (default "4 days, 2 spare", stepper 2–7) · consent row "Keep my recordings so I can hear my progress. Only for you, delete any time." (unticked) · one sentence: "Your 7-day trial is on 2 episodes a day. No card needed. On day 7 you choose a plan." (ADR-24.B27) · **Keep my show**.
 **States:** default · email path (one field, magic link) · abandoned (resumes here for 24h) · consent off.
 **Never:** pre-ticked boxes, "free" in large type, a timer.
 
@@ -83,7 +83,7 @@ A sheet: "Tomorrow?" · three cards, each one host line (Karim or Mona orb, the 
 **Never:** a feed, a calendar, a streak, a counter, a badge, more than one Play.
 
 ## B2. Why this episode? (sheet)
-Three to four lines from Salma, each a reason with its source: "You said on Monday the derby was Sunday." · "It brings back 4 words from this week: line-up, bench, …" · "Karim will push you to talk about plans." · "Shorter than usual: you've been busy." · "Not quite right? 🎙 Tell Salma".
+Three to four lines from Salma, each a reason with its source: "You said on Monday the derby was Sunday." · "It brings back 4 words from this week: line-up, bench, …" · "Karim will push you to talk about plans." · "Shorter and lighter today." (FR-741: a reason never comments on the learner's time or days away) · "Something off? 🎙 Tell Salma" (FR-1018; ADR-24.B25).
 **Never:** a target list ("grammar: past simple"), a level.
 
 ## B3. Player
@@ -139,12 +139,12 @@ Full-bleed closing: "That's today's show." (cover style) · "Tomorrow at 7:40: �
 
 ## D. Notebook (home)
 **Mode:** Eyes · **Purpose:** the teacher's file, open to the learner.
-**Layout:** "Notebook" · "Salma's notes on Faisal" (Salma's 40px orb) · **Working on with you** (≤ 3 rows, each with a one-line why and ✕; "add one" quiet) · list rows: About you (14) · Words you own (212) · The tape (3) · Out in the world (4) · Marked moments (9) · Hours (41 heard · 6 spoken) · Controls ›.
+**Layout:** "Notebook" · "Kept by Salma, for Faisal" (Salma's 40px orb) · **Working on with you** (≤ 3 rows, each with a one-line why and ✕; "add one" quiet) · list rows: About you (14) · Words you own (212) · The tape (3) · Out in the world (4) · Marked moments (9) · Hours (41 heard · 6 spoken) · Controls ›.
 **States:** week 1 (About you has 3 cards; Words you own empty: Salma "Words you've used on your own, twice, in different days. They'll show up here." ; The tape: "Your first recording is at the end of season 1.") · normal · offline (read-only, "saved" when back).
 **Never:** charts, percentages, levels, CEFR, a goal bar, a mistakes list.
 
 ## D1. About you
-Fact cards: the fact (16), "you said on Oct 3: '…'" (mono 12 quote), ✎ ✕. Unconfirmed facts have a dashed border and start "I think…"; a tap confirms or deletes. Sensitive facts (health, religion, politics, money) carry a lock glyph and the line "only if you bring it up".
+Fact cards: the fact (16), "you said on Oct 3: '…'" (mono 12 quote), ✎ ✕. Unconfirmed facts have a dashed border and start "I think…"; a tap confirms or deletes. Sensitive facts (health, money, relationships, religion, politics, sexuality; ADR-24.B5) carry a lock glyph and the line "only if you bring it up".
 **States:** normal · empty (never: at least the three onboarding facts) · deleted (gone at once; no "are you sure").
 
 ## D2. Words you own
@@ -165,7 +165,7 @@ Sentence + audio from headphone "next" presses; each can be kept as a word or de
 "41 hours heard · 6 hours spoken" (display 28) · "Since September." · nothing else. Cumulative, never a bar.
 
 ## D7. Controls (sheet)
-Rows: Drop time (7:40, On my commute) · Drop notification (on/off) · Rhythm ("4 days, 2 spare") · Captions on calls · Transcript in the player (open / folded) · Default speed · Keep my recordings (with "Delete all recordings") · Theme (System / Dark / Light) · Reading size · Interface language · Plan (2 a day · $29.99 · renews Dec 12 · Change · **Cancel**) · See, export, delete my data › · Sign out.
+Rows: Drop time (7:40, On my commute) · Drop notification (on/off) · Rhythm ("4 days, 2 spare") · Captions on calls · Transcript in the player (open / folded) · Default speed · Keep my recordings (with "Delete all recordings") · Theme (System / Dark / Light) · Reading size · Interface language · Address form (neutral / masculine / feminine; only in native languages with a gendered "you", ADR-24.B26) · Plan (2 a day · $29.99 · renews Dec 12 · Change · **Cancel**) · See, export, delete my data › · Sign out.
 **Never:** more than one screen of settings; host or topic settings (those are sentences to Salma).
 
 ---
@@ -184,11 +184,11 @@ Salma's invitation card → recording screen (one task at a time, the prompt in 
 
 ## H. Plans
 "Your plan" · three cards side by side on wide, stacked on phone (1 a day $19.99 · **2 a day $29.99 Recommended** · 3 a day $44.99), each with "about $1 a day" style line (mono), per-episode price, episodes a month · beneath: "Every plan: listen again as often as you like, the article, the chat, round two." · "A tutor is about $160 a month for two lessons a week." · founding line if applicable · **Choose** on each · "Cancel in one tap, any time."
-**States:** trial active (the current plan says "your trial") · chosen · founding (price locked line) · payment failed (warn line, retry).
+**States:** trial active (the current plan says "your trial") · chosen · founding (price locked line) · payment failed (warn line, retry; the show continues through a 7-day grace, ADR-24.B2) · changing plan (one plain sentence at the moment of change: an upgrade starts at the next drop and Paddle prorates the charge; a downgrade starts at the next billing date with no proration; unused allowance is never refunded; ADR-24.B3).
 **Never:** countdowns, "only X left", crossed-out fake prices, pre-selected upgrades, a "best value" sticker on the top tier.
 
 ## I. Data and deletion (sheet)
-Rows as in 03 flow I. Each destructive row: first tap turns the row into its confirmation sentence with Delete / Keep inline (no modal); account deletion asks for a typed "delete" or biometrics. Grace period sentence stated once.
+Rows as in 03 flow I. Each destructive row: first tap turns the row into its confirmation sentence with Delete / Keep inline (no modal); account deletion asks for a typed "delete". There is no grace period and no restore (ADR-24.B1); one sentence says access ends at once and everything is gone from live systems within 24 hours and from backups within 30 days. The research-use toggle lives here, off by default, never in onboarding (ADR-24.B6).
 
 ## J. Sample page (web, public)
 Wordmark · one question in the visitor's language · a text field or 🎙 · **Make my sample** · (60–90s: two host orbs and "Karim and Mona are recording…") · the 90-second player with transcript · **Start your show** · share link · "Not in your language yet? Leave an email."

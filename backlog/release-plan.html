@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>For one release plan</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@75,500;75,700;87.5,600&family=Readex+Pro:wght@300;400;500&family=Martian+Mono:wght@400;600&display=swap">
@@ -110,22 +111,37 @@ footer code{font-family:var(--mono);font-size:11.5px;color:var(--fg-2)}
 }
 @media (prefers-reduced-motion:reduce){ .tip{transition:none} }
 </style>
+<style>
+/* additions for the 2026-11-12 re-cut, built on the same tokens */
+.sw.later{background:var(--g2);opacity:.45}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+.tbl th{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid var(--line-2)}
+.tbl td{padding:9px 10px 9px 0;border-bottom:1px solid var(--line);color:var(--fg-2);vertical-align:baseline}
+.tbl td.num{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums;color:var(--fg);white-space:nowrap}
+.tbl tr.por td{color:var(--fg)}
+.tbl tr.por td.num{color:var(--amber)}
+.tblwrap{overflow-x:auto}
+.cap .bar.later{opacity:.45}
+.cap .legend{margin-top:10px}
+.dec .row{grid-template-columns:76px 110px 1fr}
+@media (max-width:720px){ .tbl{font-size:12.5px} }
+</style>
 
 <div class="wrap">
 <header class="top">
-  <div class="eyebrow">For one · implementation backlog · written 6 Nov 2026</div>
+  <div class="eyebrow">For one · implementation backlog · re-cut 12 Nov 2026 (ADR-24.11)</div>
   <h1 style="margin-top:10px">The release plan</h1>
-  <p class="lede" style="margin-top:14px">Five build weeks from the pilot gate on 18 November, a paid founding beta from 23 December, the gate read on 26 January, and one season after. Sixteen epics, sequenced by what must exist before the next thing can be built.</p>
+  <p class="lede" style="margin-top:14px">The open follows the work. A build of 136.5 engineer-days of Day-1 work from 18 November, two engineers, a paid founding beta from Wednesday 17 March 2027, the gate read on 20 April, and one season after. Story sizes unchanged; the date is computed from them and re-forecast every week.</p>
   <div class="facts">
-    <span><b>16</b> epics</span><span><b>164</b> stories <i>+ 27</i> cross-cutting</span><span><b>173</b> P0 · <b>16</b> P1 · <b>2</b> later</span><span>build <b>18 Nov → 22 Dec</b></span><span>beta <b>23 Dec → 26 Jan</b></span><span>freeze <i>19 Dec 12:00</i></span>
+    <span><b>16</b> epics</span><span><b>170</b> stories <i>+ 27</i> cross-cutting</span><span><b>154</b> P0 · <b>14</b> P1 · <b>2</b> later</span><span>Day-1 <b>136.5</b> days</span><span>build <b>18 Nov → 12 Mar</b></span><span>beta <b>17 Mar → 20 Apr</b></span><span>freeze <i>15 Mar 12:00</i></span>
   </div>
 </header>
 
 <section id="timeline">
   <div class="sec-head">
     <div class="eyebrow">01 · The board</div>
-    <h2>Fourteen weeks, sixteen epics</h2>
-    <p>Each bar is where an epic's stories land. Hatched means P1: built during the beta behind a flag. Amber marks are the dates nothing can slip past. Hover a bar for the goal.</p>
+    <h2>Twenty-six weeks, sixteen epics</h2>
+    <p>Each solid bar is where an epic's Day-1 stories are built, in six phases before the open. The paler bar is its stories due later in the beta, each on the day a learner first reaches it. Hatched is P1, which mostly lands in season two. Amber marks are fixed dates. Hover a row for the goal.</p>
   </div>
   <div class="board" id="gantt"></div>
   <div class="legend">
@@ -133,16 +149,18 @@ footer code{font-family:var(--mono);font-size:11.5px;color:var(--fg-2)}
     <span><i class="sw" style="background:var(--g2)"></i>What the learner meets</span>
     <span><i class="sw" style="background:var(--g3)"></i>Business and operations</span>
     <span><i class="sw" style="background:var(--g4)"></i>The beta itself</span>
-    <span><i class="sw hatch"></i>P1, during the beta</span>
+    <span><i class="sw later"></i>Later in the beta (P0, by due day)</span>
+    <span><i class="sw hatch"></i>P1</span>
     <span><i class="sw" style="background:var(--amber);width:4px"></i>Fixed date</span>
   </div>
+  <div class="callout"><b>The bridge.</b> Milestone 0 learners who pre-paid were told the new date by 19 November with a full refund or a bridge place. Those who signed Part 2 of the addendum by 15 December keep receiving hand-made episodes on the pilot's process until the open; their founding price lock starts on 17 March. Anyone who did not sign keeps the pilot's original promise: their data is deleted by 31 December.</div>
 </section>
 
 <section id="critical">
   <div class="sec-head">
     <div class="eyebrow">02 · Critical path</div>
     <h2>The longest chain runs through the call</h2>
-    <p>Nine dated handoffs. A slip on any of them moves 23 December. Three side chains come within days of it: counsel's view on the region, the merchant of record, and who writes the hosts.</p>
+    <p>A slip on any of these moves the open, through the weekly re-forecast. Three side chains come within days of it: counsel's confirmation, the Paddle account, and the native read of the bibles.</p>
   </div>
   <div class="path" id="path"></div>
 </section>
@@ -160,16 +178,16 @@ footer code{font-family:var(--mono);font-size:11.5px;color:var(--fg-2)}
   <div class="sec-head">
     <div class="eyebrow">04 · The epics</div>
     <h2>Sixteen pieces of work</h2>
-    <p>The bars at the bottom of each card are its stories by size (small, medium, large). An amber tag means a decision only Muath can make is in its way.</p>
+    <p>The bars at the bottom of each card are its stories by size (small, medium, large). The line under the goal says when it lands: build phases for Day-1 work, beta days for the rest.</p>
   </div>
   <div class="cards" id="cards"></div>
 </section>
 
-<section id="decisions">
+<section id="substitutes">
   <div class="sec-head">
-    <div class="eyebrow">05 · Blocking decisions</div>
-    <h2>Six answers the build is waiting for</h2>
-    <p>Each has a date the build needs it by and a default the backlog assumes meanwhile. The full list of ten is in the risks file.</p>
+    <div class="eyebrow">05 · Cuts and manual substitutes</div>
+    <h2>What a cohort of fifty can live without on day one</h2>
+    <p>The learner-facing core is real on day one: onboarding, the pipeline, the drop and the feed, the call, learner-model writes, the after-session pass, crisis, cost tracing and the spend guard, and voice deletion. What is not is done by hand behind a runbook line with an owner and a limit, and each line is deleted when its story ships. The single-engineer cut list applies from day one, except Terraform, which stays.</p>
   </div>
   <div class="dec" id="dec"></div>
 </section>
@@ -177,39 +195,34 @@ footer code{font-family:var(--mono);font-size:11.5px;color:var(--fg-2)}
 <section id="scope">
   <div class="sec-head">
     <div class="eyebrow">06 · Scope</div>
-    <h2>In, during, and not in the beta</h2>
+    <h2>Day-1, later in the beta, and after</h2>
   </div>
   <div class="scope">
-    <div><div class="k">On 23 December · P0</div><h3>In the beta</h3><ul>
-      <li>Sample episode, then Salma's intake, the word check, casting, the pilot and the first call before any account</li>
-      <li>Today, Show, Notebook; the player with Huh?, speeds and tap-to-hear; the article</li>
-      <li>The daily call: hold-to-talk, the word button, recall gaps, the retell, voice-note fallback</li>
-      <li>Chat that ends in three ideas; one swap; the small door; the return episode</li>
-      <li>Private podcast feed, the drop push, one opt-in gap note, rhythm in words</li>
-      <li>After-session pass; notebook with veto and add; wrong-memory fix</li>
-      <li>Weekly proof through the claim gate; the then-and-now recording; seasons with a goal</li>
-      <li>Three plans, 7-day trial on 2 a day, web checkout, founding price lock, one-tap cancel</li>
-      <li>Per-learner keys, consent versions, age gate, deletion and export on the clock, crisis protocol</li>
-      <li>Cost tracing and caps; paging, runbooks, the eval gate, the gates page</li>
+    <div><div class="k">Built before 17 March · P0</div><h3>Day-1</h3><ul>
+      <li>Onboarding A1 to A10 in order A: Salma's intake with the notice line, the optional word check, casting, the pilot, the first call, then the account by email code</li>
+      <li>Week-one questions and the baseline then-and-now recording</li>
+      <li>Today, the player, the article, the call screen, the chat that ends in three ideas, one swap, the small door, sessions and doors, the controls sheet</li>
+      <li>The pipeline from teacher to publish, batch, on-demand kinds, the return and fallback episodes</li>
+      <li>The private feed with the host's tag, the drop and the push</li>
+      <li>The call: hold-to-talk, the word button, recall gaps, the retell, anxiety mode, the voice-note fallback</li>
+      <li>Learner-model writes, the analyst, the memory keeper, the after-session pass</li>
+      <li>The claim gate and the simple weekly proof (day 7); plans, Paddle checkout and the day-6 email</li>
+      <li>Keys, consent, voice deletion in 15 minutes, deletion and export by runbook, crisis with its fail-safe, the guards</li>
+      <li>Cost tracing, the spend guard and alarms; paging, runbooks, the eval gate, the canary; a restore rehearsed</li>
     </ul></div>
-    <div><div class="k">23 Dec → 26 Jan · P1, behind flags</div><h3>During the beta</h3><ul>
-      <li>Round two</li>
-      <li>The season finale with both recordings side by side</li>
-      <li>The tape in the notebook; shadowing</li>
-      <li>Apple and Google sign-in</li>
-      <li>The dial-in experiment</li>
-      <li>The language gate harness and a second-language dry run</li>
-      <li>Metric unlock at 12 test-retest pairs; the external test</li>
-      <li>Billing reconcile; the full offline suite; vendor regression</li>
+    <div><div class="k">17 Mar → 20 Apr · P0, by beta day</div><h3>Later in the beta</h3><ul>
+      <li><b>Day 6:</b> the notebook's about-you with the sensitive-fact card, hours, edits</li>
+      <li><b>Day 7:</b> the gap note, rhythm in words, the season goal</li>
+      <li><b>Day 8:</b> the similarity check</li>
+      <li><b>Day 14:</b> the edit classifier, working on with veto and add, the mid-season rehearsal, the measures job</li>
+      <li><b>Day 21:</b> skills and "where do I stand", the avoidance flag, one-tap cancel, arcs in code, review pages</li>
+      <li><b>Day 28:</b> the Show tab, calibration, the recording rater, words you own, founding lock, plan changes, the privacy page</li>
+      <li><b>Day 29 to 35:</b> the gates page, the audit tooling, automated export and purge, the sample episode</li>
+      <li><b>Day 37:</b> failed-payment handling, first reached at the first renewal</li>
     </ul></div>
-    <div><div class="k">After the gate · later</div><h3>Not in the beta</h3><ul>
-      <li>Character creation and the six chassis</li>
-      <li>The scout (news per interest)</li>
-      <li>The observer in the call (first thing after the beta)</li>
-      <li>Languages that have not passed the gate</li>
-      <li>Native apps; paid acquisition; referrals</li>
-      <li>The learner's cloned voice; regional prices</li>
-      <li>Employer seats; human bridges</li>
+    <div><div class="k">Season two and after</div><h3>P1, and not in the beta</h3><ul>
+      <li><b>P1:</b> round two; the finale with both recordings; the tape; shadowing; Apple and Google sign-in; the dial-in experiment; the gate harness and a second-language dry run; metric unlock; the Duolingo English Test; billing reconcile; research de-identify and revoke</li>
+      <li><b>Later:</b> character creation; the scout; the observer (first after the beta); ungated languages; native apps; referrals; cloned voice; regional prices; employer seats</li>
       <li><b>Never built, by decision 3:</b> correction notes after the call, the margin note, the polish card</li>
     </ul></div>
   </div>
@@ -219,45 +232,74 @@ footer code{font-family:var(--mono);font-size:11.5px;color:var(--fg-2)}
   <div class="sec-head">
     <div class="eyebrow">07 · Capacity</div>
     <h2>The honest arithmetic</h2>
-    <p>Story sizes counted as half a day, one day and two and a half days. Solid is P0, hatched is P1. Two engineers have about 50 working days before 23 December.</p>
+    <p>Story sizes counted as half a day, one day and two and a half days, unchanged since 6 November. Muath's vendor tests, package, counsel and beta operations (7.5 days) are left out. Solid is Day-1, pale is later in the beta, hatched is P1.</p>
   </div>
   <div class="cap" id="cap"></div>
-  <div class="callout"><b>About 110 engineer-days of P0 against 50 available.</b> The plan holds only if the architecture's single-engineer cut lists are applied from day one even with two engineers, the P1 set waits for the beta, and the week 1 and 2 vendor tests are Muath's time rather than engineering time. The Show tab, admin pages, Sign in with Apple and the invites page are already accepted as beta-week-one items. If the week 3 exit (pilot under 45 s, first sentence under 5 minutes) is missed, the beta moves to 6 January. This is risk R1.</div>
+  <div class="callout"><b>136.5 engineer-days of Day-1, plus 15%, is 157.0.</b> Two engineers at five days a week from 18 November have 52 by 23 December; the seven weekdays from 24 December to 1 January count half (7 more); the remaining 98 take 49 weekdays from 4 January and end on Thursday 11 March. Friday 12 March closes the build with a 16.5% buffer, the freeze runs from 15 March 12:00, and the open is Wednesday 17 March.</div>
+  <div class="sec-head" style="margin-top:28px"><h3>Staffing decides the date</h3></div>
+  <div class="tblwrap"><table class="tbl">
+    <thead><tr><th>Staffing</th><th>Day-1 plus 15% reached</th><th>Beta opens</th></tr></thead>
+    <tbody>
+      <tr class="por"><td>Plan of record: two engineers from build start, 18 Nov 2026</td><td class="num">11 Mar 2027</td><td class="num">17 Mar 2027</td></tr>
+      <tr><td>Second engineer from 25 Nov (each week later adds a week)</td><td class="num">16 Mar 2027</td><td class="num">24 Mar 2027</td></tr>
+      <tr><td>A third engineer from 1 Dec</td><td class="num">8 Feb 2027</td><td class="num">17 Feb 2027</td></tr>
+      <tr><td>One engineer (no beta plan; recomputed once a second starts)</td><td class="num">30 Jun 2027</td><td class="num">7 Jul 2027</td></tr>
+    </tbody>
+  </table></div>
+  <div class="sec-head" style="margin-top:28px"><h3>Later in the beta, by week</h3></div>
+  <div class="tblwrap"><table class="tbl">
+    <thead><tr><th>Beta week</th><th>Later P0 due</th><th>Capacity (2 engineers, 80%)</th><th>Balance</th></tr></thead>
+    <tbody>
+      <tr><td>1 · 17 to 23 Mar</td><td class="num">5.0</td><td class="num">8.0</td><td class="num">+3.0</td></tr>
+      <tr><td>2 · 24 to 30 Mar</td><td class="num">8.5</td><td class="num">8.0</td><td class="num">−0.5</td></tr>
+      <tr><td>3 · 31 Mar to 6 Apr</td><td class="num">7.5</td><td class="num">8.0</td><td class="num">+0.5</td></tr>
+      <tr><td>4 · 7 to 13 Apr</td><td class="num">8.0</td><td class="num">8.0</td><td class="num">0</td></tr>
+      <tr><td>5 · 14 to 20 Apr</td><td class="num">7.5</td><td class="num">8.0</td><td class="num">+0.5</td></tr>
+      <tr class="por"><td>Beta total (37.0 with day 37)</td><td class="num">36.5</td><td class="num">40.0</td><td class="num">+3.5</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout"><b>Every due day is met cumulatively; the tightest is day 14 (13.5 due, 14.4 available).</b> P1 adds 18 days and only about 3.5 fit before the gate review, so most of it ships in season two. The beta has no buffer beyond the 20% on-call reserve: that is the weak point. The open moves earlier only in whole weeks, and only when the remaining Day-1 work plus 15% fits before the earlier Wednesday.</div>
 </section>
 
 <footer>
-  <span>Source: <code>backlog/00-release-plan.md</code> · <code>01-epics.md</code> · <code>02-stories/</code> · <code>03-non-functional-stories.md</code> · <code>04-risks-and-blockers.md</code> · <code>stories.csv</code></span>
-  <span>Dates follow the pilot kit: build 18 Nov to 22 Dec, beta 23 Dec to 26 Jan. Architecture build plans dated 2 Nov to 6 Dec are moved forward 16 days.</span>
+  <span>Source: <code>backlog/00-release-plan.md</code> · <code>01-epics.md</code> · <code>02-stories/</code> · <code>03-non-functional-stories.md</code> · <code>04-risks-and-blockers.md</code> · <code>05-traceability.md</code> · <code>stories.csv</code></span>
+  <span>Dates follow ADR-24.11 and architecture 10 §6: build 18 Nov 2026 to 12 Mar 2027, beta 17 Mar to 20 Apr 2027. Beta day N is 17 March plus N minus 1.</span>
 </footer>
 </div>
 <div class="tip" id="tip"></div>
 
 <script>
+// w: Day-1 build span, lw: later-in-beta span, bw: P1 span; units are weeks from Wed 18 Nov 2026
 const EPICS=[
- {id:'E01',g:1,name:'Platform foundation',goal:'One repo, staging and production, and the shared services every other epic calls, stood up in the first two weeks.',n:9,s:[3,4,2],p1:0,w:[0,2],blk:'B4'},
- {id:'E02',g:1,name:'Vendor tests and the language gate',goal:'Choose every voice and speech vendor on measured pilot data, freeze by 27 Nov, make the gate a repeatable test.',n:9,s:[1,6,2],p1:2,w:[0,2],bw:[5,11],blk:'B3'},
- {id:'E03',g:1,name:'Learner model and event log',goal:'One append-only log and one model of words, structures, errors and quote-backed facts; live roles never write.',n:11,s:[0,7,4],p1:0,w:[0,5]},
- {id:'E04',g:1,name:'Episode generation pipeline',goal:'A new episode before every drop, at about 95% known words, checked by a second-vendor editor, at a measured cost.',n:13,s:[1,8,4],p1:0,w:[1,5],blk:'B3'},
- {id:'E05',g:1,name:'The live call',goal:'A 5 to 7 minute argument with a host who answers in about a second, waits for you, and never says you were wrong.',n:13,s:[1,9,3],p1:1,w:[1,5],bw:[5,10]},
- {id:'E06',g:2,name:'Onboarding: the first ten minutes',goal:'Sound in under a minute, your first sentence inside five, and an account only after you heard yourself.',n:11,s:[1,8,2],p1:1,w:[2,3],bw:[5,8],blk:'B2'},
- {id:'E07',g:2,name:'The daily loop in the web app',goal:'An installable web app with Today, Show and Notebook and four doors, in your own language, right-to-left included.',n:12,s:[2,6,4],p1:0,w:[0,5],blk:'B1'},
- {id:'E08',g:2,name:'Private feed, drop and the one cue',goal:'The episode arrives once, where and when you chose, in the app and your podcast app. Nothing else is ever sent.',n:7,s:[3,3,1],p1:0,w:[2,5]},
- {id:'E09',g:2,name:'After-session assessment',goal:'Within ten minutes of a session the call is re-transcribed verbatim, errors classified, the model updated.',n:10,s:[1,6,3],p1:0,w:[0,5]},
- {id:'E10',g:2,name:'Notebook, controls and Salma on demand',goal:'Nothing is hidden: see what the teacher knows and works on, veto or add, fix a wrong memory.',n:9,s:[1,8,0],p1:1,w:[4,5],bw:[5,9]},
- {id:'E11',g:2,name:'Proof, claim gate, recordings, seasons',goal:'One checked piece of evidence a week, your own voice then and now every four weeks, a finale with the next goal.',n:10,s:[2,6,2],p1:3,w:[0,5],bw:[5,11]},
- {id:'E12',g:3,name:'Plans, trial and payments',goal:'Three plans by episodes a day, a 7-day trial with no card, founding members keep their price, cancel in one tap.',n:9,s:[4,4,1],p1:1,w:[2,5],bw:[6,9],blk:'B5'},
- {id:'E13',g:3,name:'Privacy, security and compliance',goal:'Per-learner keys, consent with versions, deletion and export on the clock, counsel’s answers loaded before day one.',n:12,s:[3,7,2],p1:0,w:[0,5],blk:'B4'},
- {id:'E14',g:3,name:'Cost tracing and vendor control',goal:'Every model, voice and speech call a priced row from the first test render; the exit cost is a query.',n:8,s:[2,6,0],p1:0,w:[0,5]},
- {id:'E15',g:3,name:'Evals, observability and operations',goal:'Scrubbed logs, paging, twelve runbooks, and an eval gate that stops a prompt change from breaking law 7.',n:11,s:[1,9,1],p1:1,w:[0,5],bw:[5,11]},
- {id:'E16',g:4,name:'Founding beta and season one',goal:'About 50 learners a week into trials from 23 Dec, gates read honestly on 26 Jan, a decision on the day.',n:10,s:[5,4,1],p1:6,w:[5,10],bw:[10,14]},
+ {id:'E01',g:1,name:'Platform foundation',goal:'One repo, Terraform staging and production, and the shared services every other epic calls; production restored once before the open.',n:9,s:[3,4,2],p1:0,w:[0,16.43],when:'Phases 1 to 6'},
+ {id:'E02',g:1,name:'Vendor tests and the language gate',goal:'Every voice and speech vendor chosen on measured pilot data in Milestone 0; adapters and the bibles in the packages in Phase 2.',n:9,s:[1,6,2],p1:2,w:[0,7.29],bw:[21.86,25.86],when:'M0, Phases 1 to 2'},
+ {id:'E03',g:1,name:'Learner model and event log',goal:'One append-only log and one model of words, structures, errors and quote-backed facts; live roles never write.',n:11,s:[0,7,4],p1:0,w:[0,14.14],lw:[17.71,22.0],when:'Phases 1 to 4, beta days 6 to 35'},
+ {id:'E04',g:1,name:'Episode generation pipeline',goal:'A new episode before every drop, at about 95% known words, checked by a second-vendor editor, at a measured cost.',n:13,s:[1,8,4],p1:0,w:[2.14,14.14],lw:[18.0,20.0],when:'Phases 2 to 4, beta days 8 to 21'},
+ {id:'E05',g:1,name:'The live call',goal:'A 5 to 7 minute argument with a host who answers in about a second, waits for you, and never says you were wrong.',n:13,s:[1,9,3],p1:1,w:[2.14,15.86],bw:[21.86,25.86],when:'Phases 2 to 5'},
+ {id:'E06',g:2,name:'Onboarding: the first ten minutes',goal:'Sound in under a minute, your first sentence inside five, and an account only after you heard yourself.',n:12,s:[1,9,2],p1:1,w:[7.29,16.43],lw:[21.86,22.0],bw:[21.86,25.86],when:'Phases 3 to 6, beta day 35'},
+ {id:'E07',g:2,name:'The daily loop in the web app',goal:'An installable web app with Today, Show and Notebook and four doors, in your own language, right-to-left included.',n:13,s:[2,7,4],p1:0,w:[0,16.43],lw:[20.86,21.0],when:'Phases 1 to 6, beta day 28'},
+ {id:'E08',g:2,name:'Private feed, drop and the one cue',goal:'The episode arrives once, where and when you chose, in the app and your podcast app. Nothing else is sent but the gap note and receipts.',n:7,s:[3,3,1],p1:0,w:[7.29,15.86],lw:[17.86,18.0],when:'Phases 3 to 5, beta day 7'},
+ {id:'E09',g:2,name:'After-session assessment',goal:'Within ten minutes of a session the call is re-transcribed verbatim and the model updated; classification lands by day 14.',n:11,s:[2,6,3],p1:0,w:[11.14,14.14],lw:[18.86,21.0],when:'Phase 4, beta days 14 to 28'},
+ {id:'E10',g:2,name:'Notebook, controls and Salma on demand',goal:'Nothing is hidden: see what the teacher knows and works on, veto or add, fix a wrong memory. Controls on day one.',n:9,s:[1,8,0],p1:1,w:[14.14,15.86],lw:[17.71,21.0],bw:[21.86,25.86],when:'Phase 5, beta days 6 to 28'},
+ {id:'E11',g:2,name:'Proof, claim gate, recordings, seasons',goal:'One checked piece of evidence a week from day 7, your own voice then and now from week one, a finale with the next goal.',n:10,s:[2,6,2],p1:2,w:[14.14,15.86],lw:[17.86,21.29],bw:[21.86,25.86],when:'Phase 5, beta days 7 to 30'},
+ {id:'E12',g:3,name:'Plans, trial and payments',goal:'Three plans by episodes a day, a 7-day trial with no card, Paddle checkout on day 7, founding members keep their price.',n:11,s:[5,5,1],p1:1,w:[7.29,15.86],lw:[19.86,22.29],bw:[21.86,25.86],when:'Phases 3 to 5, beta days 21 to 37'},
+ {id:'E13',g:3,name:'Privacy, security and compliance',goal:'Per-learner keys, consent with versions, voice deleted in 15 minutes, deletion and export by runbook, crisis with a fail-safe.',n:13,s:[4,7,2],p1:1,w:[0,16.43],lw:[19.86,22.0],bw:[21.86,25.86],when:'Phases 1 to 6, beta days 21 to 35'},
+ {id:'E14',g:3,name:'Cost tracing and vendor control',goal:'Every model, voice and speech call a priced row from the first test render; the exit cost is a query.',n:8,s:[2,6,0],p1:0,w:[0,16.43],lw:[20.86,21.0],when:'Phases 1 to 6, beta day 28'},
+ {id:'E15',g:3,name:'Evals, observability and operations',goal:'Scrubbed logs, paging, runbooks for every manual substitute, and an eval gate that stops a prompt change from breaking law 7.',n:11,s:[1,9,1],p1:1,w:[0,16.43],lw:[18.86,21.14],bw:[21.86,25.86],when:'Phases 1 to 6, beta days 14 to 29'},
+ {id:'E16',g:4,name:'Founding beta and season one',goal:'About 50 learners a week into trials from 17 March, gates read honestly on 20 April, a decision on the day.',n:10,s:[5,4,1],p1:4,w:[17,21.86],bw:[21.86,25.86],when:'Beta days 1 to 35'},
 ];
+// engineering days by epic: Day-1, later in the beta, P1 (release plan §6.3)
+const DAYS={E01:[10.5,0,0],E02:[4.5,0,2],E03:[12.5,4.5,0],E04:[16.5,2,0],E05:[14.5,0,2.5],E06:[12.5,1,1],E07:[17,1,0],E08:[6,1,0],E09:[7.5,7,0],E10:[1,6.5,1],E11:[6,2.5,3.5],E12:[5.5,2.5,1],E13:[8,4.5,1],E14:[6,1,0],E15:[8.5,3,.5],E16:[0,.5,5.5]};
 const SHORT={E01:'Platform foundation',E02:'Vendor tests, language gate',E03:'Learner model',E04:'Generation pipeline',E05:'The live call',E06:'Onboarding',E07:'Daily loop web app',E08:'Feed and the one cue',E09:'After-session pass',E10:'Notebook and controls',E11:'Proof and seasons',E12:'Plans and payments',E13:'Privacy and security',E14:'Cost tracing',E15:'Evals and operations',E16:'Founding beta'};
 const GC={1:'var(--g1)',2:'var(--g2)',3:'var(--g3)',4:'var(--g4)'};
 const GN={1:'Engine',2:'What the learner meets',3:'Business and operations',4:'The beta itself'};
-// week columns: index 0 = week of 18 Nov (Tue) ... 14 weeks to 23 Feb
-const WEEKS=['18 Nov','25 Nov','2 Dec','9 Dec','16 Dec','23 Dec','30 Dec','6 Jan','13 Jan','20 Jan','27 Jan','3 Feb','10 Feb','17 Feb'];
-const PHASES=[{a:0,b:5,l:'BUILD · W1 to W5'},{a:5,b:10,l:'FOUNDING BETA · cohorts 1 to 5'},{a:10,b:14,l:'SEASON TWO · after the gate'}];
-const MARKS=[{x:0,l:'Pilot gate',d:'18 Nov'},{x:1.3,l:'Vendors frozen',d:'27 Nov'},{x:4.45,l:'Freeze',d:'19 Dec'},{x:5,l:'Beta opens',d:'23 Dec'},{x:6.3,l:'Claim audit',d:'1 Jan'},{x:9,l:'First finales',d:'20 Jan'},{x:9.85,l:'Gate review',d:'26 Jan'}];
+// 26 week columns from Wed 18 Nov 2026 to 18 May 2027
+const NW=26;
+const WEEKS=['18 Nov','25 Nov','2 Dec','9 Dec','16 Dec','23 Dec','30 Dec','6 Jan','13 Jan','20 Jan','27 Jan','3 Feb','10 Feb','17 Feb','24 Feb','3 Mar','10 Mar','17 Mar','24 Mar','31 Mar','7 Apr','14 Apr','21 Apr','28 Apr','5 May','12 May'];
+const PHASES=[{a:0,b:16.43,l:'BUILD · PHASES 1 TO 6'},{a:16.43,b:17,l:''},{a:17,b:21.86,l:'FOUNDING BETA'},{a:21.86,b:25.86,l:'SEASON TWO'}];
+const PH=[[0,'P1'],[2.14,'P2'],[7.29,'P3'],[11.14,'P4'],[14.14,'P5'],[15.86,'P6']];
+const HALF={a:5.14,b:6.43};
+const MARKS=[{x:0,l:'Pilot gate',d:'18 Nov'},{x:6.29,l:'Gemini doubles',d:'1 Jan'},{x:12.71,l:'Counsel review',d:'15 Feb'},{x:16.29,l:'Build ends',d:'12 Mar'},{x:17,l:'Beta opens',d:'17 Mar'},{x:20.86,l:'First finales',d:'13 Apr'},{x:21.86,l:'Gate review',d:'20 Apr'}];
 
 const tip=document.getElementById('tip');
 function showTip(e,html){tip.innerHTML=html;tip.style.opacity=1;moveTip(e)}
@@ -268,44 +310,52 @@ function el(n,a,t){const e=document.createElementNS(NS,n);for(const k in a)e.set
 
 /* ---------- Gantt ---------- */
 (function(){
-  const L=232,R=16,T=64,rowH=26,W=1040,cw=(W-L-R)/14,H=T+EPICS.length*rowH+36;
-  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Timeline of sixteen epics across fourteen weeks'});
+  const L=232,R=16,T=78,rowH=26,W=1240,cw=(W-L-R)/NW,H=T+EPICS.length*rowH+40;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Timeline of sixteen epics across twenty-six weeks'});
+  svg.style.minWidth='1160px';
   const defs=el('defs');defs.innerHTML=`<pattern id="hp" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.5" height="6" fill="var(--p1)"/></pattern>`;svg.appendChild(defs);
-  // phase bands
   PHASES.forEach((p,i)=>{svg.appendChild(el('rect',{x:L+p.a*cw,y:0,width:(p.b-p.a)*cw,height:H,fill:i%2?'var(--bg-3)':'transparent',opacity:.5}));
-    const t=el('text',{x:L+p.a*cw+8,y:18,fill:'var(--fg-3)','font-size':10,'letter-spacing':'.1em','font-family':'var(--mono)'},p.l);svg.appendChild(t);});
-  // week grid + labels
-  for(let i=0;i<=14;i++){svg.appendChild(el('line',{x1:L+i*cw,y1:T-18,x2:L+i*cw,y2:H-18,stroke:'var(--line)','stroke-width':1}));
-    if(i<14)svg.appendChild(el('text',{x:L+i*cw+cw/2,y:T-24,'text-anchor':'middle',fill:'var(--fg-2)','font-size':11,'font-family':'var(--mono)'},WEEKS[i]));}
-  // rows
+    if(p.l)svg.appendChild(el('text',{x:L+p.a*cw+8,y:16,fill:'var(--fg-3)','font-size':10,'letter-spacing':'.1em','font-family':'var(--mono)'},p.l));});
+  svg.appendChild(el('rect',{x:L+HALF.a*cw,y:T-18,width:(HALF.b-HALF.a)*cw,height:H-T,fill:'var(--fg)',opacity:.05}));
+  svg.appendChild(el('text',{x:L+HALF.a*cw+3,y:T-4,fill:'var(--fg-3)','font-size':9,'font-family':'var(--mono)'},'half'));
+  PH.forEach(([x,l])=>{svg.appendChild(el('text',{x:L+x*cw+3,y:32,fill:'var(--fg-3)','font-size':9.5,'font-family':'var(--mono)'},l));
+    svg.appendChild(el('line',{x1:L+x*cw,y1:22,x2:L+x*cw,y2:36,stroke:'var(--line-2)','stroke-width':1}));});
+  for(let i=0;i<=NW;i++){svg.appendChild(el('line',{x1:L+i*cw,y1:T-18,x2:L+i*cw,y2:H-22,stroke:'var(--line)','stroke-width':1}));
+    if(i<NW&&i%2===0)svg.appendChild(el('text',{x:L+i*cw+cw,y:T-24,'text-anchor':'middle',fill:'var(--fg-2)','font-size':10.5,'font-family':'var(--mono)'},WEEKS[i]));}
   EPICS.forEach((ep,i)=>{const y=T+i*rowH;
     if(i%2)svg.appendChild(el('rect',{x:0,y:y,width:W,height:rowH,fill:'var(--fg)',opacity:.025}));
     svg.appendChild(el('text',{x:10,y:y+17,fill:'var(--fg-3)','font-size':10.5,'font-family':'var(--mono)'},ep.id));
-    const nm=el('text',{x:40,y:y+17,fill:'var(--fg)','font-size':12},SHORT[ep.id]);svg.appendChild(nm);
-    const bar=el('rect',{x:L+ep.w[0]*cw+1,y:y+6,width:(ep.w[1]-ep.w[0])*cw-2,height:rowH-12,rx:3,fill:GC[ep.g]});svg.appendChild(bar);
-    let hb=null;if(ep.bw){hb=el('rect',{x:L+ep.bw[0]*cw+1,y:y+6,width:(ep.bw[1]-ep.bw[0])*cw-2,height:rowH-12,rx:3,fill:'url(#hp)',stroke:'var(--p1)','stroke-width':1});svg.appendChild(hb);}
+    svg.appendChild(el('text',{x:40,y:y+17,fill:'var(--fg)','font-size':12},SHORT[ep.id]));
+    const bar=(a,b,extra)=>{const r=el('rect',Object.assign({x:L+a*cw+1,y:y+6,width:Math.max((b-a)*cw-2,4),height:rowH-12,rx:3},extra));svg.appendChild(r);};
+    if(ep.w)bar(ep.w[0],ep.w[1],{fill:GC[ep.g]});
+    if(ep.lw)bar(ep.lw[0],ep.lw[1],{fill:GC[ep.g],opacity:.45});
+    if(ep.bw)bar(ep.bw[0],ep.bw[1],{fill:'url(#hp)',stroke:'var(--p1)','stroke-width':1});
     const hit=el('rect',{x:L,y:y,width:W-L-R,height:rowH,fill:'transparent'});
-    const html=`<b>${ep.id} · ${ep.name}</b>${ep.goal}<div class="k" style="margin-top:6px">${ep.n} stories · ${ep.n-ep.p1} P0${ep.p1?' · '+ep.p1+' P1':''} · ${GN[ep.g]}</div>`;
+    const html=`<b>${ep.id} · ${ep.name}</b>${ep.goal}<div class="k" style="margin-top:6px">${ep.n} stories · ${ep.when}${ep.p1?' · '+ep.p1+' P1':''}</div>`;
     hit.addEventListener('mousemove',e=>{showTip(e,html)});hit.addEventListener('mouseleave',hideTip);svg.appendChild(hit);
   });
-  // marks
-  MARKS.forEach((m,mi)=>{const x=L+m.x*cw;svg.appendChild(el('line',{x1:x,y1:T-18,x2:x,y2:H-18,stroke:'var(--amber)','stroke-width':1.5,'stroke-dasharray':'3 3'}));
-    const g=el('g');const t=el('text',{x:x+4,y:H-6-(mi%2?12:0),fill:'var(--amber)','font-size':10,'font-family':'var(--mono)'},m.d+' '+m.l);g.appendChild(t);svg.appendChild(g);});
+  MARKS.forEach((m,mi)=>{const x=L+m.x*cw;svg.appendChild(el('line',{x1:x,y1:T-18,x2:x,y2:H-22,stroke:'var(--amber)','stroke-width':1.5,'stroke-dasharray':'3 3'}));
+    svg.appendChild(el('text',{x:x+4,y:H-6-(mi%2?12:0),fill:'var(--amber)','font-size':10,'font-family':'var(--mono)'},m.d+' '+m.l));});
   document.getElementById('gantt').appendChild(svg);
 })();
 
 /* ---------- Critical path ---------- */
 (function(){
   const steps=[
-   ['18 Nov','<b>Consent addenda signed; 30 clips through four recognizers.</b> Nothing leaves the building without the pilot learners’ yes. E02-S01, E02-S02'],
-   ['24 Nov','<b>Recognizer and voice tables exist; the minimal call-worker is on staging.</b> E05-S01'],
-   ['27 Nov','<b>Vendors frozen; 50 scripted calls measured.</b> Host reply median under 1.5 s. E02-S05, E02-S04'],
-   ['1 Dec','<b>Governor replayed clean on pilot transcripts; verbatim per turn; first episodes end to end.</b> E05-S02, E05-S03, E04-S07'],
-   ['8 Dec','<b>Salma’s intake and the first call live on real phones.</b> Pilot plays under 45 s after intake. E06-S04, E06-S07'],
-   ['15 Dec','<b>The full call; the after-session pass under ten minutes on live calls.</b> E05-S06 to S11, E09-S06'],
-   ['19 Dec','<b>Freeze at 12:00. Proof and notebook on production.</b> E11-S03, E10-S02'],
-   ['22 Dec','<b>The 15 pilot learners re-onboarded on production; cost per session measured; restore drill done.</b> E06-S11, E14-S08, E01-S09'],
-   ['23 Dec','<b>Cohort 1 invited.</b> E16-S01'],
+   ['10 Nov 2026','<b>30 learner clips through the recognizers</b> (Milestone 0, consent addendum Part 1 first). E02-S01, E02-S02'],
+   ['17 Nov','<b>Voice winners in <code>vendors.yaml</code> on post-doubling prices; counsel confirms region and regimes.</b> E02-S03, A1'],
+   ['19 Nov','<b>Every pilot pre-payer told the new date</b>, with a full refund or a bridge place. A15'],
+   ['24 Nov','<b>Staging up on Terraform</b>, or the console-and-runbook fallback if Terraform is not applying. E01-S05'],
+   ['2 Dec','<b>Phase 1 done: events, keys, tracing.</b> Paddle account open; the bibles read by 1 Dec. A4, A5, A6'],
+   ['15 Dec','<b>Addendum Part 2 signed:</b> the bridge, re-onboarding and fixtures. A9'],
+   ['7 Jan 2027','<b>Phase 2 done: governor clean, verbatim per turn, first episodes end to end.</b> Half capacity 24 Dec to 1 Jan; no releases 31 Dec to 2 Jan. E05-S02, E05-S03, E04-S07'],
+   ['3 Feb','<b>Phase 3 done: Salma’s intake and the first call on real phones.</b> Pilot plays under 45 s after intake. E06-S04, E06-S07'],
+   ['15 Feb','<b>Counsel’s review of the drafts in <code>legal/</code>.</b> The beta does not open without reviewed consent text. A8'],
+   ['25 Feb','<b>Phase 4 done: the full call; the after-session pass under ten minutes.</b> E05-S06 to S11, E09-S06'],
+   ['8 Mar','<b>Phase 5 done: the weekly proof, the baseline recording, checkout.</b> E11-S01 to S05, E12-S04'],
+   ['12 Mar','<b>Phase 6 done: restore rehearsed; pilot learners re-onboarded; cost exit document.</b> E01-S09, E06-S11, E14-S08'],
+   ['15 Mar','<b>Freeze at 12:00 UTC.</b> Hotfixes only, with a named approver.'],
+   ['17 Mar','<b>Beta opens; cohort 1 invited.</b> First weekly proof and first checkout on day 7 (23 Mar); gate review on day 35 (20 Apr). E16-S01'],
   ];
   const p=document.getElementById('path');
   steps.forEach((s,i)=>{const d=document.createElement('div');d.className='d';d.textContent=s[0];const t=document.createElement('div');t.className='t'+(i===steps.length-1?' beta':'');t.innerHTML=s[1];p.append(d,t);});
@@ -321,7 +371,7 @@ function el(n,a,t){const e=document.createElementNS(NS,n);for(const k in a)e.set
   const W=1040,H=330,cw=W/5,bw=172,bh=46,pos={};
   const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Dependency map of the sixteen epics'});
   const defs=el('defs');defs.innerHTML=`<marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--fg-3)"/></marker>`;svg.appendChild(defs);
-  const labels=['Foundation · W1','Engine · W1 to W2','Learner-facing · W3 to W4','Proof, notebook, plans · W5','Beta · 23 Dec'];
+  const labels=['Foundation · Phase 1','Engine · Phases 1 to 2','Learner-facing · Phases 3 to 4','Proof, notebook, plans · Phase 5 on','Beta · 17 Mar'];
   cols.forEach((c,ci)=>{svg.appendChild(el('text',{x:ci*cw+cw/2,y:18,'text-anchor':'middle',fill:'var(--fg-3)','font-size':10,'font-family':'var(--mono)','letter-spacing':'.08em'},labels[ci].toUpperCase()));
     const total=c.length*bh+(c.length-1)*18,y0=(H+22)/2-total/2;
     c.forEach((id,ri)=>{pos[id]={x:ci*cw+cw/2,y:y0+ri*(bh+18)};});});
@@ -331,8 +381,7 @@ function el(n,a,t){const e=document.createElementNS(NS,n);for(const k in a)e.set
     g.appendChild(el('rect',{x:P.x-bw/2,y:P.y,width:bw,height:bh,rx:4,fill:'var(--bg-3)',stroke:'var(--line-2)'}));
     g.appendChild(el('rect',{x:P.x-bw/2,y:P.y,width:4,height:bh,rx:2,fill:GC[ep.g]}));
     g.appendChild(el('text',{x:P.x-bw/2+12,y:P.y+18,fill:'var(--fg-3)','font-size':10,'font-family':'var(--mono)'},ep.id));
-    const nm=SHORT[ep.id];
-    g.appendChild(el('text',{x:P.x-bw/2+12,y:P.y+35,fill:'var(--fg)','font-size':12.5},nm));
+    g.appendChild(el('text',{x:P.x-bw/2+12,y:P.y+35,fill:'var(--fg)','font-size':12.5},SHORT[ep.id]));
     const html=`<b>${ep.id} · ${ep.name}</b>${ep.goal}`;g.addEventListener('mousemove',e=>showTip(e,html));g.addEventListener('mouseleave',hideTip);svg.appendChild(g);});
   document.getElementById('depmap').appendChild(svg);
 })();
@@ -342,29 +391,34 @@ function el(n,a,t){const e=document.createElementNS(NS,n);for(const k in a)e.set
   const c=document.getElementById('cards');let g=0;
   EPICS.forEach(ep=>{if(ep.g!==g){g=ep.g;const h=document.createElement('div');h.className='group-h';h.innerHTML=`<span class="dot" style="background:${GC[g]};width:10px;height:10px;border-radius:50%;display:inline-block"></span><span class="eyebrow">${GN[g]}</span><span class="bar"></span>`;c.appendChild(h);}
     const d=document.createElement('div');d.className='card';
-    const wk=w=>w<5?'W'+(w+1):w<10?'beta':'after';const range=ep.w[0]===4&&ep.w[1]===5?'W5':`${wk(ep.w[0])} → ${wk(ep.w[1]-1)}`;
     const sz=`<span class="sz" title="${ep.s[0]} small, ${ep.s[1]} medium, ${ep.s[2]} large">${'<i style="height:3px"></i>'.repeat(ep.s[0])}${'<i style="height:6px"></i>'.repeat(ep.s[1])}${'<i style="height:9px"></i>'.repeat(ep.s[2])}</span>`;
-    d.innerHTML=`<div class="id"><span><span class="dot" style="background:${GC[ep.g]}"></span>${ep.id}</span>${ep.blk?`<span class="blk">waits on ${ep.blk}</span>`:''}</div><h3>${ep.name}</h3><p>${ep.goal}</p><div class="meta"><span>${ep.n} stories · ${range}${ep.p1?' · '+ep.p1+' P1':''}</span>${sz}</div>`;
+    d.innerHTML=`<div class="id"><span><span class="dot" style="background:${GC[ep.g]}"></span>${ep.id}</span><em>${ep.when}</em></div><h3>${ep.name}</h3><p>${ep.goal}</p><div class="meta"><span>${ep.n} stories${ep.p1?' · '+ep.p1+' P1':''}</span>${sz}</div>`;
     c.appendChild(d);});
 })();
 
-/* ---------- Decisions ---------- */
+/* ---------- Cuts and manual substitutes ---------- */
 (function(){
-  const D=[['B1','18 Nov','Web or native for the beta','Default: installable web app plus a private podcast feed; calls screen-on; native after the gates. Blocks the whole client shell (E07, E08).'],
-   ['B2','25 Nov','First-session order','Default: Salma’s talk, optional word check, casting while the pilot renders, pilot, first call, then the account. Blocks E06 and the onboarding call kinds.'],
-   ['B3','25 Nov','Who writes Karim, Mona and Salma','Default: Muath drafts with model help from the pilot bible; a native-speaker editor reviews by 1 Dec. Blocks the writer and host prompts in W2.'],
-   ['B4','24 Nov','Legal view on storing learner voice in AWS me-central-1 or the EU','Default: staging in the EU; the production region is one variable. Blocks production Terraform, the consent copy and the crisis lines.'],
-   ['B5','1 Dec','Merchant of record and payment processor','Default: Stripe test mode until decided. A merchant of record removes per-country tax filing, which matters with no launch country. Blocks checkout in W5.'],
-   ['B6','1 Dec','Confirm the three prices ($19.99 / $29.99 / $44.99)','Default: as costed. The rule holds: no plan loses money at full use at $0.35 a session. Blocks the plan page and the founding price lock.']];
-  const d=document.getElementById('dec');D.forEach(r=>{const e=document.createElement('div');e.className='row';e.innerHTML=`<span class="b">${r[0]}</span><span class="due">by ${r[1]}</span><div class="q"><b>${r[2]}</b><span>${r[3]}</span></div>`;d.appendChild(e);});
+  const D=[
+   ['E13-S06','day 35','Automated purge and export','Until then: access ends and the key is destroyed at once, with no grace period; the purge runbook completes within 24 hours; exports are prepared by hand within 72 hours (1 hour once automated). The 15-minute voice deletion is automatic from day one.'],
+   ['E12-S07','day 21','One-tap cancel','Until then: Paddle’s cancel link in every receipt, and “cancel” in Controls completed in Paddle by the on-call the same working day.'],
+   ['E12-S10','day 28','Plan changes','Until then: “change plan” in Controls completed in Paddle within one working day, stating when it takes effect. Nobody can reach it before day 8.'],
+   ['E12-S11','day 37','Failed payments','Until then: Paddle’s own failed-payment emails and retries, with the 7-day grace applied by hand. First reachable at the first renewal.'],
+   ['E07-S11','day 28','The Show tab','Until then: the private feed is the archive; every past episode stays in the learner’s podcast app.'],
+   ['E10-S04','day 6','The notebook’s about-you','Until then: facts are corrected by telling the host or Salma; a sensitive fact stays in its own session, the strictest reading.'],
+   ['E10-S02','day 14','Veto and add','Until then: a veto said to Salma or the host is applied by hand from the transcript within one working day.'],
+   ['E09-S07','day 21','“Where do I stand”','Until then: Salma says plainly she cannot say reliably yet, for every skill.'],
+   ['E15-S09','days 14 to 29','Admin pages beyond the review queue','Until then: measures, privacy checks and gates are SQL in the 08:30 checklist; /admin/cost and /admin/audit are cut.'],
+   ['E06-S01','day 35','Sample episode and landing page','Until then: invites come from the existing waitlist and the landing page is a static waitlist form.'],
+   ['Cut list','always','Fixed call-worker tasks; P1 for Apple and Google sign-in, dial-in and HLS; the simple proof only','No autoscaling (two tasks, about 16 concurrent calls); email code only; the fuller proof waits. Terraform is not cut (ADR-24.B19).']];
+  const d=document.getElementById('dec');D.forEach(r=>{const e=document.createElement('div');e.className='row';e.innerHTML=`<span class="b">${r[0]}</span><span class="due">${r[1]}</span><div class="q"><b>${r[2]}</b><span>${r[3]}</span></div>`;d.appendChild(e);});
 })();
 
 /* ---------- Capacity ---------- */
 (function(){
-  const c=document.getElementById('cap');const days=ep=>ep.s[0]*.5+ep.s[1]*1+ep.s[2]*2.5;
-  const max=24;
-  EPICS.forEach(ep=>{const t=days(ep);const p1=Math.min(t,ep.p1*1.2);const p0=t-p1;const r=document.createElement('div');r.className='r';
-    r.innerHTML=`<span class="n">${ep.id} ${ep.name}</span><span class="bars"><span class="bar" style="width:${p0/max*100}%;background:${GC[ep.g]}"></span>${p1?`<span class="bar p1" style="width:${p1/max*100}%"></span>`:''}</span><span class="v">${t.toFixed(1)}</span>`;c.appendChild(r);});
-  const ax=document.createElement('div');ax.className='axis';[0,5,10,15,20].forEach(v=>{const s=document.createElement('span');s.style.left=(v/max*100)+'%';s.textContent=v+(v===20?' days':'');ax.appendChild(s);});c.appendChild(ax);
+  const c=document.getElementById('cap');const max=20;
+  EPICS.forEach(ep=>{const [a,b,p]=DAYS[ep.id];const r=document.createElement('div');r.className='r';
+    r.innerHTML=`<span class="n">${ep.id} ${ep.name}</span><span class="bars">${a?`<span class="bar" style="width:${a/max*100}%;background:${GC[ep.g]}"></span>`:''}${b?`<span class="bar later" style="width:${b/max*100}%;background:${GC[ep.g]}"></span>`:''}${p?`<span class="bar p1" style="width:${p/max*100}%"></span>`:''}</span><span class="v">${(a+b+p).toFixed(1)}</span>`;c.appendChild(r);});
+  const ax=document.createElement('div');ax.className='axis';[0,5,10,15,20].forEach(v=>{const s=document.createElement('span');s.style.left=(v/max*100)+'%';s.textContent=v+(v===20?' days':'');ax.appendChild(s);});const ar=document.createElement('div');ar.className='r';ar.append(document.createElement('span'),ax,document.createElement('span'));c.appendChild(ar);
+  const tot=document.createElement('div');tot.className='r';tot.innerHTML=`<span class="n" style="color:var(--fg)">Total</span><span class="mono" style="color:var(--fg-2)">136.5 Day-1 · 37.0 later in the beta · 18.0 P1</span><span class="v">191.5</span>`;c.appendChild(tot);
 })();
 </script>

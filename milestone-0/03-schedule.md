@@ -2,7 +2,7 @@
 
 *Milestone 0 pilot kit. Re-dated on 23 October 2026 (the pilot had not started): Saturday 24 October to Wednesday 18 November 2026, in Muath's time (Saudi time); learners anywhere get their slot in their own time. Two cohorts so intake calls fit in two days: **cohort A** has its intake on Saturday 31 October and starts Sunday 1 November; **cohort B** has its intake on Sunday 1 November and starts Monday 2. "Day 1" is each learner's first episode. Each learner also has one day off a week that they chose.*
 
-Concept v2 planned 14 days with 15 learners from 12 October to 1 November. This keeps the same shape 16 to 17 days later: recruiting first, then 14 days of episodes, then rating and the gate. The beta's dates move by the same amount (build from 18 November, founding beta from 23 December to 26 January). Concept v2 and PRD v2 now show the same dates (checked 23 October).
+Concept v2 planned 14 days with 15 learners from 12 October to 1 November. This keeps the same shape 16 to 17 days later: recruiting first, then 14 days of episodes, then rating and the gate. The beta's dates move by the same amount (build from 18 November, founding beta from 23 December to 26 January; re-set 2026-11-12 by ADR-24.11 to a build ending 12 March and a beta from 17 March to 20 April 2027). Concept v2 and PRD v2 now show the same dates (checked 23 October).
 
 ## Before the pilot
 
@@ -40,7 +40,7 @@ Concept v2 planned 14 days with 15 learners from 12 October to 1 November. This 
 | **Tue 17 Nov** | | No episode; count unprompted asks | B's pairs rated. Unblind; transcript measures (prompt R); send each learner their **then-and-now message** (prompt F) with both clips. Pre-pay closes 23:59. Fill the Gates tab. Write the gate report (below) |
 | **Wed 18 Nov** | | | **Gate decision**: start the beta build, or rethink the claim that failed |
 
-From Sunday 15 November, learners who ask for more get a warm answer: "Season one is over; the next season starts with the beta in December. I'll let you know first." Their asks are the gate-1 count.
+From Sunday 15 November, learners who ask for more get a warm answer: "Season one is over; the next season starts with the beta on 17 March 2027 (re-set 2026-11-12, ADR-24.11). I'll let you know first." Their asks are the gate-1 count.
 
 ## The mid-pilot review (Sunday 8 November, about an hour)
 

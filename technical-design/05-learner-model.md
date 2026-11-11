@@ -47,7 +47,7 @@ stateDiagram-v2
   ground_truth --> deleted : learner removed
 ```
 
-Validator (`forone.learner.facts.validate`): (1) `quote` must appear word for word (after Unicode and whitespace normalization) in the payload of `quote_event_id`, which must be a `call_turn_verbatim`, `chat_message{speaker: learner}` or `onboarding_answer` event of this learner; (2) `fact_type` must be in `fact_shelf_life`; (3) a sensitive class (health, money, relationships, religion, politics) is stored only if `confirmed_in_session = true` (the learner's yes is itself in the verbatim transcript) and is usable only until the end of that ISO week; (4) a dated event creates exactly one `follow_ups` row (`due_on = dated_event_on + 1`); (5) a fact of the same type and subject supersedes the older one, keeping history.
+Validator (`forone.learner.facts.validate`): (1) `quote` must appear word for word (after Unicode and whitespace normalization) in the payload of `quote_event_id`, which must be a `call_turn_verbatim`, `chat_message{speaker: learner}` or `onboarding_answer` event of this learner; (2) `fact_type` must be in `fact_shelf_life`; (3) a sensitive class (health, money, relationships, religion, politics, sexuality) is used in the session where it was said only; it is offered to any later brief only after the learner confirms it on a one-tap confirmation card in the notebook (recorded in `confirmed_by`); a spoken yes is not enough (ADR-24.10); (4) a dated event creates exactly one `follow_ups` row (`due_on = dated_event_on + 1`); (5) a fact of the same type and subject supersedes the older one, keeping history.
 
 Use rules: only `usable` or `ground_truth` facts reach a brief; `heard_once` facts are never spoken (Salma may say "I think you mentioned..." only in the notebook); expired facts are never spoken; `dont_bring_up` removes a fact from every brief at compile time; at most 2 facts per episode, 1 callback per call; `times_used` and `last_used_episode_id` stop the same fact from recurring within 5 episodes.
 
@@ -74,7 +74,7 @@ Each unit (lemma or chunk) has three Beta distributions: ear (understood when he
 
 ## 4. Structures and mistake tracking
 
-Structures come from the language package inventory (`structures`, 12 categories, English Grammar Profile ids for `languages/en`, licensing open). The analyst proposes `structure_observations {structure_id, obligatory, correct, prompted, quote, corrected, confidence, blurred_meaning}` per obligatory context in the verbatim transcript; code writes them with deterministic ids and recomputes:
+Structures come from the language package inventory (`structures`, 12 categories, EGP-style ids for `languages/en`, built from open sources without waiting for the English Grammar Profile licence, which is mapped onto those ids if it arrives; ADR-24.18). The analyst proposes `structure_observations {structure_id, obligatory, correct, prompted, quote, corrected, confidence, blurred_meaning}` per obligatory context in the verbatim transcript; code writes them with deterministic ids and recomputes:
 
 - `structure_map.state`: `not_seen → heard (input count > 0) → attempting (any obligatory context) → taking (≥ 50% correct over the 14-day window, ≥ 3 contexts) → stable (≥ 80% over 14+ days, ≥ 5 contexts, ≥ 2 sessions)`; `stable_confirmed_at` when the next 4-weekly recording holds; re-checks at 2, 4, 8 weeks (`recheck_due_at`).
 - `error_profile`: one row per structure with errors; `status = pattern` when `count_clean ≥ 3` across `≥ 2` sessions (error vs slip rule); `targeting` when the teacher picks it; `dropped_by_learner` on a veto unless `blurred_n > 0`; `resolved` at `stable_confirmed_at`.
@@ -104,7 +104,7 @@ The "working on" list is at most 3 items (`working_on_items`, source teacher or 
 | teacher | 03 | ≤ 12k tokens | everything summarized: due list, acc_14d, error profile, working on, usable facts, interests, arcs, season, taste, claims, last 14 days | (learner, lm_version) |
 | writer | 03 | ≤ 3k | brief + ≤ 2 facts with quotes, bible excerpt, targets, words, coverage and length, ban list | (episode) |
 | host | 04 | ≤ 900 | position, pushback, necessity moves, 2 to 4 recall gaps, 3 words, one callback, budgets, pause profile, anxiety flag, name and respelling, never_mention | (call) |
-| Salma talkback | 04 | ≤ 1k | produced-word history, active targets, native share | (call) |
+| talkback resolver (the host says the word, ADR-24.B22) | 04 | ≤ 1k | produced-word history, active targets, native share | (call) |
 | chat host | 06 | ≤ 1k | call summary, targets, opener | (session) |
 | proof producer | 06 | varies | passed claims with evidence only | (proof) |
 

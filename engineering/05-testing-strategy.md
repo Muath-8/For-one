@@ -41,7 +41,7 @@ Run on every PR against docker compose in the runner (handbook 04 §3).
 
 ## 4. End to end: a synthetic learner's day
 
-`tools/e2e day` on staging runs the whole loop for one synthetic learner with real vendors: `day/next` fires, the idea is chosen, `episode/produce` runs through teacher, writer, fitter, editor, voice studio; the drop publishes; the player streams the episode; the scripted caller holds a call through `call-bench`; the after-pass makes notes within 90 seconds; the notebook updates; the measures job computes the day. Assertions are on rows and timings, never on the content of the episode (that is the evals' job). It runs nightly and before every prod release as part of the canary (a shortened version).
+`tools/e2e day` on staging runs the whole loop for one synthetic learner with real vendors: `day/next` fires, the idea is chosen, `episode/produce` runs through teacher, writer, fitter, editor, voice studio; the drop publishes; the player streams the episode; the scripted caller holds a call through `call-bench`; the after-pass completes (one function, p95 under 10 minutes; there are no notes, ADR-06); the notebook updates; the measures job computes the day. Assertions are on rows and timings, never on the content of the episode (that is the evals' job). It runs nightly and before every prod release as part of the canary (a shortened version).
 
 Playwright drives the web app for the ten smoke flows against a mocked API on every PR, and against staging in the nightly. Mobile Safari is in the nightly matrix because the PWA target is a phone.
 
@@ -74,7 +74,6 @@ The offline suite (`forone.eval`, `tools/eval`) is the layer that turns "a chang
 | `clips/recognizer/` | the 30 consented clips with verbatim hand transcripts | `recognizers` |
 | `recordings/` | then-and-now pairs with blind ratings | `rater` |
 | `facts/` | confirmed and rejected life-fact candidates with quotes, plus every wrong-memory case from production | `memory` |
-| `notes/` | Salma's notes as sent | `notes`, `law_scan` |
 | `similarity/` | scripts judged too alike | `writer`, `editor` |
 | `injection/` | prompt-injection and jailbreak attempts in Arabic and English, with the expected behaviour | `injection` |
 | `pii_corpus.jsonl` | 300 lines of every PII shape in both languages | `pii_scrub` |

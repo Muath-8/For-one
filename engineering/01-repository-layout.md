@@ -44,14 +44,16 @@ for-one/
 │   ├── measures/                  forone.measures: every 16.1/16.2 number as versioned SQL
 │   ├── eval/                      forone.eval: suites, checks, scoring, synthetic learners
 │   ├── ops/                       forone.ops: alerts loader, paging, canary, logscrub
-│   └── languages/                 language packages (section 4)
-│       ├── _shared/               schema for a package; validation; loader
-│       └── en/                    the first target language: bibles, voices, inventory, lists, prompts, consent texts
-├── ui_strings/                    learner-language UI copy (ar first), keyed; loaded by web and api
+│   ├── languages/                 target-language packages (section 4)
+│   │   ├── _shared/               schema for a package; validation; loader
+│   │   └── en/                    the first target language: host bibles, voices, inventory, lists, prompts, crisis keywords
+│   └── native/                    native-language packages (section 4, ADR-02)
+│       ├── ar/                    interface strings, consent texts and notice, Salma's voice, crisis resources by country
+│       └── en/                    the same for English speakers; the fallback
 ├── eval/
 │   ├── suites.yaml                named suites (09 §4.2)
 │   ├── thresholds.yaml            floors, ceilings, allowed regression per metric
-│   ├── fixtures/                  learners/, scripts/, editor/, transcripts/, clips/, recordings/, facts/, notes/, pii_corpus.jsonl
+│   ├── fixtures/                  learners/, scripts/, editor/, transcripts/, clips/, recordings/, facts/, pii_corpus.jsonl
 │   └── baselines/                 the last accepted run per suite, committed
 ├── ops/
 │   ├── alerts.yaml                every alert rule as SQL plus runbook link
@@ -67,7 +69,7 @@ for-one/
 │   ├── eval/                      CLI front for forone.eval
 │   ├── release/                   cut, approve, drain-replace, rollback
 │   └── import_m0.py               Milestone 0 learner files and tags into fixtures and events
-├── docs/                          ropa.md (processor register), adr/ (architecture decision records)
+├── docs/                          links to `legal/05-ropa.md` (processor register) and `legal/04-dpia.md`, the sources (ADR-24.B11); adr/ (architecture decision records)
 ├── architecture/, perspectives/, milestone-0/, features/, design/, engineering/   the product and design documents (already in the repo)
 ```
 
@@ -83,13 +85,13 @@ for-one/
 - **Feature flags** are `area.flag_name` (`talkback.enabled`, `pipeline.editor_model`); a flag never guards a product law.
 - **Environment variables** are `UPPER_SNAKE`, prefixed `FORONE_` only for the handful that select behaviour of the image itself (`FORONE_ENV`, `FORONE_SERVICE`, `FORONE_FAKE_VENDORS`); vendor keys keep the vendor's own conventional name.
 
-## 4. Language packages: a change from the architecture documents
+## 4. Language packages: two kinds (ADR-02)
 
-The architecture documents (written 2026-10-16) name one package, `packages/package_ar_en/`, because at that time the product was Arabic-speaking learners of English. On 2026-10-23 Muath decided there is no launch country or learner group, and that target languages open one by one through the five-check gate in concept v2 §8. The code must therefore treat the target language and the learner's own language as two separate axes from day one, even though the pilot is English only.
+The first architecture drafts (written 2026-10-16) named one pair package, because at that time the product was Arabic-speaking learners of English. On 2026-10-23 Muath decided there is no launch country or learner group, and that target languages open one by one through the five-check gate in concept v2 §8. The code must therefore treat the target language and the learner's own language as two separate axes from day one, even though the pilot is English only.
 
-- `packages/languages/<target>/` holds everything a model sees about the **target language**: host and producer bibles, voice ids per vendor, structure inventory, word lists, ban list, the prompts (section 5), crisis keywords and resources, and the gate evidence file `gate.yaml` that records the five checks and their dates. `en` is the only package in the beta.
-- `ui_strings/<learner_language>.yaml` holds what the **learner reads in their own language**: Salma's UI copy, consent texts, the privacy notice, the three message kinds. `ar` ships first. Consent texts and the privacy notice keep their version numbers inside this file because counsel edits them.
-- Nothing in `apps/` or `packages/` other than the loader may contain a language code literal. A unit test greps for `"en"`, `"ar"` string literals outside `packages/languages/` and `ui_strings/` and fails on a hit.
+- `packages/languages/<target>/` holds everything a model sees about the **target language**: host and producer bibles, voice ids per vendor, structure inventory, word lists, ban list, the prompts (section 5), crisis keywords, and the gate evidence file `gate.yaml` that records the five checks and their dates. `en` is the only package in the beta unless another language passes all five checks by the end of build week 2 (ADR-24.20).
+- `packages/native/<lang>/` holds what the **learner reads and hears in their own language** (ADR-02): interface strings (`ui_strings/`, with `dir`), consent texts and the privacy notice, the three message kinds, Salma's voice, and crisis resources by country of residence. `native/ar` and `native/en` exist at the open, 2027-03-17 (ADR-24.20); `native/en` is the fallback. Consent texts and the privacy notice keep their version numbers inside the package because counsel edits them. The architecture adopted this split as ADR-02, so this section is no longer a departure.
+- Nothing in `apps/` or `packages/` other than the loader may contain a language code literal. A unit test greps for `"en"`, `"ar"` string literals outside `packages/languages/` and `packages/native/` and fails on a hit.
 
 This is the one place the handbook knowingly departs from architecture 01. Record it as ADR-0001 in `docs/adr/` when the repo is scaffolded.
 
@@ -107,7 +109,7 @@ packages/languages/en/
 │   ├── editor_rubric.md
 │   ├── host_system.md
 │   ├── salma_live.md
-│   ├── salma_notes.md
+│   ├── salma_explain.md       Salma when the learner asks (ADR-06); there is no notes prompt
 │   ├── chat_host.md
 │   ├── analyst_full.md / analyst_fast.md
 │   ├── memory_keeper.md
@@ -123,7 +125,7 @@ Rules that follow from this:
 
 1. A prompt file has a Markdown body and a YAML frontmatter with `role`, `model_class` (`opus`, `sonnet`, `haiku`, `gemini-flash`), `cache_prefix_ends_at` (a marker string; everything above it is the cached prefix and must not contain per-learner text), and `inputs` (the named slots the pipeline fills). The loader fails at import time if a slot in the body is not declared.
 2. **Per-learner text is never written into a prompt file.** It enters through the slots, wrapped by `forone.core.guard.listener_said()` (architecture 07 D10).
-3. Prompt text assembled at runtime (the brief, the call brief, the notes selection) is built by code in `forone.pipeline` or `forone.assess` from the file plus the learner's rows. The assembled text is stored in the learner's own rows (`pipeline_steps.prompt_ref`, `calls.brief_ref`) in the home region, never in a shared store, and goes to Langfuse only for learners with `data_use = true`.
+3. Prompt text assembled at runtime (the brief, the call brief) is built by code in `forone.pipeline` or `forone.assess` from the file plus the learner's rows. The assembled text is stored in the learner's own rows (`pipeline_steps.prompt_ref`, `calls.brief_ref`) in the home region, never in a shared store, and goes to Langfuse only for learners with `data_use = true`.
 4. **The Milestone 0 prompts** in `/milestone-0/05-prompts.md` are the seed. Week 1 of the build moves each one into its file under `prompts/` with version `1.0.0` and a frontmatter note `origin: milestone-0/05-prompts.md §x`. They are not edited in place in the kit; the kit stays as the historical record.
 5. A change to any file under `prompts/`, `rules/` or `versions.yaml` triggers the eval gate (handbook 04 and 05) and requires a reviewer who is not the author (handbook 08).
 6. The admin UI has no prompt editor. Pipeline D17 forbids it and this handbook keeps it forbidden.

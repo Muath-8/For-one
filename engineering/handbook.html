@@ -142,18 +142,19 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
 <div class="wrap">
 <header class="mast">
   <div class="eyebrow">For one · engineering handbook · written 6 November 2026</div>
+  <div class="eyebrow" style="margin-top:6px">Updated 2026-11-12 · every open decision taken (ADR-24) · beta opens 2027-03-17</div>
   <h1>How we set up and run the build</h1>
   <p class="lede">Everything the team needs that is not product, architecture or design: the repository, a free laptop setup, three environments, the pipeline, the tests, the on-call, the vendors, the review rules, the data rules, and what "done" means. Ten pages and three starter files, kept in the repository and edited like code.</p>
   <div class="meta">
-    <span><b>Build</b> 18 Nov to 22 Dec 2026</span>
-    <span><b>Paid beta</b> from 23 Dec</span>
-    <span><b>Team</b> one to two engineers plus Muath</span>
+    <span><b>Build</b> 18 Nov 2026 to 12 Mar 2027</span>
+    <span><b>Paid beta</b> from 17 Mar 2027 (17 Feb with three engineers)</span>
+    <span><b>Team</b> two engineers from build start plus Muath</span>
     <span><b>Source</b> <a href="https://github.com/Muath-8/for-one/tree/main/engineering">github.com/Muath-8/for-one/engineering</a></span>
   </div>
 </header>
 
 <nav class="rail" aria-label="Sections">
-  <a href="#rules">Rules</a><a href="#change">Path of a change</a><a href="#envs">Environments</a><a href="#data">Where data goes</a><a href="#cost">Cost</a><a href="#pages">The pages</a><a href="#vendors">Vendor accounts</a><a href="#calendar">Calendar</a><a href="#open">Open for Muath</a><a href="#starters">Starter files</a>
+  <a href="#rules">Rules</a><a href="#change">Path of a change</a><a href="#envs">Environments</a><a href="#data">Where data goes</a><a href="#cost">Cost</a><a href="#pages">The pages</a><a href="#vendors">Vendor accounts</a><a href="#calendar">Calendar</a><a href="#open">Decided for Muath</a><a href="#starters">Starter files</a>
 </nav>
 
 <section id="rules">
@@ -164,7 +165,7 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
     <div><b>Synthetic learners everywhere</b><span>Dev, staging, cassettes, canaries and load tests use invented people. Real learners live in prod and nowhere else.</span></div>
     <div><b>Learner text stays home</b><span>Ids and enums may travel to Inngest, Sentry, Slack and the logs. Names, transcripts, facts and audio never do. Prompts reach Langfuse only with the opt-in.</span></div>
     <div><b>Every look is logged</b><span>A human reading learner content writes a reason the learner can read in their own export.</span></div>
-    <div><b>Every promise is verified by a second job</b><span>Deletion windows are re-checked daily by code that does not share the doer's bugs.</span></div>
+    <div><b>Every promise is verified by a second job</b><span>Deletion windows are re-checked hourly by code that does not share the doer's bugs.</span></div>
     <div><b>Every vendor call is a priced row</b><span>Through the middleware, on the cost page, with a fallback and a degrade path in <code>vendors.yaml</code>.</span></div>
     <div><b>A deploy never cuts a call</b><span>Drain then replace, outside the drop window, inside the release window, after a canary, with one human name on it.</span></div>
     <div><b>Every alert has a runbook, every runbook has a switch</b><span>If a fix needs SQL at 05:40, the runbook gets an admin action instead.</span></div>
@@ -224,8 +225,8 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
       <path class="edge" d="M560 181 H500" marker-end="url(#ar)"/>
       <rect class="node human" x="362" y="146" width="136" height="70" rx="5"/>
       <text class="lab" x="430" y="170" text-anchor="middle" font-weight="600">One approval</text>
-      <text class="small" x="430" y="187" text-anchor="middle">not the cutter · Sun to Thu</text>
-      <text class="small" x="430" y="202" text-anchor="middle">10:00 to 16:00 Riyadh · no P1</text>
+      <text class="small" x="430" y="187" text-anchor="middle">not the cutter · any hour</text>
+      <text class="small" x="430" y="202" text-anchor="middle">window from learner_schedule · no P1</text>
 
       <path class="edge" d="M362 181 H302" marker-end="url(#ar)"/>
       <rect class="node gate" x="130" y="146" width="170" height="70" rx="5"/>
@@ -248,9 +249,9 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
       <text class="lab" x="510" y="284" text-anchor="middle" font-weight="600">Canary failed: automatic rollback</text>
       <text class="small" x="510" y="300" text-anchor="middle">previous task definition · page P2 · Slack</text>
 
-      <text class="small" x="840" y="250" text-anchor="middle">Freezes: 5 to 8 Dec and 31 Dec to 2 Jan.</text>
-      <text class="small" x="840" y="266" text-anchor="middle">Never within 30 min of a learner's drop</text>
-      <text class="small" x="840" y="282" text-anchor="middle">when the diff touches the pipeline.</text>
+      <text class="small" x="840" y="250" text-anchor="middle">Freezes: 31 Dec to 2 Jan; 15 to 17 Mar.</text>
+      <text class="small" x="840" y="266" text-anchor="middle">Refused while over 2% of learners</text>
+      <text class="small" x="840" y="282" text-anchor="middle">have a drop in the next 45 minutes.</text>
     </svg>
     </div>
     <figcaption>Staging deploys itself on every merge; prod deploys only from a tag, after one named approval, and only once a canary episode and a canary call have passed. The database rolls forward only; a prompt version rolls back by reverting its PR. Full detail in pages 03 and 04.</figcaption>
@@ -258,15 +259,15 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
 </section>
 
 <section id="envs">
-  <div class="head"><h2>Three environments</h2><p>No fourth. Backend preview environments were rejected for cost; a PR that needs a running backend is tested on staging under a Slack lock. Staging is stopped when idle, which saves about $200 a month.</p></div>
+  <div class="head"><h2>Three environments</h2><p>No fourth. Backend preview environments were rejected for cost; a PR that needs a running backend is tested on staging under a Slack lock. Staging stays up from build week 2 through the beta (about $180 a month, ADR-16).</p></div>
   <div class="tbl"><table>
     <thead><tr><th></th><th>dev</th><th>staging</th><th>prod</th></tr></thead>
     <tbody>
       <tr><td><b>Where</b></td><td>a laptop, docker compose</td><td>AWS, own VPC, same region as prod</td><td>AWS, home region</td></tr>
       <tr><td><b>Data</b></td><td>synthetic only</td><td>synthetic plus consented Milestone 0 fixtures; never a copy of prod</td><td>real learners</td></tr>
-      <tr><td><b>Vendors</b></td><td>fakes by default; own keys capped at $20/day</td><td>real keys, staging workspaces, $50/day</td><td>real keys; alerts at $50/day and $1.00/session; cap <code>max(50, learners × 1.50)</code></td></tr>
-      <tr><td><b>Postgres</b></td><td>compose, pgvector</td><td>RDS db.t4g.medium, single AZ, stopped when idle</td><td>RDS db.t4g.large Multi-AZ, 30-day backups, PITR</td></tr>
-      <tr><td><b>Storage</b></td><td>MinIO</td><td>three S3 buckets, SSE-C</td><td>three S3 buckets, SSE-C, versioning off, lifecycle rules</td></tr>
+      <tr><td><b>Vendors</b></td><td>fakes by default; own keys capped at $20/day</td><td>real keys, staging workspaces, $50/day</td><td>real keys; alert at $1.00/session; daily cap <code>max(50, Σ plan.episodes_per_day × $1.00)</code> from the open (ADR-15)</td></tr>
+      <tr><td><b>Postgres</b></td><td>compose, pgvector</td><td>RDS db.t4g.medium, single AZ, up from build week 2</td><td>RDS db.t4g.large Multi-AZ, 30-day backups, PITR</td></tr>
+      <tr><td><b>Storage</b></td><td>MinIO</td><td>three S3 buckets; voice SSE-C, show audio SSE-KMS</td><td>three S3 buckets; voice SSE-C per learner, show audio SSE-KMS; versions kept 7 days on <code>learners/</code>, never on <code>ephemeral/</code>; lifecycle rules</td></tr>
       <tr><td><b>Workflow, media</b></td><td>Inngest dev server, LiveKit dev server</td><td>Inngest Cloud EU <code>staging</code>, LiveKit <code>forone-staging</code></td><td>Inngest Cloud EU <code>prod</code>, LiveKit <code>forone-prod</code></td></tr>
       <tr><td><b>Web</b></td><td><code>next dev</code></td><td>Vercel preview per PR; <code>staging.</code> on main</td><td><code>app.</code> from the release tag</td></tr>
       <tr><td><b>Email</b></td><td>Mailpit; a real inbox is unreachable by construction</td><td>Resend test domain</td><td>Resend, tracking off</td></tr>
@@ -274,7 +275,7 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
       <tr><td><b>Secrets</b></td><td><code>.env</code>, generated by <code>make dev</code></td><td>Secrets Manager via task role</td><td>Secrets Manager via task role; humans only through break-glass</td></tr>
     </tbody>
   </table></div>
-  <p class="muted" style="margin-top:12px;font-size:15px">Region: <code>HOME_REGION</code> defaults to AWS <code>me-central-1</code> (UAE); <code>eu-central-1</code> is the one-day fallback; an in-Kingdom requirement would mean a different Terraform tree and five to eight engineer-days. Counsel's answer is due before Terraform is first applied. Infrastructure as code is Terraform with an S3 state backend; GitHub reaches AWS through OIDC and no long-lived key exists for a human or for CI.</p>
+  <p class="muted" style="margin-top:12px;font-size:15px">Region: <code>HOME_REGION</code> is AWS <code>eu-central-1</code>, final for the beta (ADR-24.8); <code>me-central-1</code> is a one-variable move only counsel can trigger, and an in-Kingdom requirement would mean a different Terraform tree and five to eight engineer-days. Transfers rest on standard contractual clauses with a transfer impact assessment, never consent. Infrastructure as code is Terraform with an S3 state backend; GitHub reaches AWS through OIDC and no long-lived key exists for a human or for CI.</p>
 </section>
 
 <section id="data">
@@ -294,13 +295,13 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
 
       <!-- home region -->
       <rect class="region home" x="142" y="60" width="300" height="280" rx="8"/>
-      <text class="mono" x="156" y="82" font-weight="500">HOME REGION · me-central-1 (pending counsel)</text>
+      <text class="mono" x="156" y="82" font-weight="500">HOME REGION · eu-central-1 (final)</text>
       <rect class="node" x="160" y="100" width="264" height="54" rx="5"/>
       <text class="lab" x="292" y="121" text-anchor="middle" font-weight="600">Postgres, row-level security</text>
       <text class="small" x="292" y="138" text-anchor="middle">facts · transcripts · identity · events · costs</text>
       <rect class="node" x="160" y="166" width="264" height="54" rx="5"/>
-      <text class="lab" x="292" y="187" text-anchor="middle" font-weight="600">S3 with a key per learner</text>
-      <text class="small" x="292" y="204" text-anchor="middle">audio · produced media · exports · deleted by key</text>
+      <text class="lab" x="292" y="187" text-anchor="middle" font-weight="600">S3: voice under a key per learner</text>
+      <text class="small" x="292" y="204" text-anchor="middle">voice deleted by key · show audio SSE-KMS</text>
       <rect class="node" x="160" y="232" width="264" height="54" rx="5"/>
       <text class="lab" x="292" y="253" text-anchor="middle" font-weight="600">api · workflows · call-worker</text>
       <text class="small" x="292" y="270" text-anchor="middle">KMS unwrap is audited per use</text>
@@ -321,7 +322,7 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
       <!-- vendors -->
       <rect class="region" x="500" y="220" width="220" height="120" rx="8"/>
       <text class="mono" x="514" y="242" font-weight="500">US / EU · processor register</text>
-      <text class="lab" x="514" y="268">Anthropic, Google</text><text class="small" x="706" y="268" text-anchor="end">briefs, scripts</text>
+      <text class="lab" x="514" y="268">Anthropic, Google</text><text class="small" x="706" y="268" text-anchor="end">briefs, scripts, embeddings</text>
       <text class="lab" x="514" y="292">Voice vendors</text><text class="small" x="706" y="292" text-anchor="end">script text only</text>
       <text class="lab" x="514" y="316">Recognizers</text><text class="small" x="706" y="316" text-anchor="end">audio in transit</text>
       <path class="edge" d="M442 280 H498" marker-end="url(#ar2)"/>
@@ -344,8 +345,8 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
       <text class="small" x="880" y="262" text-anchor="middle">A cassette with a real learner's</text>
       <text class="small" x="880" y="276" text-anchor="middle">text is deleted on sight.</text>
       <text class="small" x="880" y="306" text-anchor="middle">Fixtures beyond the 30 clips stay</text>
-      <text class="small" x="880" y="320" text-anchor="middle">out of the public repo until</text>
-      <text class="small" x="880" y="334" text-anchor="middle">counsel confirms the consent.</text>
+      <text class="small" x="880" y="320" text-anchor="middle">out of the public repo until the</text>
+      <text class="small" x="880" y="334" text-anchor="middle">learner signs the addendum.</text>
     </svg>
     </div>
     <figcaption>Three destinations with three rules: the home region holds everything, EU tools hold ids (and Langfuse holds text only for learners who opted in), vendors see only what their role needs. Page 09 lists what an engineer may look at without asking, with a reason row, and never.</figcaption>
@@ -353,9 +354,9 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
 </section>
 
 <section id="cost">
-  <div class="head"><h2>Cost per session, by voice stack</h2><p>The number the cost dashboard shows every morning, as the architecture's itemized model computes it today. The blind test on 13 November picks the voice vendor, which is the single biggest cost decision of the beta. Gemini is cheapest now and the dearest viable stack after its prices double on 1 January.</p></div>
+  <div class="head"><h2>Cost per session, by voice stack</h2><p>The number the cost dashboard shows every morning, as architecture 08 §6.1 computes it. Gemini's prices double on 1 January 2027, during the build, so the beta runs on post-doubling prices and the blind test on 17 November picks the voice on them; there is no mid-beta voice swap (ADR-24.6). With the levers pulled, the floor is $0.43 to $0.45.</p></div>
   <div class="chart" id="costchart">
-    <svg viewBox="0 0 960 320" role="img" aria-label="Stacked horizontal bars of cost per daily session: Gemini voice $0.64, Inworld voice $0.67, Gemini after the 1 January price doubling $0.82, ElevenLabs at list price $1.17. Reference lines at the $0.60 budget, the $0.80 warning and the $1.00 stop line.">
+    <svg viewBox="0 0 960 320" role="img" aria-label="Stacked horizontal bars of cost per daily session: Gemini voice before the doubling $0.67, Gemini after the 1 January 2027 doubling $0.85, Inworld after it $0.72, ElevenLabs at list price after it $1.22. Reference lines at the $0.60 budget, the $0.80 warning and the $1.00 stop line.">
       <g id="bars"></g>
     </svg>
     <div class="tip" id="tip"></div>
@@ -363,23 +364,23 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
       <span><i style="background:var(--s1)"></i>Voice studio (episode, read-aloud, recap)</span>
       <span><i style="background:var(--s2)"></i>Call, round two and call voice</span>
       <span><i style="background:var(--s3)"></i>Teacher and writer</span>
-      <span><i style="background:var(--s4)"></i>Everything else (editor, verbatim, notes, chat, after-session, proof, swap)</span>
+      <span><i style="background:var(--s4)"></i>Everything else (fitter, editor, embedding, side lines, verbatim, Salma when asked and chat, after-session, proof, swap)</span>
     </div>
   </div>
   <details style="margin-top:14px"><summary>The same numbers as a table</summary>
     <div class="tbl" style="border:none;margin-top:8px"><table>
       <thead><tr><th>Stack</th><th class="num">Voice studio</th><th class="num">Call</th><th class="num">Teacher + writer</th><th class="num">Everything else</th><th class="num">Per session</th></tr></thead>
       <tbody>
-        <tr><td>Gemini voice, today</td><td class="num">$0.217</td><td class="num">$0.147</td><td class="num">$0.132</td><td class="num">$0.142</td><td class="num"><b>$0.638</b></td></tr>
-        <tr><td>Inworld voice, today</td><td class="num">$0.253</td><td class="num">$0.144</td><td class="num">$0.132</td><td class="num">$0.142</td><td class="num"><b>$0.671</b></td></tr>
-        <tr><td>Gemini voice, after 1 Jan 2027</td><td class="num">$0.352</td><td class="num">$0.179</td><td class="num">$0.132</td><td class="num">$0.157</td><td class="num"><b>$0.820</b></td></tr>
-        <tr><td>ElevenLabs v4 at list price</td><td class="num">$0.709</td><td class="num">$0.191</td><td class="num">$0.132</td><td class="num">$0.142</td><td class="num"><b>$1.174</b></td></tr>
+        <tr><td>Gemini voice, before 1 Jan 2027</td><td class="num">$0.220</td><td class="num">$0.147</td><td class="num">$0.157</td><td class="num">$0.148</td><td class="num"><b>$0.672</b></td></tr>
+        <tr><td>Gemini voice, after 1 Jan 2027</td><td class="num">$0.355</td><td class="num">$0.179</td><td class="num">$0.157</td><td class="num">$0.163</td><td class="num"><b>$0.854</b></td></tr>
+        <tr><td>Inworld voice, after 1 Jan 2027</td><td class="num">$0.253</td><td class="num">$0.144</td><td class="num">$0.157</td><td class="num">$0.163</td><td class="num"><b>$0.717</b></td></tr>
+        <tr><td>ElevenLabs v4 at list, after 1 Jan 2027</td><td class="num">$0.709</td><td class="num">$0.191</td><td class="num">$0.157</td><td class="num">$0.163</td><td class="num"><b>$1.220</b></td></tr>
       </tbody>
     </table></div>
-    <p class="muted" style="font-size:14px;margin-top:8px">Source: architecture 08 §6.1, list prices as of October 2026, standard TTS. Fixed infrastructure (about $1.30 a session at 15 learners, $0.25 at 100) is shown as its own line on the dashboard and is not in these bars.</p>
+    <p class="muted" style="font-size:14px;margin-top:8px">Source: architecture 08 §6.1, list prices as of October 2026 with the dated January rows, standard TTS. Fixed infrastructure (about $1.30 a session at 15 learners, $0.25 at 100) is shown as its own line on the dashboard and is not in these bars.</p>
   </details>
   <div class="cols" style="margin-top:24px">
-    <div><h3>What the guard does with it</h3><p class="muted" style="margin-top:6px">At 80% of the daily cap the system enters <b>conserve</b> (teacher to Sonnet batch, rewrites capped, host to Haiku, canaries skipped). At 100% it enters <b>halt</b>: queued episodes finish, no new on-demand generation except return episodes, calls are never cut, notes and claims are never degraded. The <b>stop line</b> at $1.00 pages Muath and opens a 48-hour window for a costed plan. It never stops service.</p></div>
+    <div><h3>What the guard does with it</h3><p class="muted" style="margin-top:6px">At 80% of the daily cap the system enters <b>conserve</b> (batch TTS forced, rewrites capped, canaries and pre-writes skipped; never a model swap, which is a flag a person flips, ADR-14). At 100% it enters <b>halt</b>: queued episodes finish, no new on-demand generation except return episodes, extras and swaps pause for the UTC day, calls are never cut, claims are never degraded. The <b>stop line</b> at $1.00 pages Muath and opens a 48-hour window for a costed plan. It never stops service.</p></div>
     <div><h3>What the learner sees</h3><p class="muted" style="margin-top:6px">Nothing. No cost, no "heavy user" message, no throttle text. The allowance is the only learner-facing limit and it is a product rule, not a cost rule. Every vendor call is one row in <code>vendor_calls</code>, priced from a dated price book, reconciled monthly against each vendor's invoice.</p></div>
   </div>
 </section>
@@ -387,16 +388,16 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
 <section id="pages">
   <div class="head"><h2>The ten pages</h2><p>Each page is a Markdown file in <code>engineering/</code>, written against the nine architecture documents, concept v2 and the decisions of 23 October. The line under each title is the rule it carries that the architecture did not already state.</p></div>
   <div class="pages">
-    <div class="page"><div class="n">01</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/01-repository-layout.md">Repository layout</a></h3><p>One monorepo, four deployables (web, api, workflows, call-worker), eight packages, one Python image with three entrypoints, naming rules, and where every prompt lives as a versioned file.</p><div class="carry"><em>Carries</em><span>Language packages are per target language (<code>packages/languages/en/</code>) with learner-language UI strings separate, because there is no launch country any more.</span></div></div></div>
+    <div class="page"><div class="n">01</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/01-repository-layout.md">Repository layout</a></h3><p>One monorepo, four deployables (web, api, workflows, call-worker), eight packages, one Python image with three entrypoints, naming rules, and where every prompt lives as a versioned file.</p><div class="carry"><em>Carries</em><span>Two package kinds (ADR-02): <code>packages/languages/&lt;target&gt;/</code> for what a model sees about the target language, and <code>packages/native/&lt;lang&gt;/</code> for interface strings, consent texts, Salma's voice and crisis resources.</span></div></div></div>
     <div class="page"><div class="n">02</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/02-local-development.md">Local development</a></h3><p>A full day of the product on a laptop in under an hour: docker compose, idempotent seeds with three synthetic learners, the fake vendors and how to record a cassette, every environment variable with its owner.</p><div class="carry"><em>Carries</em><span>Fake calls still write priced <code>vendor_calls</code> rows, so the cost page works in dev.</span></div></div></div>
-    <div class="page"><div class="n">03</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/03-environments-and-deployment.md">Environments and deployment</a></h3><p>dev, staging, prod; Terraform with an S3 backend; Secrets Manager injected by task role; GitHub OIDC; the home region question; the release window, freezes, rollback, expand-then-contract migrations, and the drained call-worker replacement.</p><div class="carry"><em>Carries</em><span>No long-lived AWS key exists for a human or for CI.</span></div></div></div>
+    <div class="page"><div class="n">03</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/03-environments-and-deployment.md">Environments and deployment</a></h3><p>dev, staging, prod; Terraform with an S3 backend; Secrets Manager injected by task role; GitHub OIDC; the home region (<code>eu-central-1</code>); the computed release window, freezes, rollback, expand-then-contract migrations, and the drained call-worker replacement.</p><div class="carry"><em>Carries</em><span>No long-lived AWS key exists for a human or for CI.</span></div></div></div>
     <div class="page"><div class="n">04</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/04-ci-cd.md">CI and CD</a></h3><p>Four workflows, the checks on every PR, the eval gate that runs by diff and prints its cost, Vercel previews on staging, branch protection, the nightly, and the seven-step release.</p><div class="carry"><em>Carries</em><span>A PR's eval gate may not spend more than $25 without a label and a reviewer's yes.</span></div></div></div>
     <div class="page"><div class="n">05</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/05-testing-strategy.md">Testing strategy</a></h3><p>Five layers: unit, contract, end to end, audio and voice, model-output evals. The simulated caller, the 50 scripted calls, golden sets seeded from Milestone 0, and the plan to port the coverage checker into the fitter.</p><div class="carry"><em>Carries</em><span>A recognizer is gated on error-preservation rate before word error rate, because speech-to-text smooths learner errors.</span></div></div></div>
-    <div class="page"><div class="n">06</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/06-observability-and-on-call.md">Observability and on-call</a></h3><p>Postgres as the metrics store, alerts as SQL with runbook links, the cost-per-session dashboard defined line by line, the six P1 families that ring a phone, the on-call rota for two people, and blameless postmortems.</p><div class="carry"><em>Carries</em><span>A postmortem that produces only "be more careful" is sent back.</span></div></div></div>
+    <div class="page"><div class="n">06</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/06-observability-and-on-call.md">Observability and on-call</a></h3><p>Postgres as the metrics store, alerts as SQL with runbook links, the cost-per-session dashboard defined line by line, the six P1 families that ring a phone, the on-call rota (one responder at a time, accepted for the beta, ADR-24.12), and blameless postmortems.</p><div class="carry"><em>Carries</em><span>A postmortem that produces only "be more careful" is sent back.</span></div></div></div>
     <div class="page"><div class="n">07</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/07-vendor-accounts-and-cost-controls.md">Vendor accounts and cost controls</a></h3><p>The 25 accounts and who opens them, keys per environment and per engineer, the vendor-side retention switches, spend caps, spend modes, the stop line, the risk calendar and the monthly reconciliation.</p><div class="carry"><em>Carries</em><span>Our cap is always lower than the vendor's cap, so ours fires first.</span></div></div></div>
     <div class="page"><div class="n">08</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/08-coding-standards-and-review.md">Coding standards and review</a></h3><p>Python and TypeScript rules enforced by Ruff, Pyright and ESLint; PR shape; the ten rules for prompt changes; the nine things a reviewer checks in this product, laws first.</p><div class="carry"><em>Carries</em><span>A model change is a prompt change and runs the same suites.</span></div></div></div>
-    <div class="page"><div class="n">09</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/09-data-handling.md">Data handling</a></h3><p>Seven data classes, the promises the code keeps with their windows and verifying jobs, what engineers may look at without asking, with a reason, and never; where data may go; consent; fixtures; research use; incidents.</p><div class="carry"><em>Carries</em><span>Milestone 0 fixtures beyond the 30 clips stay out of the public repository until counsel confirms the consent.</span></div></div></div>
-    <div class="page"><div class="n">10</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/10-definition-of-done.md">Definition of done</a></h3><p>Checklists for a story, a prompt change, a release, and the build itself on 22 December.</p><div class="carry"><em>Carries</em><span>A story without a kill switch is not done.</span></div></div></div>
+    <div class="page"><div class="n">09</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/09-data-handling.md">Data handling</a></h3><p>Seven data classes, the promises the code keeps with their windows and verifying jobs, what engineers may look at without asking, with a reason, and never; where data may go; consent; fixtures; research use; incidents.</p><div class="carry"><em>Carries</em><span>Milestone 0 fixtures beyond the 30 clips stay out of the public repository until the learner signs Part 2 of the consent addendum (ADR-24.16, B10).</span></div></div></div>
+    <div class="page"><div class="n">10</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/10-definition-of-done.md">Definition of done</a></h3><p>Checklists for a story, a prompt change, a release, and the build itself at the exit on 12 March 2027 (Day-1 P0 done; Later-in-the-beta P0 by its beta day).</p><div class="carry"><em>Carries</em><span>A story without a kill switch is not done.</span></div></div></div>
   </div>
 </section>
 
@@ -405,59 +406,58 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
   <div class="tbl"><table>
     <thead><tr><th>Account</th><th>For</th><th>Plan</th><th>By</th><th class="num">Monthly</th></tr></thead>
     <tbody>
-      <tr><td><b>AWS</b> (new account, home region)</td><td>RDS, S3, KMS, Fargate, Secrets Manager, WAF</td><td>pay as you go; budget alert at $1,200</td><td><span class="pill m">before week 1</span></td><td class="num">$700 to $1,100</td></tr>
-      <tr><td><b>Apple Developer Program</b></td><td>Sign in with Apple</td><td>$99 a year; approval takes days</td><td><span class="pill m">9 Nov</span></td><td class="num">$8</td></tr>
-      <tr><td><b>Google Cloud</b> project with Gemini API and OAuth</td><td>editor; TTS candidate; Google sign-in</td><td>paid tier, billing on the project; OAuth verification takes days</td><td><span class="pill m">9 Nov</span></td><td class="num">tens</td></tr>
-      <tr><td><b>Payment processor</b> (Stripe, or Tap / Moyasar / HyperPay for Mada)</td><td>subscriptions, hosted checkout, VAT invoices</td><td>decision tied to the legal entity</td><td><span class="pill m">16 Nov</span></td><td class="num">fees</td></tr>
+      <tr><td><b>AWS</b> (new account, <code>eu-central-1</code>)</td><td>RDS, S3, KMS, Fargate, Secrets Manager, WAF</td><td>pay as you go; budget alert at $1,200</td><td><span class="pill m">before week 1</span></td><td class="num">$700 to $1,100</td></tr>
+      <tr><td><b>Apple Developer Program</b></td><td>Sign in with Apple</td><td>$99 a year; approval takes days; email codes ship first</td><td><span class="pill m">18 Nov</span></td><td class="num">$8</td></tr>
+      <tr><td><b>Google Cloud</b> project with Gemini API and OAuth</td><td>editor; embeddings (ADR-10); TTS candidate; Google sign-in</td><td>paid tier, billing on the project; OAuth verification takes days</td><td><span class="pill m">18 Nov</span></td><td class="num">tens</td></tr>
+      <tr><td><b>Paddle</b>, merchant of record (ADR-24.4)</td><td>subscriptions, hosted checkout (cards, Apple Pay, Google Pay, PayPal), tax filed by Paddle</td><td>under the legal entity; a test-mode scaffold until then</td><td><span class="pill m">2 Dec</span></td><td class="num">fees</td></tr>
       <tr><td><b>GitHub</b> organization or Team plan</td><td>repo, Actions, environments with approval</td><td>Team</td><td><span class="pill">week 1</span></td><td class="num">$4 a seat</td></tr>
       <tr><td><b>Vercel</b></td><td>web hosting, previews</td><td>Pro</td><td><span class="pill">week 1</span></td><td class="num">$20 a seat</td></tr>
-      <tr><td><b>Anthropic Console</b> (workspace per environment)</td><td>teacher, writer, fitter, host, Salma, analyst, memory keeper, proof, rater</td><td>prepaid; Batch API; rate tier raise; zero-data-retention request</td><td><span class="pill">week 1</span></td><td class="num">about $1,500 for December</td></tr>
-      <tr><td><b>ElevenLabs</b></td><td>voice finalist; alignment</td><td>pay as you go; paid tier only if it wins at ≤ $25 per million characters</td><td><span class="pill">week 1</span></td><td class="num">$0 to $330</td></tr>
+      <tr><td><b>Anthropic Console</b> (workspace per environment)</td><td>teacher, writer, fitter, host, Salma, analyst, memory keeper, proof, rater</td><td>prepaid; Batch API; rate tier raise; zero-data-retention request</td><td><span class="pill">week 1</span></td><td class="num">$2,500 prepaid for the first beta month</td></tr>
+      <tr><td><b>ElevenLabs</b></td><td>voice finalist; alignment</td><td>pay as you go; paid tier only if it wins, at a negotiated rate (target $12 to $15 per million characters)</td><td><span class="pill">week 1</span></td><td class="num">$0 to $330</td></tr>
       <tr><td><b>Inworld</b></td><td>voice finalist</td><td>pay as you go; paid tier if it wins</td><td><span class="pill">week 1</span></td><td class="num">$0 to $100</td></tr>
-      <tr><td><b>Soniox</b></td><td>streaming recognizer finalist, talkback</td><td>pay as you go; ask for 50 streams</td><td><span class="pill">week 1</span></td><td class="num">usage</td></tr>
+      <tr><td><b>Soniox</b></td><td>streaming recognizer finalist; the word button's own-language recognizer</td><td>pay as you go; ask for 50 streams</td><td><span class="pill">week 1</span></td><td class="num">usage</td></tr>
       <tr><td><b>Deepgram</b></td><td>streaming recognizer finalist, hot secondary</td><td>pay as you go; ask for 50 streams</td><td><span class="pill">week 1</span></td><td class="num">usage</td></tr>
       <tr><td><b>AssemblyAI</b></td><td>verbatim recognizer finalist</td><td>pay as you go; 50 concurrent jobs</td><td><span class="pill">week 1</span></td><td class="num">usage</td></tr>
       <tr><td><b>Inngest Cloud</b> (EU)</td><td>durable workflows</td><td>free, then Pro</td><td><span class="pill">week 1</span></td><td class="num">$0 to $75</td></tr>
       <tr><td><b>Langfuse Cloud</b> (EU project)</td><td>model traces, 30-day retention</td><td>Core</td><td><span class="pill">week 1</span></td><td class="num">up to $59</td></tr>
       <tr><td><b>Sentry</b> (EU residency)</td><td>errors</td><td>Team</td><td><span class="pill">week 1</span></td><td class="num">about $26</td></tr>
       <tr><td><b>Cloudflare</b></td><td>DNS, Turnstile; proxy off for <code>api.</code></td><td>free</td><td><span class="pill">week 1</span></td><td class="num">$0</td></tr>
-      <tr><td><b>Domain registrar</b></td><td>the brand domain (still open)</td><td></td><td><span class="pill">week 1</span></td><td class="num">yearly</td></tr>
+      <tr><td><b>Domain registrar</b></td><td>the brand domain</td><td></td><td><span class="pill m">18 Nov</span></td><td class="num">yearly</td></tr>
       <tr><td><b>Slack</b> workspace</td><td><code>#forone-ops</code>, deploys, the staging lock</td><td>free</td><td><span class="pill">week 1</span></td><td class="num">$0</td></tr>
       <tr><td><b>Speechace</b></td><td>pronunciation scoring</td><td>developer plan</td><td><span class="pill">week 2</span></td><td class="num">plan price</td></tr>
-      <tr><td><b>OpenAI</b></td><td>embeddings only, on scripts, never learner text</td><td>pay as you go, $20 hard limit</td><td><span class="pill">week 2</span></td><td class="num">under $5</td></tr>
       <tr><td><b>LiveKit Cloud</b></td><td>call media; Egress disabled</td><td>Ship</td><td><span class="pill">week 2</span></td><td class="num">$50 plus minutes</td></tr>
       <tr><td><b>Resend</b></td><td>the three message kinds; tracking off</td><td>Pro once over free</td><td><span class="pill">week 3</span></td><td class="num">$0 to $20</td></tr>
-      <tr><td><b>Better Stack</b></td><td>uptime, heartbeats, phone paging</td><td>on-call plan (open for Muath)</td><td><span class="pill">week 4</span></td><td class="num">about $30</td></tr>
+      <tr><td><b>Better Stack</b></td><td>uptime, heartbeats, phone paging</td><td>on-call plan (approved, ADR-24.12)</td><td><span class="pill">week 4</span></td><td class="num">about $30</td></tr>
       <tr><td><b>Microsoft Azure</b> Speech</td><td>secondary pronunciation scorer</td><td>pay as you go; optional</td><td><span class="pill">later</span></td><td class="num">$0</td></tr>
     </tbody>
   </table></div>
-  <p class="muted" style="margin-top:12px;font-size:15px">Not to open: Hume (voice APIs shut on 13 November; CI rejects any <code>hume</code> dependency). Not carried from Milestone 0 as processors: Google Drive, Google Forms, WhatsApp, ElevenLabs Agents, claude.ai Projects. Each account becomes a row in the processor register with its DPA status; code may not call a vendor whose row is missing.</p>
+  <p class="muted" style="margin-top:12px;font-size:15px">Not to open: Hume (voice APIs shut on 13 November; CI rejects any <code>hume</code> dependency) and OpenAI (embeddings use Google's model, ADR-10). Not carried from Milestone 0 as processors: Google Drive, Google Forms, WhatsApp, ElevenLabs Agents, claude.ai Projects. Each account becomes a row in the processor register (<code>legal/05-ropa.md</code>) with its DPA status; code may not call a vendor whose row is missing.</p>
 </section>
 
 <section id="calendar">
-  <div class="head"><h2>The calendar engineering has to keep</h2><p>Vendor deadlines and freezes between the recognizer test and the beta gate review. The two shaded bands are deploy freezes.</p></div>
+  <div class="head"><h2>The calendar engineering has to keep</h2><p>Vendor deadlines, owner actions and freezes between the recognizer test and the end of the first rater window. The two shaded bands are deploy freezes.</p></div>
   <figure>
     <div class="figbox">
-    <svg viewBox="0 0 1000 300" role="img" aria-label="Timeline from 4 November 2026 to 10 January 2027: recognizer truth file 4 Nov, recognizer test 8 Nov, Hume shuts and voice decision 13 Nov, region and payment processor 16 Nov, build starts 18 Nov, ElevenLabs rate deadline 20 Nov, launch freeze 5 to 8 Dec, beta starts 7 Dec, beta build ends 22 Dec, year-end freeze 31 Dec to 2 Jan, Gemini prices double 1 Jan, beta gate review 10 Jan.">
+    <svg viewBox="0 0 1000 300" role="img" aria-label="Timeline from November 2026 to May 2027: recognizer test 10 Nov, voice decision and counsel answer 17 Nov, build starts 18 Nov, Paddle account 2 Dec, voice rate asked and consent Part 2 15 Dec, no releases 31 Dec to 2 Jan, Gemini prices double 1 Jan, counsel reviews legal drafts 15 Feb, exit document 12 Mar, pre-open freeze 15 to 17 Mar, beta opens 17 Mar, gate review 20 Apr, rater pin ends 11 May.">
       <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
       <g id="timeline"></g>
     </svg>
     </div>
-    <figcaption>Build weeks run 18 November to 22 December. Prod releases happen Sunday to Thursday, 10:00 to 16:00 Riyadh, never inside a freeze and never while a P1 fires. Full calendar with owners in page 07 §6.</figcaption>
+    <figcaption>The build runs 18 November 2026 to 12 March 2027 (week dates in <code>backlog/00-release-plan.md</code>); the beta opens 17 March with two engineers from build start, 17 February with three, and the date is re-forecast every build week (ADR-24.11). Prod releases happen at any hour inside a window computed from learners' drop times, never inside a freeze and never while a P1 fires. Full calendar with owners in page 07 §6.</figcaption>
   </figure>
 </section>
 
 <section id="open">
-  <div class="head"><h2>Open for Muath</h2><p>Collected from the ten pages. Each blocks something specific in the build plan.</p></div>
+  <div class="head"><h2>Decided for Muath</h2><p>Collected from the ten pages. Every item was decided on 2026-11-12 (ADR-24); what remains is the owner action, with its date from <code>architecture/10</code> §10.</p></div>
   <div class="open">
-    <div><span>Open the vendor accounts above, in the company's name</span><span class="due">from week 1 · Apple and Google by 9 Nov</span></div>
-    <div><span>Counsel's answer on the home region: UAE, EU, or inside the Kingdom</span><span class="due">before Terraform is first applied</span></div>
-    <div><span>The second engineer, and therefore whether the one-engineer self-merge exception applies</span><span class="due">2 Nov (already due)</span></div>
-    <div><span>Whether the Milestone 0 consent covers eval fixtures and the vendor tests</span><span class="due">before any fixture is published</span></div>
-    <div><span>The payment processor, with the legal entity</span><span class="due">16 Nov</span></div>
-    <div><span>The brand domain, so DNS, cookies and email can be set in week 1</span><span class="due">week 1</span></div>
-    <div><span>On-call: who is primary in the first three days, escalation at any hour, the Better Stack plan</span><span class="due">before 7 Dec</span></div>
-    <div><span>The daily spend cap formula and the 48-hour stop-line plan window, as policy</span><span class="due">before 7 Dec</span></div>
+    <div><span>Vendor accounts: every processor approved (ADR-24.17); Muath opens them in the company's name</span><span class="due">from week 1 · domain, Apple, Google by 18 Nov (A3)</span></div>
+    <div><span>Home region: <code>eu-central-1</code>, final for the beta (ADR-24.8); counsel confirms</span><span class="due">17 Nov (A1)</span></div>
+    <div><span>Staffing: two engineers from build start; beta opens 17 Mar 2027, 17 Feb with three (ADR-24.11); the self-merge exception ends when the second starts</span><span class="due">18 Nov (A2)</span></div>
+    <div><span>Milestone 0 consent: a two-part addendum; Part 1 before any clip goes to a vendor, Part 2 for re-onboarding and fixtures (ADR-24.16, B10)</span><span class="due">Part 2 by 15 Dec (A9)</span></div>
+    <div><span>Payments: Paddle as merchant of record (ADR-24.4)</span><span class="due">account by 2 Dec (A6)</span></div>
+    <div><span>On-call: the one-responder rota accepted; phone escalation for a systemic drop failure; Better Stack approved (ADR-24.12)</span><span class="due">decided</span></div>
+    <div><span>Spend cap <code>max(50, Σ plan.episodes_per_day × $1.00)</code> and the 48-hour stop-line plan window, as policy (ADR-15, 24.23)</span><span class="due">decided</span></div>
+    <div><span>Counsel reviews the privacy notice, terms, consents, DPIA and crisis wording in <code>legal/</code></span><span class="due">15 Feb 2027 (A8)</span></div>
   </div>
 </section>
 
@@ -466,12 +466,12 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
   <div class="files">
     <div class="file"><span class="path">.github/workflows/ci.yml</span><h3>The PR pipeline</h3><p>Nine jobs: path filter, python (lint, types, unit, migrations, integration), web, package validation, gitleaks, Terraform plan when infra changed, the eval gate when a versioned path changed with its cost printed first, and the image build on main. OIDC to AWS, no stored keys.</p><a href="https://github.com/Muath-8/for-one/blob/main/engineering/starter-files/ci.yml">Open on GitHub</a></div>
     <div class="file"><span class="path">.env.example</span><h3>Every variable, dev values</h3><p>Fake vendors on, compose endpoints, generated secrets left blank for <code>make dev</code> to fill, Cloudflare's documented always-pass Turnstile key. CI fails if <code>Settings</code> declares a field that is not here.</p><a href="https://github.com/Muath-8/for-one/blob/main/engineering/starter-files/.env.example">Open on GitHub</a></div>
-    <div class="file"><span class="path">CODEOWNERS</span><h3>Who must review what</h3><p>Prompts, rules and versions need a second pair of eyes; bibles, UI strings and crisis texts need Muath; keys, deletion jobs, the anonymizer and the processor register need the infra engineer and Muath. Placeholders for the engineers' logins.</p><a href="https://github.com/Muath-8/for-one/blob/main/engineering/starter-files/CODEOWNERS">Open on GitHub</a></div>
+    <div class="file"><span class="path">CODEOWNERS</span><h3>Who must review what</h3><p>Prompts, rules and versions need a second pair of eyes; bibles, the native packages' strings and crisis texts need Muath; keys, deletion jobs, the research pseudonymizer and the processor register need the infra engineer and Muath. Placeholders for the engineers' logins.</p><a href="https://github.com/Muath-8/for-one/blob/main/engineering/starter-files/CODEOWNERS">Open on GitHub</a></div>
   </div>
 </section>
 
 <footer>
-  <span>For one · engineering handbook · 6 November 2026</span>
+  <span>For one · engineering handbook · 6 November 2026 · updated 12 November 2026</span>
   <span>Built on architecture documents 01 to 09, concept v2, decisions.md and the Milestone 0 kit</span>
   <span><a href="https://github.com/Muath-8/for-one/blob/main/engineering/00-handbook-index.md">Index on GitHub</a></span>
 </footer>
@@ -481,10 +481,10 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
 (function(){
   // ---- cost chart ----
   var data=[
-    {name:"Gemini voice, today",segs:[0.217,0.147,0.132,0.142]},
-    {name:"Inworld voice, today",segs:[0.253,0.144,0.132,0.142]},
-    {name:"Gemini voice, after 1 Jan",segs:[0.352,0.179,0.132,0.157]},
-    {name:"ElevenLabs v4, list price",segs:[0.709,0.191,0.132,0.142]}
+    {name:"Gemini, before 1 Jan",segs:[0.220,0.147,0.157,0.148]},
+    {name:"Gemini, after 1 Jan",segs:[0.355,0.179,0.157,0.163]},
+    {name:"Inworld, after 1 Jan",segs:[0.253,0.144,0.157,0.163]},
+    {name:"ElevenLabs v4, list",segs:[0.709,0.191,0.157,0.163]}
   ];
   var segNames=["Voice studio","Call and call voice","Teacher and writer","Everything else"];
   var cols=["var(--s1)","var(--s2)","var(--s3)","var(--s4)"];
@@ -519,46 +519,48 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
 
   // ---- timeline ----
   var tl=document.getElementById("timeline");
-  var start=new Date(2026,10,1),end=new Date(2027,0,14);
+  var start=new Date(2026,10,1),end=new Date(2027,4,20);
   var TL=30,TR=30,TW=1000,ty=170,span=end-start;
   var tx=function(d){return TL+(d-start)/span*(TW-TL-TR);};
+  var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   // freezes
-  [[new Date(2026,11,5,12),new Date(2026,11,8,12),"launch freeze"],[new Date(2026,11,31),new Date(2027,0,2),"year-end freeze"]].forEach(function(f){
-    var r=el("rect",{x:tx(f[0]),y:ty-40,width:tx(f[1])-tx(f[0]),height:80,rx:2});r.style.fill="var(--warm-soft)";tl.appendChild(r);
+  [[new Date(2026,11,31),new Date(2027,0,2,23),"no releases"],[new Date(2027,2,15,12),new Date(2027,2,17,12),"pre-open freeze"]].forEach(function(f){
+    var r=el("rect",{x:tx(f[0]),y:ty-40,width:Math.max(4,tx(f[1])-tx(f[0])),height:80,rx:2});r.style.fill="var(--warm-soft)";tl.appendChild(r);
     var t=el("text",{x:(tx(f[0])+tx(f[1]))/2,y:ty+58,"text-anchor":"middle","class":"small"},f[2]);tl.appendChild(t);
   });
   // build span
-  var bs=tx(new Date(2026,10,18)),be=tx(new Date(2026,11,22));
+  var bs=tx(new Date(2026,10,18)),be=tx(new Date(2027,2,12));
   var bl=el("line",{x1:bs,x2:be,y1:ty+30,y2:ty+30});bl.style.stroke="var(--accent)";bl.style.strokeWidth="4";bl.style.strokeLinecap="round";tl.appendChild(bl);
-  tl.appendChild(el("text",{x:(bs+be)/2,y:ty+44,"text-anchor":"middle","class":"small"},"build, 18 Nov to 22 Dec"));
-  var ps=tx(new Date(2026,11,23)),pe=tx(new Date(2027,0,10));
+  tl.appendChild(el("text",{x:(bs+be)/2,y:ty+44,"text-anchor":"middle","class":"small"},"build, 18 Nov to 12 Mar (W1 to W5)"));
+  var ps=tx(new Date(2027,2,17)),pe=tx(new Date(2027,3,20));
   var pl=el("line",{x1:ps,x2:pe,y1:ty+30,y2:ty+30});pl.style.stroke="var(--s3)";pl.style.strokeWidth="4";pl.style.strokeLinecap="round";tl.appendChild(pl);
-  tl.appendChild(el("text",{x:(ps+pe)/2,y:ty+44,"text-anchor":"middle","class":"small"},"paid beta from 23 Dec"));
+  tl.appendChild(el("text",{x:(ps+pe)/2,y:ty+44,"text-anchor":"middle","class":"small"},"paid beta from 17 Mar"));
   // axis
   var ax=el("line",{x1:TL,x2:TW-TR,y1:ty,y2:ty});ax.style.stroke="var(--line-strong)";ax.style.strokeWidth="1.5";tl.appendChild(ax);
-  [["Nov",new Date(2026,10,1)],["Dec",new Date(2026,11,1)],["Jan",new Date(2027,0,1)]].forEach(function(m){
-    tl.appendChild(el("line",{x1:tx(m[1]),x2:tx(m[1]),y1:ty-4,y2:ty+4,"class":"grid"}));
-    tl.appendChild(el("text",{x:tx(m[1])+4,y:ty+16,"class":"mono"},m[0]));
+  [new Date(2026,10,1),new Date(2026,11,1),new Date(2027,0,1),new Date(2027,1,1),new Date(2027,2,1),new Date(2027,3,1),new Date(2027,4,1)].forEach(function(m){
+    tl.appendChild(el("line",{x1:tx(m),x2:tx(m),y1:ty-4,y2:ty+4,"class":"grid"}));
+    tl.appendChild(el("text",{x:tx(m)+4,y:ty+16,"class":"mono"},MON[m.getMonth()]));
   });
-  // events (alternating above / below, staggered)
+  // events (staggered above the axis)
   var ev=[
-    [new Date(2026,10,4),"Muath's truth file for the recognizer test",0,"start"],
-    [new Date(2026,10,8),"Recognizer test deadline",1,"start"],
-    [new Date(2026,10,13),"Hume shuts · voice decision due",2,"start"],
-    [new Date(2026,10,16),"Region answer · payment processor",3,"start"],
-    [new Date(2026,10,20),"ElevenLabs rate deadline, if it won",4,"start"],
-    [new Date(2026,11,7),"Beta invites start · cap recomputed",0,"middle"],
-    [new Date(2026,11,28),"Report shows January prices",1,"end"],
-    [new Date(2026,11,31),"Rater pin window ends",2,"end"],
-    [new Date(2027,0,1),"Gemini prices double",3,"end"],
-    [new Date(2027,0,10),"Beta gate review",0,"end"]
+    [new Date(2026,10,10),"Recognizer test",0,"start"],
+    [new Date(2026,10,17),"Voice decision · counsel answer",1,"start"],
+    [new Date(2026,10,18),"Build starts · domain, Apple, Google",2,"start"],
+    [new Date(2026,11,2),"Paddle account",3,"start"],
+    [new Date(2026,11,15),"Voice rate asked · consent Part 2",4,"start"],
+    [new Date(2027,0,1),"Gemini prices double",0,"start"],
+    [new Date(2027,1,15),"Counsel reviews legal/",1,"middle"],
+    [new Date(2027,2,12),"Exit document",2,"end"],
+    [new Date(2027,2,17),"Beta opens · cap recomputed",3,"end"],
+    [new Date(2027,3,20),"Gate review",0,"end"],
+    [new Date(2027,4,11),"Rater pin ends",1,"end"]
   ];
   ev.forEach(function(e){
     var X=tx(e[0]),lvl=e[2],Y=ty-28-lvl*24;
     tl.appendChild(el("line",{x1:X,x2:X,y1:Y+6,y2:ty,"class":"grid"}));
     var c=el("circle",{cx:X,cy:ty,r:4});c.style.fill="var(--accent)";tl.appendChild(c);
     var lx=e[3]==="start"?X+6:(e[3]==="end"?X-6:X);
-    var lab=el("text",{x:lx,y:Y,"text-anchor":e[3],"class":"small"},e[0].getDate()+" "+["Nov","Dec","Jan"][e[0].getMonth()===10?0:e[0].getMonth()===11?1:2]+" · "+e[1]);
+    var lab=el("text",{x:lx,y:Y,"text-anchor":e[3],"class":"small"},e[0].getDate()+" "+MON[e[0].getMonth()]+" · "+e[1]);
     lab.style.fill="var(--fg)";tl.appendChild(lab);
   });
 })();

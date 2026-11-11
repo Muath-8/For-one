@@ -56,7 +56,7 @@ stateDiagram-v2
 
 For a daily episode with `drop_at` D: `t_teacher_cut = D − 4 h`, `t_writer_cut = D − 2 h 30`, `t_voice_cut = D − 2 h` (batch TTS only, P1), `t_switch = D − 90 min` (the PRD's switch to on-demand). Batch pricing is used only when `now < t_teacher_cut − 30 min`. Batch requests pool per 30-minute window across learners, `custom_id` per step; `batch/watch` polls every 5 min and emits `batch.ended`. At any cut line the pending batch is cancelled and the step re-runs at standard pricing. Deadlines are re-read from `episodes.drop_at` before every decision, because a schedule change updates the row.
 
-Spend modes from the cost domain: `conserve` moves the teacher to Sonnet 5.5 batch, `max_rewrite_rounds` to 1, and skips `prewrite_rank2`; `halt` refuses new swap, pilot and sample runs (the API answers with Salma's allowance line) but finishes queued dailies and always runs returns.
+Spend modes from the cost domain (`architecture/08` §4.5.2): `conserve` forces batch TTS where offered, sets `max_rewrite_rounds` to 1 and skips `prewrite_rank2` and `prewrite_extra`, and never changes a model (ADR-14: the Sonnet teacher is a flag a person flips); `halt` refuses new swap, `daily_extra`, pilot and sample runs for the rest of the UTC day (the API answers with Salma's allowance line) but finishes queued dailies and always runs returns.
 
 ## 4. Step 1: the teacher
 
@@ -69,7 +69,7 @@ You plan tomorrow's episodes (1 to {episodes_per_day}) of a private podcast for 
 You decide pedagogy; the learner decided topic, format and cast. Return JSON matching EpisodePlan. Rules you may not break:
 - exactly 1 grammar target from the inventory ids below; it may not be a target in more than {max_consecutive=4} consecutive sessions
 - 2 to 4 target words from the due list; 3 to 6 new words, at least 80% from the top 3,000 lemmas, none from the ban list
-- at most 2 life facts, only from USABLE FACTS, cited by fact_id; never a fact whose sensitivity is set unless raised this ISO week
+- at most 2 life facts, only from USABLE FACTS, cited by fact_id; never a fact whose sensitivity is set unless the learner confirmed it on the notebook card (ADR-24.10)
 - dials move at most one step from the last plan; first three episodes and return episodes are one step easier
 - 2 to 4 "why this episode" reasons in plain {native_language}, each tied to evidence you were given
 - an echo plan: which of the learner's recurring errors the host should recast on this call, and which right forms the next episodes carry (the only correction channel, ADR-06)
@@ -96,11 +96,11 @@ use each target word {words}; introduce exactly these new words {new_words}, eac
 every proper noun in NAMES only; the learner is never spoken to as a student; nobody mentions learning, levels, progress or homework;
 no phrase from BAN LIST; the episode stands alone; the plot may continue ARC but owes nothing; end with the throw: {host} asks the listener {question} and says "call me".
 FACTS you may use once each, lightly: {facts with quotes}. CALLBACK (once): {callback}. NEVER MENTION: {never_mention}.
-Then write: the article ({article_words} words, same topic, different angle), the call brief, a 90-second recap, Salma's 5-second feed tag in {native_language}, 3 shadow lines.
+Then write: the article ({article_words} words, same topic, different angle), the call brief, a 90-second recap, the host's 5-second feed tag in {target_language} ("To call me, open the link in the notes"; ADR-24.B24, FR-233), 3 shadow lines.
 Return JSON matching EpisodePackage.
 ```
 
-**Output** `EpisodePackage`: `{scenes: [{scene, lines: [{line_id, speaker, text, sfx?}]}], article: {title, paragraphs[]}, call_brief: CallBrief, recap, feed_tag_native, shadow_lines[3], names[], planted_phrases[], realized: {grammar_uses: line_id[], word_uses: {lemma: line_id[]}}}`. `validate_package` (code): structure, speakers in cast, names ⊆ allowed entities, target and new-word counts, scene count, approximate length by word count (150 wpm × rate), no ban-list phrase. One free rewrite round on violation; a second fail restarts as `fallback`.
+**Output** `EpisodePackage`: `{scenes: [{scene, lines: [{line_id, speaker, text, sfx?}]}], article: {title, paragraphs[]}, call_brief: CallBrief, recap, feed_tag, shadow_lines[3], names[], planted_phrases[], realized: {grammar_uses: line_id[], word_uses: {lemma: line_id[]}}}`. `validate_package` (code): structure, speakers in cast, names ⊆ allowed entities, target and new-word counts, scene count, approximate length by word count (150 wpm × rate), no ban-list phrase. One free rewrite round on violation; a second fail restarts as `fallback`.
 
 Request: `claude-sonnet-5-5`, batch, `max_tokens 24000`, `effort: medium`. Rewrites and repairs: `writer.rewrite` at standard pricing with the same cached prefix, input = failing sentence ids with reasons, output = `SentencePatch[]` applied by code ("rewrite only these sentences, keep every other line byte-for-byte"). Cost about $0.055 including 1.3 rewrites on average.
 
@@ -132,13 +132,13 @@ Latency: lemmatizing 1,500 words under 200 ms. Cost about $0.003.
 
 ## 7. Step 4: variety and the editor's gate
 
-**Variety** (code): embed the script (`voyage-3-lite` or the configured embedder), cosine against the learner's last 20 scripts; over 0.85 is a sameness fail passed to the editor as evidence. Format rotation: no format 3 times in a row over the last 10.
+**Variety** (code): embed the script (Google's embedding model under the existing Google processor, ADR-10; Voyage is the swap, `architecture/02` D13), cosine against the learner's last 20 scripts; over 0.85 is a sameness fail passed to the editor as evidence. Format rotation: no format 3 times in a row over the last 10.
 
 **Editor** (`editor/v1.md`, Gemini 3.8 Flash, a different vendor from the writer by rule): receives the package, the plan and the code-check results, returns `Verdict {pass: bool, checks: {1..11: {pass, note}}, repair_instructions[], flags[]}`. The eleven checks: 1 level fit (coverage and new-word budget, from the fitter), 2 targets present and natural, 3 facts used correctly and only the allowed ones, 4 names and entities allowed, 5 nothing false about the learner, 6 arc continuity, 7 bible consistency (voices, jokes), 8 sameness and format rotation, 9 stands alone, 10 law scan (no scores, levels, streaks, tests, homework, guilt, and nothing that reads as a correction or a lesson, ADR-06), 11 content safety and the crisis keyword list. Checks 1, 4, 8, 10 and 11 are also code; the model judges the rest. On fail: one `repair` (writer, standard) with the instructions, one `recheck`; a second fail restarts as a `fallback` episode (facts, arc and callback dropped; checks 6 to 9 logged but non-blocking). Three fallbacks for one learner in 7 days page a human. Cost about $0.015.
 
 ## 8. Step 5: the voice studio
 
-Render jobs per segment (scene, article read-aloud, recap, feed tag, shadow lines, name respellings), fan-out in parallel, each `step.run` with 90 s timeout, 2 retries on the primary voice then the understudy (`voice.vendor_failover` event). Vendors behind `TTS` adapter: Gemini 3.8 Flash TTS primary (winner of the blind test; Inworld TTS-2 and ElevenLabs v4 candidates), rate 0.85 to 1.00 in 0.05 steps, voice ids from `voice_casting`. Then `mix` (ffmpeg: loudness −16 LUFS, scene seams, sound design beds from the shared package), `check_duration` (4:00 to 8:00 hard bounds, ±20% of the dial; one last-scene rewrite if outside), `align` (forced alignment to word timings; falls back to sentence timings with `timing_quality = sentence`), `relisten` (ASR of the rendered audio against the script; a line whose WER > 15% is re-synthesized up to twice, then a synonym rewrite or a transcript mark). Output: `full.mp3`, `seg-{n}.mp3`, `manifest.json`. Cost about $0.22 (Gemini), the largest line.
+Render jobs per segment (scene, article read-aloud, recap, feed tag, shadow lines, name respellings), fan-out in parallel, each `step.run` with 90 s timeout, 2 retries on the primary voice then the understudy (`voice.vendor_failover` event). Vendors behind `TTS` adapter: Gemini 3.8 Flash TTS primary (winner of the blind test; Inworld TTS-2 and ElevenLabs v4 candidates), rate 0.85 to 1.00 in 0.05 steps, voice ids from `voice_casting`. Then `mix` (ffmpeg: loudness −16 LUFS, scene seams, sound design beds from the shared package), `check_duration` (4:00 to 8:00 hard bounds, ±20% of the dial; one last-scene rewrite if outside), `align` (forced alignment to word timings; falls back to sentence timings with `timing_quality = sentence`), `relisten` (ASR of the rendered audio against the script; a line whose WER > 15% is re-synthesized up to twice, then a synonym rewrite or a transcript mark). Output (`architecture/02` mix): `episode.m4a` (app), `episode_feed.m4a` and `episode_feed.mp3` (with the host's feed tag, ADR-24.B24), `article.m4a`, `recap.m4a`, `scene_{n}.m4a` (kept 24 h after the full file), `manifest.json`. Cost about $0.22 (Gemini), the largest line.
 
 ## 9. Glosses, the word index and caching
 
@@ -168,19 +168,11 @@ One transaction after all uploads: `episode_artifacts` rows, `episodes.state = r
 | pilot | rule-based brief from intake facts; short call brief; name respellings in parallel | < 45 s after intake |
 | sample | no learner; moderation on the answers; cost ceiling $0.05; Salma's close appended; 90 s | < 30 s |
 
-## 12. Cost per step (beta stack, Gemini voice, list prices 2026-10)
+## 12. Cost per step
 
-| Step | Model and mode | Cost per daily episode |
-|---|---|---|
-| Teacher | Opus 5.5 batch, ~7k in, 6k cached, 1k write, 6k out | $0.077 |
-| Writer + rewrites | Sonnet 5.5 batch + 1.3 standard rewrites | $0.055 |
-| Fitter, glosses, editor, embedding | Haiku 5.5, Gemini 3.8 Flash, embedder | $0.018 |
-| Voice studio | Gemini TTS 15k tokens + align + re-listen + mix | $0.217 |
-| Pipeline total per episode | | **$0.367** |
-| Call, verbatim, Salma (when asked) and chat, after-pass, proof share, swap allowance | see 04, 06, 09 | $0.271 |
-| **Per session** | | **$0.638** against a $0.60 budget |
+Cost numbers have one home: `architecture/08` §6 (the itemized model, the levers, the path to $0.35 and the margin by plan). This section keeps no table of its own, and the per-role figures quoted elsewhere in this file are rounded from it. In one line: on the Gemini voice stack at list prices the session is about $0.67 ($0.61 with batch TTS) against the $0.60 budget; after the 2027-01-01 doubling it is about $0.85 on Gemini, and the floor with the levers pulled is $0.43 to $0.45 (08 §6.4).
 
-Levers in order: batch TTS where offered (−$0.07, P1); episodes at 5 to 6 min (−$0.03); Sonnet teacher in `conserve` (−$0.05); cheaper voice that passes the blind test. Gemini prices double on 2027-01-01, which moves the Gemini-voice total to about $0.82; the understudy choice must be made with that date in view.
+The voice plan is ADR-24.6: Gemini's prices double on 2027-01-01, during the build and before the open (2027-03-17), so the blind-test decision is made on post-doubling prices and there is no mid-beta voice swap. A negotiated rate is asked of the blind-test winner before the open; any cost still above the line falls under ADR-24.5's price rule.
 
 ## 13. Testing
 

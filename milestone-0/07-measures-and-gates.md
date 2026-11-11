@@ -96,6 +96,8 @@ If you change your mind before 23 December, or in your first 7 days after you st
 And if not, that's completely fine, and thank you for the two weeks 🙏
 ```
 
+**Update 2026-11-12 (ADR-24.11, 24.B28).** The beta now opens on **17 March 2027**, not 23 December. If this message has already gone out, send each person who pre-paid a short correction within a week. It gives the new date and offers a full refund at once, or a place in the bridge: hand-made episodes, two a week without calls, until the open (ADR-24.B33), with the founding price lock starting at the open. Joining the bridge needs Part 2 of the consent addendum (`legal/07`) signed by 2026-12-15. Anyone who does not sign keeps the original promise that their data is deleted by 31 December 2026. In messages not yet sent, replace "23 December" with "17 March" (Arabic: ١٧ مارس).
+
 Record the plan each payer chose in the Roster tab ("Plan paid"). With 15 people it is only a hint, but it is the first evidence on whether the middle plan wins.
 
 **Payment method (Muath decides before 15 November):** one USD payment link per plan that accepts cards issued in any country. With a commercial registration, Tap or Moyasar (check that the account accepts foreign cards); without one, a PayPal payment link. Offer a bank transfer at the converted price to anyone who cannot use those, with the refund promise in writing. Only money received counts toward the gate; a "yes, I'll pay" goes in the notes, not the count. Deadline: 23:59 on Tuesday 17 November.

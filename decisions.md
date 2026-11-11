@@ -15,6 +15,8 @@ The twelve threads asked Muath 48 questions. Many are the same question asked fr
 | 5 | A series | **Accepted** with Muath's Oct 10 "continue" (taken as go-ahead on all five recommendations); not changed on Oct 23 |
 | 6 to 10 | Cue, platform, personalization depth, data use, how the beta earns | Open; built on the recommendations (10a adjusted for monthly-only pricing) |
 
+**Update 2026-11-12.** Decisions 6 to 10 are now **taken as recommended** under Muath's delegation of that day, with the beta platform (7) set as web app plus private feed. The rulings, and every other item still open, are in ADR-24 of [architecture/10-decision-records.md](architecture/10-decision-records.md).
+
 ## The five that gate everything
 
 1. **Who it is for and which languages:** anyone, anywhere; every target language that passes the language gate (decided).
