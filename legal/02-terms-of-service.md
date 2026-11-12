@@ -1,11 +1,12 @@
 # Terms of service
 
-> **Draft for counsel. Not legal advice.** Drafted 2026-11-12 from PRD-v3 Part 13, ADR-04, ADR-21 and ADR-24.4/24.5. Not in force. **Counsel must confirm:** the Paddle reseller wording against Paddle's current seller requirements and buyer terms (pack B-3a); that the refund policy in §6 (decided in ADR-24.B16) meets each regime's withdrawal rules (B-3); the cancellation and withdrawal mechanics per regime (B-3b, B-3c); the limitation of liability in §12 against mandatory consumer law; governing law and courts in §14 (B-6.5).
+> **Self-reviewed against legal/00; not reviewed by a lawyer; see the triggers** ([00-self-review-checklist.md](00-self-review-checklist.md) §25). Written from PRD-v3 Part 13, ADR-04, ADR-21, ADR-24.4 and ADR-25.3; Paddle, as merchant of record, carries the payment-side consumer law.
 
 **Notes for whoever ships this (delete before publishing).**
 - Ships to `packages/native/<lang>/legal/terms.md`, next to the privacy notice and consent texts, and to the public page `/terms`; this file is the source they are built from (per ADR-24.B17).
 - Acceptance is its own consent kind, `terms`, recorded with the version (`consent_change {kind: terms, text_shown_version}`) at account creation (A9) and again on any material change (per ADR-24.B18); see `terms` in [03-consent-texts.md](03-consent-texts.md).
-- §5's 7-day failed-payment grace is per ADR-24.B2; §4's plan-change rules per ADR-24.B3; §3's payment methods per ADR-24.B4; §7's deletion without a grace period per ADR-24.B1.
+- §5's 7-day failed-payment grace is per ADR-24.B2; §4's plan-change rules per ADR-24.B3; §3's payment methods per ADR-24.B4; §6's refunds per ADR-24.B16; §7's deletion without a grace period per ADR-24.B1.
+- Before publishing, copy into §6 the reseller wording Paddle's seller requirements currently ask for (legal/00 §20).
 
 ---
 
@@ -17,7 +18,7 @@ These terms are an agreement between you and `[Company legal name]`, `[Address]`
 
 ### 1. What For one is
 
-For one makes you a personal show for learning a language: new audio episodes made for you, live voice calls with an AI host, articles and a chat. The hosts and the producer ({producer}) are **AI characters, not people**. Episodes, calls and messages are produced by AI models. A person reviews a sample of episodes, not every one.
+For one makes you a personal show for learning a language: new audio episodes made for you, live voice calls with an AI host, articles and a chat. The hosts and the producer ({producer}) are **AI characters, not people**. Episodes, calls and messages are produced by AI models. An automated review checks samples against the show's rules; not every episode is read by a person.
 
 For one is a learning tool. It is not a school, it gives no certificate, and it is not advice of any kind (medical, legal, financial, psychological or otherwise). It is not a help line: if you are in danger, contact your local emergency number. Our safety protocol is at `[link to /safety]`.
 
@@ -25,7 +26,7 @@ For one is a learning tool. It is not a school, it gives no certificate, and it 
 
 You must be **18 or older**. Your account is for you alone; don't share it. You must give us true information when you sign up, including your birth date and the country you live in. If we learn that you are under 18, we close your account and delete its data.
 
-During the beta, For one is invite-only. We may limit the countries we can sell to.
+We may not be able to sell in every country; checkout tells you if yours is one of them.
 
 ### 3. Plans and prices
 
@@ -39,8 +40,6 @@ Prices are in US dollars. Tax is added where the law requires it and is shown be
 
 You can pay by card, Apple Pay, Google Pay or PayPal. We plan to add local methods, such as Mada, later.
 
-**Founding members.** The first 100 people who pay keep the price of their plan for as long as they stay subscribed. If you cancel and later subscribe again, the price at that time applies. If you change plan, you keep the founding price of the new plan as it was when you became a founding member. `[Counsel and Muath: confirm this last sentence; the architecture says only that plan changes never touch the founding lock (07 §4.14 rule 3).]`
-
 ### 4. The free trial, renewals and plan changes
 
 **Trial.** When you create your account you get **7 days free on the 2 a day plan. No card needed. On day 7 you choose a plan** (the same words the app shows, ADR-24.B27). On day 6 we send you one email saying the trial ends tomorrow. On day 7 we ask you once. Nothing is charged unless you choose a plan and pay. One free trial per person.
@@ -53,7 +52,7 @@ You can pay by card, Apple Pay, Google Pay or PayPal. We plan to add local metho
 - Unused episodes are never refunded or carried over.
 - We say exactly what happens, and when, before you confirm.
 
-**Price changes.** If we change the price of your plan, we email you at least 30 days before the new price applies to your next renewal. You can cancel before then in one tap. Founding members' prices never change while they stay subscribed.
+**Price changes.** If we change the price of your plan, we email you at least 30 days before the new price applies to your next renewal. You can cancel before then in one tap.
 
 ### 5. If a payment fails
 
@@ -63,20 +62,19 @@ We send you one email. **Your show keeps running for 7 days** while the payment 
 
 **Cancel any time in one tap** in Controls. No reasons, no offers to stay. Your show keeps running until the end of the month you've paid for. After that, new episodes stop and your archive, notebook, export and account deletion stay available for 90 days, as above.
 
-**Refunds.** (Per ADR-24.B16.)
+**Refunds.**
 - **First payment:** if you're not happy, ask within **14 days** of your first payment and we refund it in full. No questions.
 - **After that:** cancelling stops your next renewal. We don't refund part of a month you've already paid for, unless the law where you live says we must.
-- **Pilot pre-payments:** if you paid during the For one pilot, the promise you were given (a full refund any time before the beta opens on 17 March 2027, or in your first 7 days after you start) still applies.
 
-`[[EU]]` `[[UK]]` **Your right to withdraw.** You have 14 days from your first payment to withdraw from this contract. The refund above gives you that right in full. To withdraw, tap "Withdraw" in Controls › Plan, or write to `[support email]`. `[Counsel: the withdrawal-function wording and model form, pack B-3b.]` `[[/UK]]` `[[/EU]]`
+`[[EU]]` `[[UK]]` **Your right to withdraw.** You have 14 days from your first payment to withdraw from this contract. The refund above gives you that right in full. To withdraw, tap "Withdraw" in Controls › Plan, or write to `[support email]`. `[[/UK]]` `[[/EU]]`
 
-**Paddle.** Our reseller, Paddle (`[Paddle entity named at checkout]`), is the merchant of record: it sells you the subscription, takes payment, issues your invoice and handles tax. Paddle's buyer terms (`[link]`) also apply to the purchase, and Paddle may process refunds and handle billing questions. `[Counsel: replace this paragraph with the reseller wording Paddle currently requires, pack B-3a.]`
+**Paddle.** Our order process is run by our online reseller, Paddle (`[Paddle entity named at checkout]`), which is the merchant of record for every order: it sells you the subscription, takes payment, issues your invoice, handles tax and processes refunds. Paddle's buyer terms (`[link]`) also apply to the purchase. Where they give you more than these terms, they apply.
 
 ### 7. Your account and your data
 
 Our privacy notice (`[link]`) explains what we collect and why. You can see, export, correct and delete your data in Controls.
 
-**Deleting your account** takes two taps and a typed "delete". Your account closes at once and can't be restored. We delete everything from our live systems within 24 hours and from backups within 30 days. If you want a copy first, export it before you delete: during the beta an export is ready within 72 hours. Deleting your account cancels your subscription; any refund follows §6.
+**Deleting your account** takes two taps and a typed "delete". Your account closes at once and can't be restored. We delete everything from our live systems within 24 hours and from backups within 30 days. If you want a copy first, export it before you delete: an export is ready within 72 hours. Deleting your account cancels your subscription; any refund follows §6.
 
 ### 8. What we promise about the show
 
@@ -115,7 +113,7 @@ If you break these rules, we may pause or close your account. Unless it's seriou
 
 Nothing in these terms limits liability that the law does not allow us to limit, such as for death or personal injury caused by negligence, fraud, or your rights as a consumer.
 
-Otherwise, our total liability to you for any claim about the service is limited to the amount you paid us in the 12 months before the claim. We are not liable for losses that were not foreseeable, or for business losses (For one is for personal use). `[Counsel: check against mandatory consumer law in each covered regime.]`
+Otherwise, our total liability to you for any claim about the service is limited to the amount you paid us in the 12 months before the claim. We are not liable for losses that were not foreseeable, or for business losses (For one is for personal use).
 
 ### 13. Ending this agreement
 
@@ -123,7 +121,7 @@ You can end it any time by cancelling and deleting your account. We can end it i
 
 ### 14. Law, disputes and changes
 
-These terms are governed by `[Governing law]`. Disputes go to `[Courts]`, but if you are a consumer you can also bring a claim in the courts of the country where you live, and you keep the protection of its mandatory consumer law. `[[EU]]` You can also use the EU's online dispute resolution options `[counsel: check current availability]`. `[[/EU]]` Please write to us first at `[support email]`; most things can be fixed quickly.
+These terms are governed by `[Governing law]`. Disputes go to `[Courts]`, but if you are a consumer you can also bring a claim in the courts of the country where you live, and you keep the protection of its mandatory consumer law. Please write to us first at `[support email]`; most things can be fixed quickly.
 
 If we change these terms, we show you the new version in the app with the changes in plain words at least 30 days before they apply (sooner only if the law requires it or for a new feature). If you don't agree, you can cancel before they apply.
 

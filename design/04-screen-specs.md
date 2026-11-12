@@ -1,8 +1,8 @@
 # For one — 04. Screen specifications
 
-*Part 4 of 8. One section per screen: purpose, mode, layout (top to bottom), components (from 01 §8), states (empty, loading, error, offline), copy, and what Salma or the hosts say on it. Copy is in English here; Salma's lines are in the learner's own language in the product. Screen ids match 03-user-flows.md. The prototype at design/prototype/for-one-prototype.html shows most of these in its v2 form and is the visual reference; where this spec and the prototype differ, this spec wins.*
+*Part 4 of 8. One section per screen: purpose, mode, layout (top to bottom), components (from 01 §8), states (empty, loading, error, offline), copy, and what Salma or the hosts say on it. Copy is in English here; Salma's lines are in the learner's own language in the product. Screen ids match 03-user-flows.md. The visual reference is `design/for-one-design.html` with `tokens.css` (the v2 prototype was removed from the repository); where this spec and the reference differ, this spec wins.*
 
-**Conventions.** Every screen: 20px gutters, one primary action, no badges. "Copy" sections give the exact strings for the beta. "Never" lists what must not appear on that screen. States that are the same on every screen are in §0.
+**Conventions.** Every screen: 20px gutters, one primary action, no badges. "Copy" sections give the exact strings for launch. "Never" lists what must not appear on that screen. States that are the same on every screen are in §0.
 
 ## 0. Global states
 
@@ -41,11 +41,11 @@
 **Never:** a score, a count, a level, any feedback on fakes.
 
 ## A4. Casting
-**Layout:** Salma line "Making your first episode…" with one breathing dot (no bar) · "Your hosts" · two host orbs with name, ▶ hi (5s), swap · "Accent you'd like" with two or three samples · **Start the pilot** appears when ready (primary).
+**Layout:** Salma line "Making your first episode…" with one breathing dot (no bar) · "Your hosts" · two host orbs with name, ▶ hi (5s), swap · "Accent you'd like" with two or three samples · **Start my first episode** appears when ready (primary).
 **States:** making · ready · generation failed (Salma: "The first one is taking longer than it should. Here's one I made earlier about [topic]; yours is ready tomorrow.") · swapped (the new voice says hi).
 **Never:** a percentage, "this may take a while", a spinner on its own.
 
-## A5. The pilot
+## A5. The first episode
 Player (B3) with the transcript open on first play, and two one-time hints as quiet labels: "Huh? replays the last line slowly" · "Tap any word".
 
 ## A6. The throw and first call
@@ -56,8 +56,8 @@ Audio only; the Today card beneath is dimmed; a single line of caption in the ho
 
 ## A8. Keep your show
 **Mode:** Eyes · **Purpose:** the account after there is something to keep.
-**Layout:** title "Keep your show?" · Continue with Apple / Google · Use email (quiet) · divider · "When should tomorrow's episode drop?" radios in life terms (On my commute 7:40 · Lunch break · Evening walk · Pick a time) · "How many days a week?" (default "4 days, 2 spare", stepper 2–7) · consent row "Keep my recordings so I can hear my progress. Only for you, delete any time." (unticked) · one sentence: "Your 7-day trial is on 2 episodes a day. No card needed. On day 7 you choose a plan." (ADR-24.B27) · **Keep my show**.
-**States:** default · email path (one field, magic link) · abandoned (resumes here for 24h) · consent off.
+**Layout:** title "Keep your show?" · email field (a one-time code is the only sign-in, ADR-25.4) · divider · "When should tomorrow's episode drop?" radios in life terms (On my commute 7:40 · Lunch break · Evening walk · Pick a time) · "How many days a week?" (default "4 days, 2 spare", stepper 2–7) · required consent row, its own unticked box (`special_category`, ADR-25.9; copy from `legal/03`): "I agree that my transcripts keep everything I choose to say, including private things like health or beliefs, only for me and my show; and that if I say I may be in danger, the show stops and shows me help lines." with one quiet line under it: "The show is a conversation, so it can't work without this. Sensitive facts are still kept only if you say yes on a card." · consent row "Keep my recordings so I can hear my progress. Only for you, delete any time." (unticked) · one sentence: "Your 7-day trial is on 2 episodes a day. No card needed. On day 7 you choose a plan." (ADR-24.B27) · **Keep my show** (disabled until the conversation consent is ticked; no account is created without it).
+**States:** default · code sent (one field for the code) · abandoned (resumes here for 24h) · consent off.
 **Never:** pre-ticked boxes, "free" in large type, a timer.
 
 ## A9. Tomorrow (three ideas)
@@ -172,7 +172,7 @@ Rows: Drop time (7:40, On my commute) · Drop notification (on/off) · Rhythm ("
 
 ## E. Show (shelf)
 "Show" · season rows (title from Salma: "Season 2 · Interview season", dates) with covers in a horizontal row (48–96px) · proofs row · finales row · unfinished episode covers carry a small "waiting" label, never "overdue".
-**States:** week 1 (one row with the pilot and today) · normal · offline (covers cached; uncached play greyed with "online").
+**States:** week 1 (one row with the first episode and today) · normal · offline (covers cached; uncached play greyed with "online").
 
 ## F. Proof
 Proof cover (Salma's colour) · ▶ (2 min) · clip pair (then / now, each with ▶ and its date) · the headline sentence (display 22) · "How we know" (expandable: "Same task, three sessions, judged against your own September recording. Not a guess.") · "Next: …" · Done.
@@ -183,21 +183,21 @@ Proof cover (Salma's colour) · ▶ (2 min) · clip pair (then / now, each with 
 Salma's invitation card → recording screen (one task at a time, the prompt in the target language, a soft ring, Skip, ✕ keeps what was recorded) → the tape (D3) with this season's differences → "Next season, what's the one thing?" (hold-to-talk or type) → season recap card (episodes · hours heard · minutes spoken · words owned · "the moment I liked most" with ▶).
 
 ## H. Plans
-"Your plan" · three cards side by side on wide, stacked on phone (1 a day $19.99 · **2 a day $29.99 Recommended** · 3 a day $44.99), each with "about $1 a day" style line (mono), per-episode price, episodes a month · beneath: "Every plan: listen again as often as you like, the article, the chat, round two." · "A tutor is about $160 a month for two lessons a week." · founding line if applicable · **Choose** on each · "Cancel in one tap, any time."
-**States:** trial active (the current plan says "your trial") · chosen · founding (price locked line) · payment failed (warn line, retry; the show continues through a 7-day grace, ADR-24.B2) · changing plan (one plain sentence at the moment of change: an upgrade starts at the next drop and Paddle prorates the charge; a downgrade starts at the next billing date with no proration; unused allowance is never refunded; ADR-24.B3).
+"Your plan" · three cards side by side on wide, stacked on phone (1 a day $19.99 · **2 a day $29.99 Recommended** · 3 a day $44.99), each with "about $1 a day" style line (mono), per-episode price, episodes a month · beneath: "Every plan: listen again as often as you like, the article, the chat, round two." · "A tutor is about $160 a month for two lessons a week." · **Choose** on each · "Cancel in one tap, any time."
+**States:** trial active (the current plan says "your trial") · chosen · payment failed (warn line, retry; the show continues through a 7-day grace, ADR-24.B2) · changing plan (one plain sentence at the moment of change: an upgrade starts at the next drop and Paddle prorates the charge; a downgrade starts at the next billing date with no proration; unused allowance is never refunded; ADR-24.B3).
 **Never:** countdowns, "only X left", crossed-out fake prices, pre-selected upgrades, a "best value" sticker on the top tier.
 
 ## I. Data and deletion (sheet)
 Rows as in 03 flow I. Each destructive row: first tap turns the row into its confirmation sentence with Delete / Keep inline (no modal); account deletion asks for a typed "delete". There is no grace period and no restore (ADR-24.B1); one sentence says access ends at once and everything is gone from live systems within 24 hours and from backups within 30 days. The research-use toggle lives here, off by default, never in onboarding (ADR-24.B6).
 
 ## J. Sample page (web, public)
-Wordmark · one question in the visitor's language · a text field or 🎙 · **Make my sample** · (60–90s: two host orbs and "Karim and Mona are recording…") · the 90-second player with transcript · **Start your show** · share link · "Not in your language yet? Leave an email."
+Wordmark · one question in the visitor's language · a text field or 🎙 · **Make my sample** · (60–90s: two host orbs and "Karim and Mona are recording…") · the 90-second player with transcript · **Start your show** · share link (no email field: FR-105 is retired, ADR-25.5)
 
 ## K. Small door
 A quiet card on Today → recap player (90s, no transcript by default) → the hold pad for one voice note ("One voice note back. Anything.") → the wrap. The door row shows Listen ✓ · Call ✓ for the day.
 
-## L. Install card (web only)
+## L. Install card
 Shown once, after the first call, on Today: "Put For one on your home screen so the drop reaches you." Two-step picture for the platform · Done · Not now. Never shown again after dismissal.
 
 ## M. The lock screen / Now Playing
-Cover (dark version) · title · "For one" · ⟲ line · ❚❚ · mark (as previous / next actions). During a call on native: accept / decline like a phone call. CarPlay / Android Auto: standard Now Playing only; the call is never offered there.
+Cover (dark version) · title · "For one" · ⟲ line · ❚❚ · mark (as previous / next actions), through the browser's Media Session. On a car's screen: Now Playing only; the call is never offered there.

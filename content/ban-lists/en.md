@@ -1,6 +1,6 @@
 # English ban lists: sameness and the correction guard
 
-*Draft, 2026-11-12, written on delegation (ADR-24.3). Read by the paid native English reader (ADR-24.14) by 2026-12-01; afterwards updated monthly from the human review's findings (PRD FR-431, FR-436). Ships to `packages/languages/en/` (see [../README.md](../README.md)).*
+*Draft, written on delegation (ADR-24.3). Read by Muath and checked by the AI review pass (ADR-25.7); afterwards updated monthly from review findings (PRD FR-431, FR-436). Ships to `packages/languages/en/` (see [../README.md](../README.md)).*
 
 Two lists live here, for two different jobs:
 
@@ -17,8 +17,8 @@ Salma's lines are checked against the native package's own lists, in her languag
 
 - **Scope: invented fiction and host phrasing only.** The list never blocks the learner's own name, a name in FACTS_ALLOWED or INTEREST_ENTITIES, the hosts' names, or the default world's names ([../bibles/hosts-en.md §5](../bibles/hosts-en.md)). If the learner is called Sarah, the hosts say Sarah.
 - **Matching** (architecture/02 §4.9): code matches names and phrases by lemma sequence, settings and plots by keyword sets; the editor model catches paraphrased plots ("a note nobody signed" is still the mysterious letter).
-- **Entry shape** (architecture/02): `{kind: name|setting|plot|phrase, value, lemma_seq, added_from, added_at}`. The seed rows below have `added_from: "seed:content/ban-lists/en.md@2026-11-12"`; later rows carry the review finding id.
-- **Seed.** The rows marked **M0** are the pilot bible's BANNED block, carried over unchanged ([milestone-0/05-prompts.md §S](../../milestone-0/05-prompts.md)).
+- **Entry shape** (architecture/02): `{kind: name|setting|plot|phrase, value, lemma_seq, added_from, added_at}`. The seed rows below have `added_from: "seed:content/ban-lists/en.md@v1"`; later rows carry the review finding id.
+- **Seed.** The rows marked **seed** are the BANNED block of the first draft bible, carried over unchanged ([milestone-0/05-prompts.md §S](../../milestone-0/05-prompts.md), kept as source material).
 
 ### A.2 Names (28 first names, 4 stock name-constructions)
 
@@ -26,14 +26,14 @@ The names AI fiction reaches for first. Banned as names for invented characters 
 
 | Value | Note |
 |---|---|
-| Alex **M0** | The default gender-neutral protagonist |
-| Sam **M0** | Same |
-| Sarah **M0** | The default friend, colleague or neighbour |
-| John **M0** | The default man |
-| Emily **M0** | The default woman |
-| Elara **M0** | The default fantasy heroine |
-| Lila **M0** | Same family as Elara |
-| Max **M0** | The default dog, child or rival |
+| Alex **seed** | The default gender-neutral protagonist |
+| Sam **seed** | Same |
+| Sarah **seed** | The default friend, colleague or neighbour |
+| John **seed** | The default man |
+| Emily **seed** | The default woman |
+| Elara **seed** | The default fantasy heroine |
+| Lila **seed** | Same family as Elara |
+| Max **seed** | The default dog, child or rival |
 | Maya | Very high frequency in model stories |
 | Mia | Same |
 | Lily | Same |
@@ -65,9 +65,9 @@ The names AI fiction reaches for first. Banned as names for invented characters 
 
 | Value | Note |
 |---|---|
-| A lighthouse **M0** | |
-| A small coastal town **M0** | Also "a sleepy seaside village" |
-| A quiet café on a rainy day **M0** | Cafés are allowed; this mood-piece café is not |
+| A lighthouse **seed** | |
+| A small coastal town **seed** | Also "a sleepy seaside village" |
+| A quiet café on a rainy day **seed** | Cafés are allowed; this mood-piece café is not |
 | A cosy bookshop / an old second-hand bookstore | |
 | A bustling market or marketplace | Also banned as a phrase (A.5) |
 | An old library with dusty books | |
@@ -88,9 +88,9 @@ The names AI fiction reaches for first. Banned as names for invented characters 
 
 | Value | Note |
 |---|---|
-| An unexpected friendship **M0** | |
-| A mysterious letter **M0** | Also a mysterious note, package, key or voicemail |
-| A lesson learned **M0** | Also any moral stated at the end |
+| An unexpected friendship **seed** | |
+| A mysterious letter **seed** | Also a mysterious note, package, key or voicemail |
+| A lesson learned **seed** | Also any moral stated at the end |
 | A stranger with a secret | |
 | A found diary or journal | |
 | A map that leads to treasure | |
@@ -113,11 +113,11 @@ Banned in every host-written surface: script, article, chat opener, recap, the c
 
 | Value | Note |
 |---|---|
-| "buckle up" **M0** | |
-| "let's dive in" / "dive into" **M0** | |
-| "game-changer" **M0** | |
-| "in today's fast-paced world" **M0** | |
-| "it's not just X, it's Y" **M0** | Also "not just X but Y" as a structure |
+| "buckle up" **seed** | |
+| "let's dive in" / "dive into" **seed** | |
+| "game-changer" **seed** | |
+| "in today's fast-paced world" **seed** | |
+| "it's not just X, it's Y" **seed** | Also "not just X but Y" as a structure |
 | "delve" | Any form |
 | "tapestry" | |
 | "a testament to" | |
@@ -274,7 +274,7 @@ One schema for both files. This is the shape for `packages/languages/en/guard/co
 # packages/languages/en/guard/correction_words.yaml
 schema: forone.guard/v1
 language: en
-version: 2026-11-12.1        # a bump runs the writer and host suites (backlog E02-S07)
+version: "1.0"                # a bump runs the writer and host suites (backlog E02-S07)
 second_person: [you, your, "you're", yours, yourself, "you've", "you'd", "you'll"]
 soft_window_tokens: 6         # architecture/07 §4.10 item 2
 entries:
@@ -312,7 +312,7 @@ Every `examples.block` and `examples.pass` string becomes a fixture in the guard
 
 ### B.4 Maintenance
 
-- **Monthly**, the native reader's findings (FR-436) add or retire rows through `review_items` (architecture/02 D17); nobody edits the YAML by hand in production.
+- **Monthly**, findings from Muath's reads and the AI review pass over sampled episodes (FR-436, ADR-25.7) add or retire rows through `review_items` (architecture/02 D17); nobody edits the YAML by hand in production.
 - **A new row** needs an id, a law, a hard or soft kind, and at least one block and one pass example.
 - **A soft row** that falls under 0.99 precision on the clean corpus is dropped, not loosened into a hard one.
-- **The 50-call bench** (build week 4) reports the re-request rate per row; a row that re-requests often on clean turns is rewritten, not ignored.
+- **The 50-call bench** (before launch) reports the re-request rate per row; a row that re-requests often on clean turns is rewritten, not ignored.

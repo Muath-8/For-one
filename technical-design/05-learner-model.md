@@ -131,4 +131,4 @@ On a version change of the analyst, classifier, measures or memory keeper, `asse
 
 ## 9. Onboarding cold start
 
-A1 to A10 seed the model: waitlist answers → `interests(source = waitlist)`; A3 Salma intake → `onboarding_answer` events → `life_facts (confirmed_by = intake_card, usable)` for the cards the learner left standing (`ground_truth` only after a later confirmation or edit, PRD 8.4.2), `goals (kind = why_target)`; A4 word check (48 items, 75 s cap) → `word_check_answer` → `N_est` and the `prior_p` curve; A7 first call → first speaking estimate (`skills.speaking` with `sd = 12`). The first three episodes run one step easier.
+A1 to A10 seed the model: A3 Salma intake → `onboarding_answer` events → `life_facts (confirmed_by = intake_card, usable)` for the cards the learner left standing (`ground_truth` only after a later confirmation or edit, PRD 8.4.2), `goals (kind = why_target)`; A4 word check (48 items, 75 s cap) → `word_check_answer` → `N_est` and the `prior_p` curve; A7 first call → first speaking estimate (`skills.speaking` with `sd = 12`). The first three episodes run one step easier.

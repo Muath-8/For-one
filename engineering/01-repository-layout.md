@@ -1,10 +1,10 @@
 # 01. Repository layout
 
-Part of the For one engineering handbook. Written 2026-11-06 against architecture 01 §4.1 (monorepo), 08 §4.7 (adapters), 09 §4.3 (versions) and the decisions of 2026-10-23. Where this page and an architecture document differ, this page is the newer word and says why.
+Part of the For one engineering handbook. Written 2026-11-06 against architecture 01 §4.1 (monorepo), 08 §4.7 (adapters), 09 §4.3 (versions) and the decisions of 2026-10-23; revised 2026-11-12 for ADR-25 (the coding agent builds it; the Milestone 0 kit is background only). Where this page and an architecture document differ, this page is the newer word and says why.
 
 ## 1. One repository, four deployables
 
-For one is one Git repository, `Muath-8/for-one`, holding product documents and code side by side. The code is a monorepo with four deployable services and eight internal packages. The reason is the team size: one to two engineers plus Muath cannot keep several repositories in step, and every change that touches a prompt, an adapter and a test must land as one pull request so the eval gate can judge it as one change.
+For one is one Git repository, `Muath-8/for-one`, holding product documents and code side by side. The code is a monorepo with four deployable services and eight internal packages. The reason: one coding agent and one approver cannot keep several repositories in step, and every change that touches a prompt, an adapter and a test must land as one pull request so the eval gate, the review pass and Muath can judge it as one change.
 
 | Deployable | Directory | Runtime | Hosted on |
 |---|---|---|---|
@@ -20,6 +20,7 @@ The three Python services build into **one Docker image**, `forone-python`, with
 ```
 for-one/
 ├── README.md                      what this is, how to run it in ten minutes (links to engineering/02)
+├── AGENTS.md                      the coding agent's instructions; see engineering/starter-files/AGENTS.md
 ├── CODEOWNERS                     see engineering/starter-files/CODEOWNERS
 ├── pyproject.toml                 uv workspace root; shared Ruff and Pyright config
 ├── uv.lock
@@ -68,8 +69,7 @@ for-one/
 │   ├── cost-model/                assumptions.yaml and the recompute script
 │   ├── eval/                      CLI front for forone.eval
 │   ├── release/                   cut, approve, drain-replace, rollback
-│   └── import_m0.py               Milestone 0 learner files and tags into fixtures and events
-├── docs/                          links to `legal/05-ropa.md` (processor register) and `legal/04-dpia.md`, the sources (ADR-24.B11); adr/ (architecture decision records)
+├── docs/                          links to `legal/05-ropa.md` (processor register) and `legal/04-dpia.md`, the sources; adr/ (architecture decision records)
 ├── architecture/, perspectives/, milestone-0/, features/, design/, engineering/   the product and design documents (already in the repo)
 ```
 
@@ -87,10 +87,10 @@ for-one/
 
 ## 4. Language packages: two kinds (ADR-02)
 
-The first architecture drafts (written 2026-10-16) named one pair package, because at that time the product was Arabic-speaking learners of English. On 2026-10-23 Muath decided there is no launch country or learner group, and that target languages open one by one through the five-check gate in concept v2 §8. The code must therefore treat the target language and the learner's own language as two separate axes from day one, even though the pilot is English only.
+The first architecture drafts (written 2026-10-16) named one pair package, because at that time the product was Arabic-speaking learners of English. On 2026-10-23 Muath decided there is no launch country or learner group, and that target languages open one by one through the five-check gate in concept v2 §8. The code must therefore treat the target language and the learner's own language as two separate axes from day one, even though English is the only target language at launch.
 
-- `packages/languages/<target>/` holds everything a model sees about the **target language**: host and producer bibles, voice ids per vendor, structure inventory, word lists, ban list, the prompts (section 5), crisis keywords, and the gate evidence file `gate.yaml` that records the five checks and their dates. `en` is the only package in the beta unless another language passes all five checks by the end of build week 2 (ADR-24.20).
-- `packages/native/<lang>/` holds what the **learner reads and hears in their own language** (ADR-02): interface strings (`ui_strings/`, with `dir`), consent texts and the privacy notice, the three message kinds, Salma's voice, and crisis resources by country of residence. `native/ar` and `native/en` exist at the open, 2027-03-17 (ADR-24.20); `native/en` is the fallback. Consent texts and the privacy notice keep their version numbers inside the package because counsel edits them. The architecture adopted this split as ADR-02, so this section is no longer a departure.
+- `packages/languages/<target>/` holds everything a model sees about the **target language**: host and producer bibles, voice ids per vendor, structure inventory, word lists, ban list, the prompts (section 5), crisis keywords, and the gate evidence file `gate.yaml` that records the five checks and their dates. `en` is the only target package at launch unless another language passes all five checks before it (ADR-24.20, M4).
+- `packages/native/<lang>/` holds what the **learner reads and hears in their own language** (ADR-02): interface strings (`ui_strings/`, with `dir`), consent texts and the privacy notice, the three message kinds, Salma's voice, and crisis resources by country of residence. `native/ar` and `native/en` exist at launch (ADR-24.20); `native/en` is the fallback. Consent texts and the privacy notice keep their version numbers inside the package because each version is approved by Muath against the self-review checklist (ADR-25.3). The architecture adopted this split as ADR-02, so this section is no longer a departure.
 - Nothing in `apps/` or `packages/` other than the loader may contain a language code literal. A unit test greps for `"en"`, `"ar"` string literals outside `packages/languages/` and `packages/native/` and fails on a hit.
 
 This is the one place the handbook knowingly departs from architecture 01. Record it as ADR-0001 in `docs/adr/` when the repo is scaffolded.
@@ -126,21 +126,21 @@ Rules that follow from this:
 1. A prompt file has a Markdown body and a YAML frontmatter with `role`, `model_class` (`opus`, `sonnet`, `haiku`, `gemini-flash`), `cache_prefix_ends_at` (a marker string; everything above it is the cached prefix and must not contain per-learner text), and `inputs` (the named slots the pipeline fills). The loader fails at import time if a slot in the body is not declared.
 2. **Per-learner text is never written into a prompt file.** It enters through the slots, wrapped by `forone.core.guard.listener_said()` (architecture 07 D10).
 3. Prompt text assembled at runtime (the brief, the call brief) is built by code in `forone.pipeline` or `forone.assess` from the file plus the learner's rows. The assembled text is stored in the learner's own rows (`pipeline_steps.prompt_ref`, `calls.brief_ref`) in the home region, never in a shared store, and goes to Langfuse only for learners with `data_use = true`.
-4. **The Milestone 0 prompts** in `/milestone-0/05-prompts.md` are the seed. Week 1 of the build moves each one into its file under `prompts/` with version `1.0.0` and a frontmatter note `origin: milestone-0/05-prompts.md §x`. They are not edited in place in the kit; the kit stays as the historical record.
-5. A change to any file under `prompts/`, `rules/` or `versions.yaml` triggers the eval gate (handbook 04 and 05) and requires a reviewer who is not the author (handbook 08).
+4. **The Milestone 0 kit's prompts** in `/milestone-0/05-prompts.md` are source material, not instructions (ADR-25.5). Phase 1 drafts each prompt file from the architecture's role contract, using the kit's prompt as a starting point where one exists, with version `1.0.0` and a frontmatter note `origin:` naming what it was drafted from. The kit is never edited.
+5. A change to any file under `prompts/`, `rules/` or `versions.yaml` triggers the eval gate (handbook 04 and 05), the review pass and Muath's approval (handbook 08).
 6. The admin UI has no prompt editor. Pipeline D17 forbids it and this handbook keeps it forbidden.
 
 ## 6. What does not go in the repository
 
-Secrets of any kind (handbook 03 and 07); learner data, including de-identified fixtures that are not covered by the Milestone 0 consent (handbook 09); audio files larger than the 30 consented clips (fixtures over 5 MB live in the `forone-fixtures` S3 bucket and are fetched by `make fixtures`); build outputs; the architecture pages' HTML is kept because it is a document, but regenerated HTML must be committed with the Markdown that produced it.
+Secrets of any kind (handbook 03 and 07); any real learner's data (handbook 09); the volunteer recognizer clips and any fixture over 5 MB (they live in the `forone-fixtures` S3 bucket and are fetched by `make fixtures`); build outputs; the architecture pages' HTML is kept because it is a document, but regenerated HTML must be committed with the Markdown that produced it.
 
-## 7. Scaffolding order (build week 1, day 1)
+## 7. Scaffolding order (the first stories of phase 1)
 
 1. `uv init --workspace` at the root; `packages/core` first with `Settings`, the logger and the database session; a hello-world `api` with `/healthz`.
 2. `infra/docker-compose.yml` from architecture 01 §4.9; `make dev` brings it up.
 3. `packages/adapters` with the `Protocol` interfaces, the tracing middleware, `vendors.yaml`, `prices.yaml`, and the `fake/` recorded-fixture adapters (handbook 02 §5).
-4. `packages/languages/en` with the Milestone 0 prompts moved in (section 5).
-5. `.github/workflows/ci.yml` from `engineering/starter-files/ci.yml`, green on the empty tree before any feature lands.
+4. `packages/languages/en` and `packages/native/en`, `native/ar` skeletons with the first prompt files (section 5).
+5. `.github/workflows/ci.yml` from `engineering/starter-files/ci.yml`, `CODEOWNERS` and `AGENTS.md` from the same folder, green on the empty tree before any feature lands.
 6. `infra/terraform` with the staging environment; the first `deploy-staging.yml` run.
 
-A repository where CI is green on day one stays green; one where CI arrives in week 3 never does.
+A repository where CI is green from the first commit stays green; one where CI arrives later never does.

@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart LR
-  I[idea.chosen / cutoff / swap / return / pilot / sample] --> CT[compile_teacher_input]
+  I[idea.chosen / cutoff / swap / return / first / sample] --> CT[compile_teacher_input]
   CT --> T[teacher<br/>Opus 5.5 batch]
   T --> VP{validate_plan}
   VP -- fail --> T
@@ -50,13 +50,13 @@ stateDiagram-v2
   planning --> failed : unrecoverable (page)
 ```
 
-`streaming = true` on `swap`, `return`, `pilot`, `sample` while `voicing`: segment 1 is published (and `episode.streaming_started` sent) once scene 1 passes code checks 1, 4, 10 and model checks 3, 5, 10; later segments append to the manifest.
+`streaming = true` on `swap`, `return`, `first`, `sample` while `voicing`: segment 1 is published (and `episode.streaming_started` sent) once scene 1 passes code checks 1, 4, 10 and model checks 3, 5, 10; later segments append to the manifest.
 
 ## 3. Deadlines and pricing modes
 
 For a daily episode with `drop_at` D: `t_teacher_cut = D − 4 h`, `t_writer_cut = D − 2 h 30`, `t_voice_cut = D − 2 h` (batch TTS only, P1), `t_switch = D − 90 min` (the PRD's switch to on-demand). Batch pricing is used only when `now < t_teacher_cut − 30 min`. Batch requests pool per 30-minute window across learners, `custom_id` per step; `batch/watch` polls every 5 min and emits `batch.ended`. At any cut line the pending batch is cancelled and the step re-runs at standard pricing. Deadlines are re-read from `episodes.drop_at` before every decision, because a schedule change updates the row.
 
-Spend modes from the cost domain (`architecture/08` §4.5.2): `conserve` forces batch TTS where offered, sets `max_rewrite_rounds` to 1 and skips `prewrite_rank2` and `prewrite_extra`, and never changes a model (ADR-14: the Sonnet teacher is a flag a person flips); `halt` refuses new swap, `daily_extra`, pilot and sample runs for the rest of the UTC day (the API answers with Salma's allowance line) but finishes queued dailies and always runs returns.
+Spend modes from the cost domain (`architecture/08` §4.5.2): `conserve` forces batch TTS where offered, sets `max_rewrite_rounds` to 1 and skips `prewrite_rank2` and `prewrite_extra`, and never changes a model (ADR-14: the Sonnet teacher is a flag a person flips); `halt` refuses new swap, `daily_extra`, first-episode and sample runs for the rest of the UTC day (the API answers with Salma's allowance line) but finishes queued dailies and always runs returns.
 
 ## 4. Step 1: the teacher
 
@@ -121,12 +121,12 @@ def coverage(text, surface, learner, lexicon, dials) -> FitResult:
                      unknown_units=[(u, p[u], u.sent_id) for u in scored if p[u] < 0.5])
 ```
 
-- Prior for an unseen lemma: `p_known(rank) = sigmoid((N_est − rank) / 900)` where `N_est` is the learner's estimated vocabulary size from the word check (36 real items in 6 bands plus 12 pseudowords; the band where hits fall below 50%, corrected for false alarms) [ASSUMPTION; recalibrated after Milestone 0].
+- Prior for an unseen lemma: `p_known(rank) = sigmoid((N_est − rank) / 900)` where `N_est` is the learner's estimated vocabulary size from the word check (36 real items in 6 bands plus 12 pseudowords; the band where hits fall below 50%, corrected for false alarms) [ASSUMPTION; recalibrated on real use after launch].
 - Dials: audio default 95% (easier 96, harder 94, floor 93); text default 98% (99, 97, floor 96).
 - Planned new words are exempt from the failing rule but counted in coverage; an unplanned lemma with `p < 0.5` fails its sentence.
 - Up to 2 rewrite rounds; after that the editor's check 1 decides.
 - The Haiku call (`fitter.sense_tag`, about 2 to 4 s) assigns a sense key to each content lemma so glosses and `word_bank.sense_key` are right; it never changes text.
-- Reconciliation test against the Milestone 0 hand checker: every script the checker passed at N = 3000 with ≥ 97.5% passes the fitter at the 96 dial; the fitter is never above the checker and never more than 1.5 points below.
+- Reconciliation test against the hand coverage checker (`milestone-0/tools/coverage-checker.html`, kept as source material) on synthetic scripts: every script the checker passed at N = 3000 with ≥ 97.5% passes the fitter at the 96 dial; the fitter is never above the checker and never more than 1.5 points below.
 
 Latency: lemmatizing 1,500 words under 200 ms. Cost about $0.003.
 
@@ -144,7 +144,7 @@ Render jobs per segment (scene, article read-aloud, recap, feed tag, shadow line
 
 | Cache | Key | Store | Hit rate expected |
 |---|---|---|---|
-| Gloss cache | `(target_language, native_language, lemma, sense_key)` | `gloss_cache` table + S3 audio | > 90% after week 2; the only cross-learner content store |
+| Gloss cache | `(target_language, native_language, lemma, sense_key)` | `gloss_cache` table + S3 audio | > 90% after the first weeks of use; the only cross-learner content store |
 | Prompt cache | static system blocks per role (teacher rules, writer rules, editor rules, host bible) | Anthropic prompt caching, breakpoint 1; Gemini context cache for the editor | every call after the first per hour |
 | Compiled briefs | `(learner_id, role, lm_version)` | `briefs` + S3 | one compile per learner-model version |
 | Pre-written swap | `(learner_id, local_date, rank 2)` | `episodes.state = prewritten` | swap-prone learners only (taste.swap_n ≥ 2) |
@@ -165,15 +165,15 @@ One transaction after all uploads: `episode_artifacts` rows, `episodes.state = r
 | daily_extra (episode 2 or 3) | no teacher run: the nightly plan already holds a brief per slot; starts at the writer on standard pricing, scene 1 first; `prewrite_extra` pre-produces slot 2 overnight for learners with 5+ extras in the last 7 days; an unused extra ends `superseded` | < 30 s |
 | swap | no teacher; brief from the stored plan's rank-2 idea; scene 1 voiced first; pre-written text if it exists | < 30 s |
 | return | plan and text made at day 5 by `return/plan`; re-filter facts and claims; re-write only if stale | < 30 s |
-| pilot | rule-based brief from intake facts; short call brief; name respellings in parallel | < 45 s after intake |
+| first | rule-based brief from intake facts; short call brief; name respellings in parallel | < 45 s after intake |
 | sample | no learner; moderation on the answers; cost ceiling $0.05; Salma's close appended; 90 s | < 30 s |
 
 ## 12. Cost per step
 
 Cost numbers have one home: `architecture/08` §6 (the itemized model, the levers, the path to $0.35 and the margin by plan). This section keeps no table of its own, and the per-role figures quoted elsewhere in this file are rounded from it. In one line: on the Gemini voice stack at list prices the session is about $0.67 ($0.61 with batch TTS) against the $0.60 budget; after the 2027-01-01 doubling it is about $0.85 on Gemini, and the floor with the levers pulled is $0.43 to $0.45 (08 §6.4).
 
-The voice plan is ADR-24.6: Gemini's prices double on 2027-01-01, during the build and before the open (2027-03-17), so the blind-test decision is made on post-doubling prices and there is no mid-beta voice swap. A negotiated rate is asked of the blind-test winner before the open; any cost still above the line falls under ADR-24.5's price rule.
+The voice plan is ADR-24.6: Gemini's prices double on 2027-01-01, before launch, so the blind-test decision is made on post-doubling prices and there is no voice swap after launch. A negotiated rate is asked of the chosen vendor (register A9); any cost still above the line falls under ADR-24.5's price rule.
 
 ## 13. Testing
 
-Fixtures: `fixtures/teacher_input/*.json` built from the Milestone 0 learner files; the offline suite runs 30 to 50 synthetic learners through the whole function with vendor stubs (recorded responses) and asserts: every plan valid, coverage within 1 point of the hand checker, editor pass rate ≥ 90% first time, duration inside bounds, cost per episode within 10% of the model. A canary episode for the synthetic learner renders on every deploy.
+Fixtures: `fixtures/teacher_input/*.json` built from synthetic learners the agent generates (ADR-25.6); the offline suite runs 30 to 50 synthetic learners through the whole function with vendor stubs (recorded responses) and asserts: every plan valid, coverage within 1 point of the hand checker, editor pass rate ≥ 90% first time, duration inside bounds, cost per episode within 10% of the model. A canary episode for the synthetic learner renders on every deploy.

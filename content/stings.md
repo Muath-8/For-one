@@ -1,6 +1,6 @@
 # For one: sting and sound brief
 
-*Commissioning brief. Draft, 2026-11-12, written on delegation (ADR-24.3). Owner: Muath. The finished assets ship to `packages/languages/en/sound_design/` (PRD FR-1103; architecture/02 `TargetPackage.sound_design`) and are shared across every learner (FR-435). Sources: [design/05 §1.2 and §3](../design/05-interaction-and-audio-ux.md), [design/00](../design/00-design-principles.md) (principle P9, "sound is interface"), PRD FR-1001, architecture/03 §4.5 and §4.11, ADR-24.22.*
+*Commissioning brief. Draft, written on delegation (ADR-24.3). Owner: Muath. The finished assets ship to `packages/languages/en/sound_design/` (PRD FR-1103; architecture/02 `TargetPackage.sound_design`) and are shared across every learner (FR-435). Sources: [design/05 §1.2 and §3](../design/05-interaction-and-audio-ux.md), [design/00](../design/00-design-principles.md) (principle P9, "sound is interface"), PRD FR-1001, architecture/03 §4.5 and §4.11, ADR-24.22.*
 
 ---
 
@@ -68,7 +68,7 @@ A scene seam marked `beat` uses no asset: 700 ms of the room tone bed.
 
 ### 3.6 The drop notification
 
-**No custom sound.** The daily drop notification is a web push (PRD FR-232) and uses the phone's default notification sound; the podcast app's own new-episode alert is the second route. The show does not ship a branded alert, now or in a native app later. A distinctive sound attached to "your episode is here" turns into a cue the learner is trained to respond to, which is exactly the kind of pull the product refuses (TC-2: never manipulate).
+**No custom sound.** The daily drop notification is a web push (PRD FR-232) and uses the phone's default notification sound; the podcast app's own new-episode alert is the second route. The show does not ship a branded alert. A distinctive sound attached to "your episode is here" turns into a cue the learner is trained to respond to, which is exactly the kind of pull the product refuses (TC-2: never manipulate).
 
 ## 4. The library of 12 (concepts)
 
@@ -124,16 +124,13 @@ All files under `packages/languages/en/sound_design/`, named exactly:
 4. **Loudness and format.** Every file meets §5, checked with an EBU R128 meter; the manifest matches the files.
 5. **In context.** Muath hears three real episodes mixed with three different idents, at 1.0× and 0.75×, on a phone speaker and in earbuds, and one call from ring to goodbye.
 
-## 8. Schedule and rights (proposed)
+## 8. Order of work and rights
 
-| Date | Milestone |
-|---|---|
-| 2026-11-19 | Brief sent; quote and a two-ident sketch requested |
-| 2026-12-02 | Idents 01 to 04 in all cuts, room tone, and all call and interface sounds delivered (build week 3) |
-| 2026-12-09 | Full library delivered (build week 4); acceptance tests run that week |
-| 2026-12-16 | Fixes delivered; files committed to the package |
-| 2027-03-17 | Beta opens (ADR-24.11) |
+1. Brief sent; a quote and a two-ident sketch requested.
+2. Idents 01 to 04 in all cuts, the room tone, and every call and interface sound, before the voice studio's mixing and the call screen are built.
+3. The full library, then the acceptance tests in §7.
+4. Fixes, then the files committed to the package, before launch.
 
-Until delivery, the voice studio mixes episodes with ident 01 as a placeholder (or silence) and the call uses a sine placeholder for `call_chime` and `turn_tone` that meets the same durations.
+Until delivery, the voice studio mixes episodes with ident 01 as a placeholder (or silence), and the call uses a sine placeholder for `call_chime` and `turn_tone` with the same durations.
 
-**Rights.** Work made for hire, or a full assignment of all rights, worldwide, perpetual, all media, including the right to edit, re-cut and combine. No third-party samples that need clearance. If any element is generated or assisted by an AI tool, the composer says which, and confirms the tool's terms grant full commercial rights. No Content ID or fingerprint registration of any kind. The composer may show the work in a portfolio after the beta opens.
+**Rights.** Work made for hire, or a full assignment of all rights, worldwide, perpetual, all media, including the right to edit, re-cut and combine. No third-party samples that need clearance. If any element is generated or assisted by an AI tool, the composer says which, and confirms the tool's terms grant full commercial rights. No Content ID or fingerprint registration of any kind. The composer may show the work in a portfolio after launch.

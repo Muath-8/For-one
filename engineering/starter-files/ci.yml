@@ -1,6 +1,8 @@
 # .github/workflows/ci.yml
 # For one: checks on every pull request and on main. Starter file from engineering/04-ci-cd.md.
 # Expensive jobs (eval-gate, infra-plan, image) run only when their paths changed or on main.
+# The review job is the independent AI review pass; security-review runs on security paths (ADR-25.11).
+# Muath approves every merge (CODEOWNERS).
 
 name: ci
 
@@ -15,7 +17,7 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: write      # eval-gate and infra-plan post comments
+  pull-requests: write      # eval-gate, infra-plan and review post comments
   id-token: write           # OIDC to AWS for infra-plan and image push
 
 env:
@@ -30,6 +32,7 @@ jobs:
     outputs:
       infra: ${{ steps.filter.outputs.infra }}
       versioned: ${{ steps.filter.outputs.versioned }}
+      security: ${{ steps.filter.outputs.security }}
       web: ${{ steps.filter.outputs.web }}
     steps:
       - uses: actions/checkout@v4
@@ -42,6 +45,17 @@ jobs:
             web:
               - 'apps/web/**'
               - 'packages/native/**'
+            security:
+              - 'apps/api/auth/**'
+              - 'apps/api/feed/**'
+              - 'apps/api/media/**'
+              - 'packages/core/forone/core/keys*.py'
+              - 'packages/core/forone/core/media.py'
+              - 'apps/workflows/functions/learner_delete.py'
+              - 'apps/workflows/functions/learner_export.py'
+              - 'apps/workflows/functions/audio_expire.py'
+              - 'infra/modules/iam/**'
+              - 'infra/modules/kms/**'
             versioned:
               - 'packages/languages/**/prompts/**'
               - 'packages/languages/**/rules/**'
@@ -142,6 +156,65 @@ jobs:
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: astral-sh/setup-uv@v3
+      - name: Dependency audit (ADR-25.11); fails on a critical or high finding with a fix available
+        run: |
+          uvx pip-audit --requirement <(uv export --frozen --no-hashes) --strict
+          corepack enable && pnpm audit --audit-level high --prod
+
+  security-review:
+    # The AI security review (ADR-25.11): runs only when the diff touches auth, keys, media URLs,
+    # the feed or deletion. A fresh model session runs the /security-review pass over the diff and
+    # fails on a blocking finding. No paid penetration test at launch.
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && needs.changes.outputs.security == 'true'
+    needs: [changes]
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --frozen --package forone-tools
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_REVIEW_ROLE_ARN }}
+          aws-region: ${{ vars.HOME_REGION }}
+      - name: Load the review key (a capped key, never a prod key)
+        run: |
+          key=$(aws secretsmanager get-secret-value --secret-id forone/ci/review --query SecretString --output text)
+          echo "::add-mask::$key"; echo "REVIEW_API_KEY=$key" >> "$GITHUB_ENV"
+      - name: Run the security review pass
+        run: uv run tools/review security --base ${{ github.event.pull_request.base.sha }} --head ${{ github.sha }} --report security-review.md --fail-on blocking
+      - name: Post the security review
+        if: always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with: { path: security-review.md, header: security-review }
+
+  review:
+    # The independent AI review pass (engineering/04 §3, ADR-25.2). A fresh model session reads the
+    # diff, the story it cites and engineering/08 §5; it posts one comment and fails on a blocking finding.
+    # It never edits code and never approves; Muath approves the merge.
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: [changes]
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --frozen --package forone-tools
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_REVIEW_ROLE_ARN }}    # may read forone/ci/review only
+          aws-region: ${{ vars.HOME_REGION }}
+      - name: Load the review key (a capped key, never a prod key)
+        run: |
+          key=$(aws secretsmanager get-secret-value --secret-id forone/ci/review --query SecretString --output text)
+          echo "::add-mask::$key"; echo "REVIEW_API_KEY=$key" >> "$GITHUB_ENV"
+      - name: Run the review pass
+        run: uv run tools/review pr --base ${{ github.event.pull_request.base.sha }} --head ${{ github.sha }} --checklist engineering/08-coding-standards-and-review.md --report review.md --fail-on blocking
+      - name: Post the review
+        if: always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with: { path: review.md, header: review-pass }
 
   infra-plan:
     runs-on: ubuntu-latest

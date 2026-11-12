@@ -2,7 +2,7 @@
 
 *Part 6 of 8. How the three voices on screen speak, what they may never say, and how interface copy is written. The host and Salma "bibles" (full character documents) are drafted in `content/bibles/` under ADR-24.3; this document is the brief those drafts follow and the rules the product enforces regardless.*
 
-*Revised 2026-11-12: §7 records ADR-24.3 (who writes what).*
+*Revised 2026-11-12: §7 records ADR-24.3 (who writes what), as changed by ADR-25.7 (no hired reviewers); the founding promise is gone from pricing copy (ADR-25.5).*
 
 ## 1. The three voices at a glance
 
@@ -50,7 +50,7 @@
 
 **Language shift.** Season 1: Salma almost entirely in the learner's language, with the target language for names and titles. Later seasons: the planner raises her share of the target language sentence by sentence as the learner's listening estimate rises, and tells the learner once when it starts ("I'll say a bit more in English from now on. Say so if it's too much."). The shift is itself a quiet sign of progress.
 
-**Salma's exact strings (beta, English source, translated per interface language):**
+**Salma's exact strings (English source, translated per interface language):**
 - "What should Karim and Mona call you?"
 - "What could you talk about for an hour?"
 - "What do you need English for?"
@@ -76,12 +76,12 @@
 - **Time in life terms** where the learner set it that way: "On my commute, 7:40".
 - **Errors** (system only): what happened and the one thing to do. "No connection. Today's episode is ready." "Payment didn't go through. Try again, or later; your show keeps playing for seven days." (ADR-24.B2)
 - **Consent** sentences: what is stored, for whom, how to undo. One sentence, unticked.
-- **Pricing copy** states facts: price, per day, per episode, what every plan includes, the tutor comparison, the founding promise. Allowed: "Recommended". Not allowed: "Most popular" (until true), "Best value", "Limited", "Only today", "Don't miss", crossed-out prices, "Save 40%".
+- **Pricing copy** states facts: price, per day, per episode, what every plan includes, the tutor comparison. Allowed: "Recommended". Not allowed: "Most popular" (until true), "Best value", "Limited", "Only today", "Don't miss", crossed-out prices, "Save 40%".
 - **Legal and disclosure:** "Karim, Mona and Salma are AI. This show is made for you and nobody else." appears once in onboarding (A7 caption area) and in Controls › About.
 
 ## 5. Localisation and bidirectional text
 
-- Interface strings are written in English first with the string ids below, translated by native speakers, never machine-only, for every interface language shipped. Salma's lines are translated with her register (calm, short) rather than literally.
+- Interface strings are written in English first with the string ids below, translated and read by a native speaker (Muath for Arabic, ADR-25.7), never machine-only, for every interface language shipped. Salma's lines are translated with her register (calm, short) rather than literally.
 - Each text block sets its direction from its content; chat bubbles mixing scripts use plaintext bidi; numerals follow the interface locale.
 - Names are never transliterated by the system; the learner says their name to Salma and the hosts use her recording of it for pronunciation.
 - Episode transcripts, articles and host chats are always in the target language and keep its direction even inside an RTL interface.
@@ -94,4 +94,4 @@
 - The finale sets next season's goal inside the finale, in the learner's own words.
 
 ## 7. Who writes what (decided, ADR-24.3)
-The host and Salma bibles are drafted in `content/bibles/`; the sting library, the ban lists per language and the translation of Salma's strings are owned the same way. Muath is the owner of record. A paid native English editor reads the hosts' bible and 30 sample lines per host by 2026-12-01; Muath reads Salma's Arabic by the same date (register A4, A5 in `architecture/10-decision-records.md` §10). There is no outside writer for the beta; one is hired for season two if episodes feel alike by week 4 (R9). See 07 #4. The model writes episodes, calls and chats inside those documents; it never writes the documents.
+The host and Salma bibles are drafted in `content/bibles/`; the sting library, the ban lists per language and the translation of Salma's strings are owned the same way. Muath is the owner of record and reads and approves the English bibles and Salma's Arabic before the writer and host prompts are tuned (ADR-25.7, register A3 in `architecture/10-decision-records.md` §10), and an AI review pass checks every bible, prompt and episode sample against the laws and the ban lists. There is no hired editor or outside writer at launch; a writer is hired for season two if episodes feel alike by week 4 (R9). See 07 #4. The model writes episodes, calls and chats inside those documents; it never writes the documents.

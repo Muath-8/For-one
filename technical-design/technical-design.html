@@ -106,8 +106,8 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
 
 <div class="wrap">
 <header class="top">
-  <div class="eyebrow">Technical design, version 1.2 · aligned with the architecture decision records, ADR-24 included</div>
-  <p class="eyebrow" style="margin-top:6px">Updated 2026-11-12 · every owed decision taken (ADR-24) · beta opens 2027-03-17</p>
+  <div class="eyebrow">Technical design, version 1.3 · aligned with the architecture decision records, ADR-24 and ADR-25 included</div>
+  <p class="eyebrow" style="margin-top:6px">Updated 2026-11-12 · ADR-24 and ADR-25: built by an AI coding agent under Muath, web only, one public launch</p>
   <h1>For one technical design</h1>
   <p class="measure">One private podcast per learner, written overnight at 95% known words, a live call with a host who corrects only by recasting, and a learner model rebuilt from an append-only log. This page is the entry point; the eleven files on GitHub hold every table, endpoint, prompt and state machine.</p>
   <div class="facts">
@@ -115,7 +115,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
     <div class="fact"><b>4 services</b><span>web · api · workflows · call-worker</span></div>
     <div class="fact"><b>~0.95 s</b><span>host reply design target (gate 1.5 s)</span></div>
     <div class="fact"><b>$0.67 → $0.85</b><span>per session at list, before and after the 1 Jan 2027 Gemini doubling (architecture 08 §6)</span></div>
-    <div class="fact"><b>17 Mar 2027</b><span>beta opens with two engineers from build start (17 Feb with three); build 18 Nov to 12 Mar</span></div>
+    <div class="fact"><b>v1, open signup</b><span>one public launch, built story by story by an AI coding agent under Muath; no dates, six phases</span></div>
   </div>
 </header>
 
@@ -130,7 +130,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
     </defs>
     <!-- region frame -->
     <rect x="300" y="18" width="440" height="396" rx="8" class="box" style="fill:none;stroke-dasharray:5 4"/>
-    <text x="316" y="40" class="sm mono muted">AWS home region · eu-central-1, final for the beta (ADR-24.8) · VPC, ALB + WAF, RDS Multi-AZ, S3, KMS</text>
+    <text x="316" y="40" class="sm mono muted">AWS home region · eu-central-1 (ADR-24.8) · VPC, ALB + WAF, RDS Multi-AZ, S3, KMS</text>
     <!-- client -->
     <rect x="24" y="80" width="200" height="74" rx="6" class="box svc"/>
     <text x="40" y="106" class="md" font-weight="600">apps/web</text>
@@ -229,7 +229,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
     <path d="M455 96 V116 H275 V100" class="arrow hot"/><text x="300" y="130" class="sm mono" fill="var(--amber)">≤ 2 rewrite rounds on failing sentences</text>
     <path d="M635 96 V140 H275 V100" class="arrow hot" style="opacity:.6"/><text x="640" y="152" class="sm mono" fill="var(--amber)">repair once; second fail restarts as fallback episode</text>
     <!-- cost bars: scale 0.25 $ = 200px -->
-    <text x="20" y="196" class="sm mono muted">COST PER DAILY EPISODE (USD, beta stack, Gemini voice, Oct 2026 list)</text>
+    <text x="20" y="196" class="sm mono muted">COST PER DAILY EPISODE (USD, launch stack, Gemini voice, Oct 2026 list)</text>
     <line x1="20" x2="1040" y1="300" y2="300" class="axis"/>
     <g class="sm">
       <rect x="20" y="238" width="62" height="56" rx="0" class="bar"><title>Teacher $0.077</title></rect><text x="20" y="232" class="mono">$0.077</text>
@@ -238,7 +238,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
       <rect x="560" y="280" width="14" height="14" class="bar soft"><title>Editor, counted with the fitter line</title></rect>
       <rect x="740" y="120" width="174" height="174" class="bar"><title>Voice studio $0.217 (batch TTS $0.150, P1)</title></rect><text x="740" y="114" class="mono">$0.217</text>
       <rect x="920" y="291" width="3" height="3" class="bar"/><text x="920" y="286" class="mono">&lt; $0.006</text>
-      <text x="20" y="318" class="mono muted">Pipeline total $0.367 · with batch TTS where offered (P1) $0.300 · Gemini prices double 1 Jan 2027, during the build: voice +$0.135</text>
+      <text x="20" y="318" class="mono muted">Pipeline total $0.367 · with batch TTS where offered (P1) $0.300 · Gemini prices double 1 Jan 2027, before launch: voice +$0.135</text>
     </g>
   </svg>
   <p class="cap"><b>Coverage is code.</b> The fitter lemmatizes the script, scores every running unit with the learner's Beta mean (or the frequency prior from the 48-item word check), and fails any sentence holding an unplanned unit below p = 0.5. Prompts, schemas and the algorithm are in <a href="https://github.com/Muath-8/for-one/blob/main/technical-design/03-generation-pipeline.md">03-generation-pipeline.md</a>.</p>
@@ -344,11 +344,11 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
 
 <section id="cost">
   <div class="sec-head"><span class="num">09</span><h2>Where a session's money goes</h2>
-    <p class="measure">Measured from <code>vendor_calls</code>, never estimated, once learners exist. The beta budget is $0.60; the stop line is $1.00 with no costed plan; the scale target is $0.35. These bars are the first pre-doubling estimate; <code>architecture/08</code> §6 is the single home of cost numbers: about $0.85 a session on Gemini after 1 Jan 2027, $0.43 to $0.45 with the levers pulled.</p></div>
+    <p class="measure">Measured from <code>vendor_calls</code>, never estimated, once learners exist. The launch budget is $0.60; the stop line is $1.00 with no costed plan; the scale target is $0.35. These bars are the first pre-doubling estimate; <code>architecture/08</code> §6 is the single home of cost numbers: about $0.85 a session on Gemini after 1 Jan 2027, $0.43 to $0.45 with the levers pulled.</p></div>
   <div class="fig">
     <svg viewBox="0 0 1060 400" role="img" aria-label="Horizontal bars of cost per session by component, with the $0.60 budget and $1.00 stop line marked">
       <g class="sm">
-        <text x="0" y="14" class="mono muted">USD PER DAILY SESSION · BETA STACK, GEMINI VOICE, OCTOBER 2026 LIST PRICES</text>
+        <text x="0" y="14" class="mono muted">USD PER DAILY SESSION · LAUNCH STACK, GEMINI VOICE, OCTOBER 2026 LIST PRICES</text>
         <!-- scale: 1.00 USD = 700px, origin x=220 -->
         <g class="grid"><line x1="220" x2="220" y1="30" y2="356"/><line x1="395" x2="395" y1="30" y2="356"/><line x1="570" x2="570" y1="30" y2="356"/><line x1="745" x2="745" y1="30" y2="356"/><line x1="920" x2="920" y1="30" y2="356"/></g>
         <g class="mono muted"><text x="216" y="372">$0</text><text x="383" y="372">$0.25</text><text x="558" y="372">$0.50</text><text x="733" y="372">$0.75</text><text x="908" y="372">$1.00</text></g>
@@ -385,7 +385,7 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
       <tr><td>Three message kinds only</td><td>Only <code>forone.core.messaging</code> may import the email or push client (Ruff banned-api rule); a unit test asserts the enum size.</td></tr>
       <tr><td>No claim without proof</td><td><code>claims.text_native</code> is written by <code>gate()</code> in code and is the only progress sentence any surface may speak.</td></tr>
       <tr><td>Told, not inferred</td><td><code>life_facts.quote_event_id not null</code>; validator refuses a fact whose quote is not in a verbatim or chat event; no enrichment adapters exist.</td></tr>
-      <tr><td>Data is theirs</td><td>Export within 72 h in the beta (1 h once automated), no passphrase, a 15-minute link; deletion by typed "delete" with no grace period ends access at once, live purge 24 h, backups 30 d; destroying the learner's data key crypto-shreds all voice.</td></tr>
+      <tr><td>Data is theirs</td><td>Export within 72 h while fulfilled by hand (1 h once automated), no passphrase, a 15-minute link; deletion by typed "delete" with no grace period ends access at once, live purge 24 h, backups 30 d; destroying the learner's data key crypto-shreds all voice.</td></tr>
       <tr><td>Nothing per country</td><td>No default time zone; <code>native_language</code>, <code>target_language</code> and <code>residence_country</code> columns; two package axes, <code>packages/languages/&lt;target&gt;/</code> and <code>packages/native/&lt;lang&gt;/</code>; USD list prices.</td></tr>
       <tr><td>Sensitive facts</td><td>Six classes (health, money, relationships, religion, politics, sexuality) are used in the session only, and later only after a one-tap card in the notebook (ADR-24.10, B5).</td></tr>
       <tr><td>Inngest sees pointers</td><td>CI fails any event model with a field named name, email, text, topic, quote, transcript or audio, or a string over 200 chars.</td></tr>
@@ -394,27 +394,28 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
 </section>
 
 <section id="weeks">
-  <div class="sec-head"><span class="num">00</span><h2>Build weeks W1 to W5</h2>
-    <p class="measure">Build 18 November 2026 to 12 March 2027; the week dates are in <code>backlog/00-release-plan.md</code>. P0 is split into <b>Day-1</b> (built before the open) and <b>Later in the beta</b> (each with the beta day a learner first reaches it). Exit on 12 March: every Day-1 P0 works end to end, cost per session measured, a costed path to $0.35. The beta opens 17 March 2027 with two engineers from build start (17 February with three), gate review 20 April (ADR-24.11).</p></div>
+  <div class="sec-head"><span class="num">00</span><h2>Build phases, in dependency order</h2>
+    <p class="measure">An AI coding agent builds the system story by story under Muath: acceptance criteria become tests first, CI and an independent AI review pass must pass, and Muath approves merges, migrations, prompt and bible changes and production deploys (ADR-25.2). There are no dates; each phase ends on an exit check (<code>backlog/00-release-plan.md</code>). Work is <b>v1</b> (needed at launch) or <b>v1.1</b> (after launch). Version 1 launches once, publicly, with open signup when every v1 story passes and the launch checklist is green; the launch health measures are read 4 and 8 weeks after launch (ADR-25.5).</p></div>
   <div class="weeks">
-    <div class="wk"><span class="eyebrow">W1</span><p>Schema and migrations, event ingestion, RLS and roles, adapters with tracing, lexicon and FSRS scheduler, language package skeleton, the 30-clip and 50-call vendor tests.</p><span class="files">01 · 02 · 05 · 09</span></div>
-    <div class="wk"><span class="eyebrow">W2</span><p>Teacher, writer, fitter, editor and voice studio end to end on test learners; gloss cache; episode state machine; publish.</p><span class="files">03</span></div>
-    <div class="wk"><span class="eyebrow">W3</span><p>Onboarding A1 to A10 with Salma in order A, Today, player, word sheet, feed, push, payments on Paddle, account.</p><span class="files">02 · 07</span></div>
-    <div class="wk"><span class="eyebrow">W4</span><p>Call worker: governor, turn-taking, the word button, hold-to-talk, recorder, verbatim path; voice-note fallback; chat.</p><span class="files">04</span></div>
-    <div class="wk"><span class="eyebrow">W5</span><p>After-session pass, memory keeper, claim gate, notebook, Controls, simple weekly proof, first then-and-now, deletion and export jobs, crisis protocol.</p><span class="files">05 · 06 · 08</span></div>
+    <div class="wk"><span class="eyebrow">Phase 1</span><p>Foundation: schema and migrations, event ingestion, RLS and roles, adapters with tracing and the price book, lexicon and FSRS scheduler, the English package and its gate result, Terraform for staging.</p><span class="files">01 · 02 · 05 · 09</span></div>
+    <div class="wk"><span class="eyebrow">Phase 2</span><p>Pipeline and the minimal call: teacher, writer, fitter, editor and voice studio on synthetic learners; gloss cache; episode state machine; publish; the 30-clip recognizer test and the scripted calls.</p><span class="files">03 · 04</span></div>
+    <div class="wk"><span class="eyebrow">Phase 3</span><p>Onboarding, Today, feed: A1 to A10 with Salma in order A, Today, player, word sheet, feed, push, email one-time code sign-in, consent and the age gate.</p><span class="files">02 · 07</span></div>
+    <div class="wk"><span class="eyebrow">Phase 4</span><p>The full call and the after-session pass: governor, turn-taking, the word button, hold-to-talk, recorder, verbatim path, voice-note fallback, chat; the analyst, memory keeper and crisis protocol.</p><span class="files">04 · 05 · 06 · 08</span></div>
+    <div class="wk"><span class="eyebrow">Phase 5</span><p>The first week's surfaces: claim gate, simple weekly proof, the baseline then-and-now, notebook, Controls, plans and Paddle checkout.</p><span class="files">05 · 06 · 07 · 08</span></div>
+    <div class="wk"><span class="eyebrow">Phase 6</span><p>Production and launch: production from the same Terraform, deletion and export verified on a test learner, a restore rehearsed, the launch checklist.</p><span class="files">08 · 09</span></div>
   </div>
 </section>
 
 <section id="open">
-  <div class="sec-head"><span class="num">10</span><h2>What the decision records settled, and what ADR-24 decided</h2>
-    <p class="measure">The architecture was revised on 6 November with 23 decision records, and on 12 November ADR-24 took every decision this design still owed. What remains is owner actions and measurements, listed in <code>architecture/10</code> §10 and in the open-questions file.</p></div>
+  <div class="sec-head"><span class="num">10</span><h2>What the decision records settled, and what ADR-24 and ADR-25 decided</h2>
+    <p class="measure">The architecture was revised on 6 November with 23 decision records, and on 12 November ADR-24 took every decision this design still owed; ADR-25 then set the agent build, no dates, no lawyer, web only and one public launch. What remains is owner actions and measurements, listed in <code>architecture/10</code> §10 and in the open-questions file.</p></div>
   <div class="oq">
     <div class="oq-item"><span class="k">1 · notes · settled</span><p><b>After-call notes, the polish card and the margin note do not exist (ADR-06).</b> The after-session pass is one function inside 10 minutes; corrections are recasts planned by the teacher's echo plan; Salma explains only when asked; a "New for you" card comes only from passed claims.</p></div>
-    <div class="oq-item"><span class="k">2 · languages · settled</span><p><b>Two package axes, not pairs (ADR-02).</b> <code>packages/languages/&lt;target&gt;/</code> holds voices, recognizers, lexicon and inventory; <code>packages/native/&lt;lang&gt;/</code> holds interface strings, consent, Salma and crisis resources. The pilot runs on <code>languages/en</code> and <code>native/ar</code>; a target opens by the five-check gate in code.</p></div>
+    <div class="oq-item"><span class="k">2 · languages · settled</span><p><b>Two package axes, not pairs (ADR-02).</b> <code>packages/languages/&lt;target&gt;/</code> holds voices, recognizers, lexicon and inventory; <code>packages/native/&lt;lang&gt;/</code> holds interface strings, consent, Salma and crisis resources. Version 1 runs on <code>languages/en</code> with <code>native/en</code> and <code>native/ar</code>; a target opens by the five-check gate in code.</p></div>
     <div class="oq-item"><span class="k">3 · plans · settled</span><p><b>Plans <code>one_a_day</code>, <code>two_a_day</code>, <code>three_a_day</code> (ADR-04, ADR-05).</b> Episodes 2 and 3 are <code>daily_extra</code>: planned overnight with the drop, made on demand through <code>POST /v1/episodes/next</code> after the current episode is heard, never autoplayed. Each extra gets its own call and chat (ADR-24.21).</p></div>
-    <div class="oq-item"><span class="k">13 · vendors · measured</span><p><b>The blind test, the 30 clips and the 50 calls pick the vendors</b>, on post-doubling prices; no mid-beta voice swap (ADR-24.6). Working stack: Gemini 3.8 Flash TTS, Soniox, AssemblyAI; embeddings on Google's model (ADR-10). Hume is excluded.</p></div>
-    <div class="oq-item"><span class="k">15 · bibles · decided</span><p><b>Drafted in <code>content/bibles/</code> (ADR-24.3).</b> A paid native English editor reads the hosts' bible and Muath reads Salma's Arabic by 1 December.</p></div>
-    <div class="oq-item"><span class="k">12 · region · decided</span><p><b><code>eu-central-1</code> is final for the beta (ADR-24.8).</b> Standard contractual clauses with a transfer impact assessment, never consent; EU and UK GDPR, Saudi PDPL and a generic baseline; payments through Paddle (ADR-24.4). Counsel confirms by 17 November.</p></div>
+    <div class="oq-item"><span class="k">13 · vendors · measured</span><p><b>The blind test, the 30 clips and the 50 calls pick the vendors</b>, on post-doubling prices (ADR-24.6); the clips are speechocean762 plus about 30 volunteer recordings, and the blind test is rated by Muath and volunteers (ADR-25.6). Working stack: Gemini 3.8 Flash TTS, Soniox, AssemblyAI; embeddings on Google's model (ADR-10). Hume is excluded.</p></div>
+    <div class="oq-item"><span class="k">15 · bibles · decided</span><p><b>Drafted in <code>content/bibles/</code> (ADR-24.3, 25.7).</b> Muath reads the English bibles and Salma's Arabic; an AI review pass checks them against the laws and the ban lists; no hired reader.</p></div>
+    <div class="oq-item"><span class="k">12 · region · decided</span><p><b><code>eu-central-1</code>, compliance by conservative design (ADR-24.8, 25.3).</b> GDPR-grade rights for everyone; vendors' standard DPAs with SCCs, never consent; Paddle as merchant of record; every legal text checked against the self-review checklist by an AI review pass and by Muath. Sign-in is email one-time code only (ADR-25.4).</p></div>
   </div>
 </section>
 
@@ -431,10 +432,10 @@ footer{padding-block:36px 0;border-top:1px solid var(--line);font-size:13px;colo
     <div class="file"><span class="num">06</span><div><h3>After-session pass and proof</h3><p>Seven stages in one function, the analyst schema, the claim gate, weekly proof modes, then-and-now, why there are no notes.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/06-after-session-and-proof.md">06-after-session-and-proof.md</a></div></div>
     <div class="file"><span class="num">07</span><div><h3>Client</h3><p>Routes, state, player, word sheet, call screen, offline PWA, feed and push, onboarding.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/07-client.md">07-client.md</a></div></div>
     <div class="file"><span class="num">08</span><div><h3>Security and privacy</h3><p>Threat model, keys, isolation, consent machine, deletion jobs, crisis protocol, payments, residency.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/08-security-privacy.md">08-security-privacy.md</a></div></div>
-    <div class="file"><span class="num">09</span><div><h3>Observability and cost</h3><p>Tracing, measures, alarms, spend modes, offline suite, flags, deploys and on-call.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/09-observability.md">09-observability.md</a></div></div>
-    <div class="file"><span class="num">10</span><div><h3>Open questions, now decided</h3><p>Eight conflicts and how the decision records settled them, thirteen decisions taken under ADR-24 with the owner actions left, seven assumptions to measure in the beta.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/10-open-questions.md">10-open-questions.md</a></div></div>
+    <div class="file"><span class="num">09</span><div><h3>Observability and cost</h3><p>Tracing, measures, alarms, spend modes, offline suite, flags, deploys and operations.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/09-observability.md">09-observability.md</a></div></div>
+    <div class="file"><span class="num">10</span><div><h3>Open questions, now decided</h3><p>Eight conflicts and how the decision records settled them, thirteen decisions taken under ADR-24 and ADR-25 with the owner actions left, seven assumptions to measure after launch.</p><a href="https://github.com/Muath-8/for-one/blob/main/technical-design/10-open-questions.md">10-open-questions.md</a></div></div>
   </div>
 </section>
 
-<footer>Written 6 November 2026 against concept v2, decisions.md (23 October), the nine architecture documents and PRD-v2 v3.1; aligned 7 November with architecture/10-decision-records.md (ADR-01 to ADR-22 and the naming rulings); updated 12 November for ADR-24. Numbers marked as assumptions in the files are to be replaced by measurements in build weeks 1 and 2.</footer>
+<footer>Written 6 November 2026 against concept v2, decisions.md (23 October), the nine architecture documents and PRD-v2 v3.1; aligned 7 November with architecture/10-decision-records.md (ADR-01 to ADR-22 and the naming rulings); updated 12 November for ADR-24 and ADR-25. Numbers marked as assumptions in the files are to be replaced by measurements in phases 1 and 2.</footer>
 </div>

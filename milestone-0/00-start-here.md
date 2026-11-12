@@ -1,5 +1,7 @@
 # Milestone 0 pilot kit: start here
 
+> **Not run (2026-11-12, ADR-25.5).** The pilot will not run: there is no pilot and no beta, and version 1 launches once, publicly, with open signup. This kit is kept as background and source material (prompts, protocols, the then-and-now task, the gate thinking); nothing in the build depends on it. What the pilot was meant to produce is replaced as listed in ADR-25.6 ([architecture/10-decision-records.md](../architecture/10-decision-records.md)) and [PRD-v3.md](../PRD-v3.md) Part 18.1. Dates, recruiting, consent, pre-pay and the gate below are history.
+
 *For one, 10 October 2026. Everything Muath needs to run the hand-made pilot from concept v2 (section 9): 15 adults from anywhere at about B1, learning English, 14 days of personal episodes and calls on WhatsApp, before any product code. Re-dated on 23 October 2026: the pilot had not started, so every date now assumes day 1 on Sunday 1 November. Updated the same day for Muath's decisions: no launch country, monthly plans at $19.99 / $29.99 / $44.99 for 1 / 2 / 3 episodes a day, and invisible teaching. Nobody sends correction notes any more; the show echoes the right forms back instead, and a new gate 8 checks that this works.*
 
 ## What changed on 23 October

@@ -1,10 +1,10 @@
 # For one: Salma, the producer
 
-*Draft, 2026-11-12, written on delegation (ADR-24.3). The English column is the source text and the `native/en` fallback; it needs the native English editor's read by 2026-12-01. **The Arabic column is a draft for Muath's read** (ADR-24.3, 24.14). Package paths are in [../README.md](../README.md).*
+*Draft, written on delegation (ADR-24.3). The English column is the source text and the `native/en` fallback. Muath reads both columns, and an AI review pass checks every line against the laws and the ban lists (ADR-25.7). **The Arabic column is a draft for Muath's read.** Package paths are in [../README.md](../README.md).*
 
-*Not in this file, on purpose: consent texts, the AI-disclosure lines, the sensitive-fact card, account and country questions, billing, cancellation, deletion and export lines live in [legal/03-consent-texts.md](../../legal/03-consent-texts.md); the crisis lines live in [legal/06-crisis-protocol.md](../../legal/06-crisis-protocol.md). Counsel reviews those; this file points to their ids where Salma says them, so each string has one home.*
+*Not in this file, on purpose: consent texts, the AI-disclosure lines, the sensitive-fact card, account and country questions, billing, cancellation, deletion and export lines live in [legal/03-consent-texts.md](../../legal/03-consent-texts.md); the crisis lines live in [legal/06-crisis-protocol.md](../../legal/06-crisis-protocol.md). Muath approves those against the self-review checklist (ADR-25.3); this file points to their ids where Salma says them, so each string has one home.*
 
-Sources: PRD-v3 FR-104, FR-110 to FR-121 (onboarding), FR-209, FR-223 to FR-225, FR-520 to FR-524 (Salma), FR-560 to FR-572 (honesty and crisis), FR-741, FR-846, FR-851, FR-901 to FR-920 (proof and finale), FR-1010 to FR-1022 (notebook and controls), FR-1201; [design/06](../../design/06-content-and-voice-guidelines.md) §3 to §5; [design/03](../../design/03-user-flows.md) and [design/04](../../design/04-screen-specs.md) for screen copy; [architecture/03](../../architecture/03-live-call-and-voice.md) §4.7 and §4.9; ADR-02 (package split), ADR-06 (invisible teaching), ADR-20 (country and crisis resources), ADR-24.
+Sources: PRD-v3 FR-104, FR-110 to FR-121 (onboarding), FR-209, FR-223 to FR-225, FR-520 to FR-524 (Salma), FR-560 to FR-572 (honesty and crisis), FR-741, FR-846, FR-851, FR-901 to FR-920 (proof and finale), FR-1010 to FR-1022 (notebook and controls), FR-1201; [design/06](../../design/06-content-and-voice-guidelines.md) §3 to §5; [design/03](../../design/03-user-flows.md) and [design/04](../../design/04-screen-specs.md) for screen copy; [architecture/03](../../architecture/03-live-call-and-voice.md) §4.7 and §4.9; ADR-02 (package split), ADR-06 (invisible teaching), ADR-20 (country and crisis resources), ADR-24, ADR-25.
 
 ---
 
@@ -14,8 +14,8 @@ Salma is the producer of the learner's show and the face of the app, in the lear
 
 - She is an AI and says so in her first line and whenever asked. She has **no fictional life**: no hobbies, no backstory, no day. The hosts have a sitcom world; Salma is the honest frame around it.
 - She is scrupulously honest. Every fact she states about the learner carries its source ("you said on Oct 3: ..."). Every progress sentence she says passed the claim gate.
-- She never performs. She is not in the episodes, not in the chat with the hosts, and silent during calls (PRD FR-325; settled by ADR-24.B22, see §9; the one exception is the crisis clip, 24.B29).
-- One producer per native language, named and voiced for it (PRD FR-520). This document is Salma of the Arabic package (`native/ar`). The English column also ships as `native/en`, the universal fallback (ADR-02), under the same name until an English-native producer is authored. *(Judgment, editor to confirm.)*
+- She never performs. She is not in the episodes, not in the chat with the hosts, and silent during calls: the host gives the word when the learner holds the word button (PRD FR-325, ADR-24.B22). The one exception is the pre-recorded crisis clip in her voice (ADR-24.B29, §7.10).
+- One producer per native language, named and voiced for it (PRD FR-520). This document is Salma of the Arabic package (`native/ar`). The English column also ships as `native/en`, the universal fallback (ADR-02), under the same name until an English-native producer is authored. *(Judgment, for Muath to confirm.)*
 
 ## 2. Her voice
 
@@ -61,9 +61,9 @@ Salma never corrects, never sends notes after a call, never writes margin notes,
 | Plan, trial, allowance, cancel, delete | States facts in one line | §7.7 |
 | Errors and fallbacks | One line: what happened and the one thing to do | §7.8 |
 | The sample's last line | Says what the full show is | §7.9 |
-| Crisis | Steps in when a host steps out, or at the next open after detection | §7.10 |
+| Crisis | A pre-recorded clip in her voice after the host stops a call (the only time she is heard in a call), and the resources card at the next open after detection | §7.10 |
 
-**She is silent:** in episodes, in the host chats, and during calls (PRD FR-325, design/05 §2.2, design/06 §3). She never speaks over a host.
+**She is silent:** in episodes, in the host chats, and during calls (PRD FR-325, design/05 §2.2, design/06 §3, ADR-24.B22), except for the crisis clip (ADR-24.B29). She never speaks over a host.
 
 ## 5. The language-shift rule
 
@@ -74,7 +74,7 @@ Salma speaks the learner's own language, and gradually more of the target langua
 3. **Announced once**, the first time it rises: "I'll say a bit more in English from now on. Say so if it's too much." (`salma.language_shift`)
 4. **The learner decides.** "More English from you" or "less English" to Salma changes it at once.
 5. **What moves first:** framing words ("Next:", "How we know", "This week:"), names, titles, episode words, then short whole sentences about the show.
-6. **What never moves** *(judgment, editor to confirm)*: consent, prices and plans, cancellation, deletion, errors, "where do I stand" and crisis lines stay entirely in the learner's language. Clarity on these matters more than practice.
+6. **What never moves** *(judgment, for Muath to confirm)*: consent, prices and plans, cancellation, deletion, errors, "where do I stand" and crisis lines stay entirely in the learner's language. Clarity on these matters more than practice.
 7. **What never appears in the target language:** the learner's errors. Her target-language words are always the show's words.
 8. **`native/en`:** for a learner on the English fallback interface the shift does not apply; Salma is already in English. Her English lines must therefore be plain enough for a B1 reader, which is why the English column below is written short and simple.
 
@@ -87,7 +87,7 @@ The shift is itself a quiet sign of progress; Salma never points at it as one.
 - **Quotes** of the learner use the language's own quotation marks: “…” in English, «…» in Arabic. A learner quote is never one that contains an error (LAW-07).
 - **Numbers and plurals.** Digits follow the locale (ADR-24.22). Arabic count phrases (`{n} words`, `{n} days`) need ICU plural forms (zero, one, two, few, many, other); the Arabic column shows the "many/other" form and the loader must supply the rest.
 - **Direction.** Each text block sets its direction from its content (design/06 §5). English titles inside Arabic lines keep their own direction.
-- **Arabic and grammatical gender** *(judgment for Muath, read first)*. Arabic addresses "you" as masculine or feminine, and the product never infers a person's gender (TC-6). The Arabic below is written to be **gender-neutral on screen**: nouns and verbal nouns instead of imperatives («حذف» rather than «احذف»), «يمكنك + verbal noun», and second-person suffixes, which are spelled the same for both genders when unvowelled. **Spoken lines are different:** a voice must say «برنامجكَ» or «برنامجكِ». Recommendation: `native/ar` adds an optional address-form chip under the name card at A3 (masculine / feminine, untapped by default), stored in the existing `pronouns` slot of the host brief; until it is set, Salma's spoken lines avoid second-person forms where she can (the two static intro clips below have none) and the TTS renders the remaining suffixes from the chip once it is set. Two lines (`why.reason_host_push`, `call.talkback_intro`) also depend on a host's gender and say so.
+- **Arabic and grammatical gender** (ADR-24.B26, FR-122). Arabic addresses "you" as masculine or feminine, and the product never infers a person's gender (TC-6). At A3 an optional **address-form chip** offers masculine, feminine or neutral wording; neutral is the default, and the choice is stored as `learners.address_form` (strings in §7.1). The Arabic below is written so its neutral form reads correctly on screen for anyone: nouns and verbal nouns instead of imperatives («حذف» rather than «احذف»), «يمكنك + verbal noun», and second-person suffixes, which are spelled the same for both genders when unvowelled. **Spoken lines** must pick a vowel («برنامجكَ» or «برنامجكِ»): with masculine or feminine set, the TTS vowels the suffixes to match; with neutral, Salma's spoken lines use forms with no second-person suffix wherever one exists (the A3 intro has none). One line (`why.reason_host_push`) also depends on a host's gender and gives both forms.
 - **Speaker** is in the section heading: "voice" lines are spoken by Salma (TTS, cached where static); "screen" lines are interface copy in her register; "email" lines are transactional email.
 
 ---
@@ -126,6 +126,11 @@ The primer and its notice line (ADR-24.B14) are `notice.mic.primer` and `notice.
 | Id | English | العربية (draft, for Muath's read) |
 |---|---|---|
 | `onb.a3.label` | Salma · producer | سلمى · المنتجة |
+| `onb.a3.address_label` (only in languages with a gendered "you") | How should I address you? | صيغة المخاطبة |
+| `onb.a3.address_m` | Masculine | مذكّر |
+| `onb.a3.address_f` | Feminine | مؤنّث |
+| `onb.a3.address_neutral` (default) | Neutral wording | صيغة محايدة |
+| `onb.a3.address_note` | You can change this any time in Controls. | يمكن تغييرها في أي وقت من «التحكم». |
 | `onb.a3.intro_2` | First: what should Karim and Mona call you? | السؤال الأول: ما الاسم الذي سيستخدمه كريم ومنى؟ |
 | `onb.a3.name_check` | {name}. Did I say it right? | {name}. هل نطقته جيدًا؟ |
 | `onb.a3.name_retry` | Once more, slowly? I want the hosts to say it properly. | مرة أخرى، ببطء؟ أريد أن ينطقه المقدّمان كما يجب. |
@@ -169,10 +174,10 @@ The PRD's earlier copy for A4 said "at the right level" (FR-113) and design/04 s
 | `onb.a5.accent_label` | Accent | اللكنة |
 | `onb.a5.accent_british` | British | بريطانية |
 | `onb.a5.accent_american` | American | أمريكية |
-| `onb.a5.start_pilot` | Play the first episode | تشغيل الحلقة الأولى |
-| `onb.a5.pilot_late` | The first one is taking longer than it should. Here's one I made earlier about {topic}. Yours is ready tomorrow. | الحلقة الأولى تأخرت أكثر مما ينبغي. وهذه حلقة أعددتها سابقًا عن {topic}، وحلقتك الخاصة جاهزة غدًا. |
+| `onb.a5.start_first` | Play the first episode | تشغيل الحلقة الأولى |
+| `onb.a5.first_late` | The first one is taking longer than it should. Here's one I made earlier about {topic}. Yours is ready tomorrow. | الحلقة الأولى تأخرت أكثر مما ينبغي. وهذه حلقة أعددتها سابقًا عن {topic}، وحلقتك الخاصة جاهزة غدًا. |
 
-**A6 The pilot (screen hints, shown once)**
+**A6 The first episode (screen hints, shown once)**
 
 | Id | English | العربية (draft, for Muath's read) |
 |---|---|---|
@@ -192,7 +197,7 @@ Whether the "Huh?" button keeps its English label in an Arabic interface is Muat
 | Id | English | العربية (draft, for Muath's read) |
 |---|---|---|
 | `onb.a9.title` | Keep your show | حفظ برنامجك |
-| `onb.a9.account` | Save it with Apple, Google or your email. | الحفظ عبر Apple أو Google أو البريد الإلكتروني. |
+| `onb.a9.account` | Save it with your email. We'll send you a one-time code. | الحفظ عبر البريد الإلكتروني، برمز يصلك لمرة واحدة. |
 | `onb.a9.drop_title` | When should tomorrow's episode arrive? | متى تصل حلقة الغد؟ |
 | `onb.a9.drop_commute` | On my commute ({time}) | في طريقي ({time}) |
 | `onb.a9.drop_lunch` | Lunch break | استراحة الغداء |
@@ -200,9 +205,9 @@ Whether the "Huh?" button keeps its English label in an Arabic interface is Muat
 | `onb.a9.drop_pick` | Pick a time | وقت آخر |
 | `onb.a9.continue` | Keep my show | حفظ برنامجي |
 
-The rest of A9 is in legal/03: the country and birth-date questions (`account.country.*`, `account.birth_date.*`), voice-storage consent (`voice_storage.*`), the terms and notice lines, and the trial line (`trial.line`). `data_use` is not asked here (Controls only, ADR-24.B6). Arabic drafts for the two A9 consent lines, for Muath and counsel: «حفظ تسجيلاتي لأسمع تقدّمي بنفسي. لي وحدي، وحذفها متاح في أي وقت.» and «وبدون ذلك، نستمع إلى كل مكالمة بضع دقائق لنخطط الحلقات القادمة، ثم نحذف الصوت.»
+The rest of A9 is in legal/03: the country and birth-date questions (`account.country.*`, `account.birth_date.*`), voice-storage consent (`voice_storage.*`), the terms and notice lines, and the trial line (`trial.line`). `data_use` is not asked here (Controls only, ADR-24.B6). Arabic drafts for the two A9 consent lines, for Muath: «حفظ تسجيلاتي لأسمع تقدّمي بنفسي. لي وحدي، وحذفها متاح في أي وقت.» and «وبدون ذلك، نستمع إلى كل مكالمة بضع دقائق لنخطط الحلقات القادمة، ثم نحذف الصوت.»
 
-**For legal/03's owner:** `trial.line` keeps design/06's "After that it's $29.99 a month unless you pick another plan", which reads as an automatic charge, but the trial takes no card and payment is asked for once on day 7 (FR-007, FR-1201). Suggested: "Your 7-day trial is on 2 episodes a day. No card needed. On day 7 you choose a plan; 2 a day is $29.99 a month. Cancel in one tap." Arabic: «تجربتك لمدة 7 أيام بحلقتين يوميًا، ودون بطاقة. وفي اليوم السابع: اختيار الخطة؛ حلقتان يوميًا بسعر 29.99 دولارًا شهريًا. والإلغاء بلمسة واحدة.»
+`trial.line` reads, per ADR-24.B27: "Your 7-day trial is on 2 episodes a day. No card needed. On day 7 you choose a plan." Arabic draft in this file's neutral style: «تجربتك لمدة 7 أيام بحلقتين يوميًا، ودون بطاقة. وفي اليوم السابع: اختيار الخطة.» legal/03's Arabic draft uses «تختار», which is masculine; with the address-form chip it needs feminine and neutral forms too.
 
 **A10 Tomorrow (screen)**
 
@@ -283,7 +288,7 @@ The teacher writes 2 to 4 reasons per episode (FR-741); these are the templates 
 | `why.fixed.topic` | About {topic}, one of your subjects. | عن {topic}، من مواضيعك. |
 | `why.something_off` | Something off? Tell Salma. | هل من شيء لا يناسب؟ سلمى تسمعك. |
 
-Two departures from the PRD's examples, for the editor: FR-741's "Shorter than usual: you've been busy." comments on the learner's time, which edges toward the days missed (LAW-04); `why.reason_lighter` says the same thing without a reason, and `why.reason_lighter_said` quotes the learner when they gave one. FR-1018's "Not quite right?" is on the correction-guard list; `why.something_off` replaces it. If the learner asks Salma why it was lighter, she answers plainly ("Your last two calls were short, so I made this one lighter. Say so if you'd like it harder.").
+Two PRD lines are replaced here, as ADR-24.B25 rules: FR-741's "Shorter than usual: you've been busy." comments on the learner's time, which edges toward the days missed (LAW-04); `why.reason_lighter` says the same thing without a reason, and `why.reason_lighter_said` quotes the learner when they gave one. FR-1018's "Not quite right?" is on the correction-guard list; `why.something_off` replaces it. If the learner asks Salma why it was lighter, she answers plainly ("Your last two calls were short, so I made this one lighter. Say so if you'd like it harder.").
 
 ### 7.4 Conversation lines (voice or screen)
 
@@ -351,7 +356,7 @@ Order (FR-903): the headline with "how we know", the rhythm (only if met), the n
 
 | Id | English | العربية (draft, for Muath's read) |
 |---|---|---|
-| `fin.invite` | Season {n} ends {day}. Three minutes, same as last time. | الموسم {n} ينتهي {day}. ثلاث دقائق، مثل المرة السابقة. |
+| `fin.offer` | Season {n} ends {day}. Three minutes, same as last time. | الموسم {n} ينتهي {day}. ثلاث دقائق، مثل المرة السابقة. |
 | `fin.recording_intro` | The same three parts: a story, an opinion, and some sentences to say back. | الأجزاء الثلاثة نفسها: قصة، ورأي، وجمل للإعادة. |
 | `fin.skip` | Skip | تخطّي |
 | `fin.tape_intro` | Here's you then. And here's you now. | هذا صوتك حينها. وهذا صوتك الآن. |
@@ -383,7 +388,7 @@ Order (FR-903): the headline with "how we know", the rhythm (only if met), the n
 
 "Tutor ... two lessons a week" (design/03 G2) is rewritten as "two sessions" to keep "lesson" off every surface (FR-420).
 
-The plan picker, founding line, cancellation, failed payment (7-day grace, ADR-24.B2), trial-ended line, recording deletion and account deletion (no grace period, ADR-24.B1) are `billing.*`, `recordings.delete_all.*` and `account.delete.*` in legal/03. Arabic drafts for the ones Salma says aloud or signs: «لا حلقات جديدة قبل اختيار خطة. ويبقى أرشيفك ودفترك 90 يومًا.» (`billing.trial_ended.line`) · «أُلغيت الخطة. برنامجك مستمر حتى {date}.» (`billing.cancel.done`) · «لم يتم الدفع. برنامجك يستمر 7 أيام، والمحاولة متاحة في أي وقت.» (`billing.payment_failed.line`).
+The plan picker, cancellation, failed payment (7-day grace, ADR-24.B2), trial-ended line, recording deletion and account deletion (no grace period, ADR-24.B1) are `billing.*`, `recordings.delete_all.*` and `account.delete.*` in legal/03. Arabic drafts for the ones Salma says aloud or signs: «لا حلقات جديدة قبل اختيار خطة. ويبقى أرشيفك ودفترك 90 يومًا.» (`billing.trial_ended.line`) · «أُلغيت الخطة. برنامجك مستمر حتى {date}.» (`billing.cancel.done`) · «لم يتم الدفع. برنامجك يستمر 7 أيام، والمحاولة متاحة في أي وقت.» (`billing.payment_failed.line`).
 
 ### 7.8 Errors and fallbacks (screen; system lines in Salma's register, no monogram)
 
@@ -404,20 +409,24 @@ The plan picker, founding line, cancellation, failed payment (7-day grace, ADR-2
 
 A fallback episode ships with no message. A failed step never gets a percentage, a spinner on its own, or "this may take a while".
 
-### 7.9 The sample's close and the feed tag
+### 7.9 The sample's close and the feed notes
 
 | Id | English | العربية (draft, for Muath's read) |
 |---|---|---|
 | `sample.close` (`sample_close`, voice, FR-104) | That was a sample. The full show is a new episode like this every day, made for you, and a call with the hosts. | كانت هذه عيّنة. البرنامج الكامل حلقة جديدة مثلها كل يوم، مصنوعة لك، ومكالمة مع المقدّمَين. |
 | `sample.start` (screen) | Start your show | برنامجك يبدأ من هنا |
-| `sample.not_yet` (screen) | Not in your language yet? Leave your email and we'll tell you when it is. | لغتك غير متاحة بعد؟ بريدك الإلكتروني هنا، ونخبرك عند توفرها. |
-| `feed.tag` (voice, 5 s; not used: the host says the feed tag, ADR-24.B24; kept for reference) | To call {host}, open the link in the notes. | للاتصال بـ{host}، الرابط في ملاحظات الحلقة. |
+| `feed.notes.call` | Call {host}: {link} | الاتصال بـ{host}: {link} |
+| `feed.notes.article` | Read the article: {link} | قراءة المقال: {link} |
+| `feed.notes.heard_it` | Heard it? Tap here: {link} | سمعتها؟ لمسة هنا: {link} |
+| `feed.heard_it.done` (the page the link opens) | Noted: you heard “{title}”. | سُجّل: سمعت «{title}». |
+
+The feed item's notes are in the learner's language. **"Heard it"** (ADR-24.B30) is the learner's own statement that they listened in their podcast app: it writes `feed_heard` once per episode and counts toward an active day, so a learner who only uses the feed still gets new episodes. A download alone never counts. The line offers and never pushes: no "don't forget", no reason given beyond the plain offer. The 5-second spoken tag at the end of the feed version is the host's ([hosts-en.md §10.5](hosts-en.md), ADR-24.B24).
 
 ### 7.10 Crisis hand-off
 
-The crisis wording is fixed, counsel-reviewed text with one home: [legal/06-crisis-protocol.md](../../legal/06-crisis-protocol.md), in English and Arabic. Salma's part in it is `crisis.clip.producer` (after the host's `crisis.clip.host` in a call; alone at onboarding), the resources card (`crisis.card.*`) for the learner's country of residence (ADR-20), and `crisis.after_session` at the next open, once. Those lines are never generated, never shortened and never re-voiced in Salma's ordinary style; they are the one place her register gives way to counsel's.
+The crisis wording is fixed text with one home: [legal/06-crisis-protocol.md](../../legal/06-crisis-protocol.md), in English and Arabic. In a call, the host stops and says `crisis.clip.host`; then a pre-recorded clip in Salma's voice, in the learner's own language, says `crisis.clip.producer`. That is the only time she is heard in a call (ADR-24.B29): a learner in crisis gets plain words in their own language, and immersion no longer matters. The screen then shows the resources card (`crisis.card.*`) for the learner's country of residence (ADR-20). At onboarding the producer's clip plays alone. When the crisis is detected after a session, she shows the card with `crisis.after_session` at the next open, once.
 
-Three rules from this bible still apply to them: they never move into the target language (§5 rule 6), they never mention the show's content, and nothing light (a host joke, a teaser, a sting) follows them.
+Those lines are never generated, never shortened and never re-voiced in Salma's ordinary style. Three rules from this bible still apply to them: they never move into the target language (§5 rule 6), they never mention the show's content, and nothing light (a host joke, a teaser, a sting) follows them.
 
 ---
 
@@ -425,25 +434,7 @@ Three rules from this bible still apply to them: they never move into the target
 
 1. **Register.** Modern Standard Arabic, short and warm, chosen to sit well with Gulf listeners without dialect words. If the blind test (FR-524) picks a Gulf voice, a light Gulf pass on the voice lines only (§7.1 A3, §7.4, §7.5) is the change; the screen lines stay as they are.
 2. **Gender.** Please check the gender-neutral constructions and the address-form recommendation in §6 first. It is the decision with the largest consequence for the Arabic package.
-3. **"Producer".** «منتجة البرنامج» follows the pilot's sign-off. If learners hear it as a TV credit rather than a person who runs their show, «مسؤولة برنامجك» is the fallback.
+3. **"Producer".** «منتجة البرنامج» follows the sign-off in the first draft prompts (milestone-0/05). If learners hear it as a TV credit rather than a person who runs their show, «مسؤولة برنامجك» is the fallback.
 4. **"Huh?"** in an Arabic interface: keep the English label, or «هاه؟».
 5. **Numbers and plurals.** The `{n}` lines show one plural form; the loader needs the full ICU set.
 6. **The guard for Salma's Arabic.** The native package needs its own `guard/correction_words.yaml`: «خطأ»، «غلط»، «الصحيح»، «الأصح أن تقول»، «كان يجب أن تقول»، «أحسنت»، «ممتاز»، «مستواك»، «درجة»، «واجب»، «تمرين»، «سلسلة»، «افتقدناك»، «وينك»، «أين كنت». This draft avoids all of them, which is why it says «سهوٌ مني» rather than «خطأ مني».
-
-## 9. Conflicts this document had to choose around (settled 2026-11-12)
-
-| Conflict | This draft | Settled |
-|---|---|---|
-| Who gives the word when the learner holds the word button. PRD FR-116 and FR-325, design/05 §2.2, design/06 §3 and concept-v2 §6: the host gives it and Salma is silent in calls. architecture/03 §4.7 and §4.9 and technical-design/04 §7: Salma answers on her own track and introduces the button before the first call. | Follows the PRD: Salma is silent. If the architecture's design is kept, the lines it needs are below. | Settled by ADR-24.B22: the PRD wins, the host gives the word, Salma is silent |
-| Who says the 5-second feed tag. PRD FR-233: the host. architecture/02 and technical-design/03: Salma, in the learner's language. | Both versions are written (`feed.tag` here; [hosts-en.md §10.5](hosts-en.md)). | Settled by ADR-24.B24: the host; `feed.tag` here is not used |
-
-**Talkback lines, not used since ADR-24.B22 (kept for reference)** (`packages/native/<lang>/talkback/`):
-
-| Id | English | العربية (draft, for Muath's read) |
-|---|---|---|
-| `call.talkback_intro` (`talkback_intro_native`) | If a word won't come, hold the word button and say it in {native_language}. I'll give it to you in English. | إن لم تحضر الكلمة: ضغطة مطوّلة على زر الكلمة، ثم نطقها بالعربية، وأنا أعطيك إياها بالإنجليزية. |
-| `call.wait` (`salma_wait_native`) | One moment. | لحظة. |
-| `call.unresolved` | Say it again, slower. | مرة أخرى، ببطء. |
-| `call.hint_sound` | It starts with “{sound}”. | تبدأ بـ«{sound}». |
-| `call.hint_used` | You used it {label}. | استخدمتها {label}. |
-| `call.word` | {native_answer}... {word} | {native_answer}... {word} |

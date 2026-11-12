@@ -1,38 +1,55 @@
-# Legal and privacy texts (drafts for counsel)
+# Legal and privacy texts
 
-> **Draft for counsel. Not legal advice.** Every file in this folder was drafted on 2026-11-12 from the architecture (mainly [architecture/07](../architecture/07-security-privacy-and-compliance.md) and [ADR-24](../architecture/10-decision-records.md#adr-24-the-owed-decisions-taken-on-delegation-2026-11-12)), the PRD ([PRD-v3](../PRD-v3.md)) and the Milestone 0 consent. None of it is in force. Counsel must confirm every working position marked in [00-counsel-question-pack.md](00-counsel-question-pack.md) and approve the wording before anything ships to a learner.
+> **Self-reviewed against legal/00; not reviewed by a lawyer; see the triggers** ([00-self-review-checklist.md](00-self-review-checklist.md) §25).
+
+For one has no lawyer (ADR-25.3). It stays lawful by conservative design: the strictest common rule applies to every learner, risk is designed out rather than argued, Paddle as merchant of record carries the payment-side consumer law, and every text here is checked against a written self-review checklist by an AI review pass and by Muath.
 
 | | |
 |---|---|
-| Owner of record | Muath (owner actions A1, A8 and A9 in [10-decision-records §10](../architecture/10-decision-records.md#10-register-owner-actions-and-pending-measurements)) |
-| Status | Draft 0.1, 2026-11-12. Unreviewed by counsel. |
-| Counsel answers due | **2026-11-17** for the questions in pack part A (register A1). **2027-02-15** for the review of every text here (register A8). The beta does not open (plan of record 2027-03-17, ADR-24.11) without reviewed consent text. |
-| Milestone 0 addendum | Two parts (ADR-24.B10). Part 1 (vendor tests) is signed before any pilot clip goes to a vendor. Part 2 (the bridge, re-onboarding, fixtures and import) is signed by **2026-12-15** (register A9, ADR-24.B28); anyone who does not sign keeps the original promise of deletion by 2026-12-31. |
-| Placeholders | `[Company legal name]`, `[Address]`, `[Governing law]` and the others in square brackets are facts only Muath or counsel can supply. Nothing in these drafts invents them. |
+| Owner | Muath. He is the assessor for the DPIA and the RoPA and approves every text here (register A4) |
+| Status | Written and self-reviewed against [00-self-review-checklist.md](00-self-review-checklist.md); not yet ticked by Muath. Public launch waits for every check to be ticked |
+| Placeholders | `[Company legal name]`, `[Address]`, `[Governing law]` and the others in square brackets are facts only Muath can supply. Nothing here invents them |
+
+## The design that replaces a lawyer
+
+- GDPR-grade rights and controls for every learner, wherever they live; hosting in `eu-central-1`.
+- Vendors under their standard data processing agreements with SCCs and a short transfer impact assessment each; the EU-US Data Privacy Framework where a vendor is certified.
+- Paddle, as merchant of record, sells the subscription and carries tax, invoices, refunds and the EU withdrawal right.
+- 18+ only; no voiceprints or speaker identification; voice storage off by default with deletion within 15 minutes; data use opt-in and off by default; no sensitive fact kept without the one-tap card; explicit consent at signup for what transcripts keep; AI disclosed in Salma's first line.
+- Crisis help from a maintained international helpline directory, with SB 243-style duties for everyone.
+- Only Muath can read learner content, every read is logged and shown to the learner, and the AI agent that builds For one never touches learner data.
 
 ## The files and where each one ships
 
-Learner-facing texts are written once in English here. After counsel approves them they are copied into the English native-language package `packages/native/en/` (the universal fallback, ADR-02) and translated by a native speaker into every other native package that exists when the beta opens (2027-03-17) (`native/ar` is certain). Each shipped copy gets a version id (`YYYY-MM-DD.n`, the date counsel approved it), and every learner acceptance records that version (`consent_change.text_shown_version`, 07 D4).
+Learner-facing texts are written once in English here. After Muath approves them they are copied into the English native-language package `packages/native/en/` (the universal fallback, ADR-02) and translated by a native speaker into every other native package that ships (`native/ar` is read by Muath, register A3). Each shipped copy gets a version id (`YYYY-MM-DD.n`, the date Muath approved it), and every learner acceptance records that version (`consent_change.text_shown_version`, 07 D4).
 
-| File | What it is | Audience | Ships to | Review |
-|---|---|---|---|---|
-| [00-counsel-question-pack.md](00-counsel-question-pack.md) | The questions counsel answers, each with our working position, the facts and what it unblocks | Counsel | Sent by Muath on 2026-11-13 | A1 (2026-11-17), A8 (2027-02-15) |
-| [01-privacy-notice.md](01-privacy-notice.md) | The privacy notice (GDPR Art. 13), with the paragraphs that differ per regime marked | Learners | `packages/native/<lang>/privacy/notice.md`; rendered at A1 (link), A8/A9 (acknowledged as `privacy_notice`) and in Controls; also the public page `/privacy` | A8 |
-| [02-terms-of-service.md](02-terms-of-service.md) | Terms: plans, trial, renewals, plan changes, failed payment, cancellation and refunds, acceptable use, AI disclosure, deletion | Learners | `packages/native/<lang>/legal/terms.md` (ADR-24.B17) and the public page `/terms`; accepted as consent kind `terms` with its version at A9 and on any material change (ADR-24.B18). Refunds: full refund within 14 days of the first payment (ADR-24.B16) | A8 |
-| [03-consent-texts.md](03-consent-texts.md) | Every in-app consent and notice string, with string ids | Learners | Consent kinds to `packages/native/<lang>/consent/consent_texts.yaml`; the other strings to the native package's `ui_strings/` | A8 |
-| [04-dpia.md](04-dpia.md) | Data protection impact assessment | Counsel, Muath, a regulator on request | The source; the code repository's `docs/` links here (ADR-24.B11) | A8 |
-| [05-ropa.md](05-ropa.md) | Record of processing activities, with the retention schedule | Counsel, Muath, a regulator on request | The source; the code repository's `docs/` links here (ADR-24.B11). The machine-readable processor register that CI reads (07 §4.9, handbook 09 §9) must match it | A8 |
-| [06-crisis-protocol.md](06-crisis-protocol.md) | The crisis protocol as built, the clip wording (English, Arabic draft), resources per country, SB 243 duties, reporting | Counsel, Muath; a public summary for the website | `packages/languages/<target>/crisis/` and `packages/native/<lang>/crisis/` (clips, `resources.yaml`, `keywords.yaml`); public summary at `/safety` | A8 (wording by 2027-02-15, ADR-24.15) |
-| [07-milestone-0-consent-addendum.md](07-milestone-0-consent-addendum.md) | Two-part addendum for the 15 pilot learners (ADR-24.B10): Part 1 vendor tests, Part 2 the bridge, re-onboarding, import and de-identified fixtures | Pilot learners | Two Google Forms, like the pilot consent | Part 1 signed before any clip leaves; Part 2 by 2026-12-15 (A9, ADR-24.B28) |
-| [08-reviewer-confidentiality.md](08-reviewer-confidentiality.md) | Confidentiality agreement for native readers and taggers | Reviewers, taggers | Signed before first login; the date is recorded in `staff_accounts.agreement_signed_at` (07 §4.13) | A8 |
+| File | What it is | Audience | Ships to |
+|---|---|---|---|
+| [00-self-review-checklist.md](00-self-review-checklist.md) | Every legal question with its final position, the official source and a check; and when a lawyer becomes necessary | Muath, the AI review pass | Stays here |
+| [01-privacy-notice.md](01-privacy-notice.md) | The privacy notice (GDPR Art. 13), with the paragraphs that differ for UK and Saudi learners marked | Learners | `packages/native/<lang>/privacy/notice.md`; linked at A1 and A2, acknowledged at account creation, in Controls; the public page `/privacy` |
+| [02-terms-of-service.md](02-terms-of-service.md) | Terms: plans, trial, renewals, plan changes, failed payment, cancellation and refunds, acceptable use, AI disclosure, deletion | Learners | `packages/native/<lang>/legal/terms.md` (ADR-24.B17) and `/terms`; accepted as consent kind `terms` with its version at account creation and on any material change (ADR-24.B18); refunds per ADR-24.B16 |
+| [03-consent-texts.md](03-consent-texts.md) | Every in-app consent and notice string, with string ids, and the volunteer recording consent (ADR-25.6) | Learners; vendor-test volunteers | Consent kinds to `packages/native/<lang>/consent/consent_texts.yaml`; other strings to the native package's `ui_strings/` |
+| [04-dpia.md](04-dpia.md) | Data protection impact assessment | Muath; a regulator on request | Stays here; the code repository's `docs/` links here (ADR-24.B11) |
+| [05-ropa.md](05-ropa.md) | Record of processing activities, with the retention schedule | Muath; a regulator on request | Stays here; `docs/` links here. The machine-readable processor register that CI reads (07 §4.9, handbook 09 §9) must match it |
+| [06-crisis-protocol.md](06-crisis-protocol.md) | The crisis protocol as built, the clip wording (English, Arabic), the helpline directory, SB 243-style duties, reporting | Muath; a public summary for the website | `packages/native/<lang>/crisis/` and `packages/languages/<target>/crisis/keywords.yaml`; the summary at `/safety` |
 
 ## Rules for editing these texts
 
-1. Counsel edits the wording. Engineers never change a consent or notice text (handbook 09 §5); a text change is a new version, and a changed consent is asked again at next open (07 §4.3 rule 4).
+1. A text change is a new version, and a changed consent is asked again at next open (07 §4.3 rule 4). The AI review pass checks every change against [00-self-review-checklist.md](00-self-review-checklist.md); a change with a failing check does not merge; Muath approves the merge.
 2. A fact in these texts must match the system. If the product changes a window, a processor or a retention period, the text changes in the same pull request, and the privacy notice's processor list is rendered from the register so the two cannot drift (07 §4.9).
-3. The beta copy must never promise less than the Milestone 0 consent did ([milestone-0/02-consent.md](../milestone-0/02-consent.md); 07 §10 #2).
-4. Learner-facing texts are short, plain and in the present tense, with no exclamation marks (design 06 §4). Salma speaks the strings marked "spoken" in [03-consent-texts.md](03-consent-texts.md).
+3. Learner-facing texts are short, plain and in the present tense, with no exclamation marks (design 06 §4). Salma speaks the strings marked "spoken" in [03-consent-texts.md](03-consent-texts.md).
 
-## Contradictions found while drafting
+## The residual risk, accepted
 
-Drafting found places where the architecture, the PRD, the design and the handbook disagreed on privacy, retention or billing facts. Each one is ruled in ADR-24's consistency rulings (24.B1 to 24.B15, [10-decision-records](../architecture/10-decision-records.md)), and these texts follow the rulings; where a text depends on one, it cites "per ADR-24.Bn".
+Muath accepts these risks by launching without a lawyer (ADR-25.3):
+
+- **A position could be wrong.** The final positions in legal/00 rest on the official texts and regulators' guidance as read by Muath and an AI review, not on legal advice. A regulator or a court could read a rule differently: most likely on the basis for keeping special-category content in transcripts, on whether the hosts make the product a "companion chatbot" under SB 243, or on a country whose law the checklist does not cover. The design is chosen so that a different reading would most likely mean a text change or a stricter setting, not unlawful processing at scale.
+- **No one reviews the texts independently.** An AI review pass and Muath check them; neither is a lawyer.
+- **Laws change.** The checklist names its sources so the review can be repeated; it is re-run when a trigger fires and at least when a vendor changes, but a change in the law between reviews could go unnoticed for a while.
+- **Some duties need a person outside the company.** An EU and UK representative is appointed if the company sits outside them (GDPR Art. 27; register A7). This is a paid service, not legal advice.
+
+When a trigger in legal/00 §25 fires (a regulator or court contact, a notifiable breach, a business or employer contract, or paid traffic from a country with a law the checklist does not cover), Muath engages a lawyer before acting further on it.
+
+## Revision log
+
+- 2026-11-12: drafted as texts for counsel; then rewritten under ADR-25.3 as self-reviewed texts with no counsel step. The counsel question pack, the Milestone 0 consent addendum and the reviewer confidentiality agreement were removed (ADR-25.5, 25.7).

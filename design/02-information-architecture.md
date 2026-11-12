@@ -2,7 +2,7 @@
 
 *Part 2 of 8. What exists, where it lives, and how the learner moves between places. Three destinations, a handful of sheets, and two full-screen modes (player, call) that hide the navigation.*
 
-*Revised 2026-11-12: §6 and §7 record the decisions of ADR-24.1 (web plus feed) and ADR-24.2 (order A); the other variants stay documented as the later or alternative path.*
+*Revised 2026-11-12: §6 and §7 record the decisions of ADR-24.1 (web plus feed) and ADR-24.2 (sound first, account after the first call); ADR-25.4 removed the native variant and ADR-25.5 the founding flag.*
 
 ## 1. The map
 
@@ -10,7 +10,7 @@
 For one
 ├── (before an account)
 │   ├── Sample episode page (web only, shareable): one question, a 90-second episode, "Start your show"
-│   └── Onboarding (03 flow A / A′): Open → Salma → word check (optional) → Casting → Pilot → First call → Keep your show
+│   └── Onboarding (03 flow A): Open → Salma → word check (optional) → Casting → First episode → First call → Keep your show
 │
 ├── Today  ──────────────── the only screen most days
 │   ├── Hero cover (today's episode)         → Player (full screen)
@@ -66,7 +66,7 @@ The tab bar is a three-item bar with text labels, no badges, no counts, no dots.
 | Mode | Enter | Leave | Audio continues? |
 |---|---|---|---|
 | Player | Play on the hero; a cover on the shelf; lock screen | ⌄ collapses to a mini bar on Today/Show/Notebook | Yes; mini bar shows title, play/pause, replay line |
-| Call | "Call" from the throw card or the door row; the lock screen "accept" on native | ✕ ends it like a person; host signs off | No (it is live) |
+| Call | "Call" from the throw card or the door row | ✕ ends it like a person; host signs off | No (it is live) |
 | Proof | Its cover on Today or Show | Done | Yes while on the one screen |
 | Finale | Its cover; Salma invites | Done | Recording stops on ✕ with nothing lost |
 | Onboarding | First open | Ends at Keep your show | n/a |
@@ -74,7 +74,7 @@ The tab bar is a three-item bar with text labels, no badges, no counts, no dots.
 ## 4. Navigation rules
 
 1. **Back always means back.** No screen traps. The system back gesture and the ⌄ / ✕ do the same thing.
-2. **Audio outlives screens.** Leaving the player leaves a mini bar; closing the app keeps playing (native) or keeps playing while the tab lives (web, Media Session).
+2. **Audio outlives screens.** Leaving the player leaves a mini bar; audio keeps playing while the tab lives (Media Session); the feed covers listening with the app closed.
 3. **Deep links** exist for: today, a specific episode, the call for today's episode (used by the podcast feed's episode notes: "open For one to call in"), the proof, the notebook, plans, and the sample page.
 4. **Nothing pulls the learner anywhere.** No in-app banners, no "you have 1 new", no upsell interstitials. The only pull is the one cue the learner designed (the drop) and the one note they wrote to themselves.
 5. **State is per day, not per session.** Today's doors remember what is done until midnight local time. An unfinished episode moves to the shelf at the next drop and stays playable forever.
@@ -82,30 +82,25 @@ The tab bar is a three-item bar with text labels, no badges, no counts, no dots.
 
 ## 5. The private podcast feed (companion surface)
 
-A per-learner RSS feed (unguessable URL, revocable in Controls) carries each episode's audio and cover. Its episode notes hold one line and a deep link: "Karim wants your take. Open For one to call in." The feed is for the Ears mode on commutes; the call, the article, the chat and the notebook live only in the app. The proof episode is also in the feed. On web-for-beta, this feed is what makes lock-screen play reliable on iPhone.
+A per-learner RSS feed (unguessable URL, revocable in Controls) carries each episode's audio and cover. Its episode notes hold one line and a deep link: "Karim wants your take. Open For one to call in." The feed is for the Ears mode on commutes; the call, the article, the chat and the notebook live only in the app. The proof episode is also in the feed. On the web, this feed is what makes lock-screen play reliable on iPhone.
 
-## 6. Web vs native: what changes in the architecture (decided: web plus feed, ADR-24.1; native designed as the later path)
+## 6. The web app on each surface (ADR-24.1, ADR-25.4)
 
-The beta ships the left column. The right column is the path taken after the beta gates, or earlier if GATE-M18 fires (calls abandoned on the move, or the feed-to-call handoff loses most learners).
+For one is a web application plus the private podcast feed; no native app is planned.
 
-| | Web app (PWA) + feed (the beta) | Native app, one codebase (later) |
-|---|---|---|
-| Today, Show, Notebook, Read, Chat, plans | Identical | Identical |
-| Player | Foreground or background via Media Session; lock-screen artwork and replay/mark actions where the browser supports them; the feed covers the rest | Full Now Playing, CarPlay/Android Auto, headphone actions guaranteed |
-| Call | Screen on, earphones recommended; a "keep the screen on" hint before the call; the call pauses if the tab is backgrounded and resumes on return (host: "you still there?") | Hands-free, screen off, accept from the lock screen like a phone call |
-| Drop notification | Web push on installed PWAs; the feed's own new-episode alert | Local notification at the chosen time |
-| Checkout | Paddle hosted checkout as merchant of record (ADR-24.4), keeps ~96% | In-app purchase required for digital goods on iOS (~85%), or web checkout with store rules respected |
-| Install | "Add to home screen" shown once after the first call, with a two-step picture | App Store / Play |
-| Offline | Today's episode cached after first play; the notebook cached read-only | Same, plus prefetch at the drop time |
+| | Web app (PWA) + feed |
+|---|---|
+| Today, Show, Notebook, Read, Chat, plans | As specified in 04 |
+| Player | Foreground or background via Media Session; lock-screen artwork and replay/mark actions where the browser supports them; the feed covers the rest |
+| Call | Screen on, earphones recommended; a "keep the screen on" hint before the call; the call pauses if the tab is backgrounded and resumes on return (host: "you still there?") |
+| Drop notification | Web push on installed PWAs; the feed's own new-episode alert |
+| Checkout | Paddle hosted checkout as merchant of record (ADR-24.4); cards, Apple Pay and Google Pay where Paddle offers them |
+| Install | "Add to home screen" shown once after the first call, with a two-step picture |
+| Offline | Today's episode cached after first play; the notebook cached read-only |
 
-The screens are designed so that the native build adds capabilities and removes hints (the "keep the screen on" hint disappears, the install card disappears); nothing is laid out differently.
+## 7. First-session order
 
-## 7. First-session order: two architectures (decided: order A, ADR-24.2; order B kept as the alternative)
-
-- **Order A (recommended by the UI lens and concept v2; the beta's order, ADR-24.2):** Open → Salma (3 min) → Casting → Pilot → First call → Keep your show (account, drop time, consent, trial). Sound in under 60 seconds; the account comes after there is something to keep.
-- **Order B (PRD order; the alternative, not run in the beta):** Open → Account → Languages → Salma → Pilot → First call → Drop time and consent. The account first; useful if abandoned sessions with no account turn out to be costly, or if the store requires sign-in before purchase.
-
-03-user-flows.md specifies both; 04 screens are shared, only the sequence differs. The onboarding screens are built as independent steps, so order B stays a configuration change if the beta's drop-off at the account step argues for it. The beta runs order A only; the one onboarding A/B it may run is the word check after the first call (ADR-24.2).
+Open → Salma (3 min) → word check (optional) → Casting → First episode → First call → Keep your show (account, drop time, consent, trial). Sound in under 60 seconds; the account comes after there is something to keep (ADR-24.2). 03 flow A specifies it. The onboarding screens are built as independent steps; the one onboarding A/B test allowed is the word check's position after the first call.
 
 ## 8. Object model (what the screens are made of)
 
@@ -121,4 +116,4 @@ The screens are designed so that the native build adds capabilities and removes 
 | Proof | week, headline claim, clip pair, "how we know", next focus, kind (good · flat · slow) | Proof screen |
 | Recording (tape) | season, length, audio; measured differences in plain words (≤ 2) | Finale, Notebook › tape |
 | World entry | text, date, source quote | Notebook › out in the world |
-| Plan | tier, price, episodes a day, trial end, founding flag | Plans, Controls |
+| Plan | tier, price, episodes a day, trial end | Plans, Controls |

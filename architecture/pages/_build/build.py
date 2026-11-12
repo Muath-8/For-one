@@ -11,7 +11,7 @@ URLS = json.loads((HERE / "urls.json").read_text(encoding="utf-8")) if (HERE / "
 HUB_URL = URLS.get("hub", "#")
 
 STATUS = {
-    "ok":   ("Reviewed twice, revised 2026-11-12", "Both reviews ran, every finding was applied, and the text was reconciled with the decision records (document 10), including ADR-24 of 2026-11-12, which decided every open item and re-set the beta to 2027-03-17."),
+    "ok":   ("Reviewed twice, revised 2026-11-12", "Both reviews ran, every finding was applied, and the text was reconciled with the decision records (document 10), including ADR-24 of 2026-11-12, which decided every open item, and ADR-25, which removed the dates, the beta and the lawyer and gave the build to an AI agent."),
     "one":  ("One review, revised 2026-11-06", "Only the conformance review ran; no skeptic review exists for this document. Its findings and the decision records were applied on 2026-11-06, so the text is current, but it has had one fewer pair of eyes than the others."),
     "adr":  ("Decision records, revised 2026-11-12", "The cross-domain rulings that the nine domain documents were revised to, including ADR-24 (every open item decided on 2026-11-12) and its consistency rulings. It records why each ruling was made and what it changed."),
     "warn": ("Reviewed twice, not revised", "Both reviews found real problems that are not fixed in the text yet."),
@@ -20,13 +20,13 @@ STATUS = {
 
 DOCS = [
  dict(n="01", slug="01-system-topology", short="System topology", status="ok",
-      q="What runs where, so one or two engineers can ship the beta and grow it to 10,000 learners without a rewrite.",
+      q="What runs where, so an AI coding agent working under one owner can ship version 1 and grow it to 10,000 learners without a rewrite.",
       diagram="""flowchart LR
   L["Learner's phone<br/>web app + podcast app"]
   subgraph Vercel["Vercel, EU edge"]
     W["web<br/>Next.js PWA, no logic"]
   end
-  subgraph AWS["AWS eu-central-1<br/>final for the beta (ADR-24.8)"]
+  subgraph AWS["AWS eu-central-1<br/>final (ADR-24.8)"]
     A["api<br/>FastAPI on Fargate"]
     WF["workflows<br/>Inngest functions"]
     CW["call-worker<br/>LiveKit Agents"]
@@ -130,16 +130,16 @@ DOCS = [
       q="The installable web app, the private podcast feed and the three messages the product may send, with every rule kept on the server.",
       diagram="""flowchart LR
   subgraph Phone["Learner's phone"]
-    TAB["Browser tab<br/>invite and feed links land here"]
+    TAB["Browser tab<br/>email and feed links land here"]
     PWA["Installed PWA<br/>sw.js, media cache, event queue"]
     POD["Podcast app<br/>lock-screen listening"]
   end
   subgraph API["api modules"]
     F["feed<br/>tokenized RSS + mp3"]
     PU["push<br/>VAPID, three kinds only"]
-    AU["auth<br/>OTP, Apple, Google"]
+    AU["auth<br/>email one-time code"]
     ST["stream<br/>SSE updates"]
-    SA["sample + waitlist"]
+    SA["landing + sample"]
   end
   DN(["day/next at drop time"]) --> F
   DN --> PU
@@ -168,7 +168,7 @@ DOCS = [
   subgraph B5["No learner_id column"]
     RS["Research set<br/>opt-in, pseudonymized"]
   end
-  CO["Counsel<br/>edits consent texts, crisis files,<br/>privacy notice, processor register"]
+  CO["Muath, self-review (ADR-25.3)<br/>approves consent texts, crisis files,<br/>privacy notice, processor register"]
   W --> A
   A --> CW
   AD --> A
@@ -205,9 +205,9 @@ DOCS = [
   M0[("Milestone 0 files<br/>fixtures")] --> EV["forone.eval<br/>eval-gate in CI"]
   EV --> ER[("eval_runs")]"""),
  dict(n="10", slug="10-decision-records", short="Decision records", status="adr",
-      q="The twenty-four rulings, and ADR-24's consistency rulings, that reconcile the nine domains with the 2026-10-23 decisions: no launch country, monthly USD plans, invisible teaching, the re-dated build, and every name two documents disagreed on.",
+      q="The twenty-five rulings, including ADR-24's consistency rulings and ADR-25's direction change, that reconcile the nine domains with the 2026-10-23 decisions: no launch country, monthly USD plans, invisible teaching, the re-dated build, and every name two documents disagreed on.",
       diagram="""flowchart LR
-  D["decisions.md<br/>2026-10-23"] --> ADR["10 Decision records<br/>ADR-01 to ADR-24"]
+  D["decisions.md<br/>2026-10-23"] --> ADR["10 Decision records<br/>ADR-01 to ADR-25"]
   C["concept-v2.md"] --> ADR
   R["_review-findings.md<br/>18 reviews, last 2026-11-12"] --> ADR
   ADR --> N["No launch country<br/>ADR-02, 03, 20"]
@@ -391,9 +391,9 @@ COST_CHART = """
       <div class="cc-row"><span class="cc-l">Inworld voice</span><div class="cc-bars"><div class="bar now" style="width:56.16%"><b>$0.70</b></div><div class="bar later" style="width:57.36%"><b>$0.72</b></div></div></div>
       <div class="cc-row"><span class="cc-l">ElevenLabs list</span><div class="cc-bars"><div class="bar now" style="width:96.4%"><b>$1.21</b></div><div class="bar later" style="width:97.6%"><b>$1.22</b></div></div></div>
     </div>
-    <div class="cc-key"><span><i class="k now"></i>Before 2027-01-01, standard TTS</span><span><i class="k later"></i>From 2027-01-01 (Gemini prices double; the whole beta runs at these)</span></div>
+    <div class="cc-key"><span><i class="k now"></i>Before 2027-01-01, standard TTS</span><span><i class="k later"></i>From 2027-01-01 (Gemini prices double; launch runs at these)</span></div>
   </div>
-  <p class="muted small">Gemini with batch TTS reaches $0.61. The floor at scale is $0.45 at list prices after the doubling, $0.43 with a Sonnet teacher, against a $0.42 break-even on the 2 and 3 a day plans (section 6.5): the voice decision by 2026-11-17 and the voice contract (ADR-24.6, register A7) are the largest cost decisions in the beta.</p>
+  <p class="muted small">Gemini with batch TTS reaches $0.61. The floor at scale is $0.45 at list prices after the doubling, $0.43 with a Sonnet teacher, against a $0.42 break-even on the 2 and 3 a day plans (section 6.5): the voice decision (M2) and the voice contract (ADR-24.6, register A9) are the largest cost decisions before launch.</p>
 </figure>
 """
 
@@ -484,12 +484,12 @@ def build_doc(doc, reviews):
 
 <section class="block" id="open">
   <h2>Section 10: decided items, owner actions, measurements</h2>
-  <p class="muted">{'Section 10: the register. Every decision was taken on 2026-11-12 (ADR-24); what remains is owner actions and numbers the tests produce.' if doc['n']=='10' else 'Section 10. Every item is decided under ADR-24 (2026-11-12); owner actions and measurements point to the register in document 10.'}</p>
+  <p class="muted">{'Section 10: the register. Every decision was taken on 2026-11-12 (ADR-24, changed by ADR-25); what remains is owner actions and numbers the tests produce.' if doc['n']=='10' else 'Section 10. Every item is decided under ADR-24 (2026-11-12); owner actions and measurements point to the register in document 10.'}</p>
   <ol class="openitems">{items_html}</ol>
 </section>
 
 <section class="block" id="build">
-  <h2>Build plan (order of work; the dated schedule is backlog/00-release-plan.md, beta opens 2027-03-17)</h2>
+  <h2>Build plan (order of work; the phases and exit checks are in backlog/00-release-plan.md)</h2>
   <div class="prose">{md(s7)}</div>
 </section>
 

@@ -2,7 +2,7 @@
 
 *Part 1 of 8. Tokens live in tokens.css and tokens.json beside this file. The system formalizes the look the v2 prototype arrived at (night studio, Anybody / Readex Pro / Martian Mono, voice orbs, generated cover art) and adds the light theme, accessibility rules and the component inventory.*
 
-*Revised 2026-11-12: platform notes (§11) follow ADR-24.1 (web plus feed for the beta; native later).*
+*Revised 2026-11-12: platform notes (§11) follow ADR-24.1 and ADR-25.4 (web plus feed; no native app). Plan cards lose the founding state (ADR-25.5).*
 
 ## 1. Character
 
@@ -12,7 +12,7 @@ Three words to check any screen against: **made, warm, finite.** Made: it looks 
 
 ## 2. Tokens
 
-See tokens.css (CSS custom properties, dark default, light under `prefers-color-scheme` and `[data-theme]`) and tokens.json (the same values for native builds). Summary:
+See tokens.css (CSS custom properties, dark default, light under `prefers-color-scheme` and `[data-theme]`) and tokens.json (the same values as JSON). Summary:
 
 | Group | Values |
 |---|---|
@@ -100,7 +100,7 @@ Each component names its states and the product rule it carries. Full per-screen
 | **Voice orb** | §6 | silent · speaking · thinking (slow breath) · muted | Sound is interface |
 | **Fact card** (notebook, onboarding) | "You said on Oct 3: '…'" quote, the fact, ✎, ✕ | confirmed · "I think…" (unconfirmed, dashed line, never used in the show) · deleted (gone, no undo prompt) | Told, not inferred; a wrong memory is a bug |
 | **Three ideas** | Three short cards from the hosts, one tap picks; "or tell Salma" | unpicked (planner's hero waits) · picked | Tomorrow chosen tonight |
-| **Plan cards** | Three, middle marked Recommended, price, "about $1 a day", per-episode, what every plan includes | trial active · chosen · founding (price locked) | Honest pricing psychology; no countdowns |
+| **Plan cards** | Three, middle marked Recommended, price, "about $1 a day", per-episode, what every plan includes | trial active · chosen | Honest pricing psychology; no countdowns |
 | **Consent row** | Unticked box, one plain sentence, "only for you, delete any time" | off (default) · on | Opt-in only |
 | **Controls sheet** | Short list of reliable settings | | Everything else is a sentence to Salma |
 | **Tape tiles** | Cassette-like tiles per season, length of answer, Play A then B | | Then-and-now, the learner's own ears |
@@ -128,6 +128,5 @@ Dark is the default because the product is used at 7:40 on a bus and at night in
 
 ## 11. Platform notes
 
-- **Web (PWA), the beta's platform (ADR-24.1):** the tokens are CSS variables; fonts self-hosted; Media Session API for lock-screen metadata and the two custom actions (replay sentence, mark moment); web push on installed PWAs only; the call runs foreground.
-- **Native (the later path, ADR-24.1: after the beta gates, or earlier if GATE-M18 fires):** tokens.json feeds the theme; the audio session is category playback for episodes and playAndRecord for calls; Now Playing carries the cover; CarPlay / Android Auto get the standard Now Playing only, so the call is never offered in the car UI.
-- Both share the same screens and components; 02 §6 lists the exact differences.
+- **Web (PWA), the only platform (ADR-24.1, ADR-25.4):** the tokens are CSS variables; fonts self-hosted; Media Session API for lock-screen metadata and the two custom actions (replay sentence, mark moment); web push on installed PWAs only; the call runs foreground.
+- tokens.json carries the same values for tools that read JSON; 02 §6 lists what the web app does on each surface.

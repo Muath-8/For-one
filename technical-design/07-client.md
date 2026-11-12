@@ -1,6 +1,6 @@
 # 07. Client design
 
-*`apps/web`: Next.js 15 (App Router), TypeScript strict, installable PWA on Vercel through Serwist. Three tabs (Today, Show, Notebook) plus Controls; right-to-left and left-to-right from the language package; dark by default, light as a Controls choice (ADR-24.22). The visual reference is the prototype at `design/prototype/for-one-prototype.html` (night studio, voice orbs, generated contour art), not a card grid. No images of people, no mascot, no chart component exists. Where this file and `architecture/06-client-and-delivery.md` differ, 06 wins and this file is corrected.*
+*`apps/web`: Next.js 15 (App Router), TypeScript strict, installable PWA on Vercel through Serwist. Three tabs (Today, Show, Notebook) plus Controls; right-to-left and left-to-right from the language package; dark by default, light as a Controls choice (ADR-24.22). The visual reference is `design/for-one-design.html` with `design/01-design-system.md` and `design/tokens.json` (night studio, voice orbs, generated contour art), not a card grid. No images of people, no mascot, no chart component exists. Where this file and `architecture/06-client-and-delivery.md` differ, 06 wins and this file is corrected.*
 
 ## 1. Routes
 
@@ -8,10 +8,9 @@
 flowchart LR
   subgraph Public
     L["/ landing + sample"] --> S["/s/[token] share"]
-    I["/i/[code] invite"]
   end
   subgraph Onboarding["/onboarding/a1..a10 (scope pre_account)"]
-    A1[a1 age + start] --> A2[a2 talk or type, mic primer with the notice line] --> A3[a3 Salma intake call, optional address-form chip] --> A4[a4 word check 75 s] --> A5[a5 casting + name] --> A6[a6 pilot plays] --> A7[a7 first call 60-90 s] --> A8[a8 one thing managed, FR-117, then the eight promises] --> A9[a9 account: email/Apple/Google, birth date, country, drop time, voice-storage checkbox] --> A10[a10 tomorrow's ideas, setup card]
+    A1[a1 age + start] --> A2[a2 talk or type, mic primer with the notice line] --> A3[a3 Salma intake call, optional address-form chip] --> A4[a4 word check 75 s] --> A5[a5 casting + name] --> A6[a6 first episode plays] --> A7[a7 first call 60-90 s] --> A8[a8 one thing managed, FR-117, then the eight promises] --> A9[a9 account: email one-time code, birth date, country, drop time, voice-storage checkbox] --> A10[a10 tomorrow's ideas, setup card]
   end
   subgraph App["scope full"]
     T["/today"] --> P["player sheet (?player=1)"]
@@ -49,9 +48,9 @@ Every sheet (player, word sheet, plan picker, gap note) is a route or search par
 
 ## 3. The player
 
-- One `<audio>` element on the stitched app file `episode.m4a` (AAC, written with `-movflags +faststart`). When the file is in Cache Storage it plays from a Blob URL read out of the cache (`URL.createObjectURL(await (await caches.match(url)).blob())`), never through the service worker's fetch handler. Otherwise it plays the 10-minute presigned S3 URL (`sse_kms_env`, ADR-12) with `Range`, `crossOrigin = "anonymous"`. No MediaSource: on-demand episodes that are still rendering (swap, return, pilot, `daily_extra`) play their scene files on two elements and hand off at the seams, then switch to the stitched file when the republished manifest arrives.
+- One `<audio>` element on the stitched app file `episode.m4a` (AAC, written with `-movflags +faststart`). When the file is in Cache Storage it plays from a Blob URL read out of the cache (`URL.createObjectURL(await (await caches.match(url)).blob())`), never through the service worker's fetch handler. Otherwise it plays the 10-minute presigned S3 URL (`sse_kms_env`, ADR-12) with `Range`, `crossOrigin = "anonymous"`. No MediaSource: on-demand episodes that are still rendering (swap, return, first, `daily_extra`) play their scene files on two elements and hand off at the seams, then switch to the stitched file when the republished manifest arrives.
 - Media URLs: `EpisodeDoc.media` carries each asset as `{asset, url, expires_at}`, presigned when the document is read; an expired one is refreshed with `GET /v1/episodes/{id}/media/{asset}` → `200 {url, expires_at}` (JSON, never a 302; 06 §3.3). The request to `api` sends the cookie (`credentials: "include"`); the request to S3 sends none (`credentials: "omit"`). Learner-voice clips (marks, proof evidence, kept recordings) stay behind `GET /v1/media/{media_object_id}` with `crossOrigin = "use-credentials"`.
-- Word-synced transcript from `timings.json` (`lines[].sentences[].words`); `timing_quality = sentence` degrades the highlight to the sentence and plays the sentence for 🔊; folded or open from `player_defaults.transcript_open` (open for the pilot), opened by a tap or by Huh?.
+- Word-synced transcript from `timings.json` (`lines[].sentences[].words`); `timing_quality = sentence` degrades the highlight to the sentence and plays the sentence for 🔊; folded or open from `player_defaults.transcript_open` (open for the first episode), opened by a tap or by Huh?.
 - **Huh?** replays the previous sentence at 0.85× and shows it with up to four glosses; emits `huh {line_id, sentence_text, unit_ids}`.
 - Speeds 0.75 / 0.85 / 1.0 and nothing else; previous-track on the lock screen replays the sentence (`replay_line {source: media_session}`); next-track marks the moment, with a 1 s toast and the soft click, the client's one UI sound (ADR-24.22).
 - Cold open: the first 30 s have no transcript and record nothing.
@@ -93,7 +92,7 @@ Controls: a hold pad (hold to keep the floor; `hold.down/up`), the word button (
 
 ## 7. Onboarding specifics
 
-A2's mic primer carries the notice line ("Salma is an AI. Your voice is used only to run this talk and build your show; nothing is kept unless you make an account. Privacy notice.", ADR-24.B14). A3 runs the Salma call (persona and voice from the native package) on the same call screen in `onboarding` kind, with live fact cards (`fact_card` from the worker; edit or remove inline) and an optional address-form chip (masculine, feminine or neutral wording; neutral by default; never inferred; `PUT /controls {address_form}`, ADR-24.B26); A4 is a 48-item yes/no grid, 75 s cap; A5 plays three "hello" clips per host and three name candidates; A6 streams the pilot with `episode.manifest` updates; A8 is FR-117's one thing managed (the host names one real thing the learner did in the first call's goodbye, then one line on screen) followed by the eight promises; A9 creates the account **after** the first call (email code, Apple, Google), asks birth date (under 18 ends the flow and deletes the pre-account learner), the country of residence with a picker (never from IP), drop time and anchor, the voice-storage checkbox with its one plain sentence. Sign in with Apple uses `form_post`: the pre-account session is found through the signed `state` in `auth_states`, not a cookie (06 §4.9 rule 4). A10 shows tomorrow's three ideas and the setup card. First-open-to-Salma under 60 s; first spoken sentence under 5 min.
+A2's mic primer carries the notice line ("Salma is an AI. Your voice is used only to run this talk and build your show; nothing is kept unless you make an account. Privacy notice.", ADR-24.B14). A3 runs the Salma call (persona and voice from the native package) on the same call screen in `onboarding` kind, with live fact cards (`fact_card` from the worker; edit or remove inline) and an optional address-form chip (masculine, feminine or neutral wording; neutral by default; never inferred; `PUT /controls {address_form}`, ADR-24.B26); A4 is a 48-item yes/no grid, 75 s cap; A5 plays three "hello" clips per host and three name candidates; A6 streams the first episode with `episode.manifest` updates; A8 is FR-117's one thing managed (the host names one real thing the learner did in the first call's goodbye, then one line on screen) followed by the eight promises; A9 creates the account **after** the first call (email one-time code, the only sign-in, ADR-25.4), asks birth date (under 18 ends the flow and deletes the pre-account learner), the country of residence with a picker (never from IP), drop time and anchor, the voice-storage checkbox with its one plain sentence. A10 shows tomorrow's three ideas and the setup card. First-open-to-Salma under 60 s; first spoken sentence under 5 min.
 
 ## 8. Today
 
@@ -110,3 +109,4 @@ Only the event log. No third-party analytics, no session replay, no fingerprinti
 ## 11. Revision log
 
 - 2026-11-12: aligned to `architecture/06` after its skeptic review: the recast highlight in captions removed (ADR-06); `episode.m4a` played from a Blob URL or a presigned URL, no MediaSource; media URLs as JSON; Serwist with NetworkFirst documents; position every 5 s and flush every 2 s; three cached episodes; learner-namespaced caches and queues; fonts per design/01; `allowance.next_available` per FR-206; idempotency keys; the narrowed feed-link scope and "Heard it"; the notification before the warm; the iOS audio session; dark by default; A8 per FR-117; the crisis continue path.
+- 2026-11-12, later: ADR-25 applied: email one-time code is the only sign-in (no Apple or Google, no `auth_states`); no invite route; web only.

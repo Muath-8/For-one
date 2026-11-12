@@ -33,16 +33,14 @@ def card(d):
 </li>"""
 
 DUE = [
-  ("now", "Consent addendum Part 1 for the vendor tests", "A9, ADR-24.B10", "Pilot clips go to recognizer and voice vendors the pilot consent does not name. Nothing leaves before Part 1 is signed."),
-  ("2026-11-13", "Name counsel and send the question pack", "A13, A1", "legal/00-counsel-question-pack.md. Counsel confirms eu-central-1, SCCs with a transfer impact assessment, and the day-one regimes (ADR-24.8, 24.9, 24.B13) by 2026-11-17."),
-  ("2026-11-17", "Voice vendor after the English blind test", "M2, ADR-24.6", "Decided on post-doubling prices: Gemini's 2027-01-01 rise lands during the build, before the beta opens."),
-  ("2026-11-18", "Second engineer working from build start", "A2, ADR-24.11", "Two engineers from build start open the beta on 2027-03-17; each week later moves it a week; a third from 2026-12-01 brings it to 2027-02-17."),
-  ("2026-11-18", "Brand domain, Apple and Google developer applications", "A3", "DNS, cookies and push identity are set in build week 1."),
-  ("2026-11-19", "Tell the pilot pre-payers the new date", "A15, ADR-24.B28", "A full refund at once, or a place in the bridge: hand-made episodes until the open."),
-  ("2026-12-01", "Native read of the bibles; Salma's Arabic read", "A4, A5, ADR-24.3", "Drafts are in content/bibles/."),
-  ("2026-12-02", "Paddle account under the legal entity", "A6, ADR-24.4", "Paddle is the merchant of record; Stripe only if Paddle declines."),
-  ("2026-12-15", "Pilot addendum Part 2 signed by bridge learners", "A9, ADR-24.B28", "Non-signers keep the original promise: pilot data deleted by 2026-12-31."),
-  ("2027-02-15", "Counsel reviews legal/", "A8", "Privacy notice, terms, consent texts, DPIA, RoPA, crisis protocol."),
+  ("before staging", "Vendor accounts, API keys and standard DPAs", "A1", "AWS, Vercel, Inngest, LiveKit, Anthropic, Google, the voice and speech vendors, Langfuse, Sentry, Resend; zero data retention requested from Anthropic."),
+  ("before vendor choice", "About 30 volunteer voice clips and the voice blind test", "A2, ADR-25.6", "Replaces the pilot's clips: an open corpus plus volunteers from at least two native-language groups."),
+  ("before prompt tuning", "Read and approve the bibles and Salma's lines", "A3, ADR-25.7", "Drafts in content/; an AI review pass checks them against the laws and the ban lists."),
+  ("each one", "Approve merges, migrations, prompt changes and deploys", "A8, ADR-25.2", "The AI agent builds; Muath approves."),
+  ("before live payments", "Open the Paddle account", "A5, ADR-24.4", "Paddle is the merchant of record; the sandbox works before."),
+  ("before public deploy", "Choose the domain", "A6, ADR-25.8", "One configuration value."),
+  ("before launch", "Complete the self-review checklist", "A4, ADR-25.3", "legal/00-self-review-checklist.md; no lawyer, compliance by design."),
+  ("before launch, if it applies", "EU and UK representative", "A7", "A paid service required by GDPR Art. 27 if the company is outside the EU and UK."),
 ]
 
 due_html = "\n".join(f"""<li class="due"><span class="dd">{esc(d)}</span><div><h4>{esc(t)}</h4><p>{esc(why)}</p><span class="src">{esc(src)}</span></div></li>""" for d, t, src, why in DUE)
@@ -102,7 +100,7 @@ body = f"""
 <header class="hero hubhero">
   <p class="eyebrow">For one · Technical architecture · written 2026-10-16, revised 2026-11-06 and 2026-11-12</p>
   <h1>For one architecture</h1>
-  <p class="lede">How the beta gets built between 2026-11-18 and 2027-03-12, for an open on 2027-03-17: nine domain documents, each answering one question, plus the decision records that reconcile them with the 2026-10-23 decisions: no launch country, monthly USD plans, invisible teaching, evidence instead of tests.</p>
+  <p class="lede">How version 1 gets built, by an AI coding agent under Muath, in dependency-ordered phases with no calendar dates: nine domain documents, each answering one question, plus the decision records that reconcile them with the 2026-10-23 decisions: no launch country, monthly USD plans, invisible teaching, evidence instead of tests.</p>
 </header>
 
 <div class="figs">
@@ -125,14 +123,14 @@ body = f"""
   <h2>The documents</h2>
   <div class="legend">
     <div><span class="pill st-ok"><i></i>{STATUS['ok'][0]}</span><p>01 to 09. Both reviews ran (06's skeptic review on 2026-11-12), every finding was applied, and the text follows the decision records. Section 11 of each document logs what changed.</p></div>
-    <div><span class="pill st-adr"><i></i>{STATUS['adr'][0]}</span><p>10. The twenty-four cross-domain rulings (ADR-24 decided every open item on 2026-11-12), the naming table for the technical design, and the register of owner actions and measurements.</p></div>
+    <div><span class="pill st-adr"><i></i>{STATUS['adr'][0]}</span><p>10. The twenty-five cross-domain rulings (ADR-24 decided every open item on 2026-11-12), the naming table for the technical design, and the register of owner actions and measurements.</p></div>
   </div>
   <ol class="dlist">{cards}</ol>
 </section>
 
 <section class="block">
-  <h2>Owner actions that are due soon</h2>
-  <p class="muted">From the register in document 10, section 10. Every decision is taken; these are the things only a person can do. The build starts on 2026-11-18, so the first few block week 1.</p>
+  <h2>What is still owed</h2>
+  <p class="muted">From the register in document 10, section 10. Every decision is taken; these are the things only Muath can do. None has a date; each says what it must happen before.</p>
   <ol class="dues">{due_html}</ol>
 </section>
 
@@ -143,8 +141,9 @@ body = f"""
     <li><strong>Six new reviews.</strong> 07, 08 and 09 were each read by the conformance and the skeptic lens: 60 findings, six blockers, all applied.</li>
     <li><strong>Every document revised.</strong> The 2026-10-23 decisions had moved under the documents: no launch country, USD monthly plans with 1, 2 or 3 episodes a day, no correction notes, a build re-dated to 2026-11-18. Document 10 records the 22 rulings and each document's section 11 says what changed.</li>
     <li><strong>The integration pass.</strong> Names that disagreed between documents (`episodes.state`, `call_turn_verbatim`, `word_uses`, `expects_drop`, package paths) have one spelling now, listed in document 10 section 4 for the technical design.</li>
-    <li><strong>2026-11-12: every open item decided (ADR-24).</strong> About 150 OPEN tags across the documents became decisions, owner actions or measurements; 33 consistency rulings settled disagreements between documents; the skeptic review of 06 ran and was applied; the backlog was re-cut, which moved the beta to 2027-03-17 (two engineers from build start).</li>
-    <li><strong>Still missing.</strong> A review of document 10 itself. Content drafts (bibles) are in <code>content/</code>, legal drafts for counsel in <code>legal/</code>.</li>
+    <li><strong>2026-11-12: every open item decided (ADR-24).</strong> About 150 OPEN tags across the documents became decisions, owner actions or measurements; 33 consistency rulings settled disagreements between documents; the skeptic review of 06 ran and was applied; the backlog was re-cut.</li>
+    <li><strong>2026-11-12, later: ADR-25.</strong> An AI agent builds it; no calendar dates; no lawyer; web only; no pilot and no beta.</li>
+    <li><strong>Drafts.</strong> Content drafts (bibles) are in <code>content/</code>; the self-reviewed legal texts are in <code>legal/</code> (ADR-25.3).</li>
   </ul>
 </section>
 

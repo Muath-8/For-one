@@ -1,24 +1,24 @@
 # For one: technical design, 00. Overview and module map
 
-*Technical design document (TDD), version 1.2, 2026-11-12 (v1.0 2026-11-06; v1.1 2026-11-07, aligned with the architecture decision records ADR-01 to ADR-22 and the naming rulings in `architecture/10-decision-records.md` §4; v1.2 applies ADR-24, the decisions taken on Muath's delegation: region final, Paddle, sensitive facts by confirmation card, the crisis keyword rule, the English inventory from open sources, and the staffing and Day-1 split of ADR-24.11). The level below the nine architecture documents in `/architecture/`: what an engineer opens to start coding. Where this document and an architecture document disagree, the disagreement is listed in [10-open-questions.md](10-open-questions.md), and the architecture file is left as it is.*
+*Technical design document (TDD), version 1.3, 2026-11-12 (v1.0 2026-11-06; v1.1 2026-11-07, aligned with the architecture decision records ADR-01 to ADR-22 and the naming rulings in `architecture/10-decision-records.md` §4; v1.2 applies ADR-24, the decisions taken on Muath's delegation: region final, Paddle, sensitive facts by confirmation card, the crisis keyword rule, the English inventory from open sources, and the staffing and Day-1 split of ADR-24.11; v1.3 applies ADR-25: an AI coding agent builds it under Muath, no calendar dates, no counsel step, web only with email sign-in, and one public launch with no Milestone 0 and no beta). The level below the nine architecture documents in `/architecture/`: what the coding agent opens to start a story. Where this document and an architecture document disagree, the disagreement is listed in [10-open-questions.md](10-open-questions.md), and the architecture file is left as it is.*
 
 ## 0. How to read this set
 
-| File | Answers | Read before building |
+| File | Answers | Read before |
 |---|---|---|
 | 00 (this) | what the system is, its modules, its rules, how a day flows | anything |
-| [01-data-model](01-data-model.md) | every table, column, index, retention rule, encryption class; the ERD | week 1 |
-| [02-api-contracts](02-api-contracts.md) | every REST and WebSocket/SSE endpoint, schemas, errors, auth | week 1 (contracts), week 3 (client) |
-| [03-generation-pipeline](03-generation-pipeline.md) | the episode factory: steps, prompts, coverage check, caching, cost per step | week 2 |
-| [04-live-call](04-live-call.md) | LiveKit room lifecycle, call worker state machines, recasts, verbatim re-transcription, 1 s budget | week 4 |
-| [05-learner-model](05-learner-model.md) | facts with sources, mistake tracking, replanning | week 1 (schema), week 5 (pass) |
-| [06-after-session-and-proof](06-after-session-and-proof.md) | the after-session pass, claims, the weekly proof (evidence, not tests) | week 5 |
-| [07-client](07-client.md) | routes, state, offline/PWA, audio | week 3 |
-| [08-security-privacy](08-security-privacy.md) | keys, consent, deletion, isolation, crisis protocol | week 1 and week 5 |
-| [09-observability](09-observability.md) | tracing, evals, alarms, cost controls | week 1 (tracing) onward |
-| [10-open-questions](10-open-questions.md) | contradictions found (settled), decisions taken under ADR-24 | now |
+| [01-data-model](01-data-model.md) | every table, column, index, retention rule, encryption class; the ERD | phase 1 |
+| [02-api-contracts](02-api-contracts.md) | every REST and WebSocket/SSE endpoint, schemas, errors, auth | phase 1 (contracts), phase 3 (client) |
+| [03-generation-pipeline](03-generation-pipeline.md) | the episode factory: steps, prompts, coverage check, caching, cost per step | phase 2 |
+| [04-live-call](04-live-call.md) | LiveKit room lifecycle, call worker state machines, recasts, verbatim re-transcription, 1 s budget | phase 2 (minimal), phase 4 |
+| [05-learner-model](05-learner-model.md) | facts with sources, mistake tracking, replanning | phase 1 (schema), phase 4 (pass) |
+| [06-after-session-and-proof](06-after-session-and-proof.md) | the after-session pass, claims, the weekly proof (evidence, not tests) | phase 4 |
+| [07-client](07-client.md) | routes, state, offline/PWA, audio | phase 3 |
+| [08-security-privacy](08-security-privacy.md) | keys, consent, deletion, isolation, crisis protocol | phase 1 and phase 4 |
+| [09-observability](09-observability.md) | tracing, evals, alarms, cost controls | phase 1 (tracing) onward |
+| [10-open-questions](10-open-questions.md) | contradictions found (settled), decisions taken under ADR-24 and ADR-25 | now |
 
-Conventions. `[DECISION]` marks a choice this TDD makes that the architecture left open or that this TDD changes; `[ASSUMPTION]` marks a number nobody has measured; `[P0]`, `[P1]`, `[LATER]` are PRD-v2's priority tags (P0 is in the beta: the release plan splits it into *Day-1*, reachable in the first beta week, and *Later in the beta*, each with the beta day by which a learner can first reach it, ADR-24.11; P1 before the gate review; LATER is out of the beta). Dates follow `architecture/10-decision-records.md` §6 (ADR-24.11): build 2026-11-18 to 2027-03-12, paid beta from 2027-03-17; the build weeks keep their labels W1 to W5 and their order, and their exact dates are in `backlog/00-release-plan.md`.
+Conventions. `[DECISION]` marks a choice this TDD makes that the architecture left open or that this TDD changes; `[ASSUMPTION]` marks a number nobody has measured; `[P0]`, `[P1]`, `[LATER]` are PRD-v2's priority tags; under ADR-25.5 the release plan sorts the work into **v1** (needed at launch) and **v1.1** (after launch), and `[LATER]` stays out of both. The plan keeps no calendar dates (ADR-25.1): work runs in the dependency-ordered phases of `backlog/00-release-plan.md` (section 7 below).
 
 ## 1. What the system is, in one paragraph
 
@@ -32,7 +32,7 @@ flowchart LR
     web["apps/web<br/>Next.js 15 PWA"]
     feed["Private podcast feed<br/>(RSS per learner)"]
   end
-  subgraph Edge["AWS home region (HOME_REGION eu-central-1, final for the beta, ADR-24.8)"]
+  subgraph Edge["AWS home region (HOME_REGION eu-central-1, ADR-24.8)"]
     api["apps/api<br/>FastAPI"]
     wf["apps/workflows<br/>FastAPI + Inngest functions"]
     cw["apps/call-worker<br/>LiveKit Agents (Python)"]
@@ -41,7 +41,7 @@ flowchart LR
   end
   subgraph Vendors["Vendors behind adapters"]
     llm["Anthropic (teacher, writer, host, Salma, analyst)"]
-    gem["Google Gemini (editor, TTS)"]
+    gem["Google Gemini (editor, embeddings, TTS)"]
     stt["Soniox / Deepgram (streaming STT)<br/>AssemblyAI / Scribe (verbatim)"]
     tts2["Inworld / ElevenLabs (understudy TTS)"]
     lk["LiveKit Cloud"]
@@ -95,7 +95,7 @@ One Docker image `forone-python`, three entrypoints selected by `FORONE_SERVICE`
 | `native/<lang>` | `forone.native` | one directory per **native** language (`ar` first, `en` the universal fallback): interface strings and `dir`, consent texts and privacy notice, gloss target, Salma's voice and persona lines, crisis clips and resources card by country, talkback language hint | 02, 07, 08 |
 | `call` | `forone_call` (inside `apps/call-worker`) | governor, turn controller, recorder, talkback, Salma onboarding | 04 |
 
-**Language package rule (ADR-02, ADR-03).** Since the 2026-10-23 decision removed the launch country, nothing in code may assume Arabic or Saudi Arabia. Packages have two axes, never pairs: `packages/languages/<target>/` and `packages/native/<lang>/`. Every brief compiler, prompt loader and TTS request reads the pair from the learner row (`learners.native_language`, `target_language`, `residence_country`); `learners.tz` has no default and comes from the client. Opening a target language is a directory plus the five-check gate run by `forone.langgate` (evidence in `langgate/<target>/<date>/`, the pass recorded in `gate.yaml`), not a code change. The pilot's packages are `languages/en` and `native/ar`.
+**Language package rule (ADR-02, ADR-03).** Since the 2026-10-23 decision removed the launch country, nothing in code may assume Arabic or Saudi Arabia. Packages have two axes, never pairs: `packages/languages/<target>/` and `packages/native/<lang>/`. Every brief compiler, prompt loader and TTS request reads the pair from the learner row (`learners.native_language`, `target_language`, `residence_country`); `learners.tz` has no default and comes from the client. Opening a target language is a directory plus the five-check gate run by `forone.langgate` (evidence in `langgate/<target>/<date>/`, the pass recorded in `gate.yaml`), not a code change. Version 1 ships `languages/en` with `native/en` and `native/ar`.
 
 ### 2.3 Roles (model calls), where they run
 
@@ -196,16 +196,17 @@ forone/
 
 Tooling: `uv`, Ruff, Pyright strict, pytest; `pnpm`, TypeScript strict, Vitest, Playwright. Migrations: Alembic, one revision per PR, `alembic upgrade head` as a one-off ECS task before each deploy. Environments: `dev` (docker-compose: postgres+pgvector, minio, inngest dev server, livekit-server --dev, mailpit), `staging`, `prod`.
 
-## 7. Build order (W1 to W5; build 2026-11-18 to 2027-03-12, week dates in `backlog/00-release-plan.md`)
+## 7. Build order (phases in dependency order, no dates)
 
-| Week | Lands | TDD files |
+An AI coding agent builds the system story by story under Muath (ADR-25.2). Each story's acceptance criteria become automated tests before the code; CI and an independent AI review pass must pass; Muath approves merges to `main`, migrations, prompt and bible changes, and production deploys. The phases follow `backlog/00-release-plan.md`; each ends on an exit check, not a date (ADR-25.1).
+
+| Phase | Lands | TDD files |
 |---|---|---|
-| 1 | schema and migrations; event ingestion; RLS and roles; adapters with tracing; lexicon and FSRS scheduler; language package skeleton; vendor tests (30 clips, 50 calls) | 01, 02, 05, 09 |
-| 2 | teacher, writer, fitter, editor, voice studio end to end on test learners; gloss cache; episode state machine; publish | 03 |
-| 3 | onboarding A1 to A10 with Salma; Today; player; word sheet; feed; push; payments on Paddle (ADR-24.4); account | 02, 07 |
-| 4 | call worker: governor, turn-taking, talkback, hold-to-talk, recorder, verbatim path; voice-note fallback; chat | 04 |
-| 5 | after-session pass; memory keeper; claim gate; notebook; Controls; simple weekly proof; first then-and-now; deletion and export jobs; crisis protocol; end-to-end run with Milestone 0 learners | 05, 06, 08 |
+| 1 Foundation | schema and migrations; event ingestion; RLS and roles; adapters with tracing and the price book; lexicon and FSRS scheduler; the English package and its gate result; Terraform for staging | 01, 02, 05, 09 |
+| 2 Pipeline and the minimal call | teacher, writer, fitter, editor, voice studio end to end on synthetic learners; gloss cache; episode state machine; publish; the minimal call worker with the 30-clip recognizer test and the scripted calls (ADR-25.6) | 03, 04 |
+| 3 Onboarding, Today, feed | onboarding A1 to A10 with Salma; Today; player; word sheet; feed; push; email one-time code sign-in; consent and the age gate | 02, 07 |
+| 4 The full call and the after-session pass | governor, turn-taking, the word button, hold-to-talk, recorder, verbatim path; voice-note fallback; chat; after-session pass; memory keeper; crisis protocol | 04, 05, 06, 08 |
+| 5 The first week's surfaces | claim gate; simple weekly proof; the baseline then-and-now; notebook; Controls; plans and Paddle checkout (ADR-24.4) | 05, 06, 07, 08 |
+| 6 Production and launch | production from the same Terraform; deletion and export jobs verified on a test learner; a restore rehearsed; the launch checklist | 08, 09 |
 
-Staffing and the date (ADR-24.11, `architecture/10` §6): the beta opens when the Day-1 work is done. The plan of record is two engineers from build start (2026-11-18) and an open on **2027-03-17** (2027-02-17 with a third engineer from 2026-12-01). The date is re-forecast at the end of every build week from measured velocity; it moves earlier only in whole weeks and never later without the waitlist being told. The single-engineer cut list applies from day one regardless, except Terraform: a console setup with a runbook is the fallback only if Terraform is not applying by the end of build week 1 (ADR-24.B19).
-
-Exit on 2027-03-12: every Day-1 P0 works (the *Later in the beta* P0 items land by the beta day the release plan gives them); measured cost per session from `vendor_calls`; a costed path to $0.35 or less. Beta from 2027-03-17 (first finales 2027-04-13, gate review 2027-04-20); pre-open freeze 2027-03-15 12:00 to 03-17 12:00 UTC; no releases 2026-12-31 to 2027-01-02, which now falls inside the build (`architecture/10` §6).
+Exit for launch: every v1 story passes its tests and the launch checklist is green; cost per session measured from `vendor_calls` on test learners; a costed path to $0.35 or less. Version 1 launches once, publicly, with open signup (ADR-25.5); the launch health measures are read 4 and 8 weeks after launch.

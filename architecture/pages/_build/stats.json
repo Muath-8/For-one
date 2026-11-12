@@ -1,22 +1,17 @@
 {
  "01": {
   "title": "System topology",
-  "words": 28047,
+  "words": 26791,
   "decisions": 17,
-  "open": 13,
+  "open": 8,
   "open_titles": [
    "Home region",
    "Processors",
    "Payment processor",
    "Fixed infrastructure budget",
-   "Second engineer and the week-6 slips",
-   "Apple Developer Program and Google Cloud OAuth verification",
    "Archive growth",
-   "Invites over WhatsApp",
    "Streamed on-demand budgets",
    "PRD 3.10 amendment",
-   "Milestone 0 consents",
-   "On-call",
    "Domain and sending identity"
   ],
   "review_counts": [
@@ -40,7 +35,7 @@
  },
  "02": {
   "title": "Generation pipeline architecture",
-  "words": 28896,
+  "words": 28703,
   "decisions": 25,
   "open": 12,
   "open_titles": [
@@ -78,7 +73,7 @@
  },
  "03": {
   "title": "Live call and voice architecture",
-  "words": 25460,
+  "words": 25404,
   "decisions": 18,
   "open": 8,
   "open_titles": [
@@ -112,22 +107,22 @@
  },
  "04": {
   "title": "Learner model and data architecture",
-  "words": 29868,
+  "words": 29704,
   "decisions": 22,
   "open": 12,
   "open_titles": [
    "English structure inventory (PRD-v2 Part 18 #8)",
    "Home region",
-   "Jurisdictions on day one",
+   "Jurisdictions",
    "Sensitive facts",
    "The name clip",
    "`crisis_log` after account deletion",
-   "Rebuilds in the beta and two scope cuts",
+   "Rebuilds in v1 and two scope cuts",
    "The 30-day backup statement",
    "Storage growth of kept voice",
    "Export form",
    "Fixed infrastructure budget",
-   "Consents for Milestone 0 data"
+   "Test data from synthetic learners"
   ],
   "review_counts": [
    [
@@ -150,16 +145,16 @@
  },
  "05": {
   "title": "Assessment and after-session architecture",
-  "words": 26820,
+  "words": 26248,
   "decisions": 17,
   "open": 9,
   "open_titles": [
-   "Test-retest pairs before the beta",
+   "Test-retest pairs",
    "The second tagger for calibration",
    "English structure inventory (PRD-v2 Part 18 #8)",
-   "\"Where do I stand\" and the external test",
+   "\"Where do I stand\"",
    "How a shaky owned word is shown",
-   "Rater windows after the first",
+   "Rater windows",
    "A worse week with an unknown reason, and avoidance",
    "Forms C and D of the then-and-now task bank",
    "Data-use consent wording for calibration samples"
@@ -185,12 +180,12 @@
  },
  "06": {
   "title": "Client and delivery architecture",
-  "words": 27515,
+  "words": 26657,
   "decisions": 19,
   "open": 15,
   "open_titles": [
-   "The brand domain",
-   "Apple Developer Program and Google Cloud OAuth verification",
+   "The domain",
+   "Sign-in",
    "Which three podcast apps A10 names",
    "The feed-link session (D7)",
    "Digits and type",
@@ -198,9 +193,9 @@
    "The public sample share page",
    "Vercel, Resend and Sentry as processors",
    "The day-7 payment card on Today",
-   "One engineer or two",
+   "Who builds it",
    "Device test budget",
-   "Web or native for the beta",
+   "Web only",
    "Payment processor",
    "Jurisdictions, consent copy per native language and the crisis resources",
    "Read-aloud and recap rendered on first tap"
@@ -226,21 +221,20 @@
  },
  "07": {
   "title": "Security, privacy, compliance architecture",
-  "words": 26332,
+  "words": 26437,
   "decisions": 16,
-  "open": 11,
+  "open": 10,
   "open_titles": [
-   "Home region and the legal view on storing learner voice",
-   "Jurisdictions, the DPIA, the consent and notice copy, and the reviewer and tagger agreement",
-   "Payment processor and legal entity",
+   "Home region and transfers",
+   "Jurisdictions, the DPIA, and the consent and notice copy",
+   "Payment processor",
    "Trial without a card (PRD 18 #4)",
    "Crisis protocol details",
    "Processors",
-   "Milestone 0 import consent",
    "Research rows after deletion",
-   "Second factor for staff and a penetration test",
+   "Second factor for staff and security testing",
    "Age verification beyond self-attestation",
-   "Waitlist retention"
+   "The EU and UK representative"
   ],
   "review_counts": [
    [
@@ -263,7 +257,7 @@
  },
  "08": {
   "title": "Cost model and vendors architecture",
-  "words": 23302,
+  "words": 23086,
   "decisions": 14,
   "open": 9,
   "open_titles": [
@@ -272,9 +266,9 @@
    "Haiku 5.5 as the call host",
    "Budget approvals",
    "Payment processor",
-   "Consent for the Milestone 0 clips to reach the recognizer and voice vendors",
+   "Clips for the recognizer and voice tests",
    "The daily spend cap formula, the guard multiples and the stop line",
-   "Cost figures in the monthly human review packet",
+   "Cost figures in the monthly review packet",
    "The on-demand premium's planning value"
   ],
   "review_counts": [
@@ -298,18 +292,18 @@
  },
  "09": {
   "title": "Evaluation and operations architecture",
-  "words": 25005,
+  "words": 24676,
   "decisions": 15,
   "open": 8,
   "open_titles": [
-   "On-call for a worldwide cohort",
-   "The paid reviewer, the claims auditor and the native-language law-scan reader",
+   "Operations for a worldwide learner base",
+   "Reviewers and the claims auditor",
    "The \"very disappointed\" question",
    "Pulling a shipped episode",
    "The stop line's owner and window",
-   "Milestone 0 fixtures and consent",
+   "Fixtures from synthetic learners",
    "Budget for this domain",
-   "The invite weekday"
+   "Launch health measures"
   ],
   "review_counts": [
    [
@@ -332,8 +326,8 @@
  },
  "10": {
   "title": "Architecture decision records",
-  "words": 12677,
-  "decisions": 24,
+  "words": 13842,
+  "decisions": 25,
   "open": 0,
   "open_titles": [],
   "review_counts": []

@@ -1,6 +1,6 @@
 # For one — 05. Interaction and audio UX
 
-*Part 5 of 8. How listening, speaking and waiting feel. Sound is interface (principle P9): this document specifies the sounds, the turn-taking, the latency masking, the headphone and lock-screen behaviour, and the hard moments. Numbers marked "target" are design targets to measure in the pilot, not guarantees.*
+*Part 5 of 8. How listening, speaking and waiting feel. Sound is interface (principle P9): this document specifies the sounds, the turn-taking, the latency masking, the headphone and lock-screen behaviour, and the hard moments. Numbers marked "target" are design targets to measure after launch, not guarantees.*
 
 ## 1. Listening
 
@@ -33,7 +33,7 @@
 - **Silence.** After 8 seconds with no hold and no speech, the host offers a smaller version of the question. It never repeats the same question louder, and never says "are you there?" before 20 seconds.
 
 ### 2.2 The word button
-Hold the round **word** button, say the word or phrase in your own language, release. The host gives it back in the target language inside its next line ("line-up, yes, the line-up") and continues the thought. The given word appears once in the host's caption. The host, not Salma, gives it; Salma is silent during calls. In the beta this is button-only; a spoken "how do you say…" is a later addition.
+Hold the round **word** button, say the word or phrase in your own language, release. The host gives it back in the target language inside its next line ("line-up, yes, the line-up") and continues the thought. The given word appears once in the host's caption. The host, not Salma, gives it; Salma is silent during calls. In v1 this is button-only; a spoken "how do you say…" is a later addition.
 
 ### 2.3 Echoes (the only correction the learner ever meets)
 - The host answers an error as a friend would, using the right form: "oh, you *went* there yesterday? And what happened?"
@@ -61,7 +61,7 @@ Latency is the enemy of a conversation. The pipeline target is a host reply with
 
 Rules: never a spinner, never "thinking…", never a typing indicator. Fillers are tagged so the analyst can exclude them from the transcript.
 
-Episode generation is never waited for in front of the learner: episodes are made overnight; the pilot in onboarding is masked by casting; the sample page states "60 to 90 seconds" and shows the two orbs "recording".
+Episode generation is never waited for in front of the learner: episodes are made overnight; the first episode in onboarding is masked by casting; the sample page states "60 to 90 seconds" and shows the two orbs "recording".
 
 ## 4. Headphones, lock screen, car
 
@@ -74,12 +74,12 @@ Episode generation is never waited for in front of the learner: episodes are mad
 
 - The app uses the platform's media actions only; it never captures AirPods triple-click or the like.
 - Lock screen: cover (dark), title, show name, scrubber; the two custom actions above where supported.
-- Car (CarPlay / Android Auto): the standard Now Playing only; the call is never offered; the episode's last minute says "open For one to call in when you're parked".
+- Car: Now Playing only, where the browser's media session reaches it; the call is never offered; the episode's last minute says "open For one to call in when you're parked".
 - Web: Media Session API gives title, artwork, play/pause, seek, and (where supported) previous/next mapped as above. The call needs the screen on; the "keep the screen on" hint shows once.
 
 ## 5. Touch and gesture
 
-- Hold pad: touch and hold anywhere on it; pressure not required; haptic tick (light) on hold start and release on native; a 2px ring breath while held.
+- Hold pad: touch and hold anywhere on it; pressure not required; haptic tick (light) on hold start and release where the browser supports vibration; a 2px ring breath while held.
 - Word button: hold to speak; a light haptic on release.
 - Transcript: tap a word (the sheet), long-press a sentence (hear it / keep it); scrubbing on the scrubber only, never on the transcript.
 - Sheets: drag down or tap outside to dismiss; a sheet never blocks playback.
@@ -93,7 +93,7 @@ Episode generation is never waited for in front of the learner: episodes are mad
 | Salma | Close, dry, centred, quieter | Calm | Fewer words; never exclaims; never a joke at the learner's expense |
 | The learner's own recordings | As recorded, lightly levelled, no processing that changes how they sound | | On the tape, played back without any filter: the learner must recognise themselves |
 
-The host's voice in the call must be the same voice as in the episode (one voice vendor for both in the beta). A voice change after an update is treated as a bug: the companion-app research shows persona drift causes real grief.
+The host's voice in the call must be the same voice as in the episode (one voice vendor for both at launch). A voice change after an update is treated as a bug: the companion-app research shows persona drift causes real grief.
 
 ## 7. The hard moments (interaction answers)
 
@@ -114,7 +114,7 @@ The host's voice in the call must be the same voice as in the episode (one voice
 - Reduced motion: orbs static at mid-amplitude; captions appear per line rather than per word.
 - Haptics are optional (Controls follows the system setting).
 
-## 9. Measures that tell the interaction works (pilot targets)
+## 9. Measures that tell the interaction works (read after launch)
 | Measure | Target | Why |
 |---|---|---|
 | First open to first sound | < 60s | First impressions |
@@ -123,4 +123,4 @@ The host's voice in the call must be the same voice as in the episode (one voice
 | Host reply latency (end of learner turn to first audio) | median ≤ 1.2s, p95 ≤ 2.5s | Conversation, not a machine |
 | Host barge-ins on learner speech | 0 per call | Floor control |
 | Huh? per minute, week 1 vs week 4 | Falling | Comprehension evidence (never shown) |
-| Calls abandoned on the commute (web) | Watched; high values move native earlier | ADR-24.1, GATE-M18 |
+| Calls abandoned on the commute | Watched; high values call for a better on-the-move call | The call must survive a commute |

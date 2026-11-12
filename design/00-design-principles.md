@@ -2,7 +2,7 @@
 
 *Design documentation, part 0 of 8. Written 2026-11-06 from concept-v2.md, decisions.md (Muath's answers of 2026-10-23), perspectives/ui-ux.md, perspectives/enjoyment-pull.md, perspectives/consistency-motivation.md, the feature map (features/for-one-features.html) and the v2 prototype (design/prototype/for-one-prototype.html). Where the UI/UX lens of 2026-10-09 and the decisions of 2026-10-23 disagree, the decisions win; the differences are listed at the end.*
 
-*Revised 2026-11-12: the two open rows in §6 (platform, first-session order) are decided under ADR-24.1 and ADR-24.2 (`architecture/10-decision-records.md`).*
+*Revised 2026-11-12: the two open rows in §6 (platform, first-session order) are decided under ADR-24.1 and ADR-24.2 (`architecture/10-decision-records.md`). Revised again for ADR-25: web only, one onboarding order.*
 
 **Entry page for this documentation set:** the designed overview artifact (link in README.md once published). Files: 00 principles · 01 design system (+ tokens.css, tokens.json) · 02 information architecture · 03 user flows · 04 screen specs · 05 interaction and audio UX · 06 content and voice guidelines · 07 open questions.
 
@@ -78,7 +78,7 @@ Visual identity follows the roles: the hosts are warm, saturated voice orbs (Kar
 
 | Mode | The learner has free | Covers | Design consequence |
 |---|---|---|---|
-| **Ears** (60 to 70% of time) | Ears only | The episode, the call, Salma's proof | Lock-screen artwork is the cover; headphone buttons map to replay-sentence and mark-moment; the call can be accepted from the lock screen (native) or from a foreground tab (web) |
+| **Ears** (60 to 70% of time) | Ears only | The episode, the call, Salma's proof | Lock-screen artwork is the cover; headphone buttons map to replay-sentence and mark-moment; the call is accepted from a foreground tab |
 | **Voice** (15 to 25%) | Ears and mouth, maybe a glance | The call, the retell, "say it once" | One huge hold pad; captions for the host only; no live caption of the learner's own words |
 | **Eyes** (15 to 20%) | Hands and eyes | The article, the chat, the notebook, plans | Generous reading type; every word tappable; bidirectional text handled per block |
 
@@ -98,10 +98,10 @@ The lens was written before Muath's decisions. These parts of it are **not** in 
 |---|---|---|
 | Post-call debrief with "new for you / polish / word you reached for" cards | Removed | Decision 3: no notes after the call. The goodbye is a goodbye. |
 | Collapsed margin notes from Salma under chat messages | Removed | Decision 3: the host echoes the right form in the reply instead. |
-| Salma's "talkback" whisper during the call | Replaced by the word button | PRD v3.1: the host gives the word back; Salma is silent in calls. "Talkback" is button-only in the beta (no voice command). |
+| Salma's "talkback" whisper during the call | Replaced by the word button | PRD v3.1: the host gives the word back; Salma is silent in calls. "Talkback" is button-only (no voice command). |
 | "Want my notes after each call?" preference | Removed | There are no notes. |
-| Native app for the beta | Not for the beta (ADR-24.1) | The beta is the installable web app plus the private feed. Native stays designed as the later path (after the beta gates, or earlier if GATE-M18 fires); see 02 §6 and 07 #1. |
-| Sound in 60 seconds, account after the first call | Kept (ADR-24.2, order A) | Order A is the beta's order; order A′ stays documented as the alternative; see 03 flow A and A′, and 07 #2. |
+| Native app | Not planned (ADR-24.1, ADR-25.4) | For one is the installable web app plus the private feed; see 02 §6 and 07 #1. |
+| Sound in 60 seconds, account after the first call | Kept (ADR-24.2) | The onboarding order; see 03 flow A and 07 #2. |
 | Season length 4 weeks, finale = then-and-now recording | Kept | Decision 5. |
 | Hold to keep the floor, Huh?, tap any word, the notebook, the tape, seasons, out in the world, the controls sheet | Kept | Agreed everywhere. |
 

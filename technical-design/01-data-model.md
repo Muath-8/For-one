@@ -1,6 +1,6 @@
 # 01. Data model
 
-*Postgres 16 with pgvector on RDS Multi-AZ. One database, one schema `forone`, monthly partitions on the two high-volume tables (`events`, `vendor_calls`). SQLAlchemy 2 models in `forone.core.models`, migrations in Alembic. Every table below exists at the build's exit (2027-03-12) unless tagged [P1].*
+*Postgres 16 with pgvector on RDS Multi-AZ. One database, one schema `forone`, monthly partitions on the two high-volume tables (`events`, `vendor_calls`). SQLAlchemy 2 models in `forone.core.models`, migrations in Alembic. Every table below exists at launch unless tagged [P1].*
 
 ## 1. Principles
 
@@ -19,7 +19,6 @@ erDiagram
   learners ||--o| learner_schedule : ""
   learners ||--o| consents : ""
   learners ||--o| subscriptions : ""
-  learners ||--o{ accounts : "apple|google|email"
   learners ||--o{ auth_sessions : ""
   learners ||--o{ feed_tokens : ""
   learners ||--o{ push_subscriptions : ""
@@ -83,22 +82,20 @@ Column lists are complete. Types are Postgres. `pk` marks the primary key, `fk` 
 | theme | text | `dark, light`; default `dark`; set in Controls (ADR-24.22) |
 | residence_country | text | ISO 3166-1, asked at A9 with a country picker, never from IP (ADR-20); selects the crisis resources and the legal regime row |
 | plan | text | mirror of `subscriptions.plan` for cheap allowance reads |
-| invite_id | uuid fk invites | |
 | trial_started_at, trial_ends_at | timestamptz | trial = 7 days |
 | deletion_requested_at | timestamptz | |
 | langfuse_pseudonym | text not null | 16 random bytes hex; never the id |
 | lm_version | int not null default 0 | cached `max(learner_model_versions.version)` |
 | created_at | timestamptz | |
 
-**accounts** `{id pk, learner_id fk, provider (apple|google|email), provider_subject text, email citext, created_at; unique (provider, provider_subject)}`.
-**otp_codes** `{email citext, code_hash text, expires_at, attempts smallint; pk (email, code_hash)}`; ret 10 min.
+**otp_codes** `{email citext, code_hash text, expires_at, attempts smallint; pk (email, code_hash)}`; ret 10 min. Email one-time code is the only sign-in, so `learners.email` is the account (ADR-25.4).
 **auth_sessions** `{id bytea pk (32 random bytes), learner_id fk, scope (full|pre_account|feed_link), episode_id uuid, created_at, last_seen_at, expires_at, ua_hint text}`; ret 90 days rolling.
 **learner_keys** `{learner_id pk fk, dek_wrapped bytea, kms_key_id text, created_at, destroyed_at}`; the envelope-encrypted DEK; see [08](08-security-privacy.md).
 **learner_schedule** `{learner_id pk fk, drop_time_local time, backup_time_local time, anchor_text text, rhythm_days smallint 3..6, spare_days smallint default 2, proof_weekday smallint, onboarded_weekday smallint, expects_drop bool (set when the previous local day was active), version int, updated_at}`.
-**consents** `{learner_id pk fk, privacy_notice_version text, voice_storage bool default false, voice_storage_version text, data_use bool default false, data_use_version text, gap_note bool default false, gap_days smallint, drop_notification bool default true, captions bool default true, updated_at}`; a cache of the latest `consent_change` event per kind, reconciled daily.
-**subscriptions** `{learner_id pk fk, plan text (one_a_day|two_a_day|three_a_day), state (trialing|active|past_due|canceled|expired), founding_seq int 1..100, founding_locked bool, current_period_end timestamptz, processor text, customer_ref text, updated_at}` (ADR-04). `episodes_per_day` is read from `plans.yaml` by plan, not stored.
+**consents** `{learner_id pk fk, privacy_notice_version text, special_category bool not null default false, special_category_version text, special_category_at timestamptz, voice_storage bool default false, voice_storage_version text, data_use bool default false, data_use_version text, gap_note bool default false, gap_days smallint, drop_notification bool default true, captions bool default true, updated_at}`; a cache of the latest `consent_change` event per kind, reconciled daily. No learner row leaves `pre_account` without `special_category = true` (ADR-25.9).
+**subscriptions** `{learner_id pk fk, plan text (one_a_day|two_a_day|three_a_day), state (trialing|active|past_due|canceled|expired), current_period_end timestamptz, processor text, customer_ref text, updated_at}` (ADR-04). `episodes_per_day` is read from `plans.yaml` by plan, not stored.
 **payment_events** `{id pk, learner_id fk, processor, event_type, amount_minor int, currency, raw jsonb, received_at}`; ret 7 years (tax).
-**waitlist**, **invites**, **sample_requests**: as `architecture/01 §4.2`, unchanged.
+**sample_requests**: as `architecture/01 §4.2`, unchanged. Signup is open (ADR-25.5).
 
 ### 3.2 Episodes, sessions and media
 
@@ -109,7 +106,7 @@ Column lists are complete. Types are Postgres. `pk` marks the primary key, `fk` 
 | id | uuid pk | |
 | learner_id | uuid fk | null only for `kind = sample` |
 | sample_request_id | uuid fk | samples only |
-| kind | text | `pilot, daily, daily_extra, swap, return, sample, proof, finale, rehearsal, fallback, canary` (ADR-05: `daily_extra` is episode 2 or 3, made on demand) |
+| kind | text | `first, daily, daily_extra, swap, return, sample, proof, finale, rehearsal, fallback, canary` (ADR-05: `daily_extra` is episode 2 or 3, made on demand) |
 | slot | smallint not null default 1 | 1..3, the position within the day's allowance; unused extras end in `superseded` |
 | state | text | `planned, requested, planning, writing, fitting, editing, voicing, checking, glossing, ready, published, closed, prewritten, failed, superseded` (`episodes.state`, never `status`; `streaming` is a flag; `planned` is the row `day/next` creates for each slot of the day) |
 | streaming | bool default false | on-demand kinds while segment 1 is published and later ones render |
@@ -173,7 +170,7 @@ revoke update, delete, truncate on events from forone_app, forone_workflows;
 -- trigger events_immutable() raises unless forone.purge_mode = 'on' (set only inside learner/delete)
 ```
 
-Event types (53) are registered in `forone.core.events.REGISTRY` with a Pydantic payload each; an unknown type is a 422. The full taxonomy, producers and consumers are in `architecture/04 §4.1.1`; the ones every engineer meets: `play, pause, seek, speed, replay_line, huh, tap, keep, mark, feed_heard (the learner's "Heard it" from a feed item; counts toward the active day; idempotent per episode), call_turn, call_turn_verbatim, talkback, hold_floor, silence, chat_message, idea_shown, idea_chosen, swap, small_door, fact_card_edit, notebook_edit, working_on_edit, claim_shown, consent_change, worth_it_answer, wrong_memory_flag, onboarding_answer, word_check_answer, recording, lm_write`.
+Event types (53) are registered in `forone.core.events.REGISTRY` with a Pydantic payload each; an unknown type is a 422. The full taxonomy, producers and consumers are in `architecture/04 §4.1.1`; the ones every story meets: `play, pause, seek, speed, replay_line, huh, tap, keep, mark, feed_heard (the learner's "Heard it" from a feed item; counts toward the active day; idempotent per episode), call_turn, call_turn_verbatim, talkback, hold_floor, silence, chat_message, idea_shown, idea_chosen, swap, small_door, fact_card_edit, notebook_edit, working_on_edit, claim_shown, consent_change, worth_it_answer, wrong_memory_flag, onboarding_answer, word_check_answer, recording, lm_write`.
 
 Ordering: per learner by `(occurred_at, seq)`; client clock skew over 300 s is corrected to `recorded_at` unless the batch is a tagged offline replay. Retention: life of the account; partitions created three months ahead by `retention/daily`. Volume at 10,000 learners: about 60M rows a month [ASSUMPTION].
 
@@ -187,7 +184,7 @@ All RLS, all with `lm_version int` and `updated_at`, all rebuildable. Full DDL i
 | 2 structure map | `structure_map` + `structure_observations` | (learner_id, structure_id) | `state (not_seen|heard|attempting|taking|stable)`, `target_lifecycle (none|active|taking|stable|recheck|dropped_by_learner)`, `avoidance`, `heard_n`, `consecutive_targeted`, `recheck_due_at`, `examples jsonb`, `fsrs`; observations carry `obligatory, correct, prompted, blurred_meaning, confidence, clean, quote, corrected, surface, classifier_version`; view `structure_acc_14d` |
 | 3 error profile | `error_profile` | (learner_id, structure_id) | `count_total, count_clean, blurred_n, sessions uuid[]`, `status (observed|pattern|targeting|dropped_by_learner|resolved)`, `examples` (2 or 3 verbatim) |
 | 4 skills | `skills` + `skill_snapshots` | learner_id | `listening, reading, speaking, writing jsonb {mean, sd, n_obs, calibrated}` on an internal 10..90 scale; `fluency, complexity, comprehension jsonb`; `pause_profile {eot_silence_ms}`; `reading_speed_wpm`; `transcript_default` |
-| 5 interests | `interests` | (learner_id, topic_key) | `salience real`, `depth (curious|fan|expert)`, `source (told|behavior|intake|waitlist)`, `dormant`, `hard_dislike`, `no_go`, `quote, quote_event_id` |
+| 5 interests | `interests` | (learner_id, topic_key) | `salience real`, `depth (curious|fan|expert)`, `source (told|behavior|intake)`, `dormant`, `hard_dislike`, `no_go`, `quote, quote_event_id` |
 | 6 life | `life_facts` + `follow_ups` + `fact_shelf_life` | fact_id | `fact_type fk shelf_life`, `text`, `quote not null`, `quote_event_id not null`, `confidence (heard_once|usable|ground_truth)`, `confirmed_by`, `sensitivity`, `sensitive_usable_until`, `status (active|dormant|superseded|deleted)`, `valid_from, expires_at`, `dont_bring_up`, `supersedes_fact_id`, `dated_event_on`, `times_used`; one follow-up per fact |
 | 7 goals | `goals` | goal_id | `kind (can_do|season_goal|why_target)`, `text, text_native`, `quote`, `season_id`, `status`, `evidence jsonb`, `set_by` |
 | 8 taste | `taste` | learner_id | `format_completion, host_completion, words_per_min jsonb`, `length_pref_min`, `time_of_day_hist`, `swap_n`, `skip_patterns` |

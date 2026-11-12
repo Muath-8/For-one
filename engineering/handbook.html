@@ -142,62 +142,62 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
 <div class="wrap">
 <header class="mast">
   <div class="eyebrow">For one · engineering handbook · written 6 November 2026</div>
-  <div class="eyebrow" style="margin-top:6px">Updated 2026-11-12 · every open decision taken (ADR-24) · beta opens 2027-03-17</div>
-  <h1>How we set up and run the build</h1>
-  <p class="lede">Everything the team needs that is not product, architecture or design: the repository, a free laptop setup, three environments, the pipeline, the tests, the on-call, the vendors, the review rules, the data rules, and what "done" means. Ten pages and three starter files, kept in the repository and edited like code.</p>
+  <div class="eyebrow" style="margin-top:6px">Updated 2026-11-12 · ADR-25: an AI coding agent builds it under Muath; no dates; version 1 launches once</div>
+  <h1>How the agent builds For one</h1>
+  <p class="lede">Everything the coding agent needs that is not product, architecture or design: the repository, a free local setup, three environments, the pipeline with its AI review pass, tests first, operations without a rota, the vendors, the data rules, and what "done" means. Ten pages and four starter files, including the agent's own <code>AGENTS.md</code>, kept in the repository and edited like code. Muath approves every merge, migration, prompt change and production deploy.</p>
   <div class="meta">
-    <span><b>Build</b> 18 Nov 2026 to 12 Mar 2027</span>
-    <span><b>Paid beta</b> from 17 Mar 2027 (17 Feb with three engineers)</span>
-    <span><b>Team</b> two engineers from build start plus Muath</span>
+    <span><b>Builder</b> an AI coding agent, story by story</span>
+    <span><b>Approver</b> Muath</span>
+    <span><b>Launch</b> version 1, once, open signup, when the launch checklist is green</span>
     <span><b>Source</b> <a href="https://github.com/Muath-8/for-one/tree/main/engineering">github.com/Muath-8/for-one/engineering</a></span>
   </div>
 </header>
 
 <nav class="rail" aria-label="Sections">
-  <a href="#rules">Rules</a><a href="#change">Path of a change</a><a href="#envs">Environments</a><a href="#data">Where data goes</a><a href="#cost">Cost</a><a href="#pages">The pages</a><a href="#vendors">Vendor accounts</a><a href="#calendar">Calendar</a><a href="#open">Decided for Muath</a><a href="#starters">Starter files</a>
+  <a href="#rules">Rules</a><a href="#change">Path of a change</a><a href="#envs">Environments</a><a href="#data">Where data goes</a><a href="#cost">Cost</a><a href="#pages">The pages</a><a href="#vendors">Vendor accounts</a><a href="#calendar">Build order</a><a href="#open">Owner actions</a><a href="#starters">Starter files</a>
 </nav>
 
 <section id="rules">
   <div class="head"><h2>The ten rules</h2><p>If you read nothing else. Each one is the compressed form of a page below, and each has a check in CI, a job in Inngest or a role in the admin behind it.</p></div>
   <div class="rules">
-    <div><b>Fakes by default</b><span>Nobody calls a real vendor from a laptop unless they are working on that vendor. Every fake call is still priced, so you see the cost of a change before it runs for real.</span></div>
-    <div><b>Prompts are code</b><span>A file, a version, an eval run, a reviewer who is not the author. There is no prompt editor in the admin and there will not be one.</span></div>
+    <div><b>Tests before code</b><span>Each acceptance criterion of a story is an automated test, committed failing, before the code that makes it pass.</span></div>
+    <div><b>Never invent architecture</b><span>If the canon does not answer, the agent stops and asks Muath with options and a recommendation; it does not guess and build.</span></div>
+    <div><b>Fakes by default</b><span>No real vendor is called in dev unless the story is about that vendor. Every fake call is still priced, so the cost of a change shows before it runs for real.</span></div>
+    <div><b>Prompts are code</b><span>A file, a version, an eval run, the review pass and Muath's approval. There is no prompt editor in the admin and there will not be one.</span></div>
     <div><b>Synthetic learners everywhere</b><span>Dev, staging, cassettes, canaries and load tests use invented people. Real learners live in prod and nowhere else.</span></div>
     <div><b>Learner text stays home</b><span>Ids and enums may travel to Inngest, Sentry, Slack and the logs. Names, transcripts, facts and audio never do. Prompts reach Langfuse only with the opt-in.</span></div>
-    <div><b>Every look is logged</b><span>A human reading learner content writes a reason the learner can read in their own export.</span></div>
-    <div><b>Every promise is verified by a second job</b><span>Deletion windows are re-checked hourly by code that does not share the doer's bugs.</span></div>
+        <div><b>Every promise is verified by a second job</b><span>Deletion windows are re-checked hourly by code that does not share the doer's bugs.</span></div>
     <div><b>Every vendor call is a priced row</b><span>Through the middleware, on the cost page, with a fallback and a degrade path in <code>vendors.yaml</code>.</span></div>
-    <div><b>A deploy never cuts a call</b><span>Drain then replace, outside the drop window, inside the release window, after a canary, with one human name on it.</span></div>
-    <div><b>Every alert has a runbook, every runbook has a switch</b><span>If a fix needs SQL at 05:40, the runbook gets an admin action instead.</span></div>
-    <div><b>Green on day one</b><span>CI, Terraform, the fakes and the first eval baseline exist before the first feature lands.</span></div>
+    <div><b>Fallbacks first, then an alert</b><span>Yesterday's episode stays, the understudy voice takes over, the call becomes voice notes; then Muath is told, and a runbook says what to do next.</span></div>
+    <div><b>Muath approves what cannot be undone quietly</b><span>Merges to main, migrations, prompt and bible changes, production deploys. The agent holds no prod credential.</span></div>
   </div>
 </section>
 
 <section id="change">
-  <div class="head"><h2>The path of a change</h2><p>From a laptop to a learner's morning. Teal boxes are automated gates; the amber box is the only place a human name is required. The eval gate runs only when the diff touches something a model reads, and prints its cost before it spends it.</p></div>
+  <div class="head"><h2>The path of a change</h2><p>From the agent's branch to a learner's morning. Teal boxes are automated gates, including the independent AI review pass; the amber boxes are where Muath approves. The eval gate runs only when the diff touches something a model reads, and prints its cost before it spends it.</p></div>
   <figure>
     <div class="figbox">
-    <svg viewBox="0 0 1000 330" role="img" aria-label="A change flows from a laptop with fake vendors into a pull request, through CI checks and, when a prompt or rule changed, the eval gate; a merge to main deploys staging automatically; a tag plus one human approval deploys prod through migrations, a rolling deploy, a drained call worker replacement and a canary; a failed canary rolls back automatically.">
+    <svg viewBox="0 0 1000 330" role="img" aria-label="A change flows from the agent's branch, tests first and fake vendors, into a pull request, through CI checks and the AI review pass and, when a prompt or rule changed, the eval gate; Muath approves the merge to main, which deploys staging automatically; a tag plus Muath's approval deploys prod through migrations, a rolling deploy, a drained call worker replacement and a canary; a failed canary rolls back automatically.">
       <defs>
         <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
         <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--warm)"/></marker>
       </defs>
-      <!-- row 1: laptop -> PR -> ci -> eval-gate -> main -->
+      <!-- row 1: branch -> PR -> ci -> eval-gate -> main -->
       <rect class="node" x="20" y="40" width="140" height="58" rx="5"/>
-      <text class="lab" x="90" y="63" text-anchor="middle" font-weight="600">Laptop</text>
-      <text class="small" x="90" y="80" text-anchor="middle">fakes · synthetic learners</text>
+      <text class="lab" x="90" y="63" text-anchor="middle" font-weight="600">Agent's branch</text>
+      <text class="small" x="90" y="80" text-anchor="middle">tests first · fakes</text>
 
       <path class="edge" d="M160 69 H196" marker-end="url(#ar)"/>
       <rect class="node" x="198" y="40" width="124" height="58" rx="5"/>
       <text class="lab" x="260" y="63" text-anchor="middle" font-weight="600">Pull request</text>
-      <text class="small" x="260" y="80" text-anchor="middle">why · what · how tested</text>
+      <text class="small" x="260" y="80" text-anchor="middle">story · why · how tested</text>
 
       <path class="edge" d="M322 69 H362" marker-end="url(#ar)"/>
       <rect class="node gate" x="364" y="30" width="180" height="78" rx="5"/>
       <text class="lab" x="454" y="52" text-anchor="middle" font-weight="600">CI on every PR</text>
       <text class="small" x="454" y="69" text-anchor="middle">lint · types · unit · RLS walk</text>
       <text class="small" x="454" y="84" text-anchor="middle">migrations up and down · PII corpus</text>
-      <text class="small" x="454" y="99" text-anchor="middle">package validate · gitleaks</text>
+      <text class="small" x="454" y="99" text-anchor="middle">gitleaks · AI review pass</text>
 
       <path class="edge" d="M544 69 H594" marker-end="url(#ar)"/>
       <rect class="node gate" x="596" y="30" width="170" height="78" rx="5"/>
@@ -209,7 +209,7 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
       <path class="edge" d="M766 69 H816" marker-end="url(#ar)"/>
       <rect class="node" x="818" y="40" width="160" height="58" rx="5"/>
       <text class="lab" x="898" y="63" text-anchor="middle" font-weight="600">main</text>
-      <text class="small" x="898" y="80" text-anchor="middle">squash · one review · protected</text>
+      <text class="small" x="898" y="80" text-anchor="middle">squash · Muath approves</text>
 
       <!-- row 2: main -> staging (auto) ; tag -> approval -> prod -->
       <path class="edge" d="M898 98 V150" marker-end="url(#ar)"/>
@@ -224,8 +224,8 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
 
       <path class="edge" d="M560 181 H500" marker-end="url(#ar)"/>
       <rect class="node human" x="362" y="146" width="136" height="70" rx="5"/>
-      <text class="lab" x="430" y="170" text-anchor="middle" font-weight="600">One approval</text>
-      <text class="small" x="430" y="187" text-anchor="middle">not the cutter · any hour</text>
+      <text class="lab" x="430" y="170" text-anchor="middle" font-weight="600">Muath approves</text>
+      <text class="small" x="430" y="187" text-anchor="middle">on the tag · any hour</text>
       <text class="small" x="430" y="202" text-anchor="middle">window from learner_schedule · no P1</text>
 
       <path class="edge" d="M362 181 H302" marker-end="url(#ar)"/>
@@ -249,40 +249,40 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
       <text class="lab" x="510" y="284" text-anchor="middle" font-weight="600">Canary failed: automatic rollback</text>
       <text class="small" x="510" y="300" text-anchor="middle">previous task definition · page P2 · Slack</text>
 
-      <text class="small" x="840" y="250" text-anchor="middle">Freezes: 31 Dec to 2 Jan; 15 to 17 Mar.</text>
+      <text class="small" x="840" y="250" text-anchor="middle">Never while a P1 fires.</text>
       <text class="small" x="840" y="266" text-anchor="middle">Refused while over 2% of learners</text>
       <text class="small" x="840" y="282" text-anchor="middle">have a drop in the next 45 minutes.</text>
     </svg>
     </div>
-    <figcaption>Staging deploys itself on every merge; prod deploys only from a tag, after one named approval, and only once a canary episode and a canary call have passed. The database rolls forward only; a prompt version rolls back by reverting its PR. Full detail in pages 03 and 04.</figcaption>
+    <figcaption>Staging deploys itself on every merge; prod deploys only from a tag, after Muath's approval, and only once a canary episode and a canary call have passed. The database rolls forward only; a prompt version rolls back by reverting its PR. Full detail in pages 03 and 04.</figcaption>
   </figure>
 </section>
 
 <section id="envs">
-  <div class="head"><h2>Three environments</h2><p>No fourth. Backend preview environments were rejected for cost; a PR that needs a running backend is tested on staging under a Slack lock. Staging stays up from build week 2 through the beta (about $180 a month, ADR-16).</p></div>
+  <div class="head"><h2>Three environments</h2><p>No fourth. Backend preview environments were rejected for cost; a PR that needs a running backend is tested on staging under a Slack lock. Staging stays up from the pipeline phase on (about $180 a month, ADR-16).</p></div>
   <div class="tbl"><table>
     <thead><tr><th></th><th>dev</th><th>staging</th><th>prod</th></tr></thead>
     <tbody>
-      <tr><td><b>Where</b></td><td>a laptop, docker compose</td><td>AWS, own VPC, same region as prod</td><td>AWS, home region</td></tr>
-      <tr><td><b>Data</b></td><td>synthetic only</td><td>synthetic plus consented Milestone 0 fixtures; never a copy of prod</td><td>real learners</td></tr>
-      <tr><td><b>Vendors</b></td><td>fakes by default; own keys capped at $20/day</td><td>real keys, staging workspaces, $50/day</td><td>real keys; alert at $1.00/session; daily cap <code>max(50, Σ plan.episodes_per_day × $1.00)</code> from the open (ADR-15)</td></tr>
-      <tr><td><b>Postgres</b></td><td>compose, pgvector</td><td>RDS db.t4g.medium, single AZ, up from build week 2</td><td>RDS db.t4g.large Multi-AZ, 30-day backups, PITR</td></tr>
+      <tr><td><b>Where</b></td><td>one machine, docker compose</td><td>AWS, own VPC, same region as prod</td><td>AWS, home region</td></tr>
+      <tr><td><b>Data</b></td><td>synthetic only</td><td>synthetic learners and consented volunteer clips; never a copy of prod</td><td>real learners</td></tr>
+      <tr><td><b>Vendors</b></td><td>fakes by default; own keys capped at $20/day</td><td>real keys, staging workspaces, $50/day</td><td>real keys; alert at $1.00/session; daily cap <code>max(50, Σ plan.episodes_per_day × $1.00)</code> from launch (ADR-15)</td></tr>
+      <tr><td><b>Postgres</b></td><td>compose, pgvector</td><td>RDS db.t4g.medium, single AZ, up from the pipeline phase</td><td>RDS db.t4g.large Multi-AZ, 30-day backups, PITR</td></tr>
       <tr><td><b>Storage</b></td><td>MinIO</td><td>three S3 buckets; voice SSE-C, show audio SSE-KMS</td><td>three S3 buckets; voice SSE-C per learner, show audio SSE-KMS; versions kept 7 days on <code>learners/</code>, never on <code>ephemeral/</code>; lifecycle rules</td></tr>
       <tr><td><b>Workflow, media</b></td><td>Inngest dev server, LiveKit dev server</td><td>Inngest Cloud EU <code>staging</code>, LiveKit <code>forone-staging</code></td><td>Inngest Cloud EU <code>prod</code>, LiveKit <code>forone-prod</code></td></tr>
       <tr><td><b>Web</b></td><td><code>next dev</code></td><td>Vercel preview per PR; <code>staging.</code> on main</td><td><code>app.</code> from the release tag</td></tr>
       <tr><td><b>Email</b></td><td>Mailpit; a real inbox is unreachable by construction</td><td>Resend test domain</td><td>Resend, tracking off</td></tr>
-      <tr><td><b>Who deploys</b></td><td>anyone, to their laptop</td><td>CI on merge</td><td>CI from a tag, after one approval</td></tr>
+      <tr><td><b>Who deploys</b></td><td>the agent, locally</td><td>CI on a merge Muath approved</td><td>CI from a tag, after Muath's approval</td></tr>
       <tr><td><b>Secrets</b></td><td><code>.env</code>, generated by <code>make dev</code></td><td>Secrets Manager via task role</td><td>Secrets Manager via task role; humans only through break-glass</td></tr>
     </tbody>
   </table></div>
-  <p class="muted" style="margin-top:12px;font-size:15px">Region: <code>HOME_REGION</code> is AWS <code>eu-central-1</code>, final for the beta (ADR-24.8); <code>me-central-1</code> is a one-variable move only counsel can trigger, and an in-Kingdom requirement would mean a different Terraform tree and five to eight engineer-days. Transfers rest on standard contractual clauses with a transfer impact assessment, never consent. Infrastructure as code is Terraform with an S3 state backend; GitHub reaches AWS through OIDC and no long-lived key exists for a human or for CI.</p>
+  <p class="muted" style="margin-top:12px;font-size:15px">Region: <code>HOME_REGION</code> is AWS <code>eu-central-1</code> (ADR-24.8, ADR-25.3): GDPR-grade handling for every learner. Transfers to US vendors rest on the vendors' standard DPAs with SCCs; there is no lawyer step (ADR-25.3). Infrastructure as code is Terraform with an S3 state backend; GitHub reaches AWS through OIDC and no long-lived key exists for a person, the agent or CI.</p>
 </section>
 
 <section id="data">
-  <div class="head"><h2>Where learner data may go</h2><p>The product holds a person's voice and the facts of their life. The home region holds everything at rest; the EU tools hold pointers; the model and voice vendors see only what their role needs, in transit, under a signed DPA. A laptop never holds any of it.</p></div>
+  <div class="head"><h2>Where learner data may go</h2><p>The product holds a person's voice and the facts of their life. The home region holds everything at rest; the EU tools hold pointers; the model and voice vendors see only what their role needs, in transit, under the vendor's standard DPA. No development environment, and no agent session, ever holds any of it.</p></div>
   <figure>
     <div class="figbox">
-    <svg viewBox="0 0 1000 400" role="img" aria-label="The learner's voice, facts, transcripts and identity rest only in the home region in Postgres under row-level security and in S3 under a per-learner key. Inngest, Sentry, CloudWatch and Slack receive ids and enums only. Langfuse receives metadata for everyone and prompt text only for learners who opted in. Anthropic, Google, the voice vendors and the recognizers receive text or audio in transit under the processor register. A laptop and staging receive nothing from prod, only synthetic learners and consented fixtures.">
+    <svg viewBox="0 0 1000 400" role="img" aria-label="The learner's voice, facts, transcripts and identity rest only in the home region in Postgres under row-level security and in S3 under a per-learner key. Inngest, Sentry, CloudWatch and Slack receive ids and enums only. Langfuse receives metadata for everyone and prompt text only for learners who opted in. Anthropic, Google, the voice vendors and the recognizers receive text or audio in transit under the processor register. Development and staging receive nothing from prod, only synthetic learners and consented fixtures.">
       <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
       <marker id="arx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--crit)"/></marker></defs>
 
@@ -330,31 +330,31 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
       <text class="small" x="610" y="358" text-anchor="middle">retention switches off · DPA signed</text>
       <text class="small" x="610" y="372" text-anchor="middle">CI refuses a vendor without a register row</text>
 
-      <!-- laptop & staging -->
+      <!-- dev & staging -->
       <rect class="region" x="780" y="60" width="200" height="280" rx="8"/>
-      <text class="mono" x="794" y="82" font-weight="500">LAPTOP · STAGING</text>
+      <text class="mono" x="794" y="82" font-weight="500">DEV · STAGING</text>
       <rect class="node" x="798" y="110" width="164" height="50" rx="5"/>
       <text class="lab" x="880" y="131" text-anchor="middle" font-weight="600">Synthetic learners</text>
       <text class="small" x="880" y="148" text-anchor="middle">seeds, cassettes, canaries</text>
       <rect class="node" x="798" y="176" width="164" height="50" rx="5"/>
       <text class="lab" x="880" y="197" text-anchor="middle" font-weight="600">Consented fixtures</text>
-      <text class="small" x="880" y="214" text-anchor="middle">Milestone 0, names tokenized</text>
+      <text class="small" x="880" y="214" text-anchor="middle">open corpus, volunteer clips</text>
       <path class="edge forbid" d="M442 200 H778" marker-end="url(#arx)"/>
       <rect x="560" y="188" width="100" height="22" rx="3" fill="var(--surface)"/>
       <text class="small" x="610" y="204" text-anchor="middle" style="fill:var(--crit)" font-weight="600">nothing from prod</text>
       <text class="small" x="880" y="262" text-anchor="middle">A cassette with a real learner's</text>
       <text class="small" x="880" y="276" text-anchor="middle">text is deleted on sight.</text>
-      <text class="small" x="880" y="306" text-anchor="middle">Fixtures beyond the 30 clips stay</text>
-      <text class="small" x="880" y="320" text-anchor="middle">out of the public repo until the</text>
-      <text class="small" x="880" y="334" text-anchor="middle">learner signs the addendum.</text>
+      <text class="small" x="880" y="306" text-anchor="middle">No real learner's data is</text>
+      <text class="small" x="880" y="320" text-anchor="middle">ever a fixture; the agent</text>
+      <text class="small" x="880" y="334" text-anchor="middle">never reads learner content.</text>
     </svg>
     </div>
-    <figcaption>Three destinations with three rules: the home region holds everything, EU tools hold ids (and Langfuse holds text only for learners who opted in), vendors see only what their role needs. Page 09 lists what an engineer may look at without asking, with a reason row, and never.</figcaption>
+    <figcaption>Three destinations with three rules: the home region holds everything, EU tools hold ids (and Langfuse holds text only for learners who opted in), vendors see only what their role needs. Page 09 lists what the agent may look at (ids, never content) and what only Muath may read, with a reason row.</figcaption>
   </figure>
 </section>
 
 <section id="cost">
-  <div class="head"><h2>Cost per session, by voice stack</h2><p>The number the cost dashboard shows every morning, as architecture 08 §6.1 computes it. Gemini's prices double on 1 January 2027, during the build, so the beta runs on post-doubling prices and the blind test on 17 November picks the voice on them; there is no mid-beta voice swap (ADR-24.6). With the levers pulled, the floor is $0.43 to $0.45.</p></div>
+  <div class="head"><h2>Cost per session, by voice stack</h2><p>The number the cost dashboard shows every morning, as architecture 08 §6.1 computes it. Gemini's prices double on 1 January 2027, before launch, so version 1 runs on post-doubling prices and the blind test picks the voice on them (ADR-24.6). With the levers pulled, the floor is $0.43 to $0.45.</p></div>
   <div class="chart" id="costchart">
     <svg viewBox="0 0 960 320" role="img" aria-label="Stacked horizontal bars of cost per daily session: Gemini voice before the doubling $0.67, Gemini after the 1 January 2027 doubling $0.85, Inworld after it $0.72, ElevenLabs at list price after it $1.22. Reference lines at the $0.60 budget, the $0.80 warning and the $1.00 stop line.">
       <g id="bars"></g>
@@ -386,93 +386,92 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
 </section>
 
 <section id="pages">
-  <div class="head"><h2>The ten pages</h2><p>Each page is a Markdown file in <code>engineering/</code>, written against the nine architecture documents, concept v2 and the decisions of 23 October. The line under each title is the rule it carries that the architecture did not already state.</p></div>
+  <div class="head"><h2>The ten pages</h2><p>Each page is a Markdown file in <code>engineering/</code>, written against the architecture documents, PRD-v3 and ADR-25, for the coding agent. The line under each title is the rule it carries that the architecture did not already state.</p></div>
   <div class="pages">
     <div class="page"><div class="n">01</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/01-repository-layout.md">Repository layout</a></h3><p>One monorepo, four deployables (web, api, workflows, call-worker), eight packages, one Python image with three entrypoints, naming rules, and where every prompt lives as a versioned file.</p><div class="carry"><em>Carries</em><span>Two package kinds (ADR-02): <code>packages/languages/&lt;target&gt;/</code> for what a model sees about the target language, and <code>packages/native/&lt;lang&gt;/</code> for interface strings, consent texts, Salma's voice and crisis resources.</span></div></div></div>
-    <div class="page"><div class="n">02</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/02-local-development.md">Local development</a></h3><p>A full day of the product on a laptop in under an hour: docker compose, idempotent seeds with three synthetic learners, the fake vendors and how to record a cassette, every environment variable with its owner.</p><div class="carry"><em>Carries</em><span>Fake calls still write priced <code>vendor_calls</code> rows, so the cost page works in dev.</span></div></div></div>
-    <div class="page"><div class="n">03</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/03-environments-and-deployment.md">Environments and deployment</a></h3><p>dev, staging, prod; Terraform with an S3 backend; Secrets Manager injected by task role; GitHub OIDC; the home region (<code>eu-central-1</code>); the computed release window, freezes, rollback, expand-then-contract migrations, and the drained call-worker replacement.</p><div class="carry"><em>Carries</em><span>No long-lived AWS key exists for a human or for CI.</span></div></div></div>
-    <div class="page"><div class="n">04</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/04-ci-cd.md">CI and CD</a></h3><p>Four workflows, the checks on every PR, the eval gate that runs by diff and prints its cost, Vercel previews on staging, branch protection, the nightly, and the seven-step release.</p><div class="carry"><em>Carries</em><span>A PR's eval gate may not spend more than $25 without a label and a reviewer's yes.</span></div></div></div>
-    <div class="page"><div class="n">05</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/05-testing-strategy.md">Testing strategy</a></h3><p>Five layers: unit, contract, end to end, audio and voice, model-output evals. The simulated caller, the 50 scripted calls, golden sets seeded from Milestone 0, and the plan to port the coverage checker into the fitter.</p><div class="carry"><em>Carries</em><span>A recognizer is gated on error-preservation rate before word error rate, because speech-to-text smooths learner errors.</span></div></div></div>
-    <div class="page"><div class="n">06</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/06-observability-and-on-call.md">Observability and on-call</a></h3><p>Postgres as the metrics store, alerts as SQL with runbook links, the cost-per-session dashboard defined line by line, the six P1 families that ring a phone, the on-call rota (one responder at a time, accepted for the beta, ADR-24.12), and blameless postmortems.</p><div class="carry"><em>Carries</em><span>A postmortem that produces only "be more careful" is sent back.</span></div></div></div>
-    <div class="page"><div class="n">07</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/07-vendor-accounts-and-cost-controls.md">Vendor accounts and cost controls</a></h3><p>The 25 accounts and who opens them, keys per environment and per engineer, the vendor-side retention switches, spend caps, spend modes, the stop line, the risk calendar and the monthly reconciliation.</p><div class="carry"><em>Carries</em><span>Our cap is always lower than the vendor's cap, so ours fires first.</span></div></div></div>
-    <div class="page"><div class="n">08</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/08-coding-standards-and-review.md">Coding standards and review</a></h3><p>Python and TypeScript rules enforced by Ruff, Pyright and ESLint; PR shape; the ten rules for prompt changes; the nine things a reviewer checks in this product, laws first.</p><div class="carry"><em>Carries</em><span>A model change is a prompt change and runs the same suites.</span></div></div></div>
-    <div class="page"><div class="n">09</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/09-data-handling.md">Data handling</a></h3><p>Seven data classes, the promises the code keeps with their windows and verifying jobs, what engineers may look at without asking, with a reason, and never; where data may go; consent; fixtures; research use; incidents.</p><div class="carry"><em>Carries</em><span>Milestone 0 fixtures beyond the 30 clips stay out of the public repository until the learner signs Part 2 of the consent addendum (ADR-24.16, B10).</span></div></div></div>
-    <div class="page"><div class="n">10</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/10-definition-of-done.md">Definition of done</a></h3><p>Checklists for a story, a prompt change, a release, and the build itself at the exit on 12 March 2027 (Day-1 P0 done; Later-in-the-beta P0 by its beta day).</p><div class="carry"><em>Carries</em><span>A story without a kill switch is not done.</span></div></div></div>
+    <div class="page"><div class="n">02</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/02-local-development.md">Local development</a></h3><p>A full day of the product on one machine in under an hour: docker compose, idempotent seeds with three synthetic learners, the fake vendors and how to record a cassette, every environment variable with its owner.</p><div class="carry"><em>Carries</em><span>Fake calls still write priced <code>vendor_calls</code> rows, so the cost page works in dev.</span></div></div></div>
+    <div class="page"><div class="n">03</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/03-environments-and-deployment.md">Environments and deployment</a></h3><p>dev, staging, prod; Terraform with an S3 backend; Secrets Manager injected by task role; GitHub OIDC; the home region (<code>eu-central-1</code>); Muath's approval on every prod deploy, the computed release window, rollback, expand-then-contract migrations, and the drained call-worker replacement.</p><div class="carry"><em>Carries</em><span>The agent holds no prod credential; no long-lived AWS key exists for anyone.</span></div></div></div>
+    <div class="page"><div class="n">04</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/04-ci-cd.md">CI and CD</a></h3><p>The workflows, the checks on every PR, the AI review pass, the eval gate that runs by diff and prints its cost, Vercel previews, branch protection with Muath as the only approver, the nightly, and the release.</p><div class="carry"><em>Carries</em><span>A PR's eval gate may not spend more than $25 without a label only Muath applies.</span></div></div></div>
+    <div class="page"><div class="n">05</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/05-testing-strategy.md">Testing strategy</a></h3><p>Tests first: each acceptance criterion is a named test before the code. Five layers: unit, contract, end to end, audio and voice, model-output evals. The simulated caller, the scripted calls, golden sets from synthetic learners and open and volunteer clips, and the coverage checker ported into the fitter.</p><div class="carry"><em>Carries</em><span>A recognizer is gated on error-preservation rate before word error rate, because speech-to-text smooths learner errors.</span></div></div></div>
+    <div class="page"><div class="n">06</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/06-observability-and-on-call.md">Observability and operations</a></h3><p>Postgres as the metrics store, alerts as SQL with runbook links, the cost-per-session dashboard defined line by line, the six P1 families and the fallback that runs before each, operations without a rota (alerts to Muath, runbooks the agent runs when asked), and blameless postmortems.</p><div class="carry"><em>Carries</em><span>A postmortem that produces only "be more careful" is sent back.</span></div></div></div>
+    <div class="page"><div class="n">07</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/07-vendor-accounts-and-cost-controls.md">Vendor accounts and cost controls</a></h3><p>The accounts Muath opens, keys per environment and the agent's capped dev keys, the vendor-side retention switches, spend caps, spend modes, the stop line, the outside facts that change costs and the monthly reconciliation.</p><div class="carry"><em>Carries</em><span>Our cap is always lower than the vendor's cap, so ours fires first.</span></div></div></div>
+    <div class="page"><div class="n">08</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/08-coding-standards-and-review.md">Coding standards and review</a></h3><p>Python and TypeScript rules enforced by Ruff, Pyright and ESLint; PR shape; the ten rules for prompt changes; the eleven things the AI review pass checks in this product, laws first, and the separate security review for auth, keys, media URLs, the feed and deletion.</p><div class="carry"><em>Carries</em><span>A model change is a prompt change and runs the same suites.</span></div></div></div>
+    <div class="page"><div class="n">09</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/09-data-handling.md">Data handling</a></h3><p>Seven data classes, the promises the code keeps with their windows and verifying jobs, what the agent may look at (ids, never content) and what only Muath may read, with a reason; where data may go; consent; fixtures; research use; incidents.</p><div class="carry"><em>Carries</em><span>No real learner's data is ever a fixture, a prompt or a PR; the agent never reads learner content.</span></div></div></div>
+    <div class="page"><div class="n">10</div><div><h3><a href="https://github.com/Muath-8/for-one/blob/main/engineering/10-definition-of-done.md">Definition of done</a></h3><p>Checklists for a story (tests first), a prompt change, a release, and the launch of version 1 (every v1 story done; v1.1 may follow).</p><div class="carry"><em>Carries</em><span>A story without a kill switch is not done.</span></div></div></div>
   </div>
 </section>
 
 <section id="vendors">
-  <div class="head"><h2>Vendor accounts Muath opens himself</h2><p>These carry a contract, a card or the company's legal identity. Open each under a company email with two-factor on, and add the engineers as members. "Week" is the build week the account is first needed; the three dated rows are hard deadlines.</p></div>
+  <div class="head"><h2>Vendor accounts Muath opens</h2><p>These carry a contract, a card or the company's legal identity. Open each under a company email with two-factor on; the agent gets only scoped, capped keys through Secrets Manager, never a login. "By" is the release-plan phase in which the account is first needed.</p></div>
   <div class="tbl"><table>
     <thead><tr><th>Account</th><th>For</th><th>Plan</th><th>By</th><th class="num">Monthly</th></tr></thead>
     <tbody>
-      <tr><td><b>AWS</b> (new account, <code>eu-central-1</code>)</td><td>RDS, S3, KMS, Fargate, Secrets Manager, WAF</td><td>pay as you go; budget alert at $1,200</td><td><span class="pill m">before week 1</span></td><td class="num">$700 to $1,100</td></tr>
-      <tr><td><b>Apple Developer Program</b></td><td>Sign in with Apple</td><td>$99 a year; approval takes days; email codes ship first</td><td><span class="pill m">18 Nov</span></td><td class="num">$8</td></tr>
-      <tr><td><b>Google Cloud</b> project with Gemini API and OAuth</td><td>editor; embeddings (ADR-10); TTS candidate; Google sign-in</td><td>paid tier, billing on the project; OAuth verification takes days</td><td><span class="pill m">18 Nov</span></td><td class="num">tens</td></tr>
-      <tr><td><b>Paddle</b>, merchant of record (ADR-24.4)</td><td>subscriptions, hosted checkout (cards, Apple Pay, Google Pay, PayPal), tax filed by Paddle</td><td>under the legal entity; a test-mode scaffold until then</td><td><span class="pill m">2 Dec</span></td><td class="num">fees</td></tr>
-      <tr><td><b>GitHub</b> organization or Team plan</td><td>repo, Actions, environments with approval</td><td>Team</td><td><span class="pill">week 1</span></td><td class="num">$4 a seat</td></tr>
-      <tr><td><b>Vercel</b></td><td>web hosting, previews</td><td>Pro</td><td><span class="pill">week 1</span></td><td class="num">$20 a seat</td></tr>
-      <tr><td><b>Anthropic Console</b> (workspace per environment)</td><td>teacher, writer, fitter, host, Salma, analyst, memory keeper, proof, rater</td><td>prepaid; Batch API; rate tier raise; zero-data-retention request</td><td><span class="pill">week 1</span></td><td class="num">$2,500 prepaid for the first beta month</td></tr>
-      <tr><td><b>ElevenLabs</b></td><td>voice finalist; alignment</td><td>pay as you go; paid tier only if it wins, at a negotiated rate (target $12 to $15 per million characters)</td><td><span class="pill">week 1</span></td><td class="num">$0 to $330</td></tr>
-      <tr><td><b>Inworld</b></td><td>voice finalist</td><td>pay as you go; paid tier if it wins</td><td><span class="pill">week 1</span></td><td class="num">$0 to $100</td></tr>
-      <tr><td><b>Soniox</b></td><td>streaming recognizer finalist; the word button's own-language recognizer</td><td>pay as you go; ask for 50 streams</td><td><span class="pill">week 1</span></td><td class="num">usage</td></tr>
-      <tr><td><b>Deepgram</b></td><td>streaming recognizer finalist, hot secondary</td><td>pay as you go; ask for 50 streams</td><td><span class="pill">week 1</span></td><td class="num">usage</td></tr>
-      <tr><td><b>AssemblyAI</b></td><td>verbatim recognizer finalist</td><td>pay as you go; 50 concurrent jobs</td><td><span class="pill">week 1</span></td><td class="num">usage</td></tr>
-      <tr><td><b>Inngest Cloud</b> (EU)</td><td>durable workflows</td><td>free, then Pro</td><td><span class="pill">week 1</span></td><td class="num">$0 to $75</td></tr>
-      <tr><td><b>Langfuse Cloud</b> (EU project)</td><td>model traces, 30-day retention</td><td>Core</td><td><span class="pill">week 1</span></td><td class="num">up to $59</td></tr>
-      <tr><td><b>Sentry</b> (EU residency)</td><td>errors</td><td>Team</td><td><span class="pill">week 1</span></td><td class="num">about $26</td></tr>
-      <tr><td><b>Cloudflare</b></td><td>DNS, Turnstile; proxy off for <code>api.</code></td><td>free</td><td><span class="pill">week 1</span></td><td class="num">$0</td></tr>
-      <tr><td><b>Domain registrar</b></td><td>the brand domain</td><td></td><td><span class="pill m">18 Nov</span></td><td class="num">yearly</td></tr>
-      <tr><td><b>Slack</b> workspace</td><td><code>#forone-ops</code>, deploys, the staging lock</td><td>free</td><td><span class="pill">week 1</span></td><td class="num">$0</td></tr>
-      <tr><td><b>Speechace</b></td><td>pronunciation scoring</td><td>developer plan</td><td><span class="pill">week 2</span></td><td class="num">plan price</td></tr>
-      <tr><td><b>LiveKit Cloud</b></td><td>call media; Egress disabled</td><td>Ship</td><td><span class="pill">week 2</span></td><td class="num">$50 plus minutes</td></tr>
-      <tr><td><b>Resend</b></td><td>the three message kinds; tracking off</td><td>Pro once over free</td><td><span class="pill">week 3</span></td><td class="num">$0 to $20</td></tr>
-      <tr><td><b>Better Stack</b></td><td>uptime, heartbeats, phone paging</td><td>on-call plan (approved, ADR-24.12)</td><td><span class="pill">week 4</span></td><td class="num">about $30</td></tr>
-      <tr><td><b>Microsoft Azure</b> Speech</td><td>secondary pronunciation scorer</td><td>pay as you go; optional</td><td><span class="pill">later</span></td><td class="num">$0</td></tr>
+      <tr><td><b>AWS</b> (new account, <code>eu-central-1</code>)</td><td>RDS, S3, KMS, Fargate, Secrets Manager, WAF</td><td>pay as you go; budget alert at $1,200</td><td><span class="pill m">phase 1</span></td><td class="num">$700 to $1,100</td></tr>
+      <tr><td><b>GitHub</b></td><td>repo, Actions, environments with approval</td><td>Team if private</td><td><span class="pill">phase 1</span></td><td class="num">$4 a seat</td></tr>
+      <tr><td><b>Vercel</b></td><td>web hosting, previews</td><td>Pro</td><td><span class="pill">phase 1</span></td><td class="num">$20 a seat</td></tr>
+      <tr><td><b>Anthropic Console</b> (workspace per environment)</td><td>teacher, writer, fitter, host, Salma, analyst, memory keeper, proof, rater; the CI review pass</td><td>prepaid; Batch API; rate tier raise; zero-data-retention request</td><td><span class="pill m">phase 1</span></td><td class="num">$2,500 prepaid for the first month after launch</td></tr>
+      <tr><td><b>Google Cloud</b> project with the Gemini API</td><td>editor; embeddings (ADR-10); TTS candidate</td><td>paid tier, billing on the project</td><td><span class="pill">phase 1</span></td><td class="num">tens</td></tr>
+      <tr><td><b>Inngest Cloud</b> (EU)</td><td>durable workflows</td><td>free, then Pro</td><td><span class="pill">phase 1</span></td><td class="num">$0 to $75</td></tr>
+      <tr><td><b>Langfuse Cloud</b> (EU project)</td><td>model traces, 30-day retention</td><td>Core</td><td><span class="pill">phase 1</span></td><td class="num">up to $59</td></tr>
+      <tr><td><b>Sentry</b> (EU residency)</td><td>errors</td><td>Team</td><td><span class="pill">phase 1</span></td><td class="num">about $26</td></tr>
+      <tr><td><b>Slack</b> workspace</td><td><code>#forone-ops</code>, <code>#forone-deploys</code>, the staging lock</td><td>free</td><td><span class="pill">phase 1</span></td><td class="num">$0</td></tr>
+      <tr><td><b>ElevenLabs</b></td><td>voice finalist; alignment</td><td>pay as you go; paid tier only if it wins, at a negotiated rate (target $12 to $15 per million characters)</td><td><span class="pill">phase 1</span></td><td class="num">$0 to $330</td></tr>
+      <tr><td><b>Inworld</b></td><td>voice finalist</td><td>pay as you go; paid tier if it wins</td><td><span class="pill">phase 1</span></td><td class="num">$0 to $100</td></tr>
+      <tr><td><b>Soniox</b></td><td>streaming recognizer finalist; the word button's own-language recognizer</td><td>pay as you go; ask for 50 streams</td><td><span class="pill">phase 1</span></td><td class="num">usage</td></tr>
+      <tr><td><b>Deepgram</b></td><td>streaming recognizer finalist, hot secondary</td><td>pay as you go; ask for 50 streams</td><td><span class="pill">phase 1</span></td><td class="num">usage</td></tr>
+      <tr><td><b>AssemblyAI</b></td><td>verbatim recognizer finalist</td><td>pay as you go; 50 concurrent jobs</td><td><span class="pill">phase 1</span></td><td class="num">usage</td></tr>
+      <tr><td><b>LiveKit Cloud</b></td><td>call media; Egress disabled</td><td>Ship</td><td><span class="pill">phase 2</span></td><td class="num">$50 plus minutes</td></tr>
+      <tr><td><b>Speechace</b></td><td>pronunciation scoring</td><td>developer plan</td><td><span class="pill">phase 4</span></td><td class="num">plan price</td></tr>
+      <tr><td><b>Paddle</b>, merchant of record (ADR-24.4)</td><td>subscriptions, hosted checkout (cards, Apple Pay, Google Pay, PayPal), tax, invoices, refunds</td><td>sandbox first; the live account under the company (A5)</td><td><span class="pill m">phase 5</span></td><td class="num">fees</td></tr>
+      <tr><td><b>Domain registrar</b>, <b>Cloudflare</b>, <b>Resend</b></td><td>the domain (<code>APP_DOMAIN</code>); DNS and Turnstile; the sign-in code and the three message kinds, tracking off</td><td>free to Pro</td><td><span class="pill m">before email (A6)</span></td><td class="num">$0 to $20</td></tr>
+      <tr><td><b>Better Stack</b></td><td>uptime, heartbeats, phone escalation to Muath</td><td>the plan with phone calls (ADR-24.12)</td><td><span class="pill">phase 6</span></td><td class="num">about $30</td></tr>
+      <tr><td><b>Microsoft Azure</b> Speech</td><td>secondary pronunciation scorer</td><td>pay as you go; optional</td><td><span class="pill">only if needed</span></td><td class="num">$0</td></tr>
     </tbody>
   </table></div>
-  <p class="muted" style="margin-top:12px;font-size:15px">Not to open: Hume (voice APIs shut on 13 November; CI rejects any <code>hume</code> dependency) and OpenAI (embeddings use Google's model, ADR-10). Not carried from Milestone 0 as processors: Google Drive, Google Forms, WhatsApp, ElevenLabs Agents, claude.ai Projects. Each account becomes a row in the processor register (<code>legal/05-ropa.md</code>) with its DPA status; code may not call a vendor whose row is missing.</p>
+  <p class="muted" style="margin-top:12px;font-size:15px">Not to open: Hume (voice APIs shut on 13 November 2026; CI rejects any <code>hume</code> dependency), OpenAI (embeddings use Google's model, ADR-10), and the Apple and Google developer programmes (email one-time code is the only sign-in, ADR-25.4). Not carried from Milestone 0 as processors: Google Drive, Google Forms, WhatsApp, ElevenLabs Agents, claude.ai Projects. Each account becomes a row in the processor register (<code>legal/05-ropa.md</code>) with its DPA status; code may not call a vendor whose row is missing.</p>
 </section>
 
 <section id="calendar">
-  <div class="head"><h2>The calendar engineering has to keep</h2><p>Vendor deadlines, owner actions and freezes between the recognizer test and the end of the first rater window. The two shaded bands are deploy freezes.</p></div>
-  <figure>
-    <div class="figbox">
-    <svg viewBox="0 0 1000 300" role="img" aria-label="Timeline from November 2026 to May 2027: recognizer test 10 Nov, voice decision and counsel answer 17 Nov, build starts 18 Nov, Paddle account 2 Dec, voice rate asked and consent Part 2 15 Dec, no releases 31 Dec to 2 Jan, Gemini prices double 1 Jan, counsel reviews legal drafts 15 Feb, exit document 12 Mar, pre-open freeze 15 to 17 Mar, beta opens 17 Mar, gate review 20 Apr, rater pin ends 11 May.">
-      <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
-      <g id="timeline"></g>
-    </svg>
-    </div>
-    <figcaption>The build runs 18 November 2026 to 12 March 2027 (week dates in <code>backlog/00-release-plan.md</code>); the beta opens 17 March with two engineers from build start, 17 February with three, and the date is re-forecast every build week (ADR-24.11). Prod releases happen at any hour inside a window computed from learners' drop times, never inside a freeze and never while a P1 fires. Full calendar with owners in page 07 §6.</figcaption>
-  </figure>
+  <div class="head"><h2>The build order</h2><p>No calendar dates (ADR-25.1). The agent works story by story in the dependency order of <code>backlog/00-release-plan.md</code>; each phase ends on an exit check, and version 1 launches once, publicly, when every v1 story passes and the launch checklist (page 10 §4) is green.</p></div>
+  <div class="open">
+    <div><span><b>1 · Foundation.</b> Repo, CI with the review pass, Terraform for staging in <code>eu-central-1</code>, events and the learner model's tables, keys, tracing and the price book, logging and alerts, the English package and its gate result</span><span class="due">every test render is a priced row</span></div>
+    <div><span><b>2 · Pipeline and the minimal call.</b> Vendor tests on open and volunteer clips, <code>vendors.yaml</code>, the pipeline from teacher to publish on synthetic learners, the minimal call worker and the scripted calls; staging stays up from here</span><span class="due">test episodes with measured cost</span></div>
+    <div><span><b>3 · Onboarding, Today, feed.</b> A1 to A10 with Salma, email one-time code sign-in, Today, the player, the feed and the drop, consent and the age gate</span><span class="due">first spoken sentence under 5 min</span></div>
+    <div><span><b>4 · The full call and the after-session pass.</b> Hold-to-talk, the word button, the governor, verbatim, the voice-note fallback, crisis, the analyst and memory keeper, the spend guard</span><span class="due">zero governor violations</span></div>
+    <div><span><b>5 · The first week's surfaces.</b> The claim gate and weekly proof, the notebook, Controls, plans and Paddle checkout</span><span class="due">a proof built only from events</span></div>
+    <div><span><b>6 · Production and launch.</b> Production from the same Terraform, a restore rehearsed, deletion and export verified, the self-review checklist approved</span><span class="due">the launch checklist is green</span></div>
+  </div>
+  <p class="muted" style="margin-top:12px;font-size:15px">The only dates that matter are outside facts: Gemini's prices double on 1 January 2027, so the voice is chosen on post-doubling prices; Hume's voice APIs shut on 13 November 2026.</p>
 </section>
 
 <section id="open">
-  <div class="head"><h2>Decided for Muath</h2><p>Collected from the ten pages. Every item was decided on 2026-11-12 (ADR-24); what remains is the owner action, with its date from <code>architecture/10</code> §10.</p></div>
+  <div class="head"><h2>Owner actions</h2><p>What only Muath can do, from the register in <code>architecture/10</code> §10. None carries a date; each says what it must happen before.</p></div>
   <div class="open">
-    <div><span>Vendor accounts: every processor approved (ADR-24.17); Muath opens them in the company's name</span><span class="due">from week 1 · domain, Apple, Google by 18 Nov (A3)</span></div>
-    <div><span>Home region: <code>eu-central-1</code>, final for the beta (ADR-24.8); counsel confirms</span><span class="due">17 Nov (A1)</span></div>
-    <div><span>Staffing: two engineers from build start; beta opens 17 Mar 2027, 17 Feb with three (ADR-24.11); the self-merge exception ends when the second starts</span><span class="due">18 Nov (A2)</span></div>
-    <div><span>Milestone 0 consent: a two-part addendum; Part 1 before any clip goes to a vendor, Part 2 for re-onboarding and fixtures (ADR-24.16, B10)</span><span class="due">Part 2 by 15 Dec (A9)</span></div>
-    <div><span>Payments: Paddle as merchant of record (ADR-24.4)</span><span class="due">account by 2 Dec (A6)</span></div>
-    <div><span>On-call: the one-responder rota accepted; phone escalation for a systemic drop failure; Better Stack approved (ADR-24.12)</span><span class="due">decided</span></div>
-    <div><span>Spend cap <code>max(50, Σ plan.episodes_per_day × $1.00)</code> and the 48-hour stop-line plan window, as policy (ADR-15, 24.23)</span><span class="due">decided</span></div>
-    <div><span>Counsel reviews the privacy notice, terms, consents, DPIA and crisis wording in <code>legal/</code></span><span class="due">15 Feb 2027 (A8)</span></div>
+    <div><span>A1 · Open the vendor accounts on this page, accept each vendor's standard DPA, request zero data retention from Anthropic</span><span class="due">before the first staging deploy</span></div>
+    <div><span>A2 · Record about 30 volunteer clips and rate the voice blind test (ADR-25.6)</span><span class="due">before the vendor choice</span></div>
+    <div><span>A3 · Read and approve the English bibles and Salma's lines; an AI review pass checks them first (ADR-25.7)</span><span class="due">before the writer and host prompts are tuned</span></div>
+    <div><span>A4 · Complete the self-review checklist and approve the legal texts; no lawyer unless a trigger applies (ADR-25.3)</span><span class="due">before launch</span></div>
+    <div><span>A5 · Open the Paddle account (the sandbox works before)</span><span class="due">before checkout uses the live API</span></div>
+    <div><span>A6 · Choose and register the domain (<code>APP_DOMAIN</code>, ADR-25.8)</span><span class="due">before email and the first public deploy</span></div>
+    <div><span>A7 · Appoint an EU and UK representative if the company is outside the EU and UK</span><span class="due">before launch, if it applies</span></div>
+    <div><span>A8 · Approve merges, migrations, prompt and bible changes and production deploys as the agent asks (ADR-25.2)</span><span class="due">each one</span></div>
+    <div><span>A9 · Ask the chosen voice vendor for a negotiated rate (ADR-24.6)</span><span class="due">ideally before launch</span></div>
   </div>
 </section>
 
 <section id="starters">
-  <div class="head"><h2>Starter files</h2><p>Ready to copy into the repository root and <code>.github/workflows/</code> on day one. None contains a secret.</p></div>
+  <div class="head"><h2>Starter files</h2><p>Ready to copy into the repository root and <code>.github/workflows/</code> before the first story. None contains a secret.</p></div>
   <div class="files">
-    <div class="file"><span class="path">.github/workflows/ci.yml</span><h3>The PR pipeline</h3><p>Nine jobs: path filter, python (lint, types, unit, migrations, integration), web, package validation, gitleaks, Terraform plan when infra changed, the eval gate when a versioned path changed with its cost printed first, and the image build on main. OIDC to AWS, no stored keys.</p><a href="https://github.com/Muath-8/for-one/blob/main/engineering/starter-files/ci.yml">Open on GitHub</a></div>
+    <div class="file"><span class="path">.github/workflows/ci.yml</span><h3>The PR pipeline</h3><p>Eleven jobs: path filter, python (lint, types, unit, migrations, integration), web, package validation, gitleaks and dependency audit, the AI review pass, the security review pass when a security path changed, Terraform plan when infra changed, the eval gate when a versioned path changed with its cost printed first, and the image build on main. OIDC to AWS, no stored keys.</p><a href="https://github.com/Muath-8/for-one/blob/main/engineering/starter-files/ci.yml">Open on GitHub</a></div>
     <div class="file"><span class="path">.env.example</span><h3>Every variable, dev values</h3><p>Fake vendors on, compose endpoints, generated secrets left blank for <code>make dev</code> to fill, Cloudflare's documented always-pass Turnstile key. CI fails if <code>Settings</code> declares a field that is not here.</p><a href="https://github.com/Muath-8/for-one/blob/main/engineering/starter-files/.env.example">Open on GitHub</a></div>
-    <div class="file"><span class="path">CODEOWNERS</span><h3>Who must review what</h3><p>Prompts, rules and versions need a second pair of eyes; bibles, the native packages' strings and crisis texts need Muath; keys, deletion jobs, the research pseudonymizer and the processor register need the infra engineer and Muath. Placeholders for the engineers' logins.</p><a href="https://github.com/Muath-8/for-one/blob/main/engineering/starter-files/CODEOWNERS">Open on GitHub</a></div>
+    <div class="file"><span class="path">AGENTS.md</span><h3>The agent's instructions</h3><p>What the coding agent reads first: the canon in order of authority, how to pick up a story, tests first, never invent architecture (ask Muath instead), the laws as code checks, what needs Muath's approval, and the secrets and learner-data rules.</p><a href="https://github.com/Muath-8/for-one/blob/main/engineering/starter-files/AGENTS.md">Open on GitHub</a></div>
+    <div class="file"><span class="path">CODEOWNERS</span><h3>Who approves what</h3><p>@Muath-8 on every path. The sections mark the paths that carry extra checks in the review pass: prompts, bibles, consent and crisis texts, keys, deletion jobs, migrations and infrastructure.</p><a href="https://github.com/Muath-8/for-one/blob/main/engineering/starter-files/CODEOWNERS">Open on GitHub</a></div>
   </div>
 </section>
 
 <footer>
   <span>For one · engineering handbook · 6 November 2026 · updated 12 November 2026</span>
-  <span>Built on architecture documents 01 to 09, concept v2, decisions.md and the Milestone 0 kit</span>
+  <span>Built on architecture documents 01 to 10, PRD-v3, concept v2 and decisions.md</span>
   <span><a href="https://github.com/Muath-8/for-one/blob/main/engineering/00-handbook-index.md">Index on GitHub</a></span>
 </footer>
 </div>
@@ -517,51 +516,5 @@ footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-si
     var tv=el("text",{x:x(total)+8,y:y+barH/2+5,"class":"lab"},"$"+total.toFixed(2));tv.style.fontWeight="600";tv.style.fontVariantNumeric="tabular-nums";g.appendChild(tv);
   });
 
-  // ---- timeline ----
-  var tl=document.getElementById("timeline");
-  var start=new Date(2026,10,1),end=new Date(2027,4,20);
-  var TL=30,TR=30,TW=1000,ty=170,span=end-start;
-  var tx=function(d){return TL+(d-start)/span*(TW-TL-TR);};
-  var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  // freezes
-  [[new Date(2026,11,31),new Date(2027,0,2,23),"no releases"],[new Date(2027,2,15,12),new Date(2027,2,17,12),"pre-open freeze"]].forEach(function(f){
-    var r=el("rect",{x:tx(f[0]),y:ty-40,width:Math.max(4,tx(f[1])-tx(f[0])),height:80,rx:2});r.style.fill="var(--warm-soft)";tl.appendChild(r);
-    var t=el("text",{x:(tx(f[0])+tx(f[1]))/2,y:ty+58,"text-anchor":"middle","class":"small"},f[2]);tl.appendChild(t);
-  });
-  // build span
-  var bs=tx(new Date(2026,10,18)),be=tx(new Date(2027,2,12));
-  var bl=el("line",{x1:bs,x2:be,y1:ty+30,y2:ty+30});bl.style.stroke="var(--accent)";bl.style.strokeWidth="4";bl.style.strokeLinecap="round";tl.appendChild(bl);
-  tl.appendChild(el("text",{x:(bs+be)/2,y:ty+44,"text-anchor":"middle","class":"small"},"build, 18 Nov to 12 Mar (W1 to W5)"));
-  var ps=tx(new Date(2027,2,17)),pe=tx(new Date(2027,3,20));
-  var pl=el("line",{x1:ps,x2:pe,y1:ty+30,y2:ty+30});pl.style.stroke="var(--s3)";pl.style.strokeWidth="4";pl.style.strokeLinecap="round";tl.appendChild(pl);
-  tl.appendChild(el("text",{x:(ps+pe)/2,y:ty+44,"text-anchor":"middle","class":"small"},"paid beta from 17 Mar"));
-  // axis
-  var ax=el("line",{x1:TL,x2:TW-TR,y1:ty,y2:ty});ax.style.stroke="var(--line-strong)";ax.style.strokeWidth="1.5";tl.appendChild(ax);
-  [new Date(2026,10,1),new Date(2026,11,1),new Date(2027,0,1),new Date(2027,1,1),new Date(2027,2,1),new Date(2027,3,1),new Date(2027,4,1)].forEach(function(m){
-    tl.appendChild(el("line",{x1:tx(m),x2:tx(m),y1:ty-4,y2:ty+4,"class":"grid"}));
-    tl.appendChild(el("text",{x:tx(m)+4,y:ty+16,"class":"mono"},MON[m.getMonth()]));
-  });
-  // events (staggered above the axis)
-  var ev=[
-    [new Date(2026,10,10),"Recognizer test",0,"start"],
-    [new Date(2026,10,17),"Voice decision · counsel answer",1,"start"],
-    [new Date(2026,10,18),"Build starts · domain, Apple, Google",2,"start"],
-    [new Date(2026,11,2),"Paddle account",3,"start"],
-    [new Date(2026,11,15),"Voice rate asked · consent Part 2",4,"start"],
-    [new Date(2027,0,1),"Gemini prices double",0,"start"],
-    [new Date(2027,1,15),"Counsel reviews legal/",1,"middle"],
-    [new Date(2027,2,12),"Exit document",2,"end"],
-    [new Date(2027,2,17),"Beta opens · cap recomputed",3,"end"],
-    [new Date(2027,3,20),"Gate review",0,"end"],
-    [new Date(2027,4,11),"Rater pin ends",1,"end"]
-  ];
-  ev.forEach(function(e){
-    var X=tx(e[0]),lvl=e[2],Y=ty-28-lvl*24;
-    tl.appendChild(el("line",{x1:X,x2:X,y1:Y+6,y2:ty,"class":"grid"}));
-    var c=el("circle",{cx:X,cy:ty,r:4});c.style.fill="var(--accent)";tl.appendChild(c);
-    var lx=e[3]==="start"?X+6:(e[3]==="end"?X-6:X);
-    var lab=el("text",{x:lx,y:Y,"text-anchor":e[3],"class":"small"},e[0].getDate()+" "+MON[e[0].getMonth()]+" · "+e[1]);
-    lab.style.fill="var(--fg)";tl.appendChild(lab);
-  });
 })();
 </script>

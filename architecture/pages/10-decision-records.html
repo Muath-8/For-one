@@ -160,12 +160,12 @@ details > summary { cursor: pointer; }
 <header class="hero">
   <p class="eyebrow">Document 10 · Technical architecture · written 2026-11-06, revised 2026-11-12</p>
   <h1>Architecture decision records and the cross-domain pass</h1>
-  <p class="lede">The twenty-four rulings, and ADR-24&#x27;s consistency rulings, that reconcile the nine domains with the 2026-10-23 decisions: no launch country, monthly USD plans, invisible teaching, the re-dated build, and every name two documents disagreed on.</p>
+  <p class="lede">The twenty-five rulings, including ADR-24&#x27;s consistency rulings and ADR-25&#x27;s direction change, that reconcile the nine domains with the 2026-10-23 decisions: no launch country, monthly USD plans, invisible teaching, the re-dated build, and every name two documents disagreed on.</p>
   <div class="meta">
     <span class="pill st-adr"><i></i>Decision records, revised 2026-11-12</span>
-    <span class="chip">24 decisions</span>
+    <span class="chip">25 decisions</span>
     <span class="chip">0 open for Muath</span>
-    <span class="chip">12,677 words, about 55 min</span>
+    <span class="chip">13,842 words, about 60 min</span>
   </div>
 </header>
 
@@ -183,7 +183,7 @@ details > summary { cursor: pointer; }
   <p class="muted">How the records were made and where they land.</p>
   <div class="diagram"><pre class="mermaid">
 flowchart LR
-  D[&quot;decisions.md&lt;br/&gt;2026-10-23&quot;] --&gt; ADR[&quot;10 Decision records&lt;br/&gt;ADR-01 to ADR-24&quot;]
+  D[&quot;decisions.md&lt;br/&gt;2026-10-23&quot;] --&gt; ADR[&quot;10 Decision records&lt;br/&gt;ADR-01 to ADR-25&quot;]
   C[&quot;concept-v2.md&quot;] --&gt; ADR
   R[&quot;_review-findings.md&lt;br/&gt;18 reviews, last 2026-11-12&quot;] --&gt; ADR
   ADR --&gt; N[&quot;No launch country&lt;br/&gt;ADR-02, 03, 20&quot;]
@@ -222,7 +222,7 @@ flowchart LR
 <span class="dec-n">ADR-03</span>
 <div class="dec-body">
 <h4>The language gate as code</h4>
-<p class="dec-chosen"><code>forone.langgate</code> runs concept-v2 §8's five checks per target language from <code>vendor-lab</code>; a target opens when its gate run passes; English is the pilot target and the only one that must pass before the beta; the gate runs in parallel with Milestone 0 [DECISION]</p>
+<p class="dec-chosen"><code>forone.langgate</code> runs concept-v2 §8's five checks per target language from <code>vendor-lab</code>; a target opens when its gate run passes; English is the first target and the only one that must pass before launch [DECISION; Milestone 0 and the beta removed by ADR-25.5 and 25.6]</p>
 <p class="dec-why"><span class="lbl">Why</span> 08's vendor tests and 09's recognizer suite are the gate's first three checks; one harness, one evidence folder</p>
 <p class="dec-rej"><span class="lbl">Rejected</span> Vendor tests as one-off scripts per language</p>
 </div></li>
@@ -230,7 +230,7 @@ flowchart LR
 <span class="dec-n">ADR-04</span>
 <div class="dec-body">
 <h4>Plans and allowance</h4>
-<p class="dec-chosen">Three monthly USD plans: <code>one_a_day</code> $19.99, <code>two_a_day</code> $29.99 (recommended, the trial plan), <code>three_a_day</code> $44.99; the allowance is <code>plan.episodes_per_day</code> new episodes per learner-local day; one swap a day stays; listening, the article, the chat and round two are unlimited; founding = the first 100 payers keep their plan's price (<code>founding_locked</code>), no yearly plan [DECISION, decisions.md §2]</p>
+<p class="dec-chosen">Three monthly USD plans: <code>one_a_day</code> $19.99, <code>two_a_day</code> $29.99 (recommended, the trial plan), <code>three_a_day</code> $44.99; the allowance is <code>plan.episodes_per_day</code> new episodes per learner-local day; one swap a day stays; listening, the article, the chat and round two are unlimited; no founding lock (ADR-25.10: a price rise applies to new signups only), no yearly plan [DECISION, decisions.md §2]</p>
 <p class="dec-why"><span class="lbl">Why</span> Decided by Muath; the cost model sets the price</p>
 <p class="dec-rej"><span class="lbl">Rejected</span> SAR founding year and yearly plan (PRD-v2 1.4)</p>
 </div></li>
@@ -254,7 +254,7 @@ flowchart LR
 <span class="dec-n">ADR-07</span>
 <div class="dec-body">
 <h4>Dates</h4>
-<p class="dec-chosen">Milestone 0 2026-10-24 to 11-18; language gate and vendor tests during it; build 2026-11-18 to 12-22 in five weeks; beta 2026-12-23 to 2027-01-26; gate review 2027-01-26; every "2026-11-02" in the first drafts moves 16 days [DECISION, milestone-0/03-schedule.md; build end, beta and gate dates superseded by ADR-24.11 and §6: build to 2027-03-12, beta 2027-03-17, gate review 2027-04-20]</p>
+<p class="dec-chosen">Milestone 0 2026-10-24 to 11-18; language gate and vendor tests during it; build 2026-11-18 to 12-22 in five weeks; beta 2026-12-23 to 2027-01-26; gate review 2027-01-26; every "2026-11-02" in the first drafts moves 16 days [DECISION, milestone-0/03-schedule.md; every date removed by ADR-25.1]</p>
 <p class="dec-why"><span class="lbl">Why</span> The pilot had not started when the first drafts were written</p>
 <p class="dec-rej"><span class="lbl">Rejected</span> Keeping the old dates "until the PRD moves"</p>
 </div></li>
@@ -262,7 +262,7 @@ flowchart LR
 <span class="dec-n">ADR-08</span>
 <div class="dec-body">
 <h4>Home region</h4>
-<p class="dec-chosen">Default <code>HOME_REGION = eu-central-1</code> (Frankfurt) for a worldwide cohort; <code>me-central-1</code> (UAE) remains a one-day config move if counsel and the cohort favour it; <code>call-worker</code> runs where the vendors are fastest [DECISION; made final for the beta by ADR-24.8, with <code>me-central-1</code> only if counsel requires it]</p>
+<p class="dec-chosen">Default <code>HOME_REGION = eu-central-1</code> (Frankfurt) for a worldwide cohort; <code>me-central-1</code> (UAE) remains a one-day config move if counsel and the cohort favour it; <code>call-worker</code> runs where the vendors are fastest [DECISION; made final by ADR-24.8; no counsel step, ADR-25.3]</p>
 <p class="dec-why"><span class="lbl">Why</span> With no launch country, EU and UK learners' data in the UAE is itself a transfer without adequacy; an EU region needs only the AWS DPA for them</p>
 <p class="dec-rej"><span class="lbl">Rejected</span> GCP Dammam now; a region per learner (two of everything)</p>
 </div></li>
@@ -326,7 +326,7 @@ flowchart LR
 <span class="dec-n">ADR-16</span>
 <div class="dec-body">
 <h4>Operations around the clock</h4>
-<p class="dec-chosen">No protected hour and no timezone-fixed job: every rule is relative to each learner's <code>drop_at</code>; <code>measures/daily</code> and <code>privacy/verify</code> run hourly over learner-local days that closed; reports at fixed UTC times; the release tool computes the deploy window from <code>learner_schedule</code> (deploy only when under 2% of learners have a drop in the next 45 min, <code>call-worker</code> only when idle) and the check is binding; per-learner lateness is P2, systemic lateness (3+ learners or 5%) is P1; staging stays up from build week 2 through the beta [DECISION, amends 09 D9, D11, 4.10 and 01 D14]</p>
+<p class="dec-chosen">No protected hour and no timezone-fixed job: every rule is relative to each learner's <code>drop_at</code>; <code>measures/daily</code> and <code>privacy/verify</code> run hourly over learner-local days that closed; reports at fixed UTC times; the release tool computes the deploy window from <code>learner_schedule</code> (deploy only when under 2% of learners have a drop in the next 45 min, <code>call-worker</code> only when idle) and the check is binding; per-learner lateness is P2, systemic lateness (3+ learners or 5%) is P1; staging stays up from the first deploy onward [DECISION, amends 09 D9, D11, 4.10 and 01 D14]</p>
 <p class="dec-why"><span class="lbl">Why</span> Learners anywhere means drops at every hour</p>
 <p class="dec-rej"><span class="lbl">Rejected</span> A Riyadh-centred rota and release window</p>
 </div></li>
@@ -350,7 +350,7 @@ flowchart LR
 <span class="dec-n">ADR-19</span>
 <div class="dec-body">
 <h4>Naming rulings</h4>
-<p class="dec-chosen"><code>episodes.state</code> (not <code>status</code>); <code>events</code> append-only with <code>call_turn_verbatim</code> as a second event appended by <code>workflows</code> through <code>events.append()</code>; <code>word_uses</code> is 04's per-use word evidence table written by 05 (the twin of <code>structure_observations</code>); <code>learner_schedule.expects_drop</code>; <code>tools/call-bench</code> is the one load and latency tool; <code>cohort_key = invite_date</code>; <code>proofs.sessions_in_week</code> is computed, not stored [DECISION]</p>
+<p class="dec-chosen"><code>episodes.state</code> (not <code>status</code>); <code>events</code> append-only with <code>call_turn_verbatim</code> as a second event appended by <code>workflows</code> through <code>events.append()</code>; <code>word_uses</code> is 04's per-use word evidence table written by 05 (the twin of <code>structure_observations</code>); <code>learner_schedule.expects_drop</code>; <code>tools/call-bench</code> is the one load and latency tool; <code>cohort_key</code> = the signup week (ADR-25.5); <code>proofs.sessions_in_week</code> is computed, not stored [DECISION]</p>
 <p class="dec-why"><span class="lbl">Why</span> Nine documents, one vocabulary; the technical design needs the names fixed</p>
 <p class="dec-rej"><span class="lbl">Rejected</span> Leaving each document's spelling</p>
 </div></li>
@@ -358,7 +358,7 @@ flowchart LR
 <span class="dec-n">ADR-20</span>
 <div class="dec-body">
 <h4>Jurisdiction and crisis resources</h4>
-<p class="dec-chosen"><code>learners.residence_country</code> is asked at A9, never inferred; 07 §4.9 becomes a regime table (EU and UK GDPR, Saudi PDPL, a generic baseline for unreviewed countries) with the breach clock and DPIA per regime; crisis resources per ISO country with an international directory as the fallback; a DPIA is the fifth counsel artifact [DECISION; the day-one regimes are set by ADR-24.9]</p>
+<p class="dec-chosen"><code>learners.residence_country</code> is asked at A9, never inferred; 07 §4.9 becomes a regime table (EU and UK GDPR, Saudi PDPL, a generic baseline for unreviewed countries) with the breach clock and DPIA per regime; crisis resources per ISO country with an international directory as the fallback; a DPIA is part of the self-review [DECISION; the regimes are set by ADR-24.9; no counsel step, ADR-25.3]</p>
 <p class="dec-why"><span class="lbl">Why</span> A Saudi-only privacy design cannot serve a learner in Berlin</p>
 <p class="dec-rej"><span class="lbl">Rejected</span> PDPL-only (07 first draft); blocking signups from unreviewed countries</p>
 </div></li>
@@ -366,7 +366,7 @@ flowchart LR
 <span class="dec-n">ADR-21</span>
 <div class="dec-body">
 <h4>Payments</h4>
-<p class="dec-chosen">Three USD plans as in ADR-04; hosted checkout; cards, Apple Pay and Google Pay worldwide; a merchant-of-record processor recommended (Paddle; Stripe with Stripe Tax as the fallback) because tax falls due in many countries; Mada and other regional methods later; founding price lock, not a founding plan [DECISION on the model; Paddle chosen by ADR-24.4, PayPal added by 24.B4]</p>
+<p class="dec-chosen">Three USD plans as in ADR-04; hosted checkout; cards, Apple Pay and Google Pay worldwide; a merchant-of-record processor recommended (Paddle; Stripe with Stripe Tax as the fallback) because tax falls due in many countries; Mada and other regional methods later; no founding plan or lock (ADR-25.10) [DECISION on the model; Paddle chosen by ADR-24.4, PayPal added by 24.B4]</p>
 <p class="dec-why"><span class="lbl">Why</span> No launch country means no single tax jurisdiction</p>
 <p class="dec-rej"><span class="lbl">Rejected</span> SAR-first, Mada-first processors (07 §4.14 first draft)</p>
 </div></li>
@@ -382,7 +382,7 @@ flowchart LR
 <span class="dec-n">ADR-23</span>
 <div class="dec-body">
 <h4>Second-pass naming (integration, 2026-11-06 evening)</h4>
-<p class="dec-chosen">After the nine revisions: Inngest event <code>learner.extra_requested {learner_id, local_date, slot, episode_id}</code>; <code>episodes.slot</code> (1 = the drop, 2 and 3 = <code>daily_extra</code>); terminal state <code>superseded</code> for unused extras and swapped dailies; <code>turn_index</code> everywhere; <code>cost/reconcile-spend</code> hourly; <code>rater.pinned_until = 2027-02-16</code> (05's cohort-aligned first window; re-dated to 2027-05-11 by ADR-24.11, §6); object keys <code>learners/{lid}/...</code> with the bucket-level <code>ephemeral/</code> prefix (04 D15); <code>client_perf.first_sentence_ms</code>; A3 facts stored <code>usable</code>; no zeroization claim anywhere</p>
+<p class="dec-chosen">After the nine revisions: Inngest event <code>learner.extra_requested {learner_id, local_date, slot, episode_id}</code>; <code>episodes.slot</code> (1 = the drop, 2 and 3 = <code>daily_extra</code>); terminal state <code>superseded</code> for unused extras and swapped dailies; <code>turn_index</code> everywhere; <code>cost/reconcile-spend</code> hourly; <code>rater.pinned_until = 2027-02-16</code> (05's first window; the date itself removed by ADR-25.1); object keys <code>learners/{lid}/...</code> with the bucket-level <code>ephemeral/</code> prefix (04 D15); <code>client_perf.first_sentence_ms</code>; A3 facts stored <code>usable</code>; no zeroization claim anywhere</p>
 <p class="dec-why"><span class="lbl">Why</span> Nine agents revising in parallel chose different spellings for the same new things; one spelling per thing before the technical design reads them</p>
 <p class="dec-rej"><span class="lbl">Rejected</span> <code>day_seq</code>, <code>learner.next_requested</code>, <code>unused</code>, <code>turn_n</code>, <code>cost/reconcile</code>, a 2027-01-19 rater window, <code>episodes/{learner_id}/</code> prefixes</p>
 </div></li>
@@ -390,9 +390,17 @@ flowchart LR
 <span class="dec-n">ADR-24</span>
 <div class="dec-body">
 <h4>The owed decisions (2026-11-12)</h4>
-<p class="dec-chosen">Every open product, scope and budget item decided on Muath's delegation: web plus feed, order A, drafted bibles, Paddle, prices kept with a measured trigger, <code>eu-central-1</code> final, GDPR/PDPL/baseline with SB 243 everywhere, the beta opens when Day-1 work is done (plan of record 2027-03-17 with two engineers from build start), P0 split into Day-1 and later; section 10 becomes owner actions and measurements only [DECISION]</p>
+<p class="dec-chosen">Every open product, scope and budget item decided on Muath's delegation: web plus feed, order A, drafted bibles, Paddle, prices kept with a measured trigger, <code>eu-central-1</code> final, GDPR/PDPL/baseline with SB 243 everywhere, the beta opens when Day-1 work is done (plan of record 2027-03-17 with two engineers from build start), P0 split into Day-1 and later; section 10 becomes owner actions and measurements only [DECISION; dates, staffing, counsel, the native path, the beta and the founding lock superseded by ADR-25]</p>
 <p class="dec-why"><span class="lbl">Why</span> Six days before the build, about 150 OPEN tags were hiding the five actions that actually block it</p>
 <p class="dec-rej"><span class="lbl">Rejected</span> Leaving the items open until each owner answers</p>
+</div></li>
+<li class="dec">
+<span class="dec-n">ADR-25</span>
+<div class="dec-body">
+<h4>Direction change (2026-11-12, after ADR-24)</h4>
+<p class="dec-chosen">An AI coding agent builds it under Muath; no calendar dates, only dependency order and exit checks; no lawyer: compliance by conservative design, Paddle as merchant of record and a written self-review; web only (the podcast feed stays, Apple and Google sign-in go); no pilot and no beta: version 1 launches once with open signup and no founding lock [DECISION]</p>
+<p class="dec-why"><span class="lbl">Why</span> Muath's constraints of 2026-11-12</p>
+<p class="dec-rej"><span class="lbl">Rejected</span> Dated plans; counsel review; a native app; a pilot and a beta</p>
 </div></li>
 </ol>
   
@@ -400,124 +408,78 @@ flowchart LR
 
 <section class="block" id="open">
   <h2>Section 10: decided items, owner actions, measurements</h2>
-  <p class="muted">Section 10: the register. Every decision was taken on 2026-11-12 (ADR-24); what remains is owner actions and numbers the tests produce.</p>
-  <ol class="openitems"><li class="oi"><div class="oi-b"><p>Every decision that was open here on 2026-11-06 is now decided in ADR-24. The original list is kept, with the ruling for each item, in the revision history (git, commit before 2026-11-12). What remains falls into two kinds: things only a person can <em>do</em> (sign, hire, buy, ask counsel), and numbers only the tests can <em>produce</em>. Nothing else is open. A question the documents do not answer during the build escalates to Muath before it is built.</p>
-<h3>A. Owner actions (Muath), in date order (ids are stable, so they are not sequential)</h3>
+  <p class="muted">Section 10: the register. Every decision was taken on 2026-11-12 (ADR-24, changed by ADR-25); what remains is owner actions and numbers the tests produce.</p>
+  <ol class="openitems"><li class="oi"><div class="oi-b"><p>Every decision is taken (ADR-24, as changed by ADR-25). What remains is things only Muath can <em>do</em> and numbers only the tests can <em>produce</em>. None carries a date; each says what it must happen before.</p>
+<h3>A. Owner actions (Muath)</h3>
 <div class="tw"><table>
 <thead>
 <tr>
 <th>#</th>
 <th>Action</th>
-<th>By</th>
+<th>Needed before</th>
 <th>Unblocks</th>
-<th>If late</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>A1</td>
-<td>Send counsel the question pack (<code>legal/00-counsel-question-pack.md</code>) and get confirmation of ADR-24.8 (region, transfer basis), 24.9 (regimes) and 24.10</td>
-<td>ask 2026-11-13, answer 2026-11-17 (target)</td>
-<td>E01-S05 production apply, E13 consent copy</td>
-<td>Nothing waits on a late answer: production is built in <code>eu-central-1</code> anyway (ADR-24.8) and not applied until late in the build; a move happens only if counsel requires it</td>
-</tr>
-<tr>
-<td>A13</td>
-<td>Name counsel and the channel to them; include it in <code>legal/README.md</code></td>
-<td>2026-11-13 (with A1)</td>
-<td>A1, A8</td>
-<td>none; A1 cannot start without it</td>
+<td>Open the vendor accounts and API keys in <code>engineering/07</code> (AWS, Vercel, Inngest, LiveKit, Anthropic, Google, the voice and recognizer vendors, Langfuse, Sentry, Resend); accept each vendor's standard DPA; request zero data retention from Anthropic</td>
+<td>the agent's first deploy to staging</td>
+<td>E01 and every vendor adapter</td>
 </tr>
 <tr>
 <td>A2</td>
-<td>Second engineer working from build start; a third from 2026-12-01 is recommended (ADR-24.11)</td>
-<td>2026-11-18</td>
-<td>the open date: 2027-03-17 with two engineers from build start (03-24 if the second starts 11-25), 2027-02-17 with three</td>
-<td>The date is recomputed from the team that exists; one engineer alone gives 2027-07-07</td>
+<td>Record about 30 volunteer clips (at least two native-language groups, a one-line consent each) and rate the voice blind test with a few listeners (ADR-25.6)</td>
+<td>the vendor choice (M2)</td>
+<td>E02 vendor tests</td>
 </tr>
 <tr>
 <td>A3</td>
-<td>Register the brand domain; file the Apple and Google developer applications</td>
-<td>2026-11-18 (build week 1)</td>
-<td>email sending domain, Apple Pay domain file, Sign in with Apple (P1)</td>
-<td>Email code only; the domain is one variable (<code>APP_DOMAIN</code>)</td>
-</tr>
-<tr>
-<td>A15</td>
-<td>Tell every pilot pre-payer the new open date (2027-03-17) with a refund offer or a bridge place (24.B28)</td>
-<td>2026-11-19</td>
-<td>trust with the first payers</td>
-<td>Refund everyone who pre-paid</td>
+<td>Read the English bibles and Salma's lines in English and Arabic (<code>content/</code>) and approve them (ADR-25.7)</td>
+<td>the writer and host prompts are tuned</td>
+<td>E02-S07, E04, E05</td>
 </tr>
 <tr>
 <td>A4</td>
-<td>Hire the part-time native English reader (ADR-24.14) and book the bible read (ADR-24.3)</td>
-<td>reader on 2026-11-25; bible read done 2026-12-01</td>
-<td>E02-S07, the language gate's writing check</td>
-<td>The eval gate runs without the human read; the beta does not open on unread bibles</td>
+<td>Complete the self-review checklist (<code>legal/00</code>) and approve the legal texts in <code>legal/</code> (ADR-25.3)</td>
+<td>public launch</td>
+<td>E13, the consent strings</td>
 </tr>
 <tr>
 <td>A5</td>
-<td>Read and correct Salma's Arabic lines (<code>content/bibles/salma.md</code>)</td>
-<td>2026-12-01</td>
-<td><code>native/ar</code></td>
-<td><code>native/ar</code> waits; <code>native/en</code> ships alone</td>
+<td>Open the Paddle account under the company</td>
+<td>checkout is built against the live API (the sandbox works before)</td>
+<td>E12</td>
 </tr>
 <tr>
 <td>A6</td>
-<td>Open the Paddle account under the legal entity (ADR-24.4)</td>
-<td>2026-12-02</td>
-<td>E12-S04 checkout and later</td>
-<td>Stripe test-mode scaffold; the processor is swapped in build week 5</td>
+<td>Choose and register the domain (ADR-25.8)</td>
+<td>email sending and the first public deploy</td>
+<td>E01 DNS, Resend, Paddle domain</td>
 </tr>
 <tr>
 <td>A7</td>
-<td>Ask the blind-test winner for a negotiated voice rate (ADR-24.6); request zero data retention from Anthropic (24.17)</td>
-<td>2026-12-15</td>
-<td>the costed path to $0.35</td>
-<td>24.5's price trigger carries the cost</td>
-</tr>
-<tr>
-<td>A9</td>
-<td>Milestone 0 consent addendum: Part 1 before any clip goes to a vendor; Part 2 for the bridge, re-onboarding and fixtures (ADR-24.16, 24.B10, 24.B28)</td>
-<td>Part 1 now; Part 2 2026-12-15</td>
-<td>build week 5 end-to-end run, fixtures</td>
-<td>Non-signers are excluded</td>
-</tr>
-<tr>
-<td>A11</td>
-<td>Budget the penetration test (ADR-24.13)</td>
-<td>2027-02</td>
-<td>public launch</td>
-<td>Public launch waits</td>
+<td>Appoint an EU and UK representative (a paid service) if the company is outside the EU and UK (GDPR Art. 27)</td>
+<td>public launch, if it applies</td>
+<td>lawful processing for EU and UK learners</td>
 </tr>
 <tr>
 <td>A8</td>
-<td>Counsel reviews the privacy notice, terms, consent texts, DPIA and crisis wording in <code>legal/</code></td>
-<td>2027-02-15</td>
-<td>E13-S03, E13-S08, beta open</td>
-<td>Beta does not open without reviewed consent text</td>
+<td>Approve merges, migrations, prompt changes and production deploys as the agent asks (ADR-25.2)</td>
+<td>each one</td>
+<td>the build</td>
 </tr>
 <tr>
-<td>A14</td>
-<td>Write the then-and-now task forms C and D (forms A and B cycle in the beta, 05 §10 #8)</td>
-<td>2027-02-17</td>
-<td>the second rater window</td>
-<td>Forms A and B repeat once more</td>
+<td>A9</td>
+<td>Ask the voice vendor for a negotiated rate once the vendor is chosen (ADR-24.6)</td>
+<td>launch, ideally</td>
+<td>the costed path to $0.35</td>
 </tr>
 <tr>
 <td>A10</td>
-<td>Book the external test for 20 to 30 learners (ADR-24.19)</td>
-<td>2027-03-17</td>
-<td>GATE external-test reading</td>
-<td>The week-0 sitting moves to beta week 1</td>
-</tr>
-<tr>
-<td>A12</td>
-<td>Appoint an Art. 27 EU (and UK) representative if the legal entity is outside the EU and UK (07 §4.9)</td>
-<td>beta open</td>
-<td>lawful processing of EU and UK learners</td>
-<td>Invites to EU and UK learners wait</td>
+<td>Create the code repository and give the AI agent its own GitHub identity (a GitHub App or a machine account) with write access but no right to merge; protect <code>main</code> so a merge needs Muath's approval (ADR-25.2). GitHub does not let an author approve their own pull request, so the agent cannot open them as Muath</td>
+<td>the agent's first pull request</td>
+<td>E01, the review rule in <code>engineering/04</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -528,71 +490,65 @@ flowchart LR
 <th>#</th>
 <th>Number</th>
 <th>Produced by</th>
-<th>When</th>
+<th>Read when</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>M1</td>
-<td>Pilot gate result</td>
-<td>Milestone 0 gate report (R13)</td>
-<td>2026-11-18</td>
-</tr>
-<tr>
 <td>M2</td>
 <td>Voice vendor for episodes and calls; streaming and verbatim recognizers</td>
-<td>blind test (30 clips, 50 calls), <code>vendors.yaml</code></td>
-<td>2026-11-17 to build week 2</td>
+<td>the blind test and the 30-clip test (ADR-25.6), <code>vendors.yaml</code></td>
+<td>phase 1 of the release plan</td>
 </tr>
 <tr>
 <td>M3</td>
-<td>Similarity threshold; recognizer confidence threshold</td>
-<td>Milestone 0 scripts; 30-clip test</td>
-<td>end of Milestone 0</td>
+<td>Recognizer confidence threshold; similarity threshold (0.85 until tuned)</td>
+<td>the 30-clip test; real use after launch</td>
+<td>phase 1; after launch</td>
 </tr>
 <tr>
 <td>M4</td>
 <td>Which target languages pass the gate besides English</td>
 <td><code>forone.langgate</code></td>
-<td>end of build week 2</td>
+<td>phase 1</td>
 </tr>
 <tr>
 <td>M5</td>
 <td>Haiku host comparison (ADR-24.7)</td>
-<td><code>call-bench</code> 50 calls</td>
-<td>build week 4</td>
+<td><code>call-bench</code> scripted calls</td>
+<td>the call phase</td>
 </tr>
 <tr>
 <td>M6</td>
-<td>Measured cost per session by plan (ADR-24.5 trigger)</td>
-<td>exit document; beta week-3 report</td>
-<td>2027-03-12; 2027-04-06</td>
+<td>Margin by plan at measured use (ADR-24.5 trigger)</td>
+<td>cost tracing; the weekly report</td>
+<td>before launch on test learners; 4 weeks after launch</td>
 </tr>
 <tr>
 <td>M7</td>
-<td>Private-feed support in the cohort's podcast apps; GATE-M18 triggers</td>
-<td>beta observation</td>
-<td>first cohort</td>
+<td>Which podcast apps learners use with the private feed</td>
+<td>observation after launch</td>
+<td>after launch</td>
 </tr>
 <tr>
 <td>M8</td>
-<td>Salma's Arabic variety and voice (the 7.3 blind test per native package)</td>
-<td>blind test with Arabic listeners</td>
-<td>build week 2</td>
+<td>Salma's Arabic voice (the 7.3 blind test for <code>native/ar</code>)</td>
+<td>Muath and Arabic-speaking volunteers</td>
+<td>before <code>native/ar</code> ships</td>
 </tr>
 <tr>
 <td>M9</td>
-<td>The on-demand premium per extra episode ($0.05 assumed, 08 #9)</td>
+<td>The on-demand premium per extra episode ($0.05 assumed)</td>
 <td>cost tracing on <code>daily_extra</code></td>
-<td>beta week 2 (2027-03-30)</td>
+<td>after launch</td>
 </tr>
 </tbody>
 </table></div></div></li></ol>
 </section>
 
 <section class="block" id="build">
-  <h2>Build plan (order of work; the dated schedule is backlog/00-release-plan.md, beta opens 2027-03-17)</h2>
-  <div class="prose"><p><strong>Superseded 2026-11-12:</strong> the build now runs to 2027-03-12, and its week-by-week order is in <code>backlog/00-release-plan.md</code>. The table below is the 2026-11-06 five-week plan and keeps only its order of work. The five weeks keep the contents of each document's section 7, moved by 16 days, with these cross-domain changes placed where they must land.</p>
+  <h2>Build plan (order of work; the phases and exit checks are in backlog/00-release-plan.md)</h2>
+  <div class="prose"><p><strong>Superseded:</strong> the build has no dates (ADR-25.1); its order of work is the phases in <code>backlog/00-release-plan.md</code>. The table below is the 2026-11-06 five-week plan and keeps only its order of work. The five weeks keep the contents of each document's section 7, moved by 16 days, with these cross-domain changes placed where they must land.</p>
 <div class="tw"><table>
 <thead>
 <tr>
@@ -646,10 +602,10 @@ flowchart LR
 <section class="block" id="full">
   <h2>The full document</h2>
   <p class="muted">Every section as written, closed by default. Source file: <code>architecture/10-decision-records.md</code>.</p>
-  <ol class="toc"><li><a href="#s1-summary-and-the-decisions-in-one-table">1. Summary and the decisions in one table</a></li><li><a href="#s2-what-changed-on-2026-10-23-and-what-it">2. What changed on 2026-10-23 and what it does to the architecture</a></li><li><a href="#s3-the-decision-records">3. The decision records</a></li><li><a href="#s4-naming-and-interface-rulings">4. Naming and interface rulings</a></li><li><a href="#s5-what-the-prd-v3-thread-needs-to-carry">5. What the PRD-v3 thread needs to carry</a></li><li><a href="#s6-dates-in-one-table">6. Dates, in one table</a></li><li><a href="#s7-build-plan-for-2026-11-18-to-2026-12-2">7. Build plan for 2026-11-18 to 2026-12-22 (history; superseded by the release plan)</a></li><li><a href="#s8-alternatives-rejected-in-the-cross-dom">8. Alternatives rejected in the cross-domain pass</a></li><li><a href="#s9-how-the-findings-were-applied">9. How the findings were applied</a></li><li><a href="#s10-register-owner-actions-and-pending-me">10. Register: owner actions and pending measurements</a></li><li><a href="#s11-revision-log">11. Revision log</a></li></ol>
+  <ol class="toc"><li><a href="#s1-summary-and-the-decisions-in-one-table">1. Summary and the decisions in one table</a></li><li><a href="#s2-what-changed-on-2026-10-23-and-what-it">2. What changed on 2026-10-23 and what it does to the architecture</a></li><li><a href="#s3-the-decision-records">3. The decision records</a></li><li><a href="#s4-naming-and-interface-rulings">4. Naming and interface rulings</a></li><li><a href="#s5-what-the-prd-v3-thread-needs-to-carry">5. What the PRD-v3 thread needs to carry</a></li><li><a href="#s6-dates">6. Dates</a></li><li><a href="#s7-build-plan-for-2026-11-18-to-2026-12-2">7. Build plan for 2026-11-18 to 2026-12-22 (history; superseded by the release plan)</a></li><li><a href="#s8-alternatives-rejected-in-the-cross-dom">8. Alternatives rejected in the cross-domain pass</a></li><li><a href="#s9-how-the-findings-were-applied">9. How the findings were applied</a></li><li><a href="#s10-register-owner-actions-and-pending-me">10. Register: owner actions and pending measurements</a></li><li><a href="#s11-revision-log">11. Revision log</a></li></ol>
   <details class="fs"><summary><h3>Front matter</h3></summary><div class="prose"><p>Domain 10 of the For one technical architecture. Written 2026-11-06 by the "Finish the architecture documentation" thread after reviewing domains 07 to 09 and cross-checking all nine domain documents against each other, against <a href="../decisions.md">decisions.md</a> (Muath's answers of 2026-10-23) and against <a href="../concept-v2.md">concept-v2.md</a>. Each record below is a ruling that two or more documents now follow; the nine documents were revised on the same day to match. Tags as in the other documents: [DECISION] ruled here; [ASSUMPTION] assumed because the sources are silent; [OPEN for Muath] only the owner could settle; on 2026-11-12 ADR-24 decided every one of them, and section 10 now lists only owner actions and measurements.</p>
 <p>The one fact behind most records: the nine documents were written on 2026-10-16 and 10-17 against PRD-v2, which encodes the decisions as they stood on 2026-10-10 (one launch pair, Saudi Arabic speakers learning English, SAR prices, a founding year, Salma's correction notes). On 2026-10-23 Muath decided differently on five points and the pilot kit re-dated the schedule. PRD-v2 remains the build spec wherever decisions.md and concept-v2 are silent; where they differ, decisions.md wins, and the PRD-v3 thread is carrying the same changes into the PRD.</p></div></details>
-  <details class="fs" id="s1-summary-and-the-decisions-in-one-table"><summary><h3>1. Summary and the decisions in one table</h3><span class="wc">2,125 words</span></summary><div class="prose"><div class="tw"><table>
+  <details class="fs" id="s1-summary-and-the-decisions-in-one-table"><summary><h3>1. Summary and the decisions in one table</h3><span class="wc">2,212 words</span></summary><div class="prose"><div class="tw"><table>
 <thead>
 <tr>
 <th>#</th>
@@ -677,14 +633,14 @@ flowchart LR
 <tr>
 <td>ADR-03</td>
 <td>The language gate as code</td>
-<td><code>forone.langgate</code> runs concept-v2 §8's five checks per target language from <code>vendor-lab</code>; a target opens when its gate run passes; English is the pilot target and the only one that must pass before the beta; the gate runs in parallel with Milestone 0 [DECISION]</td>
+<td><code>forone.langgate</code> runs concept-v2 §8's five checks per target language from <code>vendor-lab</code>; a target opens when its gate run passes; English is the first target and the only one that must pass before launch [DECISION; Milestone 0 and the beta removed by ADR-25.5 and 25.6]</td>
 <td>08's vendor tests and 09's recognizer suite are the gate's first three checks; one harness, one evidence folder</td>
 <td>Vendor tests as one-off scripts per language</td>
 </tr>
 <tr>
 <td>ADR-04</td>
 <td>Plans and allowance</td>
-<td>Three monthly USD plans: <code>one_a_day</code> $19.99, <code>two_a_day</code> $29.99 (recommended, the trial plan), <code>three_a_day</code> $44.99; the allowance is <code>plan.episodes_per_day</code> new episodes per learner-local day; one swap a day stays; listening, the article, the chat and round two are unlimited; founding = the first 100 payers keep their plan's price (<code>founding_locked</code>), no yearly plan [DECISION, decisions.md §2]</td>
+<td>Three monthly USD plans: <code>one_a_day</code> $19.99, <code>two_a_day</code> $29.99 (recommended, the trial plan), <code>three_a_day</code> $44.99; the allowance is <code>plan.episodes_per_day</code> new episodes per learner-local day; one swap a day stays; listening, the article, the chat and round two are unlimited; no founding lock (ADR-25.10: a price rise applies to new signups only), no yearly plan [DECISION, decisions.md §2]</td>
 <td>Decided by Muath; the cost model sets the price</td>
 <td>SAR founding year and yearly plan (PRD-v2 1.4)</td>
 </tr>
@@ -705,14 +661,14 @@ flowchart LR
 <tr>
 <td>ADR-07</td>
 <td>Dates</td>
-<td>Milestone 0 2026-10-24 to 11-18; language gate and vendor tests during it; build 2026-11-18 to 12-22 in five weeks; beta 2026-12-23 to 2027-01-26; gate review 2027-01-26; every "2026-11-02" in the first drafts moves 16 days [DECISION, milestone-0/03-schedule.md; build end, beta and gate dates superseded by ADR-24.11 and §6: build to 2027-03-12, beta 2027-03-17, gate review 2027-04-20]</td>
+<td>Milestone 0 2026-10-24 to 11-18; language gate and vendor tests during it; build 2026-11-18 to 12-22 in five weeks; beta 2026-12-23 to 2027-01-26; gate review 2027-01-26; every "2026-11-02" in the first drafts moves 16 days [DECISION, milestone-0/03-schedule.md; every date removed by ADR-25.1]</td>
 <td>The pilot had not started when the first drafts were written</td>
 <td>Keeping the old dates "until the PRD moves"</td>
 </tr>
 <tr>
 <td>ADR-08</td>
 <td>Home region</td>
-<td>Default <code>HOME_REGION = eu-central-1</code> (Frankfurt) for a worldwide cohort; <code>me-central-1</code> (UAE) remains a one-day config move if counsel and the cohort favour it; <code>call-worker</code> runs where the vendors are fastest [DECISION; made final for the beta by ADR-24.8, with <code>me-central-1</code> only if counsel requires it]</td>
+<td>Default <code>HOME_REGION = eu-central-1</code> (Frankfurt) for a worldwide cohort; <code>me-central-1</code> (UAE) remains a one-day config move if counsel and the cohort favour it; <code>call-worker</code> runs where the vendors are fastest [DECISION; made final by ADR-24.8; no counsel step, ADR-25.3]</td>
 <td>With no launch country, EU and UK learners' data in the UAE is itself a transfer without adequacy; an EU region needs only the AWS DPA for them</td>
 <td>GCP Dammam now; a region per learner (two of everything)</td>
 </tr>
@@ -768,7 +724,7 @@ flowchart LR
 <tr>
 <td>ADR-16</td>
 <td>Operations around the clock</td>
-<td>No protected hour and no timezone-fixed job: every rule is relative to each learner's <code>drop_at</code>; <code>measures/daily</code> and <code>privacy/verify</code> run hourly over learner-local days that closed; reports at fixed UTC times; the release tool computes the deploy window from <code>learner_schedule</code> (deploy only when under 2% of learners have a drop in the next 45 min, <code>call-worker</code> only when idle) and the check is binding; per-learner lateness is P2, systemic lateness (3+ learners or 5%) is P1; staging stays up from build week 2 through the beta [DECISION, amends 09 D9, D11, 4.10 and 01 D14]</td>
+<td>No protected hour and no timezone-fixed job: every rule is relative to each learner's <code>drop_at</code>; <code>measures/daily</code> and <code>privacy/verify</code> run hourly over learner-local days that closed; reports at fixed UTC times; the release tool computes the deploy window from <code>learner_schedule</code> (deploy only when under 2% of learners have a drop in the next 45 min, <code>call-worker</code> only when idle) and the check is binding; per-learner lateness is P2, systemic lateness (3+ learners or 5%) is P1; staging stays up from the first deploy onward [DECISION, amends 09 D9, D11, 4.10 and 01 D14]</td>
 <td>Learners anywhere means drops at every hour</td>
 <td>A Riyadh-centred rota and release window</td>
 </tr>
@@ -789,21 +745,21 @@ flowchart LR
 <tr>
 <td>ADR-19</td>
 <td>Naming rulings</td>
-<td><code>episodes.state</code> (not <code>status</code>); <code>events</code> append-only with <code>call_turn_verbatim</code> as a second event appended by <code>workflows</code> through <code>events.append()</code>; <code>word_uses</code> is 04's per-use word evidence table written by 05 (the twin of <code>structure_observations</code>); <code>learner_schedule.expects_drop</code>; <code>tools/call-bench</code> is the one load and latency tool; <code>cohort_key = invite_date</code>; <code>proofs.sessions_in_week</code> is computed, not stored [DECISION]</td>
+<td><code>episodes.state</code> (not <code>status</code>); <code>events</code> append-only with <code>call_turn_verbatim</code> as a second event appended by <code>workflows</code> through <code>events.append()</code>; <code>word_uses</code> is 04's per-use word evidence table written by 05 (the twin of <code>structure_observations</code>); <code>learner_schedule.expects_drop</code>; <code>tools/call-bench</code> is the one load and latency tool; <code>cohort_key</code> = the signup week (ADR-25.5); <code>proofs.sessions_in_week</code> is computed, not stored [DECISION]</td>
 <td>Nine documents, one vocabulary; the technical design needs the names fixed</td>
 <td>Leaving each document's spelling</td>
 </tr>
 <tr>
 <td>ADR-20</td>
 <td>Jurisdiction and crisis resources</td>
-<td><code>learners.residence_country</code> is asked at A9, never inferred; 07 §4.9 becomes a regime table (EU and UK GDPR, Saudi PDPL, a generic baseline for unreviewed countries) with the breach clock and DPIA per regime; crisis resources per ISO country with an international directory as the fallback; a DPIA is the fifth counsel artifact [DECISION; the day-one regimes are set by ADR-24.9]</td>
+<td><code>learners.residence_country</code> is asked at A9, never inferred; 07 §4.9 becomes a regime table (EU and UK GDPR, Saudi PDPL, a generic baseline for unreviewed countries) with the breach clock and DPIA per regime; crisis resources per ISO country with an international directory as the fallback; a DPIA is part of the self-review [DECISION; the regimes are set by ADR-24.9; no counsel step, ADR-25.3]</td>
 <td>A Saudi-only privacy design cannot serve a learner in Berlin</td>
 <td>PDPL-only (07 first draft); blocking signups from unreviewed countries</td>
 </tr>
 <tr>
 <td>ADR-21</td>
 <td>Payments</td>
-<td>Three USD plans as in ADR-04; hosted checkout; cards, Apple Pay and Google Pay worldwide; a merchant-of-record processor recommended (Paddle; Stripe with Stripe Tax as the fallback) because tax falls due in many countries; Mada and other regional methods later; founding price lock, not a founding plan [DECISION on the model; Paddle chosen by ADR-24.4, PayPal added by 24.B4]</td>
+<td>Three USD plans as in ADR-04; hosted checkout; cards, Apple Pay and Google Pay worldwide; a merchant-of-record processor recommended (Paddle; Stripe with Stripe Tax as the fallback) because tax falls due in many countries; Mada and other regional methods later; no founding plan or lock (ADR-25.10) [DECISION on the model; Paddle chosen by ADR-24.4, PayPal added by 24.B4]</td>
 <td>No launch country means no single tax jurisdiction</td>
 <td>SAR-first, Mada-first processors (07 §4.14 first draft)</td>
 </tr>
@@ -817,16 +773,23 @@ flowchart LR
 <tr>
 <td>ADR-23</td>
 <td>Second-pass naming (integration, 2026-11-06 evening)</td>
-<td>After the nine revisions: Inngest event <code>learner.extra_requested {learner_id, local_date, slot, episode_id}</code>; <code>episodes.slot</code> (1 = the drop, 2 and 3 = <code>daily_extra</code>); terminal state <code>superseded</code> for unused extras and swapped dailies; <code>turn_index</code> everywhere; <code>cost/reconcile-spend</code> hourly; <code>rater.pinned_until = 2027-02-16</code> (05's cohort-aligned first window; re-dated to 2027-05-11 by ADR-24.11, §6); object keys <code>learners/{lid}/...</code> with the bucket-level <code>ephemeral/</code> prefix (04 D15); <code>client_perf.first_sentence_ms</code>; A3 facts stored <code>usable</code>; no zeroization claim anywhere</td>
+<td>After the nine revisions: Inngest event <code>learner.extra_requested {learner_id, local_date, slot, episode_id}</code>; <code>episodes.slot</code> (1 = the drop, 2 and 3 = <code>daily_extra</code>); terminal state <code>superseded</code> for unused extras and swapped dailies; <code>turn_index</code> everywhere; <code>cost/reconcile-spend</code> hourly; <code>rater.pinned_until = 2027-02-16</code> (05's first window; the date itself removed by ADR-25.1); object keys <code>learners/{lid}/...</code> with the bucket-level <code>ephemeral/</code> prefix (04 D15); <code>client_perf.first_sentence_ms</code>; A3 facts stored <code>usable</code>; no zeroization claim anywhere</td>
 <td>Nine agents revising in parallel chose different spellings for the same new things; one spelling per thing before the technical design reads them</td>
 <td><code>day_seq</code>, <code>learner.next_requested</code>, <code>unused</code>, <code>turn_n</code>, <code>cost/reconcile</code>, a 2027-01-19 rater window, <code>episodes/{learner_id}/</code> prefixes</td>
 </tr>
 <tr>
 <td>ADR-24</td>
 <td>The owed decisions (2026-11-12)</td>
-<td>Every open product, scope and budget item decided on Muath's delegation: web plus feed, order A, drafted bibles, Paddle, prices kept with a measured trigger, <code>eu-central-1</code> final, GDPR/PDPL/baseline with SB 243 everywhere, the beta opens when Day-1 work is done (plan of record 2027-03-17 with two engineers from build start), P0 split into Day-1 and later; section 10 becomes owner actions and measurements only [DECISION]</td>
+<td>Every open product, scope and budget item decided on Muath's delegation: web plus feed, order A, drafted bibles, Paddle, prices kept with a measured trigger, <code>eu-central-1</code> final, GDPR/PDPL/baseline with SB 243 everywhere, the beta opens when Day-1 work is done (plan of record 2027-03-17 with two engineers from build start), P0 split into Day-1 and later; section 10 becomes owner actions and measurements only [DECISION; dates, staffing, counsel, the native path, the beta and the founding lock superseded by ADR-25]</td>
 <td>Six days before the build, about 150 OPEN tags were hiding the five actions that actually block it</td>
 <td>Leaving the items open until each owner answers</td>
+</tr>
+<tr>
+<td>ADR-25</td>
+<td>Direction change (2026-11-12, after ADR-24)</td>
+<td>An AI coding agent builds it under Muath; no calendar dates, only dependency order and exit checks; no lawyer: compliance by conservative design, Paddle as merchant of record and a written self-review; web only (the podcast feed stays, Apple and Google sign-in go); no pilot and no beta: version 1 launches once with open signup and no founding lock [DECISION]</td>
+<td>Muath's constraints of 2026-11-12</td>
+<td>Dated plans; counsel review; a native app; a pilot and a beta</td>
 </tr>
 </tbody>
 </table></div>
@@ -878,24 +841,24 @@ flowchart LR
 </tr>
 </tbody>
 </table></div>
-<hr /></div></details><details class="fs" id="s3-the-decision-records"><summary><h3>3. The decision records</h3><span class="wc">6,698 words</span></summary><div class="prose"><p>Each record: context, the ruling, consequences per domain, and what stays open.</p>
+<hr /></div></details><details class="fs" id="s3-the-decision-records"><summary><h3>3. The decision records</h3><span class="wc">8,205 words</span></summary><div class="prose"><p>Each record: context, the ruling, consequences per domain, and what stays open.</p>
 <h3>ADR-01 Source of truth</h3>
 <p><strong>Context.</strong> PRD-v2 (2026-10-10) is the build spec every document cites by part number. Muath's answers of 2026-10-23 overruled parts of it; concept-v2 and decisions.md were updated the same day; the PRD was not. <strong>Ruling.</strong> decisions.md wins over concept-v2, which wins over PRD-v2; PRD part numbers stay as citations for the unchanged parts; where a document cites a changed part it now cites the decision. <strong>Consequences.</strong> Every document's front matter says "revised 2026-11-06 to the decisions of 2026-10-23"; the PRD-v3 thread is told which parts changed (section 5 lists them).</p>
 <h3>ADR-02 Languages as two package kinds</h3>
-<p><strong>Context.</strong> <code>package_ar_en</code> appears in 02 (gloss language, prompts), 03 (Salma persona, talkback), 06 (<code>lang="ar"</code>, RTL), 07 (consent texts, notice, crisis), 08 (<code>packages/language/ar-en/recognizer.yaml</code>), 09 (<code>versions.yaml</code>). Concept-v2 §7 says the target language is a package that passes the gate and the learner's own language "needs only interface text, glosses, and a recognizer that catches it when the learner switches". <strong>Ruling.</strong> Two package kinds. <code>packages/languages/&lt;target&gt;/</code>: episode and call voices, streaming and verbatim recognizers with thresholds, lexicon and frequency list, structure inventory and rules, calibration set, law words and correction phrases, crisis keywords, host prompts, format patterns, the ban list. <code>packages/native/&lt;lang&gt;/</code>: interface strings (direction from the package: <code>dir</code>), consent texts and the privacy notice, gloss target language, Salma's voice and persona lines, crisis clips and the resources card copy, the talkback language hint. <code>learners</code> gains <code>native_language</code>, <code>target_language</code>, <code>residence_country</code>; every brief compiler, prompt loader and TTS request reads the pair from the learner row. The pilot's packages are <code>lang/en</code> and <code>native/ar</code>; <code>native/en</code> is the universal fallback for interface and consent. <strong>Consequences.</strong> 02: gloss cache key already carries <code>native_lang</code>; prompts load from <code>lang/&lt;target&gt;</code>. 03: Salma's talkback and persona from <code>native/&lt;lang&gt;</code>; <code>talkback_stt.languages = [native, target]</code> per call. 06: <code>dir</code> and <code>lang</code> from the native package; the landing page is served per <code>Accept-Language</code> with English as the default. 07: ADR-20. 08: the gate per target. 09: <code>versions.yaml</code> per package; corpora per language. <strong>Open.</strong> None for the mechanism; which native packages exist at the open (2027-03-17, ADR-24.11) depends on the beta cohort (English and Arabic are certain, ADR-24.20).</p>
+<p><strong>Context.</strong> <code>package_ar_en</code> appears in 02 (gloss language, prompts), 03 (Salma persona, talkback), 06 (<code>lang="ar"</code>, RTL), 07 (consent texts, notice, crisis), 08 (<code>packages/language/ar-en/recognizer.yaml</code>), 09 (<code>versions.yaml</code>). Concept-v2 §7 says the target language is a package that passes the gate and the learner's own language "needs only interface text, glosses, and a recognizer that catches it when the learner switches". <strong>Ruling.</strong> Two package kinds. <code>packages/languages/&lt;target&gt;/</code>: episode and call voices, streaming and verbatim recognizers with thresholds, lexicon and frequency list, structure inventory and rules, calibration set, law words and correction phrases, crisis keywords, host prompts, format patterns, the ban list. <code>packages/native/&lt;lang&gt;/</code>: interface strings (direction from the package: <code>dir</code>), consent texts and the privacy notice, gloss target language, Salma's voice and persona lines, crisis clips and the resources card copy, the talkback language hint. <code>learners</code> gains <code>native_language</code>, <code>target_language</code>, <code>residence_country</code>; every brief compiler, prompt loader and TTS request reads the pair from the learner row. The pilot's packages are <code>lang/en</code> and <code>native/ar</code>; <code>native/en</code> is the universal fallback for interface and consent. <strong>Consequences.</strong> 02: gloss cache key already carries <code>native_lang</code>; prompts load from <code>lang/&lt;target&gt;</code>. 03: Salma's talkback and persona from <code>native/&lt;lang&gt;</code>; <code>talkback_stt.languages = [native, target]</code> per call. 06: <code>dir</code> and <code>lang</code> from the native package; the landing page is served per <code>Accept-Language</code> with English as the default. 07: ADR-20. 08: the gate per target. 09: <code>versions.yaml</code> per package; corpora per language. <strong>Open.</strong> None for the mechanism; which native packages exist at launch depends on whose strings and Salma voice are ready (English and Arabic are certain, ADR-24.20).</p>
 <p><strong>Reconciled 2026-11-06 with the sibling threads.</strong> The engineering handbook (engineering/01-repository-layout.md) already uses <code>packages/languages/&lt;target&gt;/</code> with <code>gate.yaml</code> inside it, so that is the path; the architecture's earlier <code>packages/lang/</code> spelling is dropped. The technical design (technical-design/00-overview.md) chose a per-pair package <code>packages/language/&lt;pair&gt;/</code> with <code>ar-en</code> first and columns <code>native_lang</code> / <code>target_lang</code>; this record overrides it: two axes, not pairs (a pair package would multiply content by every native language), <code>packages/languages/&lt;target&gt;/</code> plus <code>packages/native/&lt;lang&gt;/</code>, and the column names <code>native_language</code> and <code>target_language</code>. The handbook's <code>ui_strings/</code> is the UI part of <code>packages/native/&lt;lang&gt;/</code>.</p>
 <h3>ADR-03 The language gate as code</h3>
-<p><strong>Context.</strong> 08 §4.6 specifies the voice blind test, the 50-call latency test and the 30-clip recognizer test for one pair; 09 §4.2 wraps them as suites; concept-v2 §8 names five checks (voices, learner speech to text, writing, the call, structures) that open a language. <strong>Ruling.</strong> <code>forone.langgate</code> (in the <code>vendor-lab</code> CLI) runs the five checks for a target language and writes one evidence folder <code>langgate/&lt;target&gt;/&lt;date&gt;/</code>; a <code>lang/&lt;target&gt;/gate.yaml</code> records the pass with the date and the winners; <code>vendors.yaml</code> roles that depend on the target (<code>episode_tts</code>, <code>call_tts</code>, <code>streaming_stt</code>, <code>verbatim_stt</code>, <code>pronunciation</code>) are keyed by target language. Raters: 5 native speakers of the target plus 5 learners of it from anywhere; clips: 30 real learner clips per target. <strong>Consequences.</strong> 08 §4.6 is rewritten as the gate's checks 1, 2 and 4; 09's <code>recognizers</code>, <code>voices-blind</code> and <code>calls_50</code> suites are the gate's regression form; 02's writing check (a native speaker reads 10 scripts) and 04's structure inventory are checks 3 and 5. English runs during Milestone 0 on the pilot's clips.</p>
+<p><strong>Context.</strong> 08 §4.6 specifies the voice blind test, the 50-call latency test and the 30-clip recognizer test for one pair; 09 §4.2 wraps them as suites; concept-v2 §8 names five checks (voices, learner speech to text, writing, the call, structures) that open a language. <strong>Ruling.</strong> <code>forone.langgate</code> (in the <code>vendor-lab</code> CLI) runs the five checks for a target language and writes one evidence folder <code>langgate/&lt;target&gt;/&lt;date&gt;/</code>; a <code>lang/&lt;target&gt;/gate.yaml</code> records the pass with the date and the winners; <code>vendors.yaml</code> roles that depend on the target (<code>episode_tts</code>, <code>call_tts</code>, <code>streaming_stt</code>, <code>verbatim_stt</code>, <code>pronunciation</code>) are keyed by target language. Raters: 5 native speakers of the target plus 5 learners of it from anywhere; clips: 30 real learner clips per target. <strong>Consequences.</strong> 08 §4.6 is rewritten as the gate's checks 1, 2 and 4; 09's <code>recognizers</code>, <code>voices-blind</code> and <code>calls_50</code> suites are the gate's regression form; 02's writing check (a native speaker reads 10 scripts) and 04's structure inventory are checks 3 and 5. English runs before launch on the clips of ADR-25.6.</p>
 <h3>ADR-04 Plans and allowance</h3>
-<p><strong>Ruling.</strong> <code>plans.yaml</code>: <code>one_a_day</code> $19.99, <code>two_a_day</code> $29.99 (recommended; the 7-day trial plan), <code>three_a_day</code> $44.99, USD, monthly, VAT or sales tax handled by the processor (ADR-21). <code>subscriptions.plan</code> takes these three values; <code>founding_locked boolean</code> and <code>founding_seq</code> 1 to 100 lock the price for as long as the subscription lasts. The allowance is <code>plan.episodes_per_day</code> new episodes per learner-local day, enforced in <code>api</code> (<code>episodes_today &lt; plan.episodes_per_day</code>), with one swap a day (PRD 3.6) and unlimited listening, article, chat and round two. <strong>Consequences.</strong> 01: <code>plans.yaml</code>, the allowance check, <code>learners.plan</code>. 06: the plan picker on day 7, "about $1 a day", the compromise and anchor layout from concept-v2 §8, cancel in one tap. 07: ADR-21. 08: ADR-15. 09: <code>plan_mix</code>, <code>blended_margin</code>. <strong>Open.</strong> None: ADR-24.5 keeps the three prices with a measured-cost trigger and carries the break-even warning.</p>
+<p><strong>Ruling.</strong> <code>plans.yaml</code>: <code>one_a_day</code> $19.99, <code>two_a_day</code> $29.99 (recommended; the 7-day trial plan), <code>three_a_day</code> $44.99, USD, monthly, VAT or sales tax handled by the processor (ADR-21). <code>subscriptions.plan</code> takes these three values; each subscription keeps the price it started at for as long as it lasts, and a price rise applies to new signups only (ADR-25.10; the founding lock and <code>founding_locked</code> are removed). The allowance is <code>plan.episodes_per_day</code> new episodes per learner-local day, enforced in <code>api</code> (<code>episodes_today &lt; plan.episodes_per_day</code>), with one swap a day (PRD 3.6) and unlimited listening, article, chat and round two. <strong>Consequences.</strong> 01: <code>plans.yaml</code>, the allowance check, <code>learners.plan</code>. 06: the plan picker on day 7, "about $1 a day", the compromise and anchor layout from concept-v2 §8, cancel in one tap. 07: ADR-21. 08: ADR-15. 09: <code>plan_mix</code>, <code>blended_margin</code>. <strong>Open.</strong> None: ADR-24.5 keeps the three prices with a measured-cost trigger and carries the break-even warning.</p>
 <h3>ADR-05 Episodes 2 and 3</h3>
 <p><strong>Context.</strong> Law 11 (concept-v2 §5): "One, two or three new episodes a day depending on the plan, each with a clear ending, no autoplay and no feed." The batch pipeline makes one episode for the drop; the on-demand path (swap, return) streams in under 30 s. Typical use is 60%, 50% and 45% of the allowance (concept-v2 §8). <strong>Ruling.</strong> Episode 1 is the drop (batch). Episodes 2 and 3 are made when the learner asks ("next one" on Today after the current session's episode is heard), through the on-demand path with <code>episode_kind = daily_extra</code>, standard pricing, scene 1 first. The nightly teacher run plans all of the day's episodes (one plan with 1 to 3 episode briefs, each with its own targets so the day's language load stays within the 2 to 4 words and 1 structure per episode rule), so the on-demand run starts at the writer. Learners whose last 7 days show 5 or more extra episodes get episode 2 pre-produced in the nightly batch (<code>prewrite_extra</code>), the way 02 D15 pre-writes the rank-2 idea. The feed carries only the drop episode plus any extra the learner has played. <strong>Consequences.</strong> 01: <code>day/next</code> creates up to <code>episodes_per_day</code> <code>episodes</code> rows in state <code>planned</code>; <code>POST /v1/episodes/next</code>. 02: <code>daily_extra</code> kind; the teacher's multi-episode plan schema; <code>prewrite_extra</code>. 06: the "next one" control (one button, after the episode ends, never autoplay); the Show tab lists all of the day's episodes. 08: the cost model prices a learner-day as 1 + extras × on-demand premium (about +$0.05 an episode for standard pricing), and the margin by plan uses measured extras.</p>
 <h3>ADR-06 Invisible teaching</h3>
 <p><strong>Context.</strong> decisions.md §3 drops "the after-call correction notes, the polish card, the chat margin note"; concept-v2 law 7 forbids "the correct answer is" and correction notes; Salma "never corrects, never sends notes". 05 built <code>notes</code>, <code>margin_notes</code>, a 90-second stage 1, the polish TTS, the notes door; 06 renders them; 08 prices them; 09 measures them; 07 guards them. <strong>Ruling.</strong> Remove: <code>notes</code>, <code>margin_notes</code> tables and functions; <code>session/after-pass</code> stage 1; the notes door and the margin chip; <code>notes.enabled</code>; <code>notes_late</code>, <code>chat_opener_late</code> stays; the "Notes under 90 s" budget; the cost line "Salma's notes and chat" becomes "Salma (when asked) and chat". Keep as evidence (decision 4): the notebook with its "working on" list, "words you own", the tape, "how we know"; the weekly proof and finale through the claim gate; "why this episode"; "where do I stand" when asked, with a range; the "New for you" card from <code>did_it</code> and <code>first_ever</code> claims; "say it once" and shadowing as pronunciation with internal scoring only. Add: the correction guard in <code>guard.check_output</code> (07) with a per-language phrase list, counted in <code>moves.violations</code> and in 09's <code>explicit_corrections_per_100_turns</code> (ceiling 0); the editor's check "nothing reads as a correction or a lesson" as a model check on every script, article and chat opener (02 check 10 widened); the teacher's "echo plan" (which of the learner's recurring errors the host should recast this call and which right forms the next episodes carry), already the host brief's <code>recasts</code> field in 03, now the only correction channel. The after-session pass is one function with the 10-minute budget; the analyst's first stage runs inside it. <strong>Consequences.</strong> 02, 03, 05, 06, 07, 08, 09 revised; the technical-design thread should drop the notes screens and the margin chip. Salma's remaining per-session role is explanations when the learner asks (<code>salma_explain</code>, Sonnet, on demand).</p>
 <h3>ADR-07 Dates</h3>
-<p><strong>Ruling.</strong> Milestone 0: 2026-10-24 to 11-18 (gate decision 11-18). Language gate for English and the vendor tests: 2026-11-01 to 11-17 on the pilot's clips (recognizer by 11-10, voice by 11-17, <code>vendors.yaml</code> committed before build week 1). Build weeks: W1 2026-11-18 to 11-24, W2 11-25 to 12-01, W3 12-02 to 12-08, W4 12-09 to 12-15, W5 12-16 to 12-22; exit 12-22 (measured cost per session and a costed path to $0.35). Beta: 2026-12-23 to 2027-01-26; first cohort 12-23 (a Wednesday; the invite cadence is weekly on the beta's weekday, <code>cohort_key = invite_date</code>); the Gemini price doubling lands in beta week 2; first finales from 2027-01-19; first "active in week 4" readable 2027-01-20; gate review 2027-01-26. Freezes: 2026-12-21 12:00 to 12-24 12:00 UTC and 2026-12-31 to 2027-01-02. Counsel's answers (region, consents, crisis lines) due before build week 1: 2026-11-17. <strong>Superseded in part on 2026-11-12:</strong> ADR-24.11 re-sets the build end, the beta, the finales and the gate review; section 6 holds the current dates. <strong>Consequences.</strong> Every build plan (section 7 of each document) is re-dated by 16 days with the same week contents unless a record above changes them; the hub's "due soon" list is re-dated.</p>
+<p><strong>Ruling.</strong> Milestone 0: 2026-10-24 to 11-18 (gate decision 11-18). Language gate for English and the vendor tests: 2026-11-01 to 11-17 on the pilot's clips (recognizer by 11-10, voice by 11-17, <code>vendors.yaml</code> committed before build week 1). Build weeks: W1 2026-11-18 to 11-24, W2 11-25 to 12-01, W3 12-02 to 12-08, W4 12-09 to 12-15, W5 12-16 to 12-22; exit 12-22 (measured cost per session and a costed path to $0.35). Beta: 2026-12-23 to 2027-01-26; first cohort 12-23 (a Wednesday; the invite cadence is weekly on the beta's weekday, <code>cohort_key = invite_date</code>); the Gemini price doubling lands in beta week 2; first finales from 2027-01-19; first "active in week 4" readable 2027-01-20; gate review 2027-01-26. Freezes: 2026-12-21 12:00 to 12-24 12:00 UTC and 2026-12-31 to 2027-01-02. Counsel's answers (region, consents, crisis lines) due before build week 1: 2026-11-17. <strong>Superseded:</strong> ADR-24.11 re-set these dates, and ADR-25.1 removed them; the plan keeps no calendar dates (section 6). <strong>Consequences.</strong> Every build plan (section 7 of each document) is re-dated by 16 days with the same week contents unless a record above changes them; the hub's "due soon" list is re-dated.</p>
 <h3>ADR-08 Home region</h3>
-<p><strong>Context.</strong> 01 D8 chose <code>me-central-1</code> for Saudi residents' data; 07 D7 accepted it; 01 §10 #1 asked counsel "may Saudi residents' voice rest in the UAE or EU". With learners anywhere the question is different: EU and UK learners' data in the UAE is a transfer without an adequacy decision; the same data in Frankfurt needs only the AWS DPA, while the US vendor transfers are the same in every option. Latency does not decide it: 01 §3.6 already lets <code>call-worker</code> run near the vendors and no database sits on the turn path. <strong>Ruling.</strong> The default becomes <code>HOME_REGION = eu-central-1</code>; <code>me-central-1</code> stays available as the alternative if counsel and the first cohort's residence countries favour it; Vercel region follows (<code>fra1</code>); Inngest and Langfuse stay EU. The architecture is indifferent between the two AWS regions (one config key), so the choice can be made as late as the Terraform apply in build week 1. <strong>Open.</strong> None since 2026-11-12: ADR-24.8 makes <code>eu-central-1</code> final for the beta, and 24.B13 sets the transfer basis (SCCs with a transfer impact assessment, never consent); counsel confirms (register A1).</p>
+<p><strong>Context.</strong> 01 D8 chose <code>me-central-1</code> for Saudi residents' data; 07 D7 accepted it; 01 §10 #1 asked counsel "may Saudi residents' voice rest in the UAE or EU". With learners anywhere the question is different: EU and UK learners' data in the UAE is a transfer without an adequacy decision; the same data in Frankfurt needs only the AWS DPA, while the US vendor transfers are the same in every option. Latency does not decide it: 01 §3.6 already lets <code>call-worker</code> run near the vendors and no database sits on the turn path. <strong>Ruling.</strong> The default becomes <code>HOME_REGION = eu-central-1</code>; <code>me-central-1</code> stays available as the alternative if counsel and the first cohort's residence countries favour it; Vercel region follows (<code>fra1</code>); Inngest and Langfuse stay EU. The architecture is indifferent between the two AWS regions (one config key), so the choice can be made as late as the Terraform apply in build week 1. <strong>Open.</strong> None since 2026-11-12: ADR-24.8 makes <code>eu-central-1</code> final for the beta, and 24.B13 sets the transfer basis (SCCs with a transfer impact assessment, never consent); no counsel step (ADR-25.3); the self-review covers it (register A4).</p>
 <h3>ADR-09 Tracing data</h3>
 <p><strong>Ruling.</strong> 01 D15 as revised on 2026-10-17 stands for every domain (see the table). 08 D3 and §4.3 are rewritten; 07's Langfuse register row says "metadata and pseudonymous ids by default; pseudonymized, de-identified text only for <code>data_use</code> learners; 30 days"; 09 §4.9's Langfuse row says the same. The research pseudonym is a row in <code>research_pseudonyms(learner_id, pseudonym)</code> (deleted with the learner) rather than an HMAC of a never-rotated secret, so the secret can rotate and deletion by pseudonym still works (07 skeptic minor). Langfuse deletion is by pseudonym and does not hold up the "deleted" email (closes 04 §10's question).</p>
 <h3>ADR-10 and ADR-11 Embeddings and the editor fallback</h3>
@@ -905,17 +868,17 @@ flowchart LR
 <h3>ADR-13 to ADR-15 Cost rows, spend modes, per-plan guards</h3>
 <p>As in the table. The report's "Margin by plan" section: net price (list less the processor's measured fee and tax), measured episodes used, measured cost per learner-month, margin, and the break-even cost per session at full use ($0.57 / $0.42 / $0.42 from decisions.md); <code>plan_mix</code> and <code>blended_margin</code> are measures in 09 and lines in the Tuesday review. ADR-24.5 carries the warning that the post-doubling floor ($0.43 to $0.45) is above the 2 and 3 a day break-even at full use, and the price trigger that answers it.</p>
 <h3>ADR-16 Operations around the clock</h3>
-<p>As in the table. Jobs: <code>measures/daily</code> → <code>measures/hourly</code> computing learner-local days that closed in the last hour; <code>privacy/verify</code> hourly over the last 25 hours with <code>expires_at</code>-based checks; <code>retention/daily</code> per learner-local midnight; the digest at 06:00 UTC; the weekly report Mondays 06:00 UTC. Alerts: <code>episode_not_ready_before_drop</code> is P2 per learner with dedupe, and a new <code>drops_late_systemic</code> rule is P1 at 3 or more learners or 5%. Release: <code>tools/release</code> refuses a deploy when more than 2% of learners have a drop in the next 45 minutes (an override needs a reason row); <code>call-worker</code> deploys drain as 01 §4.4 #7 says, at any hour. On-call: P1 pages at any hour; the honest beta statement is that a one-engineer rota means some overnight P1s are answered by the product's fallbacks (yesterday's episode stays; voice notes) and a human at the next working hour; ADR-24.12 accepts that. Staging stays up from build week 2 through the beta (about +$180 a month, carried into 01 §6 and §10 #4).</p>
+<p>As in the table. Jobs: <code>measures/daily</code> → <code>measures/hourly</code> computing learner-local days that closed in the last hour; <code>privacy/verify</code> hourly over the last 25 hours with <code>expires_at</code>-based checks; <code>retention/daily</code> per learner-local midnight; the digest at 06:00 UTC; the weekly report Mondays 06:00 UTC. Alerts: <code>episode_not_ready_before_drop</code> is P2 per learner with dedupe, and a new <code>drops_late_systemic</code> rule is P1 at 3 or more learners or 5%. Release: <code>tools/release</code> refuses a deploy when more than 2% of learners have a drop in the next 45 minutes (an override needs a reason row); <code>call-worker</code> deploys drain as 01 §4.4 #7 says, at any hour. On-call: P1 pages at any hour; overnight P1s are answered by the product's fallbacks (yesterday's episode stays; voice notes) and by Muath, who gets the alerts, at the next working hour (ADR-25.2). Staging stays up from the first deploy onward (about +$180 a month, carried into 01 §6 and §10 #4).</p>
 <h3>ADR-17 to ADR-19</h3>
 <p>As in the table. For ADR-19, the full list of renamings is in section 4.</p>
 <h3>ADR-20 Jurisdiction and crisis resources</h3>
-<p><strong>Ruling.</strong> <code>learners.residence_country</code> (ISO 3166-1) asked at A9 as one question with a country picker, never from IP (trust promise 6). 07 §4.9 becomes a table of regimes with, per regime: lawful basis for voice and for the research set, breach clock and regulator, DPIA requirement, children's age threshold (the product's 18+ gate exceeds all of them), transfer basis for US vendors, and the status of counsel's review; a generic baseline row applies to a learner whose country is not reviewed and says so in the notice. <code>packages/native/&lt;lang&gt;/crisis/resources.yaml</code> keyed by ISO country with an international directory entry as the fallback; the card shows the learner's country's lines or the directory. Counsel artifacts: consent texts, notice, crisis files, processor register, DPIA. <strong>Open.</strong> None since 2026-11-12: ADR-24.9 sets the day-one regimes and accepts signups from unreviewed countries under the generic notice; counsel confirms (register A1, A8).</p>
+<p><strong>Ruling.</strong> <code>learners.residence_country</code> (ISO 3166-1) asked at A9 as one question with a country picker, never from IP (trust promise 6). 07 §4.9 becomes a table of regimes with, per regime: lawful basis for voice and for the research set, breach clock and regulator, DPIA requirement, children's age threshold (the product's 18+ gate exceeds all of them), transfer basis for US vendors, and the status of the self-review (ADR-25.3); a generic baseline row applies to a learner whose country is not reviewed and says so in the notice. <code>packages/native/&lt;lang&gt;/crisis/resources.yaml</code> keyed by ISO country with an international directory entry as the fallback; the card shows the learner's country's lines or the directory. Self-review artifacts (ADR-25.3): consent texts, notice, crisis files, processor register, DPIA. <strong>Open.</strong> None since 2026-11-12: ADR-24.9 sets the day-one regimes and accepts signups from unreviewed countries under the generic notice; no counsel step; the self-review covers it (ADR-25.3, register A4).</p>
 <h3>ADR-21 Payments</h3>
 <p>As in the table. The <code>Payments</code> adapter interface (01 §4.5) is unchanged; a merchant-of-record processor changes who issues the invoice and remits tax, not the webhook model. Fees: about 5% (MoR) against about 3% plus tax registrations; the margin section reads the real fee row. <strong>Open.</strong> None: ADR-24.4 chooses Paddle.</p>
 <h3>ADR-22 Open-item register</h3>
 <p>Section 10 below is the register. Each domain document's section 10 keeps only the items specific to that domain and points here for the shared ones.</p>
 <h3>ADR-24 The owed decisions, taken on delegation (2026-11-12)</h3>
-<p><strong>Context.</strong> On 2026-11-12 Muath delegated every open product, scope and budget decision ("you make the decisions and finish up everything"). Six days before the build starts, about 150 items were tagged OPEN across PRD-v3 Part 17, this register, the technical design's file 10, the design's file 07, the backlog's blockers and the handbook. <strong>Ruling.</strong> Every item is decided below. Where the documents already argued for an answer, that answer is taken; the few new judgments are marked <em>(new)</em>. Decisions are not the same as actions: a ruling can say "Paddle", but only Muath can open the account. Those actions are listed once, in section 10 table B, with dates. A decision here is reversible by Muath at any time; reversing one reopens only the rows that cite it.</p>
+<p><strong>Context.</strong> On 2026-11-12 Muath delegated every open product, scope and budget decision ("you make the decisions and finish up everything"). Six days before the build starts, about 150 items were tagged OPEN across PRD-v3 Part 17, this register, the technical design's file 10, the design's file 07, the backlog's blockers and the handbook. <strong>Ruling.</strong> Every item is decided below. Where the documents already argued for an answer, that answer is taken; the few new judgments are marked <em>(new)</em>. Decisions are not the same as actions: a ruling can say "Paddle", but only Muath can open the account. Those actions are listed once, in section 10 table A (since ADR-25.1, with the step each must come before rather than a date). A decision here is reversible by Muath at any time; reversing one reopens only the rows that cite it.</p>
 <div class="tw"><table>
 <thead>
 <tr>
@@ -929,19 +892,19 @@ flowchart LR
 <tr>
 <td>24.1</td>
 <td>Web or native for the beta (OPEN-01, B1, §10 #8, design 07 #1)</td>
-<td><strong>Installable web app plus the private podcast feed.</strong> Native starts after the beta gates, or earlier if GATE-M18 fires (calls abandoned on the move, or the feed-to-call handoff loses most learners). The <code>[OPEN-01]</code> tags in PRD-v3 become plain requirements.</td>
+<td><em>Superseded by 25.4.</em> <strong>Installable web app plus the private podcast feed.</strong> Native starts after the beta gates, or earlier if GATE-M18 fires (calls abandoned on the move, or the feed-to-call handoff loses most learners). The <code>[OPEN-01]</code> tags in PRD-v3 become plain requirements.</td>
 <td>One team ships web weeks faster; the feed carries the lock-screen listening (60 to 70% of the time); web keeps about 96% of revenue against about 85% through a store</td>
 </tr>
 <tr>
 <td>24.2</td>
 <td>First-session order (OPEN-02, B2, design 07 #2)</td>
-<td><strong>Order A:</strong> Salma's talk, the optional word check, casting while the pilot renders, the pilot, the first call, then the account. The suggested door order stays Listen, Read, Call, Chat. The beta may A/B the word check after the first call; nothing else is tested.</td>
+<td><em>Superseded by 25.5 (no beta A/B).</em> <strong>Order A:</strong> Salma's talk, the optional word check, casting while the first episode renders, the first episode, the first call, then the account. The suggested door order stays Listen, Read, Call, Chat. The beta may A/B the word check after the first call; nothing else is tested.</td>
 <td>Sound inside a minute and speech inside five minutes are the two onboarding promises; asking for the account first costs both</td>
 </tr>
 <tr>
 <td>24.3</td>
 <td>Who writes the hosts and Salma (OPEN-03, B3, TDD #15, design 07 #4)</td>
-<td><strong>Drafts are written in this pass</strong> (<code>content/bibles/</code>). Muath is the owner of record; a paid native English editor reads the hosts' bible and the 30 sample lines per host by 2026-12-01; Muath reads Salma's Arabic. No outside writer for the beta <em>(new: B3 recommended a two-week writer hire; there is no time to hire before W2, and the eval gate plus the native read catch the risk)</em>. A writer is hired for season two if R9 (sameness) shows up in week 4.</td>
+<td><em>Superseded by 25.7.</em> <strong>Drafts are written in this pass</strong> (<code>content/bibles/</code>). Muath is the owner of record; a paid native English editor reads the hosts' bible and the 30 sample lines per host by 2026-12-01; Muath reads Salma's Arabic. No outside writer for the beta <em>(new: B3 recommended a two-week writer hire; there is no time to hire before W2, and the eval gate plus the native read catch the risk)</em>. A writer is hired for season two if R9 (sameness) shows up in week 4.</td>
 <td>The build cannot test the writer or host prompts on 2026-11-25 without a bible; a draft that people correct beats a blank page that waits for a hire</td>
 </tr>
 <tr>
@@ -953,7 +916,7 @@ flowchart LR
 <tr>
 <td>24.5</td>
 <td>Prices (OPEN-06, B6, §10 #4)</td>
-<td><strong>Keep $19.99, $29.99 and $44.99</strong>, founding lock for the first 100 payers. Accept the loss on full-use learners during the beta. The post-doubling floor ($0.43 to $0.45 a session) is already above the $0.42 full-use break-even, so a per-session trigger would fire at once and mean nothing. <strong>The trigger is margin at measured use instead</strong> <em>(amended 2026-11-12 after the final review)</em>: if the "Margin by plan" report (ADR-15) shows a plan's margin below 0 at the cohort's measured episodes per paid day, net of Paddle's fee, in the exit document (2027-03-12, on Milestone 0 and staging usage) or the beta week-3 report, that plan's price rises for signups after the founding 100 (<code>two_a_day</code> $34.99, <code>three_a_day</code> $54.99). The founding price stays locked</td>
+<td><em>Superseded by 25.1, 25.5 and 25.10.</em> <strong>Keep $19.99, $29.99 and $44.99</strong>, founding lock for the first 100 payers. Accept the loss on full-use learners during the beta. The post-doubling floor ($0.43 to $0.45 a session) is already above the $0.42 full-use break-even, so a per-session trigger would fire at once and mean nothing. <strong>The trigger is margin at measured use instead</strong> <em>(amended 2026-11-12 after the final review)</em>: if the "Margin by plan" report (ADR-15) shows a plan's margin below 0 at the cohort's measured episodes per paid day, net of Paddle's fee, in the exit document (2027-03-12, on Milestone 0 and staging usage) or the beta week-3 report, that plan's price rises for signups after the founding 100 (<code>two_a_day</code> $34.99, <code>three_a_day</code> $54.99). The founding price stays locked</td>
 <td>The founders' price must not move under them; the rule protects "no plan loses money at typical use", which is the promise that matters, and applies to every plan that breaks it</td>
 </tr>
 <tr>
@@ -965,19 +928,19 @@ flowchart LR
 <tr>
 <td>24.7</td>
 <td>Haiku as the call host (§10 #6)</td>
-<td><strong>Pre-approved:</strong> if the build-week-4 comparison shows no difference in move-contract violations, talk share and the human read, the flag is flipped after <code>eval-gate</code> passes.</td>
+<td><em>Superseded by 25.1 (no build-week dates).</em> <strong>Pre-approved:</strong> if the build-week-4 comparison shows no difference in move-contract violations, talk share and the human read, the flag is flipped after <code>eval-gate</code> passes.</td>
 <td>It is worth $0.046 a session and the gate already guards quality</td>
 </tr>
 <tr>
 <td>24.8</td>
 <td>Home region (§10 #1, ADR-08, TDD #12, B4)</td>
-<td><strong><code>eu-central-1</code> is final for the beta.</strong> <code>me-central-1</code> stays a one-variable move that only counsel can trigger. The transfer basis is standard contractual clauses with a transfer impact assessment, never consent (24.B13). Voice used only for the learner's own progress is treated as <em>not</em> biometric identification, but it is handled at the biometric standard anyway (per-learner keys, 15-minute deletion when storage is off).</td>
+<td><em>Superseded by 25.3.</em> <strong><code>eu-central-1</code> is final for the beta.</strong> <code>me-central-1</code> stays a one-variable move that only counsel can trigger. The transfer basis is standard contractual clauses with a transfer impact assessment, never consent (24.B13). Voice used only for the learner's own progress is treated as <em>not</em> biometric identification, but it is handled at the biometric standard anyway (per-learner keys, 15-minute deletion when storage is off).</td>
 <td>EU and UK learners need no transfer from an EU region; the stricter handling costs nothing because ADR-12 already builds it</td>
 </tr>
 <tr>
 <td>24.9</td>
 <td>Jurisdictions and beta countries (OPEN-05, OPEN-07, §10 #2, B7)</td>
-<td>Day-one regimes: <strong>EU and UK GDPR, Saudi PDPL and the generic baseline.</strong> Invites go to waitlist learners in any country under the generic notice, 18 or older by self-attestation; countries the processor cannot sell into are refused at checkout. <strong>California SB 243's crisis-protocol duties are applied to every learner</strong> <em>(new)</em>, so whether it applies legally stops mattering. A DPIA is written before the beta (draft in <code>legal/</code>).</td>
+<td><em>Superseded by 25.3 and 25.5.</em> Day-one regimes: <strong>EU and UK GDPR, Saudi PDPL and the generic baseline.</strong> Invites go to waitlist learners in any country under the generic notice, 18 or older by self-attestation; countries the processor cannot sell into are refused at checkout. <strong>California SB 243's crisis-protocol duties are applied to every learner</strong> <em>(new)</em>, so whether it applies legally stops mattering. A DPIA is written before the beta (draft in <code>legal/</code>).</td>
 <td>"Anyone, anywhere" (decision 1) with the strictest regime's controls is the defensible default; applying SB 243 everywhere is cheap because the crisis protocol already exists</td>
 </tr>
 <tr>
@@ -989,37 +952,37 @@ flowchart LR
 <tr>
 <td>24.11</td>
 <td>Staffing and the date (§10 #10, B10, TDD #20, R1)</td>
-<td><strong>The beta opens when the Day-1 work is done, not on a fixed date.</strong> The backlog was re-cut on 2026-11-12 (release plan §5 and §6, sizes unchanged): Day-1 P0 is 136.5 engineer-days after the rulings (157 with a 15% buffer); work later in the beta is 37; capacity before a 2026-12-21 freeze was about 41 days. Neither 2026-12-23 nor the earlier 2027-01-06 fallback is honest. <strong>Plan of record: two engineers working from build start (2026-11-18), beta opens Wednesday 2027-03-17.</strong> Each week the second engineer starts later moves the open about one week (a start on 2026-11-25 gives 2027-03-24). A third engineer from 2026-12-01 brings it to 2027-02-17, which is the recommended action (A2). One engineer alone gives 2027-07-07. The open date is re-forecast at the end of every build week from measured velocity. It moves earlier, in whole weeks, only when the remaining Day-1 work plus a 15% buffer fits before the earlier Wednesday, and it never moves later without the waitlist being told. One engineer alone is not a viable beta plan; the build continues, and the date is recomputed once a second engineer starts. The single-engineer cut list applies from day one regardless, except Terraform (24.B19). <strong>Bridge</strong> <em>(new)</em>: Milestone 0 learners who pre-paid and opt in keep receiving hand-made episodes until the open (two a week, no calls, 24.B33), and their founding price lock starts at the open. ADR-07's beta and gate dates are superseded by §6</td>
+<td><em>Superseded by 25.1, 25.2 and 25.5.</em> <strong>The beta opens when the Day-1 work is done, not on a fixed date.</strong> The backlog was re-cut on 2026-11-12 (release plan §5 and §6, sizes unchanged): Day-1 P0 is 136.5 engineer-days after the rulings (157 with a 15% buffer); work later in the beta is 37; capacity before a 2026-12-21 freeze was about 41 days. Neither 2026-12-23 nor the earlier 2027-01-06 fallback is honest. <strong>Plan of record: two engineers working from build start (2026-11-18), beta opens Wednesday 2027-03-17.</strong> Each week the second engineer starts later moves the open about one week (a start on 2026-11-25 gives 2027-03-24). A third engineer from 2026-12-01 brings it to 2027-02-17, which is the recommended action (A2). One engineer alone gives 2027-07-07. The open date is re-forecast at the end of every build week from measured velocity. It moves earlier, in whole weeks, only when the remaining Day-1 work plus a 15% buffer fits before the earlier Wednesday, and it never moves later without the waitlist being told. One engineer alone is not a viable beta plan; the build continues, and the date is recomputed once a second engineer starts. The single-engineer cut list applies from day one regardless, except Terraform (24.B19). <strong>Bridge</strong> <em>(new)</em>: Milestone 0 learners who pre-paid and opt in keep receiving hand-made episodes until the open (two a week, no calls, 24.B33), and their founding price lock starts at the open. ADR-07's beta and gate dates are superseded by §6</td>
 <td>The backlog's own sizes: 136.5 days of Day-1 work cannot fit 41; a date that the arithmetic contradicts is not a plan</td>
 </tr>
 <tr>
 <td>24.12</td>
 <td>On-call (§10 #7, TDD #21, R12)</td>
-<td><strong>Accept the one-engineer rota</strong> for the beta. Overnight P1s are answered by the product's fallbacks (yesterday's episode stays; voice notes) and by a human at the next working hour, with phone escalation for a systemic drop failure. Approve Better Stack (about $30 a month).</td>
+<td><em>Superseded by 25.2.</em> <strong>Accept the one-engineer rota</strong> for the beta. Overnight P1s are answered by the product's fallbacks (yesterday's episode stays; voice notes) and by a human at the next working hour, with phone escalation for a systemic drop failure. Approve Better Stack (about $30 a month).</td>
 <td>An honest beta statement; a second responder costs more than a beta cohort's risk</td>
 </tr>
 <tr>
 <td>24.13</td>
 <td>Budget (§10 #9, TDD #20)</td>
-<td><strong>Approved:</strong> fixed infrastructure $1,000 to $1,300 a month, the vendor minimums listed in §10 #9, and an Anthropic prepaid balance of $2,500 for the first beta month. Penetration test $5,000 to $10,000 budgeted for February, before public launch (B9).</td>
+<td><em>Superseded by 25.11 (the penetration test) and 25.5.</em> <strong>Approved:</strong> fixed infrastructure $1,000 to $1,300 a month, the vendor minimums listed in §10 #9, and an Anthropic prepaid balance of $2,500 for the first beta month. Penetration test $5,000 to $10,000 budgeted for February, before public launch (B9).</td>
 <td>These are the documents' own estimates; nothing ships without them</td>
 </tr>
 <tr>
 <td>24.14</td>
 <td>Reviewers (§10 #11, TDD #16)</td>
-<td>One <strong>paid native English reader</strong>, part-time (about 4 hours a day at 100 learners), who also performs the language gate's writing check. Muath is the claims auditor and the Arabic law-scan reader. A second tagger for the calibration set is recruited from the native-reader pool by build week 5; until one exists, only event claims ship and metric claims stay off.</td>
+<td><em>Superseded by 25.7.</em> One <strong>paid native English reader</strong>, part-time (about 4 hours a day at 100 learners), who also performs the language gate's writing check. Muath is the claims auditor and the Arabic law-scan reader. A second tagger for the calibration set is recruited from the native-reader pool by build week 5; until one exists, only event claims ship and metric claims stay off.</td>
 <td>The roles exist in the design; only names were missing</td>
 </tr>
 <tr>
 <td>24.15</td>
 <td>Crisis protocol details (§10 #12)</td>
-<td>The keyword list waits for the host to confirm, for up to 2 seconds, and fires anyway if no confirmation comes (fail safe, 24.B12). Resources come per ISO country, with an international helpline directory as the fallback. The clip wording is drafted in <code>legal/</code> for counsel by 2026-12-15. Muath is told the weekly <em>count</em> of activations, never their content, and does not write to learners personally.</td>
+<td><em>Superseded by 25.3 (no counsel review).</em> The keyword list waits for the host to confirm, for up to 2 seconds, and fires anyway if no confirmation comes (fail safe, 24.B12). Resources come per ISO country, with an international helpline directory as the fallback. The clip wording is drafted in <code>legal/</code> for counsel by 2026-12-15. Muath is told the weekly <em>count</em> of activations, never their content, and does not write to learners personally.</td>
 <td>Privacy and the learner's dignity outrank the founder's curiosity</td>
 </tr>
 <tr>
 <td>24.16</td>
 <td>Milestone 0 consents (§10 #13)</td>
-<td><strong>A short addendum goes to the 15 pilot learners</strong> before build week 5. It covers re-onboarding in the end-to-end run and de-identified fixtures. Any learner who does not sign is excluded from both, and no fixture is published without a signature.</td>
+<td><em>Superseded by 25.5.</em> <strong>A short addendum goes to the 15 pilot learners</strong> before build week 5. It covers re-onboarding in the end-to-end run and de-identified fixtures. Any learner who does not sign is excluded from both, and no fixture is published without a signature.</td>
 <td>The pilot consent did not foresee either use</td>
 </tr>
 <tr>
@@ -1037,13 +1000,13 @@ flowchart LR
 <tr>
 <td>24.19</td>
 <td>External test (OPEN-09, B8)</td>
-<td><strong>Duolingo English Test</strong> for the 20 to 30 English learners at week 0 and week 8.</td>
+<td><em>Superseded by 25.5.</em> <strong>Duolingo English Test</strong> for the 20 to 30 English learners at week 0 and week 8.</td>
 <td>The cheapest recognized test with a speaking section</td>
 </tr>
 <tr>
 <td>24.20</td>
 <td>Thresholds and languages (OPEN-10, OPEN-11, TDD #18, R14)</td>
-<td>Similarity cosine 0.85 until Milestone 0's scripts give a measured value; recognizer confidence from the 30-clip test. <strong>English is the only target language in the beta</strong> unless another passes all five gate checks by the end of build week 2; native packages <code>en</code> and <code>ar</code> exist at the open (2027-03-17), and others follow when their strings and Salma's voice exist.</td>
+<td><em>Superseded by 25.1 and 25.6.</em> Similarity cosine 0.85 until Milestone 0's scripts give a measured value; recognizer confidence from the 30-clip test. <strong>English is the only target language in the beta</strong> unless another passes all five gate checks by the end of build week 2; native packages <code>en</code> and <code>ar</code> exist at the open (2027-03-17), and others follow when their strings and Salma's voice exist.</td>
 <td>The gate is the rule; the rest is data the tests produce</td>
 </tr>
 <tr>
@@ -1055,7 +1018,7 @@ flowchart LR
 <tr>
 <td>24.22</td>
 <td>Design questions 3 and 5 to 20 (design 07)</td>
-<td><strong>Every row takes its "designed for now" column</strong>: button-only talkback; dark and light themes, dark by default; automatic Salma language shift, announced once; a quiet allowance row; a short proof after an empty week; the proof on the rhythm week's last day; captions on by default (host side); the sample page optional; one factual founding-lock line; deletion with a typed "delete" and no grace period (amended by 24.B1); a left-to-right scrubber with a mirrored layout; digits follow the locale; toast plus a soft click; one host per call; "That's three today."; Hours shown in both places, quietly. Row 13 (store compliance) does not apply under 24.1.</td>
+<td><em>Superseded by 25.10 (no founding-lock line).</em> <strong>Every row takes its "designed for now" column</strong>: button-only talkback; dark and light themes, dark by default; automatic Salma language shift, announced once; a quiet allowance row; a short proof after an empty week; the proof on the rhythm week's last day; captions on by default (host side); the sample page optional; one factual founding-lock line; deletion with a typed "delete" and no grace period (amended by 24.B1); a left-to-right scrubber with a mirrored layout; digits follow the locale; toast plus a soft click; one host per call; "That's three today."; Hours shown in both places, quietly. Row 13 (store compliance) does not apply under 24.1.</td>
 <td>Each default was designed against the laws; the pilot and beta measure the ones marked for observation</td>
 </tr>
 <tr>
@@ -1116,7 +1079,7 @@ flowchart LR
 <tr>
 <td>24.B7</td>
 <td>Export: passphrase (07 §4.1) vs none (04 D16); link 1 h (handbook 09) vs 15 min (04); a 1-hour promise vs manual fulfilment (E13-S13)</td>
-<td>Zip with no passphrase. The emailed link opens the notebook, and the download is a presigned URL minted on click, valid 15 minutes; the file is kept 7 days. Promise: <strong>within 72 hours</strong> in the beta while it may be fulfilled by hand, and within 1 hour once automated</td>
+<td><em>Superseded by 25.5 (72 hours until export is automated, not tied to a beta).</em> Zip with no passphrase. The emailed link opens the notebook, and the download is a presigned URL minted on click, valid 15 minutes; the file is kept 7 days. Promise: <strong>within 72 hours</strong> in the beta while it may be fulfilled by hand, and within 1 hour once automated</td>
 <td>04 D16; PRD FR-1046</td>
 </tr>
 <tr>
@@ -1134,7 +1097,7 @@ flowchart LR
 <tr>
 <td>24.B10</td>
 <td>Milestone 0 addendum: before any clip leaves (07 §7) vs 2026-12-09 (24.16)</td>
-<td><strong>Two parts.</strong> Part 1 (vendor tests) must be signed before any pilot clip goes to a vendor; if a clip already went, that is a counsel question (A-10 in the question pack). Part 2 (the bridge, re-onboarding and fixtures) by 2026-12-15 (24.B28, register A9)</td>
+<td><em>Superseded by 25.5.</em> <strong>Two parts.</strong> Part 1 (vendor tests) must be signed before any pilot clip goes to a vendor; if a clip already went, that is a counsel question (A-10 in the question pack). Part 2 (the bridge, re-onboarding and fixtures) by 2026-12-15 (24.B28, register A9)</td>
 <td>07 §7; <code>legal/07</code></td>
 </tr>
 <tr>
@@ -1188,7 +1151,7 @@ flowchart LR
 <tr>
 <td>24.B19</td>
 <td>Terraform: the single-engineer cut list's "console setup" vs Terraform written in Milestone 0 week 0 and the production apply (A1)</td>
-<td><strong>Terraform stays</strong> and the cut is withdrawn. A console setup with a runbook is only the fallback if Terraform is not applying by the end of build week 1</td>
+<td><em>Superseded by 25.1 and 25.2.</em> <strong>Terraform stays</strong> and the cut is withdrawn. A console setup with a runbook is only the fallback if Terraform is not applying by the end of build week 1</td>
 <td>01 §7; release plan §5</td>
 </tr>
 <tr>
@@ -1242,7 +1205,7 @@ flowchart LR
 <tr>
 <td>24.B28</td>
 <td>The new date (24.11) against the pilot's promises: pre-payers were told 23 December, and the pilot consent deletes all data by 2026-12-31</td>
-<td>Every pre-payer is told the new date within a week, with a full refund at once or a place in the bridge. The bridge and any re-onboarding need Part 2 of the addendum signed by <strong>2026-12-15</strong>; anyone who does not sign keeps the original promise, deletion by 2026-12-31</td>
+<td><em>Superseded by 25.5.</em> Every pre-payer is told the new date within a week, with a full refund at once or a place in the bridge. The bridge and any re-onboarding need Part 2 of the addendum signed by <strong>2026-12-15</strong>; anyone who does not sign keeps the original promise, deletion by 2026-12-31</td>
 <td><code>milestone-0/07</code>; <code>legal/07</code>; register A9, A15</td>
 </tr>
 <tr>
@@ -1260,7 +1223,7 @@ flowchart LR
 <tr>
 <td>24.B31</td>
 <td>Vendor tests on pilot clips (M2, M3, due by 2026-11-17) against 24.B10 (no clip goes to a vendor before addendum Part 1 is signed)</td>
-<td>Only clips from pilot learners who have signed Part 1 are used. If fewer than the 30 needed are signed by 2026-11-15, the set is topped up with clips from paid voice testers recorded under their own consent, and the vendor decision may slip to the end of build week 1. It is then frozen on the measured leader, or failing that on the documented defaults (Gemini 3.8 Flash TTS; Soniox streaming; AssemblyAI verbatim). Any clip already sent without Part 1 is a counsel question (A-10), reported, and not used</td>
+<td><em>Superseded by 25.6.</em> Only clips from pilot learners who have signed Part 1 are used. If fewer than the 30 needed are signed by 2026-11-15, the set is topped up with clips from paid voice testers recorded under their own consent, and the vendor decision may slip to the end of build week 1. It is then frozen on the measured leader, or failing that on the documented defaults (Gemini 3.8 Flash TTS; Soniox streaming; AssemblyAI verbatim). Any clip already sent without Part 1 is a counsel question (A-10), reported, and not used</td>
 <td><code>legal/07</code>; 08; register M2, M3</td>
 </tr>
 <tr>
@@ -1272,13 +1235,100 @@ flowchart LR
 <tr>
 <td>24.B33</td>
 <td>The bridge's load on Muath (final review): four months of hand-made episodes alongside A1 to A15</td>
-<td>The bridge is capped at <strong>two hand-made episodes a week per learner, no calls</strong>, offered only to pre-payers who opt in. If it takes more than about 4 hours a week, Muath may end it with a full refund and the founding lock kept for the open</td>
+<td><em>Superseded by 25.5.</em> The bridge is capped at <strong>two hand-made episodes a week per learner, no calls</strong>, offered only to pre-payers who opt in. If it takes more than about 4 hours a week, Muath may end it with a full refund and the founding lock kept for the open</td>
 <td>24.11; <code>milestone-0/07</code>; <code>legal/07</code></td>
+</tr>
+<tr>
+<td>24.B34</td>
+<td>"Pilot" meant both the Milestone 0 programme (now cancelled, ADR-25.5) and the onboarding's first episode</td>
+<td>The onboarding episode is called <strong>the first episode</strong> everywhere; episode kind <code>first</code> (was <code>pilot</code>); "pilot" is no longer used for anything in the product</td>
+<td>PRD Part 2; 02; TDD 01, 03; design; <code>content/</code></td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>Consequences.</strong> PRD-v3 Part 0.3 and Part 17 are now decided lists. The technical design's file 10 §B, the design's file 07, the backlog's blockers and the handbook's decision table point here. The release plan is re-cut (24.11). Content and legal drafts now exist in <code>content/</code> and <code>legal/</code>, and they need the reviews named in 24.3, 24.9 and 24.15. <strong>Still open after this record:</strong> only the counsel answers (confirmations of 24.8, 24.9, 24.10 and 24.15) and the measurements the tests produce (24.6, 24.7, 24.20). Both are listed in section 10.</p>
-<hr /></div></details><details class="fs" id="s4-naming-and-interface-rulings"><summary><h3>4. Naming and interface rulings</h3><span class="wc">759 words</span></summary><div class="prose"><div class="tw"><table>
+<p><strong>Consequences.</strong> PRD-v3 Part 0.3 and Part 17 are now decided lists. The technical design's file 10 §B, the design's file 07, the backlog's blockers and the handbook's decision table point here. The release plan is re-cut (24.11). Content and legal drafts now exist in <code>content/</code> and <code>legal/</code>, and they need the reviews named in 24.3, 24.9 and 24.15. <strong>Still open after this record:</strong> only the counsel answers (confirmations of 24.8, 24.9, 24.10 and 24.15; ADR-25.3 replaced them with the self-review) and the measurements the tests produce (24.6, 24.7, 24.20). Both are listed in section 10.</p>
+<h3>ADR-25 Direction change: an AI agent builds it, no dates, no lawyer, web only, no pilot or beta (2026-11-12)</h3>
+<p><strong>Context.</strong> After ADR-24, Muath set five constraints: dates no longer matter and none are kept; the product is built by an AI coding agent, not a team of engineers; there is no lawyer; the product is a web application only, with no mobile app; and there is no pilot and no beta. The product launches once, as version 1. <strong>Ruling.</strong> Each constraint is applied everywhere, as follows. Where this record and ADR-24 disagree, this record wins.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Ruling</th>
+<th>Replaces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>25.1</td>
+<td>Dates</td>
+<td><strong>No calendar dates anywhere in the plan.</strong> Work is ordered by dependency, in phases, each with an exit check (<code>backlog/00-release-plan.md</code>). The product launches when every v1 story passes and the launch checklist is green. Dated items that remain are facts about the outside world (Gemini's price rise on 2027-01-01, a vendor's deprecation date)</td>
+<td>ADR-07's dates, 24.11's date arithmetic, §6, every build-week date, freezes tied to a beta</td>
+</tr>
+<tr>
+<td>25.2</td>
+<td>Who builds it</td>
+<td><strong>An AI coding agent builds it, story by story, under Muath.</strong> Each story's acceptance criteria become automated tests before the code. A second, independent AI review pass reads every change, and CI must pass. Muath approves merges to <code>main</code>, database migrations, prompt and bible changes, and production deploys. Engineer-days, staffing, the second engineer, the "one-engineer review exception" and on-call rotas are gone. Sizes S, M and L stay only as relative complexity. Operations: automated fallbacks first (yesterday's episode stays, voice notes), alerts to Muath, and runbooks the agent can execute when Muath asks</td>
+<td>24.11, 24.12, A2, the handbook's review and rota rules</td>
+</tr>
+<tr>
+<td>25.3</td>
+<td>No lawyer</td>
+<td><strong>Compliance by conservative design plus a written self-review, with no counsel step.</strong> (a) The strictest common rules apply to everyone: GDPR-grade rights for every learner, wherever they live; hosting in <code>eu-central-1</code>; vendors under their standard data processing agreements with SCCs (self-serve); a DPIA and RoPA completed by Muath from the official templates. (b) Paddle, as merchant of record, carries the payment-side consumer law: tax, invoices, refunds and the EU withdrawal right. (c) Risk is designed out rather than argued: 18+ only; no voiceprints or speaker identification; voice storage off by default with deletion within 15 minutes; data use opt-in; no sensitive fact without the one-tap card; AI disclosed in the first line Salma says. (d) Crisis resources come from a maintained international helpline directory rather than a hand-kept list; the protocol applies SB 243-style duties to everyone. (e) <code>legal/00</code> becomes a <strong>self-review checklist</strong>: each question has a final position and the official guidance it rests on; every legal text is checked against it by an AI review pass and by Muath. (f) <strong>When a lawyer becomes necessary:</strong> a regulator or court contact, a personal-data breach that must be notified, a B2B or employer contract, or paid traffic from a country with a specific law the checklist does not cover. Until then, none is needed. Residual risk is accepted and stated in <code>legal/README.md</code></td>
+<td>24.8 to 24.10 and 24.15's counsel confirmations, A1, A8, A13, the counsel question pack</td>
+</tr>
+<tr>
+<td>25.4</td>
+<td>Web only</td>
+<td><strong>Web application only, with the private podcast feed kept.</strong> The feed is part of the web product: an RSS URL that the learner's podcast app plays; no app is built for it. No native app is planned. GATE-M18's "switch to native" is removed. Sign in with Apple and Google are removed; email one-time code is the only sign-in. No Apple or Google developer accounts. Apple Pay and Google Pay stay where Paddle's hosted checkout offers them (no developer account needed)</td>
+<td>24.1's native path, FR-118's Apple and Google, A3's developer applications</td>
+</tr>
+<tr>
+<td>25.5</td>
+<td>No pilot, no beta</td>
+<td><strong>Version 1 launches once, publicly, with open signup.</strong> Removed: Milestone 0 as a dependency (the kit stays in <code>milestone-0/</code> as background and source material), the pre-payers and the bridge, the Milestone 0 consent addendum, invites, the waitlist as a gate, the founding-member price lock and the 100 cap, beta cohorts, the external test, the beta gate review, P0's "Day-1 / later in the beta" split. The 7-day trial without a card stays (it is product, not pre-launch). The beta gates become <strong>launch health measures</strong>, read at 4 and 8 weeks after launch with the same targets and stop lines. Stories that were "later in the beta" become <strong>v1</strong> (needed at launch) or <strong>v1.1</strong> (after launch), by whether a learner can reach them in the first week; manual substitutes are no longer needed</td>
+<td>24.11's bridge, 24.16, 24.19, 24.B10, 24.B28, 24.B31, 24.B33, ADR-04's founding lock</td>
+</tr>
+<tr>
+<td>25.6</td>
+<td>What Milestone 0 was meant to produce</td>
+<td><strong>Replaced without a pilot.</strong> Recognizer clips: an open corpus with a commercial-use licence (speechocean762, Apache-2.0) plus about 30 clips recorded by volunteers from at least two native-language groups, each with a one-line recording consent. Voice blind test: Muath and volunteers rate. Governor replay and fixtures: synthetic learners and scripted calls generated by the agent. Similarity threshold 0.85 until tuned on real use. Calibration set for metric claims: built after launch from opted-in data; until then only event claims ship (the existing fallback)</td>
+<td>M1, M3 and the pilot-derived inputs in 02, 03, 05 and 09</td>
+</tr>
+<tr>
+<td>25.7</td>
+<td>Reviewers</td>
+<td><strong>No hired reviewers at launch.</strong> Muath reads the English bibles and Salma's Arabic; an AI review pass checks every bible, prompt and episode sample against the laws and the ban lists. The second tagger is not needed until metric claims are calibrated. The reviewer confidentiality agreement is dropped</td>
+<td>24.3's native editor, 24.14, A4, <code>legal/08</code></td>
+</tr>
+<tr>
+<td>25.8</td>
+<td>Domain</td>
+<td><strong>Chosen later.</strong> It is one configuration value (<code>APP_DOMAIN</code>), needed only before email sending and the first public deploy</td>
+<td>A3's date</td>
+</tr>
+<tr>
+<td>25.9</td>
+<td>Conversation content that may be sensitive</td>
+<td><strong>An explicit consent at signup (A9)</strong>, its own consent kind <code>special_category</code>, for processing what the learner chooses to say in calls and chats, which can include health, beliefs or relationships (GDPR Art. 9(2)(a)). Without it the account is not created, because the product cannot run without listening. The one-tap card (24.10) still governs whether a sensitive fact is <em>kept and reused</em>. The crisis protocol also rests on vital interests. Making it a condition of the account meets Art. 7(4), because that test bites on consent to processing the service does not need; here the processing <em>is</em> the service, and explicit consent is the only Art. 9 basis that fits a voice conversation product</td>
+<td>the gap the self-review found (<code>legal/00</code>)</td>
+</tr>
+<tr>
+<td>25.10</td>
+<td>Who a price rise applies to</td>
+<td><strong>New signups only.</strong> Everyone already subscribed keeps the price they signed up at for as long as they stay subscribed, so no founding lock is needed</td>
+<td>the founding lock (ADR-04)</td>
+</tr>
+<tr>
+<td>25.11</td>
+<td>Security testing before launch</td>
+<td><strong>No paid penetration test at launch.</strong> Instead: dependency and secret scanning in CI, an OWASP ZAP baseline scan of staging, and an AI security review of every change touching auth, keys, media URLs, the feed or deletion (the <code>/security-review</code> pass). A paid penetration test becomes a trigger, like the lawyer: at 1,000 paying learners, before any B2B contract, or after any security incident</td>
+<td>ADR-24.13's budgeted test, A11</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Consequences.</strong> Every document drops dates, pilot, beta, invites, founding lock, lawyer and native-app material, or marks it as history. The register (§10) keeps only owner actions with "needed before" conditions, never dates. Owner actions that remain: open the vendor and Paddle accounts, choose the domain, record the volunteer clips, read the bibles and Salma's Arabic, complete the self-review, and appoint an EU and UK representative if the company sits outside them. The last is a paid service, not a lawyer, and is required by GDPR Art. 27.</p>
+<hr /></div></details><details class="fs" id="s4-naming-and-interface-rulings"><summary><h3>4. Naming and interface rulings</h3><span class="wc">774 words</span></summary><div class="prose"><div class="tw"><table>
 <thead>
 <tr>
 <th>Item</th>
@@ -1327,7 +1377,7 @@ flowchart LR
 <tr>
 <td>Cohort key</td>
 <td><code>cohort_monday</code></td>
-<td><code>cohort_key = invite_date</code></td>
+<td><code>cohort_key</code> = the signup week (was <code>invite_date</code>; ADR-25.5)</td>
 <td>09, 04</td>
 </tr>
 <tr>
@@ -1345,12 +1395,12 @@ flowchart LR
 <tr>
 <td>Plans</td>
 <td><code>founding</code>, <code>monthly</code>, <code>yearly</code></td>
-<td><code>one_a_day</code>, <code>two_a_day</code>, <code>three_a_day</code>; <code>founding_locked</code></td>
+<td><code>one_a_day</code>, <code>two_a_day</code>, <code>three_a_day</code> (<code>founding_locked</code> removed by ADR-25.10)</td>
 <td>01, 06, 07, 08, 09</td>
 </tr>
 <tr>
 <td>Episode kinds</td>
-<td>daily, swap, return, pilot, sample, fallback, rehearsal, finale, proof, canary</td>
+<td>daily, swap, return, first (was pilot, 24.B34), sample, fallback, rehearsal, finale, proof, canary</td>
 <td>plus <code>daily_extra</code></td>
 <td>01, 02, 06, 08</td>
 </tr>
@@ -1429,7 +1479,7 @@ flowchart LR
 <tr>
 <td>Rater pin window</td>
 <td>2026-12-31 (08), 2027-01-19 (01), 2027-02-16 (05)</td>
-<td><code>rater.pinned_until = 2027-02-16</code>; 09's window calendar starts the next window on 2027-02-17 (both re-dated by ADR-24.11: 2027-05-11 and 2027-05-12, §6)</td>
+<td><code>rater.pinned_until = 2027-02-16</code>; 09's window calendar starts the next window on 2027-02-17 (the dates themselves removed by ADR-25.1; the window is relative to launch)</td>
 <td>01, 08, 09</td>
 </tr>
 <tr>
@@ -1460,111 +1510,8 @@ flowchart LR
 </table></div>
 <p><strong>For the technical-design thread.</strong> (Updated after the nine revisions: each document's section 11 lists every new name it introduced; the ten rows above this paragraph are the ones two documents spelled differently. The technical design's <code>packages/language/&lt;pair&gt;/</code> with <code>ar-en</code> first, and its <code>native_lang</code>/<code>target_lang</code> columns, are overridden by ADR-02: two axes, <code>packages/languages/&lt;target&gt;/</code> plus <code>packages/native/&lt;lang&gt;/</code>, columns <code>native_language</code> and <code>target_language</code>.) Interfaces that changed name or shape in this pass: <code>episodes.state</code>; <code>POST /v1/episodes/next</code> and <code>episode_kind = daily_extra</code>; <code>learners.{native_language,target_language,residence_country,plan}</code>; <code>plans.yaml</code> and <code>subscriptions.plan</code>; <code>media_objects.encryption</code> and presigned URLs for show audio; <code>word_uses</code>; <code>learner_schedule.expects_drop</code>; <code>research_pseudonyms</code>; <code>forone_admin</code>; <code>guard.check_output</code> item 6; the removal of <code>notes</code>, <code>margin_notes</code>, the notes door and <code>note_shown</code>; package paths <code>packages/languages/&lt;target&gt;</code> and <code>packages/native/&lt;lang&gt;</code>; <code>keys.get_dek</code> cache semantics; <code>vendor_calls</code> written in its own transaction; <code>measures/hourly</code>.</p>
 <hr /></div></details><details class="fs" id="s5-what-the-prd-v3-thread-needs-to-carry"><summary><h3>5. What the PRD-v3 thread needs to carry</h3><span class="wc">111 words</span></summary><div class="prose"><p>Parts of PRD-v2 that these rulings change: 1.4 (plans, prices, payments, platform note unchanged); 2.2 A9 (residence country question, consent per native language); 3.6 (allowance by plan, "next one"); 5.5 and 5.6 rule 6 (notes and margin note removed); 6.3 check 10 (widened to corrections); 7.3 (Salma's language is the learner's native language); 8.6 (host brief's echo plan); 10.2 (no stage 1 notes; the pass is one function); 12.5 and 12.6 (regimes, region default); 13 (two package kinds); 14.3 (Langfuse rule, embeddings vendor); 14.5 (cost lines, margin by plan); 15 (notes budget removed); 16.1 (gates re-dated; renewal reads all subscribers); 18 (open items replaced by section 10 here); 19 (dates).</p>
-<hr /></div></details><details class="fs" id="s6-dates-in-one-table"><summary><h3>6. Dates, in one table</h3><span class="wc">307 words</span></summary><div class="prose"><p>The "Now" column was set on 2026-11-12 by ADR-24.11 (the open follows the Day-1 work; plan of record two engineers). The "11-06" column is history.</p>
-<div class="tw"><table>
-<thead>
-<tr>
-<th>Milestone</th>
-<th>First drafts</th>
-<th>2026-11-06</th>
-<th>Now (2026-11-12)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Milestone 0</td>
-<td>2026-10-12 to 11-01</td>
-<td>2026-10-24 to 11-18</td>
-<td>unchanged; gate decision 2026-11-18</td>
-</tr>
-<tr>
-<td>Recognizer test</td>
-<td>by 2026-11-08</td>
-<td>by 2026-11-10</td>
-<td>unchanged</td>
-</tr>
-<tr>
-<td>Voice decision, <code>vendors.yaml</code> committed</td>
-<td>2026-11-13</td>
-<td>by 2026-11-17</td>
-<td>by 2026-11-17, on post-doubling prices (24.6)</td>
-</tr>
-<tr>
-<td>Counsel: region, regimes</td>
-<td>2026-11-01 and 11-16</td>
-<td>2026-11-17</td>
-<td>2026-11-17 (A1)</td>
-</tr>
-<tr>
-<td>Build</td>
-<td>2026-11-02 to 12-06</td>
-<td>2026-11-18 to 12-22</td>
-<td><strong>2026-11-18 to 2027-03-12</strong>; no releases 2026-12-31 to 2027-01-02</td>
-</tr>
-<tr>
-<td>Payment processor and entity</td>
-<td>2026-11-16</td>
-<td>2026-12-02</td>
-<td>2026-12-02 (A6)</td>
-</tr>
-<tr>
-<td>Counsel review of <code>legal/</code></td>
-<td>n/a</td>
-<td>2026-12-15</td>
-<td>2027-02-15 (A8)</td>
-</tr>
-<tr>
-<td>Gemini prices double</td>
-<td>2027-01-01 (beta week 4)</td>
-<td>2027-01-01 (beta week 2)</td>
-<td>2027-01-01 (during the build)</td>
-</tr>
-<tr>
-<td>Exit document (measured cost, costed path)</td>
-<td>2026-12-06</td>
-<td>2026-12-22</td>
-<td>2027-03-12</td>
-</tr>
-<tr>
-<td>Pre-open freeze</td>
-<td>n/a</td>
-<td>2026-12-21 12:00 to 12-24 12:00 UTC</td>
-<td>2027-03-15 12:00 to 03-17 12:00 UTC</td>
-</tr>
-<tr>
-<td><strong>Beta opens, first cohort</strong></td>
-<td>2026-12-07</td>
-<td>2026-12-23</td>
-<td><strong>2027-03-17</strong> with two engineers from build start (2027-02-17 with a third from 2026-12-01)</td>
-</tr>
-<tr>
-<td>First finales</td>
-<td>2027-01-03</td>
-<td>2027-01-19</td>
-<td>2027-04-13</td>
-</tr>
-<tr>
-<td>First "active in week 4" readable</td>
-<td>2027-01-04</td>
-<td>2027-01-20</td>
-<td>2027-04-14</td>
-</tr>
-<tr>
-<td>Gate review</td>
-<td>2027-01-10</td>
-<td>2027-01-26</td>
-<td>2027-04-20</td>
-</tr>
-<tr>
-<td>Rater pin ends</td>
-<td>2026-12-31</td>
-<td>2027-02-16</td>
-<td>2027-05-11 (next window from 2027-05-12)</td>
-</tr>
-</tbody>
-</table></div>
-<p>Every later date in the documents is relative to the open: beta day N = 2027-03-17 + (N − 1). If the open moves under 24.11, the rows from "Exit document" down move with it.</p>
-<hr /></div></details><details class="fs" id="s7-build-plan-for-2026-11-18-to-2026-12-2"><summary><h3>7. Build plan for 2026-11-18 to 2026-12-22 (history; superseded by the release plan)</h3><span class="wc">409 words</span></summary><div class="prose"><p><strong>Superseded 2026-11-12:</strong> the build now runs to 2027-03-12, and its week-by-week order is in <code>backlog/00-release-plan.md</code>. The table below is the 2026-11-06 five-week plan and keeps only its order of work. The five weeks keep the contents of each document's section 7, moved by 16 days, with these cross-domain changes placed where they must land.</p>
+<hr /></div></details><details class="fs" id="s6-dates"><summary><h3>6. Dates</h3><span class="wc">72 words</span></summary><div class="prose"><p><strong>Superseded by ADR-25.1 (2026-11-12): the plan keeps no calendar dates.</strong> Work runs in dependency order, in phases with exit checks (<code>backlog/00-release-plan.md</code>), and version 1 launches when the launch checklist is green. The only dates that still matter are outside facts: Gemini's 3.8 price rise on 2027-01-01, and vendor deprecation dates listed in 08. The dated tables that stood here (first drafts, 2026-11-06 and the ADR-24 re-set) are in the git history.</p>
+<hr /></div></details><details class="fs" id="s7-build-plan-for-2026-11-18-to-2026-12-2"><summary><h3>7. Build plan for 2026-11-18 to 2026-12-22 (history; superseded by the release plan)</h3><span class="wc">410 words</span></summary><div class="prose"><p><strong>Superseded:</strong> the build has no dates (ADR-25.1); its order of work is the phases in <code>backlog/00-release-plan.md</code>. The table below is the 2026-11-06 five-week plan and keeps only its order of work. The five weeks keep the contents of each document's section 7, moved by 16 days, with these cross-domain changes placed where they must land.</p>
 <div class="tw"><table>
 <thead>
 <tr>
@@ -1607,7 +1554,7 @@ flowchart LR
 </tbody>
 </table></div>
 <p><strong>Freeze:</strong> 2026-12-21 12:00 to 12-24 12:00 UTC. <strong>Beta week 2 (2027-01-01):</strong> the Gemini doubling lands; the voice plan from 08 §6.1 note 3 is executed in the first release after 2027-01-02.</p>
-<hr /></div></details><details class="fs" id="s8-alternatives-rejected-in-the-cross-dom"><summary><h3>8. Alternatives rejected in the cross-domain pass</h3><span class="wc">235 words</span></summary><div class="prose"><div class="tw"><table>
+<hr /></div></details><details class="fs" id="s8-alternatives-rejected-in-the-cross-dom"><summary><h3>8. Alternatives rejected in the cross-domain pass</h3><span class="wc">237 words</span></summary><div class="prose"><div class="tw"><table>
 <thead>
 <tr>
 <th>Alternative</th>
@@ -1633,11 +1580,11 @@ flowchart LR
 </tr>
 <tr>
 <td>A region per learner (EU for Europeans, UAE for Gulf learners)</td>
-<td>Two of every store and job for a two-engineer team; one region plus the vendor transfers that every option shares is the honest minimum</td>
+<td>Two of every store and job for a one-owner product built by an agent; one region plus the vendor transfers that every option shares is the honest minimum</td>
 </tr>
 <tr>
-<td>Blocking signups from countries counsel has not reviewed</td>
-<td>Contradicts "anyone, anywhere"; the generic notice plus the strictest regime's controls is the defensible default, confirmed by counsel</td>
+<td>Blocking signups from countries no regime row covers</td>
+<td>Contradicts "anyone, anywhere"; the generic notice plus the strictest regime's controls is the defensible default (ADR-25.3)</td>
 </tr>
 <tr>
 <td>Leaving <code>episodes.status</code> and <code>episodes.state</code> to the integrator</td>
@@ -1707,123 +1654,77 @@ flowchart LR
 </tbody>
 </table></div>
 <p>Where a finding's fix was applied, the document says so in its section 11 (revision log) and the finding stays in <code>_review-findings.md</code> as history. Where a finding was declined, the revision log says why. The skeptic review of 06, the one review missing on 2026-11-06, ran on 2026-11-12 and is appended to <code>_review-findings.md</code>.</p>
-<hr /></div></details><details class="fs" id="s10-register-owner-actions-and-pending-me"><summary><h3>10. Register: owner actions and pending measurements</h3><span class="wc">888 words</span></summary><div class="prose"><p>Every decision that was open here on 2026-11-06 is now decided in ADR-24. The original list is kept, with the ruling for each item, in the revision history (git, commit before 2026-11-12). What remains falls into two kinds: things only a person can <em>do</em> (sign, hire, buy, ask counsel), and numbers only the tests can <em>produce</em>. Nothing else is open. A question the documents do not answer during the build escalates to Muath before it is built.</p>
-<h3>A. Owner actions (Muath), in date order (ids are stable, so they are not sequential)</h3>
+<hr /></div></details><details class="fs" id="s10-register-owner-actions-and-pending-me"><summary><h3>10. Register: owner actions and pending measurements</h3><span class="wc">609 words</span></summary><div class="prose"><p>Every decision is taken (ADR-24, as changed by ADR-25). What remains is things only Muath can <em>do</em> and numbers only the tests can <em>produce</em>. None carries a date; each says what it must happen before.</p>
+<h3>A. Owner actions (Muath)</h3>
 <div class="tw"><table>
 <thead>
 <tr>
 <th>#</th>
 <th>Action</th>
-<th>By</th>
+<th>Needed before</th>
 <th>Unblocks</th>
-<th>If late</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>A1</td>
-<td>Send counsel the question pack (<code>legal/00-counsel-question-pack.md</code>) and get confirmation of ADR-24.8 (region, transfer basis), 24.9 (regimes) and 24.10</td>
-<td>ask 2026-11-13, answer 2026-11-17 (target)</td>
-<td>E01-S05 production apply, E13 consent copy</td>
-<td>Nothing waits on a late answer: production is built in <code>eu-central-1</code> anyway (ADR-24.8) and not applied until late in the build; a move happens only if counsel requires it</td>
-</tr>
-<tr>
-<td>A13</td>
-<td>Name counsel and the channel to them; include it in <code>legal/README.md</code></td>
-<td>2026-11-13 (with A1)</td>
-<td>A1, A8</td>
-<td>none; A1 cannot start without it</td>
+<td>Open the vendor accounts and API keys in <code>engineering/07</code> (AWS, Vercel, Inngest, LiveKit, Anthropic, Google, the voice and recognizer vendors, Langfuse, Sentry, Resend); accept each vendor's standard DPA; request zero data retention from Anthropic</td>
+<td>the agent's first deploy to staging</td>
+<td>E01 and every vendor adapter</td>
 </tr>
 <tr>
 <td>A2</td>
-<td>Second engineer working from build start; a third from 2026-12-01 is recommended (ADR-24.11)</td>
-<td>2026-11-18</td>
-<td>the open date: 2027-03-17 with two engineers from build start (03-24 if the second starts 11-25), 2027-02-17 with three</td>
-<td>The date is recomputed from the team that exists; one engineer alone gives 2027-07-07</td>
+<td>Record about 30 volunteer clips (at least two native-language groups, a one-line consent each) and rate the voice blind test with a few listeners (ADR-25.6)</td>
+<td>the vendor choice (M2)</td>
+<td>E02 vendor tests</td>
 </tr>
 <tr>
 <td>A3</td>
-<td>Register the brand domain; file the Apple and Google developer applications</td>
-<td>2026-11-18 (build week 1)</td>
-<td>email sending domain, Apple Pay domain file, Sign in with Apple (P1)</td>
-<td>Email code only; the domain is one variable (<code>APP_DOMAIN</code>)</td>
-</tr>
-<tr>
-<td>A15</td>
-<td>Tell every pilot pre-payer the new open date (2027-03-17) with a refund offer or a bridge place (24.B28)</td>
-<td>2026-11-19</td>
-<td>trust with the first payers</td>
-<td>Refund everyone who pre-paid</td>
+<td>Read the English bibles and Salma's lines in English and Arabic (<code>content/</code>) and approve them (ADR-25.7)</td>
+<td>the writer and host prompts are tuned</td>
+<td>E02-S07, E04, E05</td>
 </tr>
 <tr>
 <td>A4</td>
-<td>Hire the part-time native English reader (ADR-24.14) and book the bible read (ADR-24.3)</td>
-<td>reader on 2026-11-25; bible read done 2026-12-01</td>
-<td>E02-S07, the language gate's writing check</td>
-<td>The eval gate runs without the human read; the beta does not open on unread bibles</td>
+<td>Complete the self-review checklist (<code>legal/00</code>) and approve the legal texts in <code>legal/</code> (ADR-25.3)</td>
+<td>public launch</td>
+<td>E13, the consent strings</td>
 </tr>
 <tr>
 <td>A5</td>
-<td>Read and correct Salma's Arabic lines (<code>content/bibles/salma.md</code>)</td>
-<td>2026-12-01</td>
-<td><code>native/ar</code></td>
-<td><code>native/ar</code> waits; <code>native/en</code> ships alone</td>
+<td>Open the Paddle account under the company</td>
+<td>checkout is built against the live API (the sandbox works before)</td>
+<td>E12</td>
 </tr>
 <tr>
 <td>A6</td>
-<td>Open the Paddle account under the legal entity (ADR-24.4)</td>
-<td>2026-12-02</td>
-<td>E12-S04 checkout and later</td>
-<td>Stripe test-mode scaffold; the processor is swapped in build week 5</td>
+<td>Choose and register the domain (ADR-25.8)</td>
+<td>email sending and the first public deploy</td>
+<td>E01 DNS, Resend, Paddle domain</td>
 </tr>
 <tr>
 <td>A7</td>
-<td>Ask the blind-test winner for a negotiated voice rate (ADR-24.6); request zero data retention from Anthropic (24.17)</td>
-<td>2026-12-15</td>
-<td>the costed path to $0.35</td>
-<td>24.5's price trigger carries the cost</td>
-</tr>
-<tr>
-<td>A9</td>
-<td>Milestone 0 consent addendum: Part 1 before any clip goes to a vendor; Part 2 for the bridge, re-onboarding and fixtures (ADR-24.16, 24.B10, 24.B28)</td>
-<td>Part 1 now; Part 2 2026-12-15</td>
-<td>build week 5 end-to-end run, fixtures</td>
-<td>Non-signers are excluded</td>
-</tr>
-<tr>
-<td>A11</td>
-<td>Budget the penetration test (ADR-24.13)</td>
-<td>2027-02</td>
-<td>public launch</td>
-<td>Public launch waits</td>
+<td>Appoint an EU and UK representative (a paid service) if the company is outside the EU and UK (GDPR Art. 27)</td>
+<td>public launch, if it applies</td>
+<td>lawful processing for EU and UK learners</td>
 </tr>
 <tr>
 <td>A8</td>
-<td>Counsel reviews the privacy notice, terms, consent texts, DPIA and crisis wording in <code>legal/</code></td>
-<td>2027-02-15</td>
-<td>E13-S03, E13-S08, beta open</td>
-<td>Beta does not open without reviewed consent text</td>
+<td>Approve merges, migrations, prompt changes and production deploys as the agent asks (ADR-25.2)</td>
+<td>each one</td>
+<td>the build</td>
 </tr>
 <tr>
-<td>A14</td>
-<td>Write the then-and-now task forms C and D (forms A and B cycle in the beta, 05 §10 #8)</td>
-<td>2027-02-17</td>
-<td>the second rater window</td>
-<td>Forms A and B repeat once more</td>
+<td>A9</td>
+<td>Ask the voice vendor for a negotiated rate once the vendor is chosen (ADR-24.6)</td>
+<td>launch, ideally</td>
+<td>the costed path to $0.35</td>
 </tr>
 <tr>
 <td>A10</td>
-<td>Book the external test for 20 to 30 learners (ADR-24.19)</td>
-<td>2027-03-17</td>
-<td>GATE external-test reading</td>
-<td>The week-0 sitting moves to beta week 1</td>
-</tr>
-<tr>
-<td>A12</td>
-<td>Appoint an Art. 27 EU (and UK) representative if the legal entity is outside the EU and UK (07 §4.9)</td>
-<td>beta open</td>
-<td>lawful processing of EU and UK learners</td>
-<td>Invites to EU and UK learners wait</td>
+<td>Create the code repository and give the AI agent its own GitHub identity (a GitHub App or a machine account) with write access but no right to merge; protect <code>main</code> so a merge needs Muath's approval (ADR-25.2). GitHub does not let an author approve their own pull request, so the agent cannot open them as Muath</td>
+<td>the agent's first pull request</td>
+<td>E01, the review rule in <code>engineering/04</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -1834,67 +1735,67 @@ flowchart LR
 <th>#</th>
 <th>Number</th>
 <th>Produced by</th>
-<th>When</th>
+<th>Read when</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>M1</td>
-<td>Pilot gate result</td>
-<td>Milestone 0 gate report (R13)</td>
-<td>2026-11-18</td>
-</tr>
-<tr>
 <td>M2</td>
 <td>Voice vendor for episodes and calls; streaming and verbatim recognizers</td>
-<td>blind test (30 clips, 50 calls), <code>vendors.yaml</code></td>
-<td>2026-11-17 to build week 2</td>
+<td>the blind test and the 30-clip test (ADR-25.6), <code>vendors.yaml</code></td>
+<td>phase 1 of the release plan</td>
 </tr>
 <tr>
 <td>M3</td>
-<td>Similarity threshold; recognizer confidence threshold</td>
-<td>Milestone 0 scripts; 30-clip test</td>
-<td>end of Milestone 0</td>
+<td>Recognizer confidence threshold; similarity threshold (0.85 until tuned)</td>
+<td>the 30-clip test; real use after launch</td>
+<td>phase 1; after launch</td>
 </tr>
 <tr>
 <td>M4</td>
 <td>Which target languages pass the gate besides English</td>
 <td><code>forone.langgate</code></td>
-<td>end of build week 2</td>
+<td>phase 1</td>
 </tr>
 <tr>
 <td>M5</td>
 <td>Haiku host comparison (ADR-24.7)</td>
-<td><code>call-bench</code> 50 calls</td>
-<td>build week 4</td>
+<td><code>call-bench</code> scripted calls</td>
+<td>the call phase</td>
 </tr>
 <tr>
 <td>M6</td>
-<td>Measured cost per session by plan (ADR-24.5 trigger)</td>
-<td>exit document; beta week-3 report</td>
-<td>2027-03-12; 2027-04-06</td>
+<td>Margin by plan at measured use (ADR-24.5 trigger)</td>
+<td>cost tracing; the weekly report</td>
+<td>before launch on test learners; 4 weeks after launch</td>
 </tr>
 <tr>
 <td>M7</td>
-<td>Private-feed support in the cohort's podcast apps; GATE-M18 triggers</td>
-<td>beta observation</td>
-<td>first cohort</td>
+<td>Which podcast apps learners use with the private feed</td>
+<td>observation after launch</td>
+<td>after launch</td>
 </tr>
 <tr>
 <td>M8</td>
-<td>Salma's Arabic variety and voice (the 7.3 blind test per native package)</td>
-<td>blind test with Arabic listeners</td>
-<td>build week 2</td>
+<td>Salma's Arabic voice (the 7.3 blind test for <code>native/ar</code>)</td>
+<td>Muath and Arabic-speaking volunteers</td>
+<td>before <code>native/ar</code> ships</td>
 </tr>
 <tr>
 <td>M9</td>
-<td>The on-demand premium per extra episode ($0.05 assumed, 08 #9)</td>
+<td>The on-demand premium per extra episode ($0.05 assumed)</td>
 <td>cost tracing on <code>daily_extra</code></td>
-<td>beta week 2 (2027-03-30)</td>
+<td>after launch</td>
 </tr>
 </tbody>
-</table></div></div></details><details class="fs" id="s11-revision-log"><summary><h3>11. Revision log</h3><span class="wc">263 words</span></summary><div class="prose"><ul>
-<li>2026-11-12, final review: header, §1 rows ADR-07, 08, 20, 21 and 23 and the records ADR-02, 04, 07, 08, 13 to 16, 20 and 21 point to the ADR-24 rulings that settled their open items; ADR-03's heading restored; 24.5's exit date (2027-03-12), 24.11's day count (136.5), 24.20's package date (the open) and 24.B10's Part 2 date (2026-12-15, as 24.B28 and A9) corrected; "still open" names 24.10 as A1 does; §4's split table rejoined and its package path corrected; register A sorted by date; rulings now run to 24.B30.</li>
+</table></div></div></details><details class="fs" id="s11-revision-log"><summary><h3>11. Revision log</h3><span class="wc">333 words</span></summary><div class="prose"><ul>
+<li>2026-11-12, last review: ADR-24 rows that ADR-25 replaces carry a "Superseded by 25.x" pointer; §1 rows and ADR-02, 03, 04, 07, 08, 16 and 20 no longer cite counsel, the beta, the founding lock or dates; <code>cohort_key</code> is the signup week.</li>
+<li>
+<p>2026-11-12, last: ADR-25 added (AI-agent build, no dates, no lawyer, web only, no pilot or beta). §6 now keeps no dates; §10 holds owner actions without dates.</p>
+</li>
+<li>
+<p>2026-11-12, final review: header, §1 rows ADR-07, 08, 20, 21 and 23 and the records ADR-02, 04, 07, 08, 13 to 16, 20 and 21 point to the ADR-24 rulings that settled their open items; ADR-03's heading restored; 24.5's exit date (2027-03-12), 24.11's day count (136.5), 24.20's package date (the open) and 24.B10's Part 2 date (2026-12-15, as 24.B28 and A9) corrected; "still open" names 24.10 as A1 does; §4's split table rejoined and its package path corrected; register A sorted by date; rulings now run to 24.B30.</p>
+</li>
 <li>2026-11-12, later: ADR-24.11 rewritten after the backlog re-cut (Day-1 136.5 engineer-days after the rulings); the open follows the work, plan of record 2027-03-17; §6 dates re-set; §7 marked history; 24.6 no longer has a mid-beta voice swap; consistency rulings 24.B1 to B27 added.</li>
 <li>
 <p>2026-11-12: ADR-24 added. Every item open on 2026-11-06 was decided on Muath's delegation; section 10 was rewritten as owner actions and measurements; the domain documents' [OPEN for Muath] tags were re-tagged in place.</p>

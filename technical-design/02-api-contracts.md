@@ -8,7 +8,7 @@
 stateDiagram-v2
   [*] --> anonymous
   anonymous --> pre_account : POST /onboarding/start (cookie scope pre_account)
-  pre_account --> full : POST /auth/otp/verify or Apple/Google callback (claims the learner)
+  pre_account --> full : POST /auth/otp/verify (claims the learner)
   anonymous --> full : sign in (existing account)
   anonymous --> feed_link : POST /links/exchange (feed episode link, scope feed_link)
   feed_link --> full : sign in
@@ -18,7 +18,7 @@ stateDiagram-v2
 - Cookie `forone_s`: HttpOnly, Secure, `SameSite=Lax`, `Domain=.forone.app`, 90-day rolling; value is the opaque 32-byte id of an `auth_sessions` row. `learner_id` always comes from the session, never from a body.
 - Scopes: `pre_account` may call onboarding, events and the Salma call only; `feed_link` may read one episode and start its call; `full` everything.
 - Internal routes (`/internal/*`) accept a short-lived JWT signed with the service key, issued to `call-worker` per job and to `workflows` per run; they bypass the cookie but still set `forone.learner_id` for RLS.
-- Admin routes (`/admin/*`) use staff SSO (Google Workspace OIDC) plus a WebAuthn second factor; every call writes `audit_log`.
+- Admin routes (`/admin/*`) sign Muath in through the same email one-time code against `staff_accounts` (role `owner`), with an IP allowlist as the second factor; every call writes `audit_log`.
 - Rate limits (per learner, per device hash, per IP prefix) are in `forone.core.ratelimit`; a refusal is `429 rate_limited` with `Retry-After`.
 
 ## 2. Conventions
@@ -37,19 +37,17 @@ stateDiagram-v2
 |---|---|---|
 | `POST /sample` | 90 s sample episode | `{name, topic, job?, contact?}` (rate limit: one per device and per contact per 24 h) → `202 {sample_id, share_token}`; progress on `GET /sample/{id}` `{state, first_segment_url?}` |
 | `GET /s/{share_token}.mp3` | shareable audio, 30 days | Range |
-| `POST /waitlist` | | `{name, contact_kind, contact, why_target?, self_rating?, city?}` → 202 |
-| `GET /invites/{code}` | invite landing | → `{valid, name, expires_at}` |
 | `POST /telemetry` | anonymous web vitals | `{metrics[]}` → 204 |
 
 ### 3.2 Onboarding (A1 to A10; scope `pre_account`)
 
 | Method, path | Purpose | Request → Response |
 |---|---|---|
-| `POST /onboarding/start` | A2 Talk or Type; creates the `pre_account` learner | `{invite_code?, tz, native_language, target_language, mode: "talk"|"type"}` → `{learner_id, call: {call_id, room_url, token}}` |
-| `GET /onboarding` | A4, A5, A10 data | → `OnboardingDoc {word_check: {items: [{item_id, text, band}]}, casting: {hosts: {karim: {voices: [{voice_id, hello_clip_url}]}, mona: {...}}, accents[]}, name: {candidates: [{index, clip_url}], chosen, verified}, pilot: {episode_id, state, first_segment_url?}, ideas: Idea[]}` |
+| `POST /onboarding/start` | A2 Talk or Type; creates the `pre_account` learner | `{tz, native_language, target_language, mode: "talk"|"type"}` → `{learner_id, call: {call_id, room_url, token}}` |
+| `GET /onboarding` | A4, A5, A10 data | → `OnboardingDoc {word_check: {items: [{item_id, text, band}]}, casting: {hosts: {karim: {voices: [{voice_id, hello_clip_url}]}, mona: {...}}, accents[]}, name: {candidates: [{index, clip_url}], chosen, verified}, first_episode: {episode_id, state, first_segment_url?}, ideas: Idea[]}` |
 | `PUT /onboarding/casting` | A5 | `{karim_voice_id, mona_voice_id, accent}` → 204 |
 | `PUT /onboarding/name` | A5 "say it differently" | `{candidate_index}` → 204 |
-| `PUT /me` | A9 account facts | `{birth_date, residence_country, drop_time_local, backup_time_local?, anchor_text, display_name?, rhythm_days?}` → 204, or `403 under_18` (deletes the pre-account learner) |
+| `PUT /me` | A9 account facts | `{special_category: true (required, ADR-25.9), birth_date, residence_country, drop_time_local, backup_time_local?, anchor_text, display_name?, rhythm_days?}` → 204, or `403 under_18` (deletes the pre-account learner) |
 
 ### 3.3 Auth
 
@@ -57,7 +55,6 @@ stateDiagram-v2
 |---|---|
 | `POST /auth/otp/request` | `{email}` → 202 always |
 | `POST /auth/otp/verify` | `{email, code}` → `{learner_id, status}`; sets cookie; claims the pre-account learner |
-| `GET /auth/apple/start`, `POST /auth/apple/callback`, `GET /auth/google/start`, `GET /auth/google/callback` | OIDC; `state` carries the pre-account session id |
 | `POST /auth/signout` | 204 |
 | `POST /handoff/mint`, `POST /handoff/exchange` | PWA install handoff: `{}` → `{h}`; `{h}` → sets cookie; single use, 10 min |
 | `POST /links/exchange` | feed link `{k, episode_id}` → sets a `feed_link` cookie (scope: that episode's call, article and host thread; each `k` once, then `410 link_used`) |
@@ -118,13 +115,13 @@ Internal, for the worker: `GET /internal/calls/{id}/brief` → `CallBundle` (04 
 | `GET /controls`, `PUT /controls` | `{address_form?, drop_time_local?, backup_time_local?, drop_notification?, captions?, transcript_default?, default_speed?, voice_storage?, data_use?, gap_note?, gap_days?, text_size?}` → `ControlsDoc`; each change appends `consent_change` |
 | `GET /feed/url`, `POST /feed/reset` | → `{url}` (new token, old revoked) |
 | `POST /push/subscribe`, `DELETE /push/subscribe` | `{subscription, ua_hint}` → 204 |
-| `POST /me/export`, `GET /me/exports` | → `202 {export_id}` (no passphrase); list `[{export_id, state, ready_at, url_expires_at}]`; the download URL is minted on click and valid 15 minutes; the file is kept 7 days; ready within 72 hours in the beta (ADR-24.B7) |
+| `POST /me/export`, `GET /me/exports` | → `202 {export_id}` (no passphrase); list `[{export_id, state, ready_at, url_expires_at}]`; the download URL is minted on click and valid 15 minutes; the file is kept 7 days; ready within 72 hours while fulfilled by hand, within 1 hour once automated (ADR-24.B7) |
 | `DELETE /me` | → 202; every later call `410 deleted` |
-| `POST /billing/checkout`, `GET /billing`, `POST /billing/portal` | `{plan: "one_a_day"|"two_a_day"|"three_a_day"}` → `{checkout_url}`; `GET` → `{plan, state, episodes_per_day, current_period_end, founding}` |
+| `POST /billing/checkout`, `GET /billing`, `POST /billing/portal` | `{plan: "one_a_day"|"two_a_day"|"three_a_day"}` → `{checkout_url}`; `GET` → `{plan, state, episodes_per_day, current_period_end}` |
 
 ### 3.8 Admin (staff)
 
-`GET /admin/learners/{id}/summary` (ids and counts only), `POST /admin/invites`, `GET/PUT /admin/vendors` (one-click vendor switch, writes `vendor_config` and `voice.vendor_failover`), `GET/PUT /admin/flags`, `GET /admin/review/queue` (human review: 10 random episodes per learner per month), `GET /admin/privacy/runs`, `POST /admin/rebuild/{learner_id}`.
+`GET /admin/learners/{id}/summary` (ids and counts only), `GET/PUT /admin/vendors` (one-click vendor switch, writes `vendor_config` and `voice.vendor_failover`), `GET/PUT /admin/flags`, `GET /admin/review/queue` (episodes the AI review pass flagged, and Muath's spot checks, ADR-25.7), `GET /admin/privacy/runs`, `POST /admin/rebuild/{learner_id}`.
 
 ## 4. Schemas
 

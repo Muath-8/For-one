@@ -1,8 +1,8 @@
 # For one — Product Requirements Document, PRD v3
 
-**PRD v3, 2026-11-06; open items decided 2026-11-12 (Part 0.3, Part 17, ADR-24).** Supersedes [PRD-v2.md](PRD-v2.md) (whose internal version numbers were 3.0 of 2026-10-10 and 3.1 of 2026-10-23). PRD-v2.md is kept unchanged so the two can be compared; [PRD.md](PRD.md) (2.0) is history only.
+**PRD v3, 2026-11-06; open items decided 2026-11-12 (Part 0.3, Part 17, ADR-24); revised the same day for the direction change in ADR-25 (Part 0.4): an AI coding agent builds it under Muath, no dates, no lawyer, web only, no Milestone 0 and no beta. Version 1 launches once, publicly, with open signup.** Supersedes [PRD-v2.md](PRD-v2.md) (whose internal version numbers were 3.0 of 2026-10-10 and 3.1 of 2026-10-23). PRD-v2.md is kept unchanged so the two can be compared; [PRD.md](PRD.md) (2.0) is history only.
 
-**What this document is.** The single product requirements document that the architecture, technical design, epics and stories, design and engineering documents are built from. Every requirement has a stable identifier so those documents can cite it (`FR-312`, `NFR-104`, `LAW-07`, `GATE-03`, `OPEN-02`). Nothing here is new product thinking: the requirements come from the decisions Muath took on 2026-10-23 ([decisions.md](decisions.md)), concept v2 ([concept-v2.md](concept-v2.md)), the agreed feature map ([features/for-one-features.html](features/for-one-features.html)), the eleven lens documents ([perspectives/](perspectives/)) and the Milestone 0 kit ([milestone-0/](milestone-0/)). Where PRD-v2 had to make a call that none of those sources made, that call is carried over here and still marked **[PRD call]**: veto it or it stands.
+**What this document is.** The single product requirements document that the architecture, technical design, epics and stories, design and engineering documents are built from. Every requirement has a stable identifier so those documents can cite it (`FR-312`, `NFR-104`, `LAW-07`, `GATE-03`, `OPEN-02`). Nothing here is new product thinking: the requirements come from the decisions Muath took on 2026-10-23 ([decisions.md](decisions.md)), concept v2 ([concept-v2.md](concept-v2.md)), the agreed feature map ([features/for-one-features.html](features/for-one-features.html)), the eleven lens documents ([perspectives/](perspectives/)) and the Milestone 0 kit ([milestone-0/](milestone-0/); Milestone 0 is not run, and the kit is kept as source material, ADR-25.5). Where PRD-v2 had to make a call that none of those sources made, that call is carried over here and still marked **[PRD call]**: veto it or it stands.
 
 **Sources of truth, in order.** When two sources disagree: decisions.md, then concept v2, then the feature map, then the lens documents and the Milestone 0 kit. This PRD follows that order and says so where it mattered (Part 0.2).
 
@@ -13,14 +13,15 @@ FR-312  [P0] [D3]   The host never says "wrong", "mistake" or "the correct answe
 │       │    │
 │       │    └─ source: D1..D5 decided/agreed by Muath; S = settled point every lens agreed on;
 │       │       C = concept v2; L = a lens document; M0 = Milestone 0 kit; [PRD call] = this PRD's own call
-│       └────── priority: P0 = in the paid beta (opens 2027-03-17, ADR-24.11): Day-1 P0 works on opening day,
-│               other P0 by the beta day a learner can first reach it (backlog `Due:`);
-│               P1 = works before the beta gate review (2027-04-20); LATER = direction only, not built in the beta
+│       └────── priority: P0 = needed at launch (v1); P1 = after launch (v1.1);
+│               LATER = direction only, built in neither (ADR-25.5). There is no beta and no Day-1 split:
+│               work a learner can reach in their first week is P0.
 └────────────── identifier, stable from this version on. Numbers are grouped by area (FR-1xx onboarding, FR-2xx daily loop ...).
                 Gaps in numbering are deliberate; new requirements take the next free number in their area and are never renumbered.
 ```
 
-- **FR** = functional requirement (what the product does). **NFR** = non-functional requirement (how well: latency, reliability, security, cost, quality, accessibility). **LAW** = one of the twelve product laws; a feature that breaks one does not ship. **TC** = one of the eight trust-contract promises. **GATE** = a success metric with a target and a stop line. **OPEN** = an item that was undecided when this PRD was written; Part 17 lists every one. **As of 2026-11-12 every OPEN id is decided** (ADR-24 in [architecture/10-decision-records.md](architecture/10-decision-records.md)); the ids stay as stable references to those rulings.
+- **FR** = functional requirement (what the product does). **NFR** = non-functional requirement (how well: latency, reliability, security, cost, quality, accessibility). **LAW** = one of the twelve product laws; a feature that breaks one does not ship. **TC** = one of the eight trust-contract promises. **GATE** = a launch health measure with a target and a stop line, read 4 and 8 weeks after launch (Part 16). **OPEN** = an item that was undecided when this PRD was written; Part 17 lists every one. **As of 2026-11-12 every OPEN id is decided** (ADR-24 in [architecture/10-decision-records.md](architecture/10-decision-records.md), as changed by ADR-25); the ids stay as stable references to those rulings.
+- A requirement marked **Retired (ADR-25.x)** no longer applies. Its id is kept, never reused, because the backlog cites ids.
 - A requirement with no priority tag inside Parts 2 to 12 is **[P0]**.
 - "Target language" is the language the learner is learning; "own language" (or "native language") is the language the interface and the producer speak to them. "English" and "Arabic" appear only in examples.
 
@@ -32,13 +33,13 @@ FR-312  [P0] [D3]   The host never says "wrong", "mistake" or "the correct answe
 
 | # | Decision | What it fixes in this PRD |
 |---|---|---|
-| **D1** | **No single target country or people.** Languages open per the five-check language gate (concept v2 §8); the pilot is English only. | FR-11xx language packages; FR-101 to FR-106 onboarding in any native language; no requirement anywhere is tuned to one market. |
+| **D1** | **No single target country or people.** Languages open per the five-check language gate (concept v2 §8); English is the first target (ADR-24.20). | FR-11xx language packages; FR-101 to FR-122 onboarding in any native language; no requirement anywhere is tuned to one market. |
 | **D2** | **Monthly subscription only.** Three plans that differ only in new episodes a day: 1 a day $19.99, 2 a day $29.99 (recommended), 3 a day $44.99. Cost per session sets price and allowance. Pricing psychology used to push people to subscribe, honestly. | FR-12xx billing; FR-206 to FR-209 allowance; NFR-4xx cost; GATE-10, GATE-11. |
 | **D3** | **Teaching is invisible.** No "wrong, the correct answer is X", no pop-ups. Corrections come inside the conversation as recasts ("you mean..."). The producer, Salma, never corrects. | LAW-07; FR-33x call move contract; FR-36x chat; FR-83x correction layers; the editor's law scan FR-420. |
 | **D4** | **Evidence instead of tests.** Recall in conversation, a 60-second word check, a then-and-now recording every 4 weeks, a notebook the learner can open. Still no points, streaks or levels. | LAW-01, LAW-12; FR-8xx assessment and claim gate; FR-9xx weekly proof; FR-10xx notebook. |
 | **D5** | **A continuing series.** Plot may persist, obligation never; 4-week seasons with one real goal; missing a day never costs anything. | LAW-04; FR-55x arcs and seasons; FR-210 to FR-214 after a gap; FR-224 rhythm never shown as a counter. |
 
-The six settled points (what counts as learned, fun carries the language, audio-first transcript, light pronunciation, the first ten minutes, what counts as success) are adopted as in decisions.md and tagged **[S]**. Decisions 6 to 10 (the daily cue, platform, personalization depth, data use, how the beta earns) run on decisions.md's recommendations and are tagged **[C]**; where one of them was still open for Muath it was also an OPEN item (all decided 2026-11-12, ADR-24).
+The six settled points (what counts as learned, fun carries the language, audio-first transcript, light pronunciation, the first ten minutes, what counts as success) are adopted as in decisions.md and tagged **[S]**. Decisions 6 to 10 (the daily cue, platform, personalization depth, data use, how the product earns) run on decisions.md's recommendations and are tagged **[C]**; where one of them was still open for Muath it was also an OPEN item (all decided 2026-11-12, ADR-24).
 
 ## 0.2 What changed from PRD-v2 (3.1)
 
@@ -47,31 +48,46 @@ PRD-v2 3.1 had already folded in the 2026-10-23 decisions. This version keeps it
 | # | Change | Why | Where |
 |---|---|---|---|
 | 1 | Every rule is now a numbered requirement with a priority and a source tag. | Six documents are being written from this one in parallel; they need stable references. | Whole document |
-| 2 | **Web versus native for the beta is reopened as OPEN-01.** PRD-v2 decided "installable web app plus private podcast feed". That was decisions.md's recommendation for decision 7, which Muath has not answered. The web app plus feed stays as the **working default** so the build can start; every requirement that depends on it is tagged `[OPEN-01]`. | Project memory and the UI lens list it as still open for Muath. | FR-130, FR-23x, FR-31x, NFR-1xx |
+| 2 | **Web versus native for the beta is reopened as OPEN-01.** PRD-v2 decided "installable web app plus private podcast feed". That was decisions.md's recommendation for decision 7, which Muath has not answered. The web app plus feed stays as the **working default** so the build can start; every requirement that depends on it is tagged `[OPEN-01]`. | Project memory and the UI lens list it as still open for Muath. | FR-009, FR-23x, FR-31x, NFR-1xx |
 | 3 | **The first-session order is reopened as OPEN-02.** The A1 to A10 flow and the suggested door order (Listen, Read, Call, Chat) stay as the working default. | Same reason: the UI lens left it open; nobody has decided it. | FR-110 to FR-121, FR-302 |
 | 4 | **Who writes the hosts and Salma is OPEN-03**, as before, now with the consequence stated: no language can open in the beta without finished bibles, and Milestone 0 runs on drafts. | Due before the build starts on 2026-11-18. | FR-501, FR-520, OPEN-03 |
-| 5 | **Milestone 0 is English only.** PRD-v2 allowed "English plus any language with a native-speaker helper". The kit recommends English only and the coordinator's brief confirms it. | D1 as applied to the pilot. | FR-1110, Part 16 |
+| 5 | **Milestone 0 is English only.** PRD-v2 allowed "English plus any language with a native-speaker helper". The kit recommends English only and the coordinator's brief confirms it. | D1 as applied to Milestone 0. FR-1110 retired 2026-11-12 (ADR-25.5): Milestone 0 does not run. | FR-1110, Part 16 |
 | 6 | Three editorial errors in PRD-v2 are fixed: a stray "Salma" row inside the measures table (10.3), a malformed "Host" row in the agent roster (14.1), and "English throughout" in the episode spec (5.1), which now reads "the target language throughout". | They contradicted D1 and D3 as written. | FR-301, FR-810, Part 13 |
-| 7 | **Status as of 2026-11-06:** Milestone 0 is running (cohort A on day 6, cohort B on day 5 by the kit's schedule); the gate decision is Wed 2026-11-18. The beta build (2026-11-18 to 2026-12-22) and paid beta (2026-12-23 to 2027-01-26) dates are unchanged and depend on the gate passing. **Re-set 2026-11-12 (ADR-24.11):** build 2026-11-18 to 2027-03-12, paid beta 2027-03-17 to 2027-04-20. | Dates follow the pilot kit. | Part 16 |
+| 7 | **Status as of 2026-11-06:** Milestone 0 is running (cohort A on day 6, cohort B on day 5 by the kit's schedule); the gate decision is Wed 2026-11-18. The beta build (2026-11-18 to 2026-12-22) and paid beta (2026-12-23 to 2027-01-26) dates are unchanged and depend on the gate passing. **Re-set 2026-11-12 (ADR-24.11):** build 2026-11-18 to 2027-03-12, paid beta 2027-03-17 to 2027-04-20. **Superseded the same day (ADR-25.1, 25.5):** no dates, no Milestone 0 gate and no beta; see Part 18. | Dates follow the Milestone 0 kit. | Part 16 |
 | 8 | The agents-and-stack part is cut to what the product requires (roles, what is code and what is a model, vendor tests). Vendor choices, costs per role and infrastructure now live in the architecture documents and are referenced, not repeated. | The architecture thread owns them; two copies drift. | Part 15, NFR-4xx |
 
 Everything else is PRD-v2's content, re-stated as requirements. The **[PRD call]** decisions PRD-v2 made (its "[NEW]" tags) are carried over with that tag; they remain vetoable.
 
 ## 0.3 What only Muath could settle, and how it was settled
 
-On 2026-11-12 Muath delegated these decisions. Each one is recorded in ADR-24 ([architecture/10-decision-records.md](architecture/10-decision-records.md)); the "Action left" column names the owner action in that document's §10 register.
+On 2026-11-12 Muath delegated these decisions. Each one is recorded in ADR-24 ([architecture/10-decision-records.md](architecture/10-decision-records.md)). The same day ADR-25 changed several of them; the "Now" column gives the ruling that applies and the owner action (A#) or measurement (M#) in that document's §10 register. The "Decided" column is kept as history.
 
-| ID | Question | Decided (2026-11-12) | Action left |
+| ID | Question | Decided (ADR-24, history) | Now (ADR-25) and action left |
 |---|---|---|---|
-| OPEN-01 | Web app plus private podcast feed, or a native app, for the beta | Web app plus feed; native after the gates, or earlier if GATE-M18 fires (ADR-24.1) | none |
-| OPEN-02 | The first-session order (A1 to A10) and the suggested door order | Order A as in FR-110 to FR-121; doors Listen, Read, Call, Chat; the beta may A/B only the word check's position (ADR-24.2) | none |
-| OPEN-03 | Who writes the host bibles (one duo per target language) and Salma's (one per native language) | Drafted in `content/bibles/`; Muath owns them; a native English editor reads them by 2026-12-01 (ADR-24.3) | A4, A5 |
-| OPEN-04 | Company and payment provider | Paddle as merchant of record; Stripe only if Paddle declines (ADR-24.4) | A6 by 2026-12-02 |
-| OPEN-05 | Legal review scoped by the countries the beta invites from | EU and UK GDPR, Saudi PDPL, generic baseline; region `eu-central-1`; SB 243 crisis duties for everyone (ADR-24.8, 24.9) | A1, A8 (counsel confirms) |
-| OPEN-06 | Confirm the three prices, or change the cost rule behind them | Kept; price rises for post-founding signups on any plan whose margin at measured use is below zero (`two_a_day` $34.99, `three_a_day` $54.99) (ADR-24.5) | M6 (measurement) |
-| OPEN-07 | Which countries the beta invites from | Any country under the generic notice, 18+, where the processor sells (ADR-24.9) | none |
+| OPEN-01 | Web app plus private podcast feed, or a native app, for the beta | Web app plus feed; native after the gates, or earlier if GATE-M18 fires (ADR-24.1) | Web application plus the private feed; no native app is planned and GATE-M18 is retired (ADR-25.4). None |
+| OPEN-02 | The first-session order (A1 to A10) and the suggested door order | Order A as in FR-110 to FR-121; doors Listen, Read, Call, Chat; the beta may A/B only the word check's position (ADR-24.2) | Order A unchanged; any A/B test of the word check runs after launch. None |
+| OPEN-03 | Who writes the host bibles (one duo per target language) and Salma's (one per native language) | Drafted in `content/bibles/`; Muath owns them; a native English editor reads them by 2026-12-01 (ADR-24.3) | Muath reads the English bibles and Salma's Arabic; an AI review pass checks every bible against the laws and ban lists; no hired editor (ADR-25.7). A3 |
+| OPEN-04 | Company and payment provider | Paddle as merchant of record; Stripe only if Paddle declines (ADR-24.4) | Unchanged. A5 |
+| OPEN-05 | Legal review scoped by the countries the beta invites from | EU and UK GDPR, Saudi PDPL, generic baseline; region `eu-central-1`; SB 243 crisis duties for everyone (ADR-24.8, 24.9) | Compliance by conservative design for everyone, with no counsel step: the self-review checklist (`legal/00-self-review-checklist.md`) checked by an AI review pass and by Muath (ADR-25.3). A4; A7 if it applies |
+| OPEN-06 | Confirm the three prices, or change the cost rule behind them | Kept; price rises for post-founding signups on any plan whose margin at measured use is below zero (`two_a_day` $34.99, `three_a_day` $54.99) (ADR-24.5) | Kept; no founding lock: a rise applies to new signups on that plan only, and existing subscribers keep their price while subscribed (ADR-25.5, 25.10). M6 |
+| OPEN-07 | Which countries the beta invites from | Any country under the generic notice, 18+, where the processor sells (ADR-24.9) | No invites: open signup at launch for anyone 18+ in a country where Paddle sells (ADR-25.5). None |
 
 The complete open list, including the items that tests rather than Muath decide, is Part 17. **Update 2026-11-12:** Muath delegated these decisions and all of them are now taken. See the "Decided" column above and ADR-24 in [architecture/10-decision-records.md](architecture/10-decision-records.md). What remains are owner actions and test measurements, listed in that document's §10.
+
+## 0.4 2026-11-12 direction (ADR-25)
+
+After ADR-24, Muath set five constraints. ADR-25 applies them everywhere; where it and ADR-24 disagree, ADR-25 wins.
+
+| # | Ruling | What it changes in this PRD |
+|---|---|---|
+| 25.1 | **No calendar dates in the plan.** Work runs in dependency order, in phases with exit checks. The product launches when every v1 story passes and the launch checklist is green. Only outside facts keep dates (Gemini's price rise on 2027-01-01). | Priority legend; Part 16 heading; Part 18 rewritten as the build sequence; dated owner actions re-cited to A1 to A9 |
+| 25.2 | **An AI coding agent builds it, story by story, under Muath.** Acceptance criteria become tests first; CI and an independent AI review pass check every change; Muath approves merges, migrations, prompt and bible changes, and production deploys. Operations: automated fallbacks first, alerts to Muath. | Part 18.2; FR-422's paging goes to Muath |
+| 25.3 | **No lawyer.** Compliance by conservative design for everyone, a self-review checklist (`legal/00-self-review-checklist.md`) checked by an AI review pass and by Muath, crisis resources from a maintained international helpline directory, and stated triggers for when a lawyer becomes necessary. | FR-571, FR-572, FR-1051, FR-1104, NFR-307 |
+| 25.4 | **Web only**, with the private podcast feed kept. No native app planned. Email one-time code is the only sign-in. | FR-009, FR-118, LAW-06, GATE-M18 retired, Part 16.3 |
+| 25.5 | **No Milestone 0, no beta.** v1 launches once, publicly, with open signup. No invites, no waitlist gate, no founding lock or 100 cap, no external test. The 7-day trial without a card stays. Beta gates become launch health measures read 4 and 8 weeks after launch. | FR-004, FR-101 to FR-106, FR-1203, FR-861, FR-1110, Part 16.1, Part 18 |
+| 25.6 | **Milestone 0 inputs replaced:** recognizer clips from speechocean762 (Apache-2.0) plus about 30 volunteer clips; voice blind test by Muath and volunteers; synthetic learners and scripted calls for replay and fixtures; similarity threshold 0.85 until tuned on real use; the calibration set built after launch from opted-in data, with only event claims until then. | FR-433, FR-841, FR-860, FR-862, FR-1324, FR-1330, NFR-501 |
+| 25.7 | **No hired reviewers at launch.** Muath reads the English bibles and Salma's Arabic; an AI review pass checks bibles, prompts and episode samples against the laws and ban lists. | FR-436, FR-524, FR-1101, FR-1102, NFR-503, NFR-605 |
+| 25.8 | **Domain chosen later** (`APP_DOMAIN`), needed before email sending and the first public deploy. | None directly; owner action A6 |
 
 ---
 
@@ -110,7 +126,7 @@ A feature that breaks a law does not ship. The editor's law scan (FR-420) and a 
 | **LAW-03** | **The learner owns topic, format and cast; the teacher owns pedagogy and shows its reasons on request.** | "Why this episode" and the editable "working on" list; vetoes and additions change targeting the same day (FR-706). | C |
 | **LAW-04** | **Every episode is complete. Plot may persist; obligation never.** The story waits for the learner. | Arcs never advance while the learner is away; no episode requires an earlier one (editor check FR-419). Missing a day costs nothing, anywhere. | D5 |
 | **LAW-05** | **Honesty about what it is.** Transparently AI; no guilt, no "I miss you", no fake lives. | AI disclosure (FR-560), the line between in-show fiction and fake lives (FR-561), the crisis protocol (FR-57x). | C |
-| **LAW-06** | **Formats are hijacked, not invented.** Podcast, call-in, group chat, a producer's notebook. | Milestone 0 runs on WhatsApp and a podcast feed; the beta keeps the feed. | C |
+| **LAW-06** | **Formats are hijacked, not invented.** Podcast, call-in, group chat, a producer's notebook. | The product keeps the private podcast feed (FR-233); calls, chat and the notebook live in the web app (FR-009). | C |
 | **LAW-07** | **Correction is invisible.** It lives inside the conversation and in the next episodes, never in a verdict. Hosts ask for clarification when meaning is lost and say the learner's point back the natural way ("you mean you *went* there?"). Nobody says "wrong", shows a right answer, grades, interrupts a learner mid-sentence or praises the person. | The host move contract (FR-33x), nothing after the call (FR-350), the correction layers (FR-83x). No surface ever shows a learner's sentence next to a corrected one, a red mark or a correction pop-up. | D3 |
 | **LAW-08** | **Conversations end like conversations.** Clean goodbyes, never homework. | Call and chat closers; real-world tries are offered, never assigned. | C |
 | **LAW-09** | **The show is the gym; life is the game.** Real-world tries are offered and celebrated above everything else. | "Out in the world" log (FR-1015); real-life arcs and the mid-season rehearsal (FR-553). | C |
@@ -140,29 +156,31 @@ Eight promises, shown in plain words at onboarding and in Controls.
 | **FR-001** | Learner | Any adult (18 or older) who already understands some of the target language and wants to speak it, from about A2 to C1. No launch country or people is singled out, and no requirement may be tuned to one culture or market. The design centre is still the learner who understands a lot and freezes when speaking. | D1 |
 | **FR-002** | Languages | As many target languages as the speech stack supports, decided by the language gate (FR-1101), never by a market list. Any shipped native language pairs with any shipped target language. Accents per target as the voice pools allow (English: British and American). | D1 |
 | **FR-003** | Age | 18+. A checkbox on the first screen; birth date at account creation; under-18 dates are refused with a plain message. | C |
-| **FR-004** | Access | Invite-only from the waitlist during the beta (FR-106). | PRD call |
+| **FR-004** | Access | Open signup from launch: anyone 18 or older, in a country where Paddle sells, can start onboarding (FR-110). No waitlist, no invites (ADR-25.5). | ADR-25.5 |
 | **FR-005** | Plans | Monthly only. Three plans that differ only in new episodes per active day: 1 a day $19.99, 2 a day $29.99 (marked "Recommended"), 3 a day $44.99. No yearly plan, no free tier, no ads, no credits, no lifetime deals. One USD price list at launch. Prices kept (OPEN-06, ADR-24.5). | D2 |
 | **FR-006** | Unlimited on every plan | Re-listening, the archive, the feed, the article, the chat, the small door, shadowing and one round-two call per episode cost no allowance. | D2, C |
-| **FR-007** | Free taste | A 90-second sample episode before signup (FR-101), then a 7-day trial after onboarding, on the 2 a day plan, with no card (FR-1201). | C, D2 |
+| **FR-007** | Free taste | The first episode and the first call inside onboarding, before any account (FR-115, FR-116), then a 7-day trial on the 2 a day plan, with no card (FR-1201). After launch, a 90-second sample episode on the landing page (FR-103, P1). | C, D2 |
 | **FR-008** | Messages | Exactly three kinds of message ever leave the product (FR-240). | C |
-| **FR-009** | Platform | **Decided [OPEN-01, ADR-24.1]:** an installable web app (mobile Safari and Chrome, installable to the home screen) plus a private podcast feed per learner. Native apps after the beta gates, or earlier if GATE-M18 fires. The requirements tagged are plain requirements; if the platform ever changes to native, those are the ones that change. | C (decision 7 recommendation) |
+| **FR-009** | Platform | **Decided [OPEN-01, ADR-24.1, ADR-25.4]:** a web application (mobile Safari and Chrome, installable to the home screen) plus a private podcast feed per learner: an RSS URL the learner's own podcast app plays, with no app built for it. No native app is planned. | C (decision 7 recommendation); ADR-25.4 |
 | **FR-010** | Interface language | The interface, Salma, captions and glosses are in the learner's own language (right to left where that language is written right to left); episodes, articles and host chat are in the target language; every text block sets its own direction from its content. | D1, C |
-| **FR-011** | AI cost | Budget about $0.60 per session in the beta; scale target $0.30 to $0.35; stop line $1.00 with no plan to reduce it. Cost tracing on every model, voice and recognition call from the first learner (NFR-401 to NFR-405). | C |
+| **FR-011** | AI cost | Budget about $0.60 per session at launch; scale target $0.30 to $0.35; stop line $1.00 with no plan to reduce it. Cost tracing on every model, voice and recognition call from the first learner (NFR-401 to NFR-405). | C |
 
 ---
 
 # PART 2 — ACQUISITION AND ONBOARDING (FR-1xx)
 
-## 2.1 Sample episode and waitlist
+## 2.1 Landing page and sample episode
+
+Signup is open from launch (FR-004). The plain landing page ships at launch and leads straight into onboarding at A1 (FR-110), which plays the learner's first episode within minutes. The personalized sample episode is plain acquisition, added after launch. Neither is a gate.
 
 | ID | Pri | Requirement | Source |
 |---|---|---|---|
-| **FR-101** | P0 | A public landing page in the visitor's language (from the browser, with a language picker), one sentence of promise and one action: "Hear your own show." | C |
-| **FR-102** | P0 | The visitor picks the language they want to speak (only shipped targets are offered), then answers three questions by text or voice: what the hosts should call them, something they could talk about for an hour, what they do. | C |
-| **FR-103** | P0 | The hosts make a **90-second sample episode** about that topic, using the name once, playable within 30 seconds (streamed). Cost ceiling $0.05 per sample. Limit: one per device and per phone number or email per 24 hours. | C; limits: PRD call |
-| **FR-104** | P0 | The sample ends with Salma, in the visitor's own language: the full show is a new episode like this every day, plus a call with the hosts. | C |
-| **FR-105** | P0 | Waitlist form: name, WhatsApp number or email, native language, why this language (job, studies, travel, family, other), self-rated speaking from three plain statements, country. The sample is the learner's to keep and forward; nothing is shared automatically. | C |
-| **FR-106** | P0 | Invites go out in batches of about 50 a week from the open (2027-03-17, ADR-24.11), filtered only for a shipped language pair, a country the processor can sell into, under the regimes of ADR-24.9 (OPEN-05, OPEN-07) and about A2 or above. Each batch is spread across language pairs so every pair gets enough learners to calibrate. Each invite carries the waitlist answers into onboarding so Salma does not ask them again. | D1; carry-over: PRD call |
+| **FR-101** | P0 | A plain public landing page in the visitor's language (from the browser, with a language picker), one sentence of promise and one action, "Start your show", which opens onboarding at A1 (FR-110) with open signup. A second route, "Hear a sample" (FR-102), is added when the sample ships (P1). | C; open signup: ADR-25.5 |
+| **FR-102** | P1 | The visitor picks the language they want to speak (only shipped targets are offered), then answers three questions by text or voice: what the hosts should call them, something they could talk about for an hour, what they do. | C |
+| **FR-103** | P1 | The hosts make a **90-second sample episode** about that topic, using the name once, playable within 30 seconds (streamed). Cost ceiling $0.05 per sample. Limit: one per device per 24 hours, plus a per-network rate limit. | C; limits: PRD call |
+| **FR-104** | P1 | The sample ends with Salma, in the visitor's own language: the full show is a new episode like this every day, plus a call with the hosts, and one button, "Start your show", opens onboarding at A1 with the sample's answers carried in so Salma does not ask them again. The sample is the visitor's to keep and forward; nothing is shared automatically. | C; carry-over: PRD call |
+| **FR-105** | Retired | Retired (ADR-25.5): there is no waitlist form. | |
+| **FR-106** | Retired | Retired (ADR-25.5): there are no invites or invite batches; signup is open (FR-004). | |
 
 ## 2.2 The first ten minutes (order A, decided by ADR-24.2)
 
@@ -170,16 +188,16 @@ Example learner throughout: Faisal, 27, a sales engineer, supports a football cl
 
 | ID | Pri | Step | Requirement | Limits | Source |
 |---|---|---|---|---|---|
-| **FR-110** | P0 | A1 Open | One screen in the learner's own language: "Your own show, in English." One Start button and an "I'm 18 or older" checkbox. Native and target language come from the invite (or the browser), each changeable with one tap. | Nothing else on the screen. | S |
+| **FR-110** | P0 | A1 Open | One screen in the learner's own language: "Your own show, in English." One Start button and an "I'm 18 or older" checkbox. Native and target language come from the sample, if the visitor made one, or from the browser, each changeable with one tap. | Nothing else on the screen. | S |
 | **FR-111** | P0 | A2 Mic primer | "Salma, your producer, will talk with you for 3 minutes. You can talk or type." Buttons: Talk (asks for the microphone only now) / Type. Under the buttons, the notice line (ADR-24.B14): "Salma is an AI. Your voice is used only to run this talk and build your show; nothing is kept unless you make an account." with a link to the privacy notice. | | S |
 | **FR-112** | P0 | A3 Salma | **Salma's voice, in the learner's own language, within 60 seconds of opening.** Her first lines say she is the AI producer of their show. Three questions: what should the hosts call you (said aloud, so the hosts learn the pronunciation); what could you talk about for an hour; what do you need the language for. Each fact appears as a card under her as she hears it, with ✎ to correct and ✕ to remove. Twice she switches to the target language for one line: once a comprehension line ("tell me what you heard, in any language"), once a production invitation ("say anything back in English"). A dated event ("interview in six weeks") becomes a follow-up with a date. | About 3 minutes, at most 8 Salma turns. A field not filled after one re-ask is skipped and marked sparse; the intake never stalls. Voice or text per message. | S, D3 |
 | **FR-113** | P0 | A4 Word check (optional) | "Want to help me pitch your show just right? 60 seconds: tap the words you know." ("Level" is a law word on every surface, FR-420.) Spec FR-850. "Skip" is as large as "Start". | 48 items, stops at 75 seconds. | D4 |
-| **FR-114** | P0 | A5 Casting | While the pilot episode is made: each host says hello (5 seconds); "swap" plays another voice from that host's pool; accent choice where the target has more than one, each with a short sample. | Lasts as long as pilot generation, 40 to 90 seconds; skipped if the pilot is ready. | C |
-| **FR-115** | P0 | A6 The pilot | A **2 to 3 minute episode** about the hour-long topic, the learner's name used once. The transcript is shown on the pilot (first contact); one gentle hint points at "Huh?" and at tapping a word. | Playback starts within 45 seconds of the end of A3 (A4 time excluded). | S; timing: PRD call |
+| **FR-114** | P0 | A5 Casting | While the first episode is made: each host says hello (5 seconds); "swap" plays another voice from that host's pool; accent choice where the target has more than one, each with a short sample. | Lasts as long as first-episode generation, 40 to 90 seconds; skipped if the first episode is ready. | C |
+| **FR-115** | P0 | A6 The first episode | A **2 to 3 minute episode** about the hour-long topic, the learner's name used once. The transcript is shown on the first episode (first contact); one gentle hint points at "Huh?" and at tapping a word. | Playback starts within 45 seconds of the end of A3 (A4 time excluded). | S; timing: PRD call |
 | **FR-116** | P0 | A7 First call | A host throws a question the learner can answer in one or two sentences. Before it rings, the other host says once, slowly, captioned in the learner's language: "If a word won't come, hold the word button and say it in your own language." | **60 to 90 seconds.** In this call the host makes no recasts; it clarifies only if meaning is lost. | S; no-recast rule: PRD call |
 | **FR-117** | P0 | A8 One thing managed | In the call's goodbye, the host names one real thing the learner did that is not easy ("you used *should have*"). Nothing about what went wrong. Then one line on screen: "Every day: a new episode and a call." | | D3 |
-| **FR-118** | P0 | A9 Keep your show | Account (email one-time code; Sign in with Apple and Google are P1 under the single-engineer cut list, ADR-24.11) and birth date. **Drop time in life terms**: "On my commute (7:40)", "Lunch break", "Evening walk", "Pick a time", each with an adjustable clock time. **Voice-storage consent** right after the learner heard themselves: one checkbox, "Keep my recordings so I can hear my progress (only for you, delete any time)", and one plain sentence: "If you don't, we still listen to each call for a few minutes to plan your next episodes, then delete the audio." | The 7-day trial starts here, on the 2 a day plan, with no card. | S, C (decision 9a); code instead of password: PRD call |
-| **FR-119** | P0 | A10 Tomorrow | Three ideas for tomorrow's episode, written from the intake, plus "Tell Salma an idea". The learner picks one. "Tomorrow at 7:40." Then a one-time setup card: add the app to the home screen (for the drop notification) and add the show to a podcast app ("copy feed link" plus instructions for three common apps). | The pilot counts as day 1's episode. | C |
+| **FR-118** | P0 | A9 Keep your show | Account (email one-time code, the only sign-in; there is no Sign in with Apple or Google, ADR-25.4) and birth date. **Drop time in life terms**: "On my commute (7:40)", "Lunch break", "Evening walk", "Pick a time", each with an adjustable clock time. **Voice-storage consent** right after the learner heard themselves: one checkbox, "Keep my recordings so I can hear my progress (only for you, delete any time)", and one plain sentence: "If you don't, we still listen to each call for a few minutes to plan your next episodes, then delete the audio." **Conversation consent** (ADR-25.9, FR-1049): one required checkbox, consent kind `special_category`, agreeing that what the learner chooses to say in calls and chats, which can include health, beliefs or relationships, is processed to run their show. The account is not created without it. | The 7-day trial starts here, on the 2 a day plan, with no card. | S, C (decision 9a); code instead of password: PRD call |
+| **FR-119** | P0 | A10 Tomorrow | Three ideas for tomorrow's episode, written from the intake, plus "Tell Salma an idea". The learner picks one. "Tomorrow at 7:40." Then a one-time setup card: add the app to the home screen (for the drop notification) and add the show to a podcast app ("copy feed link" plus instructions for three common apps). | The first episode counts as day 1's episode. | C |
 | **FR-120** | P0 | Targets | Measured from the first open: first sound under 60 seconds; the learner's first spoken target-language sentence under 5 minutes; account only after the first call (NFR-101, NFR-102). | | S |
 | **FR-121** | P0 | Starting estimate | The two target-language moments, the word check (if taken) and the first call produce a first estimate per skill (listening, reading, speaking, writing) with a wide range (FR-845). The first three episodes are pitched one step easy (FR-731) and treated as calibration. | | C |
 | **FR-122** | P0 | Address form | In a native language whose "you" is gendered (Arabic first), A3 offers an optional chip for how Salma and the interface address the learner: masculine, feminine, or neutral wording. The default is neutral, it is never inferred (TC-6), and it can be changed in Controls. Stored as `learners.address_form` (ADR-24.B26). | | PRD call (2026-11-12) |
@@ -201,7 +219,7 @@ Example learner throughout: Faisal, 27, a sales engineer, supports a football cl
 |---|---|---|---|
 | **FR-201** | P0 | Tomorrow's choice appears at the close of whichever door the learner uses last today (usually the chat), and on the Today screen once the session is done. | C (decision 6) |
 | **FR-202** | P0 | **Three ideas**, each one line of at most 140 characters, carrying topic, format and cast ("Mona interviews you for the job, and she is not nice."), plus **"Tell Salma an idea"**: the learner types or says what they want; Salma confirms it in one line and it becomes the pick. | C |
-| **FR-203** | P0 | Composition, enforced by the teacher: at least one idea from the learner's own life if a follow-up is due, an arc is open or a life situation is active; exactly one wildcard outside the learner's usual lanes, from an adjacent interest; at most one idea continues an open arc; no format that already ran twice in a row; current events only from what the learner told the show (the beta has no news scout, so no idea asserts a real-world fact the learner did not supply). | C; no-scout rule: PRD call |
+| **FR-203** | P0 | Composition, enforced by the teacher: at least one idea from the learner's own life if a follow-up is due, an arc is open or a life situation is active; exactly one wildcard outside the learner's usual lanes, from an adjacent interest; at most one idea continues an open arc; no format that already ran twice in a row; current events only from what the learner told the show (v1 has no news scout, so no idea asserts a real-world fact the learner did not supply). | C; no-scout rule: PRD call |
 | **FR-204** | P0 | The ideas for day N+1 are written in the plan made the night before day N. Pedagogy is threaded into the chosen idea afterwards from today's evidence; pedagogy adapts to the topic, never the reverse. If today's session brought a life update that changes an idea (the interview moved), the teacher rewrites that idea before showing it. | C; rewrite rule: PRD call |
 | **FR-205** | P0 | **Cutoff:** if nothing is chosen by 6 hours before the drop time, the teacher's top-ranked idea is used. **Remix:** long-press an idea to change topic, format or cast before choosing; the result is the pick. | PRD call |
 
@@ -209,7 +227,7 @@ Example learner throughout: Faisal, 27, a sales engineer, supports a football cl
 
 | ID | Pri | Requirement | Source |
 |---|---|---|---|
-| **FR-206** | P0 | **New episodes per active day, by plan: 1, 2 or 3.** An active day is a local calendar day on which the learner played at least half an episode in the app, tapped "Heard it" on a feed episode (`feed_heard`, the learner's own statement; a feed download never counts), started a call or used the small door. The day's first episode is made overnight and drops at the chosen time. On the 2 and 3 a day plans, the next episode is made on demand from tonight's other ideas when the learner finishes (or skips past) the current one's listen door, and plays within 30 seconds (streamed). Nothing extra is voiced in advance, so unused allowance costs almost nothing; for learners who use their extras on most days, the next script may be written ahead as text only (`prewrite_extra`, after Day-1, ADR-05, ADR-24.B32). Unused allowance never carries over and is never mentioned. | D2; active-day definition: PRD call |
+| **FR-206** | P0 | **New episodes per active day, by plan: 1, 2 or 3.** An active day is a local calendar day on which the learner played at least half an episode in the app, tapped "Heard it" on a feed episode (`feed_heard`, the learner's own statement; a feed download never counts), started a call or used the small door. The day's first episode is made overnight and drops at the chosen time. On the 2 and 3 a day plans, the next episode is made on demand from tonight's other ideas when the learner finishes (or skips past) the current one's listen door, and plays within 30 seconds (streamed). Nothing extra is voiced in advance, so unused allowance costs almost nothing; for learners who use their extras on most days, the next script may be written ahead as text only (`prewrite_extra`, v1.1, ADR-05, ADR-24.B32). Unused allowance never carries over and is never mentioned. | D2; active-day definition: PRD call |
 | **FR-207** | P0 | **No episode is made after an inactive day.** If yesterday's episode is unplayed, it stays as today's hero; no new one is generated and no drop notification fires. There is only ever one unplayed episode waiting, on every plan. | PRD call (caps cost; a skipped day leaves no pile and no reminder) |
 | **FR-208** | P0 | **One swap a day.** "Not this one" on a dropped, unstarted episode makes the second-ranked idea on demand (playable within 30 seconds, streamed). | PRD call |
 | **FR-209** | P0 | When a learner reaches the plan's number for the day, Today says plainly, in text: "That's today's new episodes. Tomorrow's will be ready at 7:40." Never in character as an excuse, never with a button. **The plan, mentioned honestly:** if a learner reaches the limit on 3 or more days in a week, that week's proof ends with one plain line naming the next plan and its price, once; changing plan lives in Controls, never on Today. A learner who uses less than half the allowance for 4 weeks hears, once, that a smaller plan exists. | D2 (pricing psychology within TC-2) |
@@ -243,13 +261,13 @@ Example learner throughout: Faisal, 27, a sales engineer, supports a football cl
 |---|---|---|---|
 | **FR-235** | P0 | One hero episode, big, with a typographic cover (title, hosts' marks, the show's colour), length and what it includes. One line from a host above it, always a real, confirmed memory. "Why this episode?" under it. No list of pitches: the other ideas live only in tomorrow's choice. | C |
 | **FR-236** | P0 | Hero states: **ready, not started** = cover and ▶ Play; **in progress** = the cover with doors Listen ✓ · Call · Read · Chat (doors, not a progress bar); **done for today** = "That's today's show", tomorrow's drop time and the one-line teaser of the pick, plus "Round two with Mona, any time" when available, nothing else; **weekly proof day** = the proof sits above today's episode with its own cover; **returning after a gap** = exactly like any other day. | C, LAW-01 |
-| **FR-237** | P0 | Three tabs only: **Today**, **Show** (the archive, FR-1001), **Notebook** (FR-1010). Controls open from the notebook. | C |
+| **FR-237** | P0 | Three tabs only: **Today**, **Show** (the archive, FR-1002), **Notebook** (FR-1010). At launch there are two, Today and Notebook; Show is added in v1.1 (FR-1002, P1). Controls open from the notebook. | C |
 
 ## 3.6 Every message that leaves the product
 
 | ID | Pri | Requirement | Source |
 |---|---|---|---|
-| **FR-240** | P0 | Exactly three kinds of message ever leave the product: (1) the **drop notification**, at the drop time, only when a new episode dropped, by web push and the feed's own alert, can be turned off; (2) the **gap note**, once, after the chosen gap, by email and web push, opt-in only; (3) **transactional** email: sign-in code, receipts, trial ending (day 6, one plain email), payment failed, export ready, account deleted. Nothing else is ever sent: no re-engagement, no "your hosts miss you", no streak warnings, no marketing email to learners in the beta. | C (decision 6), TC-2 |
+| **FR-240** | P0 | Exactly three kinds of message ever leave the product: (1) the **drop notification**, at the drop time, only when a new episode dropped, by web push and the feed's own alert, can be turned off; (2) the **gap note**, once, after the chosen gap, by email and web push, opt-in only; (3) **transactional** email: sign-in code, receipts, trial ending (day 6, one plain email), payment failed, export ready, account deleted. Nothing else is ever sent: no re-engagement, no "your hosts miss you", no streak warnings, no marketing email to learners. | C (decision 6), TC-2 |
 
 ---
 
@@ -262,7 +280,7 @@ A **session** is one episode and everything attached to it. Each part the learne
 | ID | Pri | Requirement | Source |
 |---|---|---|---|
 | **FR-301** | P0 | Door states: `not_started`, `in_progress(position)`, `done`, `skipped`. Session states: `ready`, `open`, `done`, `closed`. | C |
-| **FR-302** | P0 | **Any order** (suggested order Listen, Read, Call, Chat, ADR-24.2). Every door can be opened at any time once the episode exists, except: Chat opens after Listen, Read or Call has been used; Round two opens after the main call is done. **Working default path:** the episode's ending throws to the learner and the screen offers **Call** now, **Read the article** first, or **Later**; Read-before-Call is suggested because the article is planning time. In Ears mode (screen off), pressing play on the headphones after the throw does nothing; the call needs the screen in the beta. | C |
+| **FR-302** | P0 | **Any order** (suggested order Listen, Read, Call, Chat, ADR-24.2). Every door can be opened at any time once the episode exists, except: Chat opens after Listen, Read or Call has been used; Round two opens after the main call is done. **Working default path:** the episode's ending throws to the learner and the screen offers **Call** now, **Read the article** first, or **Later**; Read-before-Call is suggested because the article is planning time. In Ears mode (screen off), pressing play on the headphones after the throw does nothing; the call needs the screen (web only, ADR-25.4). | C |
 | **FR-303** | P0 | **Planning time when the article is skipped.** Listen straight to Call shows a 30-second planning card first: "Think about your side. Three words you might want:" with three words from the brief and a "Ready" button. Skippable. | C; card form: PRD call |
 | **FR-304** | P0 | **Pause and resume.** Audio position, article scroll and chat history persist indefinitely. A call cannot resume mid-call: an interrupted call restarts as a fresh call whose first line acknowledges the gap ("The line dropped. Where were we?"; never a line that puts the drop on the learner, `content/bibles/hosts-en.md`). | C |
 | **FR-305** | P0 | **Skips are allowed and logged** as energy and taste signals. Nothing punishes a skip; the host naturally refers to the article in the call, which is the built-in cost of skipping it. | C |
@@ -329,7 +347,7 @@ A **session** is one episode and everything attached to it. Each part the learne
 | **FR-360** | P0 | One long thread per host, across days, with date separators named after episodes. The host's first message arrives within 30 seconds of the chat door opening, or within 30 seconds of the call ending if the learner stays in the app. | C |
 | **FR-361** | P0 | **The opener** asks the learner to restate one point first (from the episode, the article or the call) before the host adds anything new. **Length:** 3 to 5 host messages; the host ends at message 5 at the latest with a natural closer, then tomorrow's three ideas appear. If the learner keeps writing after the closer, the host sends one final short reply and goes quiet; anything after that is answered in one callback line next session. **Content contract:** adds something new (a comeback, a joke, a clarification, the next angle); never re-litigates the call; never assigns anything. | C |
 | **FR-362** | P0 | **No margin note.** When it helps, the host's reply says the learner's point back the natural way, at most once per chat ("So the meeting *was* cancelled? Classic."). Nothing is marked, underlined or annotated. **Writing help:** if the learner asks how to write something, the host gives a hint first, never a rewrite of the learner's message. | D3 |
-| **FR-363** | P0 | Text only in the beta. Each bubble sets its own text direction. | C |
+| **FR-363** | P0 | Text only in v1. Each bubble sets its own text direction. | C |
 
 ## 4.7 The word sheet (tap to define)
 
@@ -368,12 +386,12 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | **FR-414** | P0 | 3 Language correctness | Grammatical, natural target language (for English, in the chosen accent's spelling); no errors in the model sentences. | C |
 | **FR-415** | P0 | 4 Memory | Every life fact used is confirmed, unexpired, not marked "don't bring up", and its source quote exists in the event log. No more than two life facts. | C, TC-1 |
 | **FR-416** | P0 | 5 Not generic | "Would this episode work unchanged for another learner?" Yes fails. | C |
-| **FR-417** | P0 | 6 No unsourced world facts | No real-world result, statistic or news stated as fact unless it came from the learner. | PRD call (the beta has no scout) |
+| **FR-417** | P0 | 6 No unsourced world facts | No real-world result, statistic or news stated as fact unless it came from the learner. | PRD call (v1 has no scout) |
 | **FR-418** | P0 | 7 The fun carries the language | Every joke, twist and personal moment carries at least one target or due item. Fun that carries nothing is cut. | S |
 | **FR-419** | P0 | 8 Stands alone, 9 Variety | The episode can be understood without earlier episodes, even inside an arc (LAW-04); the format rule, ban list and similarity check pass (FR-43x). | D5, C |
 | **FR-420** | P0 | 10 Law scan | No game language, no grading, no explicit correction by anyone ("wrong", "mistake", "the correct answer", a learner sentence beside a corrected one), no guilt, no "I miss you", no lesson words ("lesson", "test", "exercise", "level", "homework") in any surface. | D3, D4, LAW-01, LAW-07 |
 | **FR-421** | P0 | 11 Pitch test | "Would this person, with this interest profile, choose this over a real podcast at 8am?" No fails. | C |
-| **FR-422** | P0 | On fail | Targeted repair of the failing part and one recheck. On a second fail, ship the **fallback episode**: built from the learner's top interest with no life facts, no arc and no callbacks; it must still pass checks 1 to 6 and 10. The teacher logs the failure; three fallbacks for one learner in 7 days page a human. | C; paging rule: PRD call |
+| **FR-422** | P0 | On fail | Targeted repair of the failing part and one recheck. On a second fail, ship the **fallback episode**: built from the learner's top interest with no life facts, no arc and no callbacks; it must still pass checks 1 to 6 and 10. The teacher logs the failure; three fallbacks for one learner in 7 days send an alert to Muath (ADR-25.2). | C; alert rule: PRD call |
 | **FR-425** | P0 | Audio re-listen | The rendered audio is run back through speech recognition and compared with the script. Lines with skipped or garbled words, a mispronounced learner name or a mispronounced target word are re-synthesized, up to two attempts; then the line is rewritten with a synonym (if not a target) or the episode ships with that line's transcript marked. | C; fallback: PRD call |
 
 ## 5.4 Variety, shared ingredients, review
@@ -381,12 +399,12 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | ID | Pri | Requirement | Source |
 |---|---|---|---|
 | **FR-430** | P0 | **Real input in every episode:** at least one element that did not come from the model: the learner's life, their own words from the last call, or something they told the show this week. | C |
-| **FR-431** | P0 | **Ban list:** stock names, settings and plots that AI stories converge on, kept per language package and updated monthly from the human read (FR-436). | C |
-| **FR-432** | P0 | **Format rotation:** formats are tracked over the last 10 episodes; no format runs three times in a row. **Format library (beta):** debate, story time, news-style rundown (of the learner's own news), interview, explain-it-to-me, mystery, gossip, roast, rehearsal. The learner can describe any other format in "Tell Salma an idea"; the writer maps it to the closest pattern and follows the learner's description on conflict. | C |
-| **FR-433** | P0 | **Similarity check:** each new script is embedded and compared with the learner's last 20 scripts; above the threshold it is regenerated. Threshold set in Milestone 0 from scripts the human reviewer judges "too alike" (starting value: cosine 0.85 until measured; OPEN-10, ADR-24.20). | C; starting value: PRD call |
+| **FR-431** | P0 | **Ban list:** stock names, settings and plots that AI stories converge on, kept per language package and updated monthly from the review read (FR-436). | C |
+| **FR-432** | P0 | **Format rotation:** formats are tracked over the last 10 episodes; no format runs three times in a row. **Format library (v1):** debate, story time, news-style rundown (of the learner's own news), interview, explain-it-to-me, mystery, gossip, roast, rehearsal. The learner can describe any other format in "Tell Salma an idea"; the writer maps it to the closest pattern and follows the learner's description on conflict. | C |
+| **FR-433** | P0 | **Similarity check:** each new script is embedded and compared with the learner's last 20 scripts; above the threshold it is regenerated. Starting value cosine 0.85, tuned after launch on real use from scripts the review read (FR-436) judges "too alike" (OPEN-10, ADR-24.20, ADR-25.6). | C; starting value: PRD call |
 | **FR-434** | P0 | **Authored hosts:** people write the hosts and Salma (drafted in `content/bibles/`, ADR-24.3); the model writes only episodes. **Surprise in the content, never in rewards:** a callback from weeks ago, a returning side character, a one-day format change. | C |
 | **FR-435** | P0 | **Shared ingredients,** made once and shared across learners with no difference a learner can notice: the gloss cache, host and Salma bibles, the ban list, sound design. Per-interest news digests are LATER with the scout. | C (decision 8) |
-| **FR-436** | P0 | **Human review:** a paid native reviewer of each target language reads 10 random episodes per learner per month in the beta (in Milestone 0, every episode) and flags errors, sameness and anything that breaks a law. Findings update the ban list, prompts and the similarity threshold. | C |
+| **FR-436** | P0 | **Review read:** an AI review pass, separate from the editor's gate, reads 10 random episodes per learner per month and flags errors, sameness and anything that breaks a law or a ban list; Muath reads what it flags (ADR-25.7). There is no hired reviewer at launch. Findings update the ban list, prompts and the similarity threshold. | C; reviewers: ADR-25.7 |
 | **FR-437** | P1 | **Offline test suite:** 30 to 50 synthetic learners at different levels with planted error patterns, and a simulated caller. Run on every prompt or model change; a change that worsens recast and clarification rate on planted errors, learner talk share, host latency, recall-gap count, analyst tag precision on the hand-tagged set or coverage accuracy does not ship. | C |
 
 ---
@@ -397,7 +415,7 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 
 | ID | Pri | Requirement | Source |
 |---|---|---|---|
-| **FR-501** | P0 | One authored host duo per target language; Karim and Mona are the English duo, shared by every native language that learns English. Each host has a bible written by a person (drafted in `content/bibles/`, ADR-24.3): values, opinions and biases, humour, speech patterns, how they disagree with each other, their stance toward the learner, what they never do, and their in-show storylines. The bibles are content in the language package, not prompts invented per learner. | C, D1 |
+| **FR-501** | P0 | One authored host duo per target language; Karim and Mona are the English duo, shared by every native language that learns English. Each host has a bible written by a person (drafted in `content/bibles/`, ADR-24.3; read and approved by Muath and checked by an AI review pass, ADR-25.7): values, opinions and biases, humour, speech patterns, how they disagree with each other, their stance toward the learner, what they never do, and their in-show storylines. The bibles are content in the language package, not prompts invented per learner. | C, D1 |
 | **FR-502** | P0 | **Voices:** three candidate voices per host per accent, chosen by the blind listening test (FR-1330). The learner hears each host's hello in onboarding and can swap within the pool. | C |
 | **FR-503** | P0 | Changes after onboarding (voice swap or rename, through Salma or Controls) are announced on air in one line in the next episode. A host's voice, personality or memory never changes silently, including across model or vendor upgrades; a forced vendor change is announced the same way. | C |
 | **FR-504** | P0 | **Casting per episode:** one host or both, chosen with the idea. In the call the learner talks to one host, the one who threw. | C |
@@ -411,7 +429,7 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | **FR-521** | P0 | **Salma does:** onboarding; life updates and "tell Salma an idea"; the notebook; the voice of the weekly proof and the season finale; settings changes by conversation; "what do you know about me?"; fact corrections; "where do I stand?" (FR-846); "why do we say it like that?" answered plainly, only when the learner asks. | D3, C |
 | **FR-522** | P0 | **Salma never:** corrects, sends notes after a call, writes margin notes, performs in the show, guilts, praises every turn, grades. **In the call she is silent** (FR-325). | D3 |
 | **FR-523** | P0 | **Language balance:** in season 1 at least 80% of Salma's words are in the learner's own language. Each new season her target-language share rises by about 10 points if the speaking estimate rose, never above 70%. The learner can ask for more or less at any time. | PRD call |
-| **FR-524** | P0 | **Which voice and variety:** per native language, chosen by a blind test with 5 native listeners (FR-1330); her writing is friendly and plain, not formal. (For Arabic, Gulf dialect versus neutral educated Arabic is settled by that test.) | PRD call |
+| **FR-524** | P0 | **Which voice and variety:** per native language, chosen by a blind test with Muath and native-speaking volunteers (FR-1330, ADR-25.6); her writing is friendly and plain, not formal. (For Arabic, Gulf dialect versus neutral educated Arabic is settled by that test.) | PRD call |
 
 ## 6.3 Series bible, arcs and seasons
 
@@ -432,8 +450,8 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | **FR-560** | P0 | Salma says she is AI in her first lines in onboarding, and the hosts in theirs; host portraits carry a small "AI" mark; every character answers "are you real?" honestly, every time. Clean goodbyes: no host asks the learner to stay. | LAW-05, TC-3 |
 | **FR-561** | P0 | **No fake lives.** The hosts' storylines are the show's fiction, inside the show, like a sitcom. A host never claims to exist outside the show, to have met the learner, to remember them between episodes "personally", or to miss them. Asked about it, the host says it is part of the show. | PRD call (the line between in-show fiction and fake lives) |
 | **FR-570** | P0 | Every live role (host, Salma) and the after-session analyst watch for statements of self-harm intent or crisis, in either language. | C (decision 9 flags), L |
-| **FR-571** | P0 | On detection in a live call or chat: the show stops. In a call, the host stops and a pre-recorded clip in the learner's own language, in Salma's voice, says plainly that this is an AI that cannot help with this (the one time Salma speaks in a call, ADR-24.B29); in chat, the character steps out and says the same, and shows the crisis resources for the learner's country from the language package (reviewed by counsel). The session continues only if the learner chooses. Detected in after-session analysis only: Salma shows the same resources at the next open, once. | L |
-| **FR-572** | P0 | Every activation is logged for the annual reporting California SB 243 requires. Its crisis-protocol duties apply to every learner, wherever they live (ADR-24.9); counsel confirms the wording (`legal/06-crisis-protocol.md`). | L |
+| **FR-571** | P0 | On detection in a live call or chat: the show stops. In a call, the host stops and a pre-recorded clip in the learner's own language, in Salma's voice, says plainly that this is an AI that cannot help with this (the one time Salma speaks in a call, ADR-24.B29); in chat, the character steps out and says the same, and shows the crisis resources for the learner's country, taken from a maintained international helpline directory (ADR-25.3). The session continues only if the learner chooses. Detected in after-session analysis only: Salma shows the same resources at the next open, once. | L |
+| **FR-572** | P0 | Every activation is logged for the annual reporting California SB 243 requires. Its crisis-protocol duties apply to every learner, wherever they live (ADR-24.9). The wording (`legal/06-crisis-protocol.md`) is checked against the self-review checklist (`legal/00-self-review-checklist.md`) by an AI review pass and by Muath; there is no counsel step (ADR-25.3). | L; ADR-25.3 |
 | **FR-580** | LATER | Character creation, the six chassis, user-created hosts and guest hosts made by learners: after episodes are loved. | C |
 
 ---
@@ -506,7 +524,7 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | ID | Pri | Requirement | Source |
 |---|---|---|---|
 | **FR-710** | P0 | **Treatment by learner state:** never attempted but expected at their stage: input flood (hosts use it often and audibly in the episode), no correction, 1 to 2 weeks before it becomes a productive target. Attempting, rule-based, with errors: clear recasts in the call; the form returns often and audibly in the next episodes and articles, and in calls that make it necessary. Attempting, item-based (word choice, collocation): recast, then the item returns on schedule. Avoided (expected, never used, paraphrased around): a host models it, then a call question that is hard to answer without it. Slow or broken speech on easy content: retell, and round two "shorter and faster". A mistake the learner says they don't care about: dropped from targeting unless it breaks meaning. | D3, C |
-| **FR-720** | P0 | **Review schedule:** every word, chunk and structure has a review state in an FSRS-style scheduler (code). **Due** means predicted recall below 0.85 by the next drop time (tuned in the beta). Grammar targets are spaced tightly early (every 1 to 3 days); words on widening gaps. | C; 0.85: PRD call |
+| **FR-720** | P0 | **Review schedule:** every word, chunk and structure has a review state in an FSRS-style scheduler (code). **Due** means predicted recall below 0.85 by the next drop time (tuned after launch). Grammar targets are spaced tightly early (every 1 to 3 days); words on widening gaps. | C; 0.85: PRD call |
 | **FR-721** | P0 | Due items return through four channels: the same day across surfaces (episode, article, call, chat); across days in new stories; through the recurring world (arcs, running jokes); and through the hosts' "you mean..." lines that echo the learner's own sentences. | C, LAW-10 |
 | **FR-722** | P0 | **New words:** 3 to 6 planted per episode; at least 80% from the top 3,000 lemmas of a general frequency list, not the topic's niche vocabulary (frequency floor). | PRD call |
 | **FR-723** | P0 | Words the learner tapped twice or more become recall candidates: the call brief creates a need for them and the next episodes use them again. Kept words are scheduled like targets. | C |
@@ -548,7 +566,7 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | **FR-810** | P0 | Accuracy | Correct use in obligatory contexts per structure; errors per 100 words by category, always read next to what was attempted | Calls, chats |
 | **FR-811** | P0 | Complexity and fluency | Clause length, subordination, lexical diversity (MTLD), share of words beyond the top 2,000; speech rate, mean length of run, mid-clause pause rate, articulation rate (filler and repair counts logged, not weighted) | Retell turns, round two, the 4-weekly recording only |
 | **FR-812** | P0 | Vocabulary, comprehension, pronunciation, word button | Word probabilities (understood, produced) and words owned on every surface; content uptake 0 to 2, Huh? rate per minute, taps per 100 words and "how much did you follow?" answers per session; sentence- and word-level pronunciation scores on known sentences only (shadow lines), internal and never shown; word-button presses per call, by word | As listed |
-| **FR-815** | P0 | **Structure inventory:** for English, seeded from the English Grammar Profile, filtered to the structures that matter from A2 to B2, a few hundred items (ADR-24.18: built from open sources with EGP-style ids; mapped onto the Profile if the licence arrives). **Twelve reporting categories** (localized per language package; English set): verb tense and aspect, subject-verb agreement, articles, prepositions, word order, word choice, plurals, pronouns, comparatives, conditionals, question formation, register. Used for reporting and the proof; targeting works on the inventory. **Frequency list and lemmatizer:** a general lemma frequency list (wordfreq for the beta, ADR-24.18; a subtitle-corpus list later) plus a formulaic-sequence list; a standard lemmatizer. | C; subtitle corpus: PRD call |
+| **FR-815** | P0 | **Structure inventory:** for English, seeded from the English Grammar Profile, filtered to the structures that matter from A2 to B2, a few hundred items (ADR-24.18: built from open sources with EGP-style ids; mapped onto the Profile if the licence arrives). **Twelve reporting categories** (localized per language package; English set): verb tense and aspect, subject-verb agreement, articles, prepositions, word order, word choice, plurals, pronouns, comparatives, conditionals, question formation, register. Used for reporting and the proof; targeting works on the inventory. **Frequency list and lemmatizer:** a general lemma frequency list (wordfreq for v1, ADR-24.18; a subtitle-corpus list later) plus a formulaic-sequence list; a standard lemmatizer. | C; subtitle corpus: PRD call |
 
 ## 9.3 Error, slip, lifecycle, "learned"
 
@@ -574,11 +592,11 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | ID | Pri | Requirement | Source |
 |---|---|---|---|
 | **FR-840** | P0 | Every sentence about the learner's progress, in the proof, the finale, a host line or "where do I stand", passes all five rules in code: (1) **like for like**: the same task type; (2) **beyond the noise**: the change exceeds about twice the measure's standard error, estimated per metric from learners who recorded twice a few days apart; (3) **repeated**: at least two data points point the same way, except first-ever events; (4) **clean evidence**: grammar claims from chat text or high-confidence speech only; (5) **openable**: every claim carries its evidence and the learner can open "how we know". | LAW-12, D4 |
-| **FR-841** | P0 | Until a metric's standard error is estimated (from Milestone 0 and early beta test-retest pairs), only first-ever events and words-owned claims may be made about it. | PRD call |
+| **FR-841** | P0 | Until a metric's standard error is estimated (from test-retest pairs collected after launch, ADR-25.6), only first-ever events and words-owned claims may be made about it. | PRD call |
 | **FR-842** | P0 | **When nothing passes,** the honest thing is said instead ("too early to tell"; "flat week, and here is the one thing I'm changing"). When accuracy fell while the learner attempted harder language, that is said with its evidence. **Fabricated wins are impossible by construction:** the proof producer receives only claims that passed (FR-645). | TC-4 |
-| **FR-860** | P0 | **Calibration before claims,** per language pair, before the paid beta: 150 to 200 learner samples (calls and chats, starting with Milestone 0's hand-tagged calls) double-tagged by trained teachers. Bars: level rating agreement at a quadratic weighted kappa of about 0.7 or better; precision of at least 0.8 on every error tag that feeds a claim. The rating model version is pinned for each 4-week window so an upgrade never shows up as learner progress; the calibration set is re-run on every model change. | C |
-| **FR-861** | P1 | **External test:** 20 to 30 beta learners take a recognized test of their target language with a speaking component at week 0 and week 8, paid by For one, starting with English learners (the Duolingo English Test; OPEN-09, ADR-24.19). Results calibrate the internal scale; never shown to other learners, never used in marketing without consent. | C (decision 10c) |
-| **FR-862** | P0 (before build week 2) | **The recognizer test:** for each target language, 30 recorded clips of real learners from at least two native-language groups are run through each candidate streaming and batch recognizer; count how many real learner errors survive (hand-tagged), filler retention, hallucinations near long pauses, and handling of switches into the learner's own language. A target that fails ships later; it never ships with a weaker bar. The winner per role and the confidence threshold (FR-804) come from this test. Recognizer error is tracked by first language from day one. | L (voice lens), D1 |
+| **FR-860** | P0 rule / P1 set | **Calibration before metric claims,** per language pair. The rule is P0: no metric claim ships for a pair until its set meets the bars; until then only event claims ship (FR-841). The set is P1: built after launch from opted-in learners' data (FR-1044, ADR-25.6), 150 to 200 learner samples (calls and chats) double-tagged by two trained taggers, the second recruited when metric claims are calibrated (ADR-25.7). Bars: level rating agreement at a quadratic weighted kappa of about 0.7 or better; precision of at least 0.8 on every error tag that feeds a claim. The rating model version is pinned for each 4-week window so an upgrade never shows up as learner progress; the calibration set is re-run on every model change. | C |
+| **FR-861** | Retired | Retired (ADR-25.5): there is no external test. | |
+| **FR-862** | P0 (build phase 1) | **The recognizer test:** for each target language, learner clips from an open corpus with a commercial-use licence (for English, speechocean762, Apache-2.0) plus about 30 clips recorded by volunteers from at least two native-language groups, each with a one-line recording consent (ADR-25.6, owner action A2), are run through each candidate streaming and batch recognizer; count how many real learner errors survive (tagged), filler retention, hallucinations near long pauses, and handling of switches into the learner's own language. A target that fails ships later; it never ships with a weaker bar. The winner per role and the confidence threshold (FR-804) come from this test. Recognizer error is tracked by first language from day one. | L (voice lens), D1 |
 
 ## 9.6 Correction layers (what the learner experiences)
 
@@ -604,7 +622,7 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | **FR-901** | P0 | **Every week, for every learner,** on the learner's proof day: by default the weekday on which they used the show most in their first week; until then, day 7. It never waits for a minimum number of sessions. | C |
 | **FR-902** | P0 | **Form:** an audio episode of about 2 minutes presented by Salma, with the learner's own clips and at most one line from a host. It sits above today's episode on Today with its own cover, and in the feed. | C |
 | **FR-903** | P0 | **Contents, in order:** (1) one headline piece of evidence that passed the claim gate, with "how we know" behind it; (2) the rhythm, in words, only if it was met (FR-224); (3) the next focus; (4) the "working on" list, with one tap to change it; (5) one question: "Was this week worth your time?" (yes / mostly / no) and an optional free-text "why". A "more" section on screen holds the other passed claims, if any. | C, D4; answer options: PRD call |
-| **FR-904** | P0 | **Simple version for the open (2027-03-17):** headline from first-ever events and words owned, the next focus, the working-on list, the worth-it question. The full gate on fluency and accuracy claims follows once standard errors exist (P1). | C |
+| **FR-904** | P0 | **Simple version at launch:** headline from first-ever events and words owned, the next focus, the working-on list, the worth-it question. The full gate on fluency and accuracy claims follows once standard errors exist (P1). | C |
 | **FR-905** | P0 | **A slow week** (no session or one) gets a shorter proof, about 45 seconds, about what has built up over time (hours, words owned since the start), never about the week. | D5, TC-4 |
 | **FR-906** | P0 | **A flat week** says so plainly and names the one thing the teacher is changing. **A worse week** says so with the most likely reason the evidence supports (harder material, a long gap) and the change. | TC-4 |
 | **FR-920** | P1 | **The season finale:** offered at the learner's first session on or after day 28 of the season, as a special episode. Contents: the then-and-now recording played next to the last one; **at most two measured differences in plain words** (gated claims only); the real-world attempt if there was one; a short recap (episodes, about how many hours heard, minutes spoken, words owned, the moment Salma liked most); and the next season's goal, set inside the finale. If the learner skips the recording, the finale still happens without a voice comparison, and the season still ends on its date. | D4, D5 |
@@ -618,8 +636,8 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 
 | ID | Pri | Requirement | Source |
 |---|---|---|---|
-| **FR-1001** | P0 | Three tabs: Today (FR-235), **Show**, **Notebook**. The interface is in the learner's language, right to left where that language is. Dark mode is first-class. No mascot, no avatars: hosts are simple portrait marks, Salma a monogram. Sound design: a show sting opens and closes every episode; the learner's turn is signalled by the host's breath and a soft rising tone, never a beep; no reward sounds anywhere. | C, LAW-01 |
-| **FR-1002** | P0 | **Show (the archive):** a shelf of seasons, each a row of typographic episode covers. Every episode is replayable, with its transcript, article, call recording (if kept) or transcript, and chat. No statistics, aggregates or charts. | C, LAW-01 |
+| **FR-1001** | P0 | Three tabs: Today (FR-235), **Show**, **Notebook** (Show from v1.1, FR-1002). The interface is in the learner's language, right to left where that language is. Dark mode is first-class. No mascot, no avatars: hosts are simple portrait marks, Salma a monogram. Sound design: a show sting opens and closes every episode; the learner's turn is signalled by the host's breath and a soft rising tone, never a beep; no reward sounds anywhere. | C, LAW-01 |
+| **FR-1002** | P1 | **Show (the archive):** a shelf of seasons, each a row of typographic episode covers. Every episode is replayable, with its transcript, article, call recording (if kept) or transcript, and chat. No statistics, aggregates or charts. At launch the private feed and Today cover the archive (every episode stays in the feed). | C, LAW-01 |
 
 ## 11.2 The notebook (styled as Salma's notebook, not as settings)
 
@@ -651,12 +669,13 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | **FR-1042** | P0 | **Revoking voice consent:** the flag flips at once; all stored audio is deleted within 24 hours. | C |
 | **FR-1043** | P0 | **Transcripts and text** are always stored while the account exists (core function, disclosed at consent). | C |
 | **FR-1044** | P0 | **Opt-in data use:** only with the Controls switch on (never asked during onboarding, ADR-24.B6) may pseudonymized, de-identified transcripts (no audio; names, places and employers replaced, ADR-24.B9) be used to check and improve the teacher. Off by default. Never sold, never used for ads. | TC-8, C (decision 9b) |
-| **FR-1045** | LATER | **The learner's cloned voice** ("hear yourself say it fluently"): not offered in the beta; tested later as opt-in. | C (decision 9c) |
-| **FR-1046** | P0 | **Export:** a full export (learner model in plain JSON, transcripts, kept audio) is prepared on request, and a link to it is emailed within 72 hours in the beta (within 1 hour once automated). The download is minted on click, valid 15 minutes; the file is kept 7 days, with no passphrase (ADR-24.B7). | TC-5; windows: ADR-24.B7 |
+| **FR-1045** | LATER | **The learner's cloned voice** ("hear yourself say it fluently"): not offered in v1; tested later as opt-in. | C (decision 9c) |
+| **FR-1046** | P0 | **Export:** a full export (learner model in plain JSON, transcripts, kept audio) is prepared on request, and a link to it is emailed within 72 hours until export is automated, then within 1 hour (ADR-24.B7). The download is minted on click, valid 15 minutes; the file is kept 7 days, with no passphrase (ADR-24.B7). | TC-5; windows: ADR-24.B7 |
 | **FR-1047** | P0 | **Account deletion:** confirmed by typing "delete"; no grace period (ADR-24.B1); access ends at once; data is purged from live systems within 24 hours and from backups within 30 days, as stated plainly in the privacy text. | TC-5; windows: PRD call |
 | **FR-1048** | P0 | **Trial ended without paying:** new episodes stop; the archive, notebook, export and delete stay available for 90 days, then the account is deleted after one email warning. | PRD call |
+| **FR-1049** | P0 | **Consent to process conversation content** (ADR-25.9): an explicit consent at account creation (A9, FR-118), recorded as its own consent kind `special_category` with its version, for processing what the learner says in calls and chats, which may include special categories (GDPR Art. 9(2)(a)). Without it the account is not created, because the product cannot run without listening. It does not cover keeping or reusing a sensitive fact: that still needs the one-tap card (FR-622). The crisis protocol (FR-57x) also rests on vital interests. | ADR-25.9 |
 | **FR-1050** | P0 | **Security:** encryption at rest and in transit; per-learner keys for audio, so deleting a learner's key deletes their audio; row-level isolation per learner; no cross-learner data paths except the shared gloss cache and pseudonymized, de-identified, opt-in transcripts (ADR-24.B9) (NFR-301 to NFR-305). Hosting region `eu-central-1` (OPEN-05, ADR-24.8). | C |
-| **FR-1051** | P0 | **Legal work before the paid beta** (ADR-24.9), scoped by the countries the beta invites from: GDPR in the EU and UK, Saudi PDPL and other national privacy laws (consent wording, voice data, cross-border transfer, hosting region); California SB 243 (disclosure, crisis protocol, reporting); the EU AI Act's disclosure duties; subscription, cancellation and refund rules per country. Crisis resources are needed for every country the beta opens to. These are flags from the lenses, not legal advice. | L |
+| **FR-1051** | P0 | **Compliance by conservative design, before launch, with no counsel step** (ADR-25.3). (1) The strictest common rules apply to every learner wherever they live: GDPR-grade rights, hosting in `eu-central-1`, vendors under their standard data processing agreements with SCCs, a DPIA and RoPA completed from the official templates (`legal/04`, `legal/05`). (2) Paddle, as merchant of record, carries payment-side consumer law: tax, invoices, refunds and the EU withdrawal right. (3) Risk is designed out: 18+ only (FR-003); no voiceprints or speaker identification; voice storage off by default with deletion within 15 minutes (FR-1041); data use opt-in (FR-1044); no sensitive fact without the one-tap card (FR-622); AI disclosed in Salma's first line (FR-560); SB 243-style crisis duties for everyone (FR-572); the EU AI Act's disclosure duties met by FR-560. (4) Crisis resources for every country come from a maintained international helpline directory (FR-571). (5) Every legal text is checked against the self-review checklist (`legal/00-self-review-checklist.md`) by an AI review pass and approved by Muath (owner action A4); an EU and UK representative is appointed if the company sits outside them (A7). (6) The checklist lists when a lawyer becomes necessary: a regulator or court contact, a personal-data breach that must be notified, a B2B or employer contract, or paid traffic from a country with a specific law the checklist does not cover. These are design rules, not legal advice; the residual risk is accepted and stated in `legal/README.md`. | L; ADR-25.3 |
 
 ---
 
@@ -665,14 +684,14 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | ID | Pri | Requirement | Source |
 |---|---|---|---|
 | **FR-1100** | P0 | Everything language-specific is configuration, not code. A **target-language package** and a **native-language package** are separate, so any native language can pair with any target. | D1 |
-| **FR-1101** | P0 | **The language gate (five checks).** A target language opens when: (1) **voices**: 5 native listeners rate two-host episodes from the candidate vendors blind, and the winner is one most of them would listen to (FR-1330); (2) **learner speech**: on 30 real learner clips the verbatim transcript keeps the learner's errors instead of fixing them and catches words said in the learner's own language (FR-862); (3) **writing**: a native speaker reads 10 scripts and finds them natural and correct; (4) **the call**: the host answers within about a second on that language's speech stack (NFR-107); (5) **structures**: a structure inventory exists. A target that fails any check ships later, never with a weaker bar. | D1, C §8 |
-| **FR-1102** | P0 | A **native language** ships when Salma's voice passes the blind test with 5 native listeners, its interface text, captions and glosses pass a native reviewer's check of 50 items, and its recognizer catches words said with the word button. | D1 |
+| **FR-1101** | P0 | **The language gate (five checks).** A target language opens when: (1) **voices**: Muath and native-speaking volunteers rate two-host episodes from the candidate vendors blind, and the winner is one most of them would listen to (FR-1330); (2) **learner speech**: on the recognizer test's learner clips the verbatim transcript keeps the learner's errors instead of fixing them and catches words said in the learner's own language (FR-862); (3) **writing**: an AI review pass checks 10 scripts against the laws and ban lists, and a fluent speaker (for English, Muath) reads them and finds them natural and correct (ADR-25.7); (4) **the call**: the host answers within about a second on that language's speech stack (NFR-107); (5) **structures**: a structure inventory exists. A target that fails any check ships later, never with a weaker bar. | D1, C §8 |
+| **FR-1102** | P0 | A **native language** ships when Salma's voice passes the blind test with native-speaking volunteers (M8 for Arabic), its interface text, captions and glosses pass a native speaker's check of 50 items (for Arabic, Muath, ADR-25.7), and its recognizer catches words said with the word button. | D1 |
 | **FR-1103** | P0 | **A target-language package contains:** host bibles and voice pools per accent; the structure inventory and edit-classification rules; the 12 reporting categories; band descriptors and anchor examples; the calibration set; the frequency list, lemmatizer and chunk list; the word-check items; the then-and-now task bank; the ban list; sound design. | C |
-| **FR-1104** | P0 | **A native-language package contains:** Salma's bible and voice; gloss prompts; caption prompts; the UI strings and text direction; crisis resources for the countries where it is spoken; the localized names of the 12 categories. | C |
-| **FR-1105** | P0 | **Order of testing.** Candidate targets, in order: English, then Spanish, French, German, Italian, Portuguese, Japanese, Korean, Mandarin, Arabic, Hindi, Turkish and Russian (concept v2's estimate, not a test result). Native languages are tested in order of waitlist demand. The list is re-run whenever a vendor ships a new voice or recognizer model. | C §8 |
+| **FR-1104** | P0 | **A native-language package contains:** Salma's bible and voice; gloss prompts; caption prompts; the UI strings and text direction; the crisis clip in that language, in Salma's voice (FR-571; the resources themselves come from the international helpline directory, ADR-25.3); the localized names of the 12 categories. | C |
+| **FR-1105** | P0 | **Order of testing.** Candidate targets, in order: English, then Spanish, French, German, Italian, Portuguese, Japanese, Korean, Mandarin, Arabic, Hindi, Turkish and Russian (concept v2's estimate, not a test result). Native languages are tested in order of demand (the native languages learners state at signup). The list is re-run whenever a vendor ships a new voice or recognizer model. | C §8 |
 | **FR-1106** | P0 | **Proof claims per target.** English has an established structure inventory (built from open sources with English Grammar Profile-style ids, OPEN-08, ADR-24.18). Other targets start with an inventory drafted by a model and checked by a native teacher. Until a target's calibration set is tagged, its learners get the show and the calls, and progress claims stay at first-ever events and words owned (FR-841). LAW-12 is never relaxed for a new language. | D1, LAW-12 |
-| **FR-1107** | P0 | **Cost and closing rule.** Each target needs a host duo's bibles, a voice test, a recognizer test, an inventory review and a calibration set; each native language needs a Salma (bible and voice), interface translation and a reviewer. The beta opens the languages that pass by the end of build week 2 and adds others during the beta as they pass. A language whose "worth it" answers fall well behind English closes to new learners until fixed (GATE-M12). | C |
-| **FR-1110** | P0 | **Milestone 0 is English only** as the target language (any native language), because episodes are checked by hand. The gate runs on other candidate targets during the beta build, and the beta opens in every language that passed. | D1 as applied; M0 kit |
+| **FR-1107** | P0 | **Cost and closing rule.** Each target needs a host duo's bibles, a voice test, a recognizer test, an inventory review and a calibration set; each native language needs a Salma (bible and voice), interface translation and a native speaker's check. v1 launches with the target languages that have passed the gate by launch (English first; M4), and others open after launch as they pass. A language whose "worth it" answers fall well behind English closes to new learners until fixed (GATE-M12). | C |
+| **FR-1110** | Retired | Retired (ADR-25.5): there is no Milestone 0. Which targets open at launch is FR-1107. | |
 
 ---
 
@@ -681,14 +700,14 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | ID | Pri | Requirement | Source |
 |---|---|---|---|
 | **FR-1201** | P0 | **Trial:** 7 days, starting at account creation (FR-118), on the 2 a day plan, with no card. Payment is asked for once, plainly, on day 7 (one plain email on day 6, FR-240). | D2, Muath 2026-10-23 |
-| **FR-1202** | P0 | **Plans:** 1 a day $19.99, 2 a day $29.99 ("Recommended", about $1 a day), 3 a day $44.99, monthly recurring, USD, tax added where required. The middle plan is marked "Recommended", not "Most popular", until that is true. Prices are set from the cost per session by the rule in NFR-402 (OPEN-06, ADR-24.5: kept; price rises for post-founding signups on any plan whose margin at measured use is below zero (`two_a_day` $34.99, `three_a_day` $54.99)). | D2 |
-| **FR-1203** | P0 | **Founding members:** the first 100 paying learners keep their plan's price for as long as they stay subscribed. | C |
+| **FR-1202** | P0 | **Plans:** 1 a day $19.99, 2 a day $29.99 ("Recommended", about $1 a day), 3 a day $44.99, monthly recurring, USD, tax added where required. The middle plan is marked "Recommended", not "Most popular", until that is true. Prices are set from the cost per session by the rule in NFR-402 (OPEN-06, ADR-24.5: kept; the price rises for new signups on any plan whose margin at measured use is below zero (`two_a_day` $34.99, `three_a_day` $54.99); everyone already subscribed keeps the price they signed up at for as long as they stay subscribed, so no founding lock is needed, ADR-25.10). | D2 |
+| **FR-1203** | Retired | Retired (ADR-25.5, 25.10): there is no founding-member price lock and no 100 cap; every subscriber keeps the price they signed up at (FR-1202). | |
 | **FR-1204** | P0 | **Checkout** through Paddle as merchant of record (OPEN-04, ADR-24.4): USD prices shown in local currency where the provider supports it; tax handled per country; cards, Apple Pay, Google Pay and PayPal; local methods such as Mada later (ADR-24.B4); change plan from Controls; cancel in one tap. | PRD call (merchant of record) |
 | **FR-1205** | P0 | **Plan changes** take effect at the next drop (upgrade, with the charge prorated by Paddle) or the next billing date (downgrade, no proration) (ADR-24.B3), stated plainly at the moment of change; unused allowance is never refunded or carried. | PRD call |
 | **FR-1206** | LATER | Regional prices for lower-income countries, and a cheaper listen-first plan, once there is data on where learners are. | C |
-| **FR-1230** | P0 | **Pricing psychology, within TC-2:** three plans with the middle marked; the top plan as the anchor (2 and 3 a day cost the same per episode, so 1 to 2 is the obvious step); "about $1 a day"; the trial on 2 a day; a free sample episode before signup; the real comparison shown (a tutor costs about $160 a month for two lessons a week); founding members keep their price. | D2, C §8 |
+| **FR-1230** | P0 | **Pricing psychology, within TC-2:** three plans with the middle marked; the top plan as the anchor (2 and 3 a day cost the same per episode, so 1 to 2 is the obvious step); "about $1 a day"; the trial on 2 a day; the first episode and call free before any account (and, after launch, the sample episode, FR-103); the real comparison shown (a tutor costs about $160 a month for two lessons a week). | D2, C §8 |
 | **FR-1231** | P0 | **Never:** fake countdowns, fake scarcity, hidden or hard cancellation, guilt, pre-ticked upgrades, or an upgrade prompt anywhere but the once-a-week line in FR-209 and Controls. | TC-2 |
-| **FR-1232** | P0 | **Receipts and failures:** receipts by email; a failed payment gets one plain email and a 7-day grace period in which the show continues; after that, new episodes stop and the account behaves as in FR-1048. | PRD call |
+| **FR-1232** | P1 | **Receipts and failures:** receipts by email; a failed payment gets one plain email and a 7-day grace period in which the show continues; after that, new episodes stop and the account behaves as in FR-1048. **At launch** Paddle's built-in dunning (its payment retries and emails) and its receipts cover this; our own grace mechanics follow in v1.1. | PRD call |
 | **FR-1233** | P0 | **Cancel** keeps the show running until the end of the paid period; afterwards FR-1048 applies. No win-back offers, no survey wall. A full refund is given on request within 14 days of the first payment (ADR-24.B16); after that there are no refunds for part-months. | TC-2 |
 
 ---
@@ -701,8 +720,8 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 |---|---|---|---|
 | **NFR-101** | P0 | First open to first sound (Salma) | Under 60 s |
 | **NFR-102** | P0 | First open to the learner's first spoken target-language sentence | Under 5 min |
-| **NFR-103** | P0 | Sample episode playable | Under 30 s |
-| **NFR-104** | P0 | Pilot playback after the intake | Under 45 s |
+| **NFR-103** | P1 | Sample episode playable (FR-103) | Under 30 s |
+| **NFR-104** | P0 | First-episode playback after the intake | Under 45 s |
 | **NFR-105** | P0 | Dropped episode start | Under 2 s |
 | **NFR-106** | P0 | On-demand episode (second of the day, swap, return) playable | Under 30 s, streamed |
 | **NFR-107** | P0 | Host reply after end of learner turn | Under 1.5 s median, under 2.5 s at the 95th percentile; call connect under 3 s |
@@ -722,7 +741,7 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | **NFR-204** | P0 | Every pipeline step is a durable workflow step with a timeout and retries; a partial run never publishes a partial episode. |
 | **NFR-205** | P0 | Audio position, article scroll and chat history survive app restarts and device changes. |
 | **NFR-206** | P0 | A model, prompt or vendor upgrade never changes a host's voice or personality silently (FR-503) and never shows up as learner progress (FR-860). |
-| **NFR-207** | P0 | **Backup and restore:** automated database backups kept 30 days with point-in-time recovery (recovery point 5 minutes or better); a full restore into staging is rehearsed before the beta opens and once a quarter, finishing within 4 hours. Backups are never scrubbed; deletion relies on their 30-day expiry (FR-1047, architecture 04 §4.12.2). [PRD call, 2026-11-12] |
+| **NFR-207** | P0 | **Backup and restore:** automated database backups kept 30 days with point-in-time recovery (recovery point 5 minutes or better); a full restore into staging is rehearsed before launch and once a quarter, finishing within 4 hours. Backups are never scrubbed; deletion relies on their 30-day expiry (FR-1047, architecture 04 §4.12.2). [PRD call, 2026-11-12] |
 
 ## 14.3 Security and privacy (NFR-3xx)
 
@@ -734,26 +753,26 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | **NFR-304** | P0 | Audio deleted within 15 minutes when voice storage is off; all audio deleted within 24 hours after consent is revoked; live purge within 24 hours and backup purge within 30 days after account deletion. |
 | **NFR-305** | P0 | Feed URLs carry an unguessable token, are excluded from podcast directories and can be reset by the learner. |
 | **NFR-306** | P0 | Every model, voice and recognition call is logged with its cost and the learner-model version it read, in a tracing tool that holds no raw audio. |
-| **NFR-307** | P0 | Hosting region `eu-central-1`; cross-border transfers on standard contractual clauses with a transfer impact assessment (the EU-US Data Privacy Framework where a vendor is certified), never on consent (ADR-24.8, ADR-24.B13), which counsel confirms. |
+| **NFR-307** | P0 | Hosting region `eu-central-1`; cross-border transfers on standard contractual clauses with a transfer impact assessment (the EU-US Data Privacy Framework where a vendor is certified), never on consent (ADR-24.8, ADR-24.B13); vendors under their standard data processing agreements, checked in the self-review (ADR-25.3). |
 
 ## 14.4 Cost (NFR-4xx)
 
 | ID | Pri | Requirement |
 |---|---|---|
 | **NFR-401** | P0 | Cost per session (everything one episode cycle uses: the teacher's share, writing, fitting, editing, all audio, the call and round two, re-transcription, chat, the after-session pass and a quarter of the weekly proof) is measured from the first learner, traced per role, per vendor and per learner, and reported weekly next to the heavy-use outliers. |
-| **NFR-402** | P0 | **The price rule:** no plan may lose money on a learner who uses every episode at the planning cost of $0.35 a full session. Assumptions to replace with beta data: about 15% of the price goes to tax and payment fees; typical learners use 60% of 1 a day, 50% of 2 a day, 45% of 3 a day. Break-even cost per session at full use: $0.57 (1 a day), $0.42 (2 and 3 a day). If either assumption is far off by week 4 of the beta, the prices are re-run with the same rule before public launch. |
-| **NFR-403** | P0 | Beta budget about $0.60 per session (the current itemized estimate on the recommended stack is about $0.64; the architecture cost page is the authority for the numbers). First levers from day one: episodes at 5 to 6 minutes by default, batch for everything nobody waits on, the cheapest voice that passes the blind test. |
+| **NFR-402** | P0 | **The price rule:** no plan may lose money on a learner who uses every episode at the planning cost of $0.35 a full session. Assumptions to replace with measured data after launch: about 15% of the price goes to tax and payment fees; typical learners use 60% of 1 a day, 50% of 2 a day, 45% of 3 a day. Break-even cost per session at full use: $0.57 (1 a day), $0.42 (2 and 3 a day). If either assumption is far off at the 4-week launch read, the prices are re-run with the same rule, and any rise applies to new signups only (ADR-24.5, ADR-25.10, M6). |
+| **NFR-403** | P0 | Launch budget about $0.60 per session (the current itemized estimate on the recommended stack is about $0.64; the architecture cost page is the authority for the numbers). First levers from day one: episodes at 5 to 6 minutes by default, batch for everything nobody waits on, the cheapest voice that passes the blind test. |
 | **NFR-404** | P0 | **Stop line:** over $1.00 a session with no costed plan to reduce it. **Scale target:** $0.30 to $0.35 at 10,000 learners; the announced prices must work there. |
-| **NFR-405** | P0 | A learner on 2 or 3 a day who uses every episode costs more than they pay until the cost falls below $0.42; with about 50 beta learners that is at most about $560 a month, accepted as research and tracked weekly (GATE-11). |
-| **NFR-406** | P0 | Sample episodes cost at most $0.05 each and are rate-limited (FR-103). |
+| **NFR-405** | P0 | A learner on 2 or 3 a day who uses every episode costs more than they pay until the cost falls below $0.42. This is accepted while use is measured, reported weekly with the heavy-use outliers (NFR-401, GATE-11); a plan whose margin at measured use is below zero triggers the price rule for new signups only (ADR-24.5, ADR-25.10, M6). |
+| **NFR-406** | P1 | Sample episodes cost at most $0.05 each and are rate-limited (FR-103). |
 
 ## 14.5 Quality and evaluation (NFR-5xx)
 
 | ID | Pri | Requirement |
 |---|---|---|
-| **NFR-501** | P0 | No prompt or model change ships to the host, writer, editor or analyst without the offline test suite (FR-437, P1) or, before it exists, a hand-tagged regression set from Milestone 0. |
-| **NFR-502** | P0 | Monthly human audit of proof claims; false-claim rate under 5% (GATE-12). |
-| **NFR-503** | P0 | Monthly human read of 10 random episodes per learner for errors, sameness and law breaks (FR-436). |
+| **NFR-501** | P0 | No prompt or model change ships to the host, writer, editor or analyst without the offline test suite (FR-437, P1) or, before it exists, a regression set of synthetic learners and scripted calls generated by the agent (ADR-25.6), and without the independent AI review pass and Muath's approval (ADR-25.2). |
+| **NFR-502** | P0 | Monthly human audit of proof claims by Muath, the claims auditor; false-claim rate under 5% (GATE-12). |
+| **NFR-503** | P0 | Monthly review read of 10 random episodes per learner for errors, sameness and law breaks: an AI review pass, with Muath reading what it flags (FR-436, ADR-25.7). |
 | **NFR-504** | P0 | Recognizer error tracked by first language from day one; a language whose quality falls well behind English closes to new learners until fixed (FR-1107). |
 | **NFR-505** | P0 | Every "why this episode" reason is traceable to a learner-model record; every claim is openable to its evidence. |
 
@@ -765,7 +784,7 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 | **NFR-602** | P0 | Captions on calls, a word-synced transcript on episodes and read-aloud on articles, so every audio surface has a text route and every text surface an audio route. |
 | **NFR-603** | P0 | The app is usable with one thumb on a phone during a commute: one hero, large buttons, the hold pad and word button reachable; no gesture overrides a system gesture. |
 | **NFR-604** | P0 | Dark mode is first-class; every surface meets WCAG AA contrast in both themes. |
-| **NFR-605** | P0 | Every native-language string, gloss and caption passes a native reviewer's check before the language opens (FR-1102). |
+| **NFR-605** | P0 | Every native-language string, gloss and caption passes a native speaker's check before the language opens (FR-1102; for Arabic, Muath, ADR-25.7). |
 
 ---
 
@@ -773,9 +792,9 @@ Every check is pass or fail. Checks 1, 2 and 4 are code; the rest are the editor
 
 The architecture documents own vendor choices, infrastructure and costs per role. This part states only what the product requires of them.
 
-## 15.1 The roster (thirteen roles, eleven in the beta)
+## 15.1 The roster (thirteen roles, eleven in v1)
 
-| ID | When | Role | Job | Model or code | Beta |
+| ID | When | Role | Job | Model or code | v1 |
 |---|---|---|---|---|---|
 | **FR-1301** | Before | Teacher | Reads the learner model; targets, due words, arcs, the weekly mix, tomorrow's ideas, each brief, "why this episode" | Strongest reasoning model, batch | Yes |
 | **FR-1302** | Before | Writer | Script, article, call brief, chat opener, recap, shadow lines | Strong creative model | Yes |
@@ -785,7 +804,7 @@ The architecture documents own vendor choices, infrastructure and costs per role
 | **FR-1306** | Before | Scout | Results and news for stored interests, shared per topic | Small model plus search | LATER |
 | **FR-1307** | Live | Host | The call (FR-32x to FR-34x), the word button, the chat (FR-36x) | Fast mid model in a voice pipeline, same voice as the episode | Yes |
 | **FR-1308** | Live and after | Producer (Salma) | Onboarding, life updates, "tell Salma an idea", the notebook, the weekly proof's voice, "why" and "where do I stand" when asked, fact corrections. Never corrects, never sends notes. | Conversational model with voice; strong text model for the proof | Yes |
-| **FR-1309** | Live | Observer | Reads each learner turn and whispers to the host what to recast or draw out next turn | Small fast model | LATER (first addition after the beta) |
+| **FR-1309** | Live | Observer | Reads each learner turn and whispers to the host what to recast or draw out next turn | Small fast model | LATER (first addition after launch) |
 | **FR-1310** | After | Analyst | FR-801 to FR-802 | Small model with a fixed schema, checked by code | Yes |
 | **FR-1311** | After | Memory keeper | Life facts with quotes, interests, goals, canon | Small model plus rules | Yes |
 | **FR-1312** | Weekly | Proof producer | Scripts the proof and finale from gated claims; picks clips | Strong text model plus the voice studio | Yes, simple |
@@ -799,15 +818,15 @@ The architecture documents own vendor choices, infrastructure and costs per role
 | **FR-1321** | P0 | Live roles never write to the learner model; only after-session roles write, from the append-only log (FR-602). |
 | **FR-1322** | P0 | Every vendor sits behind a thin adapter so a swap is configuration; two voice vendors are wired from the start; a vendor may be used for some languages only, because the shipped language list is whatever passes on the chosen stack (FR-1101). |
 | **FR-1323** | P0 | The editor runs on a different vendor from the writer. |
-| **FR-1324** | P0 | The call host uses the episode vendor's low-latency voice so the host sounds the same in the episode and the call; where that is impossible, the mismatch is tested in Milestone 0 (the day-7 check-in asks whether it matters). |
+| **FR-1324** | P0 | The call host uses the episode vendor's low-latency voice so the host sounds the same in the episode and the call; where that is impossible, the mismatch is rated in the voice blind test (FR-1330) and watched after launch. |
 | **FR-1325** | P0 | A durable workflow engine calling model APIs directly; no agent framework in the production path. |
-| **FR-1326** | P0 | Vendors known to be shutting down are not used; known price events (several Gemini 3.8 prices double on 2027-01-01, during the build) are visible in cost tracing; vendor decisions use post-doubling prices (ADR-24.6). |
+| **FR-1326** | P0 | Vendors known to be shutting down are not used; known price events (several Gemini 3.8 prices double on 2027-01-01) are visible in cost tracing; vendor decisions use post-doubling prices (ADR-24.6). |
 
-## 15.3 Vendor tests (P0, in the beta build's first two weeks)
+## 15.3 Vendor tests (P0, in build phase 1)
 
 | ID | Pri | Test | Protocol |
 |---|---|---|---|
-| **FR-1330** | P0 | Voices | For each candidate target, 5 learners of it and 5 native speakers rate the same two-host script from each of the 3 episode-voice vendors, blind, on naturalness, accent quality and "would you listen to this on your commute?". Same protocol, with 5 native listeners, for each native language's Salma voice. |
+| **FR-1330** | P0 | Voices | For each candidate target, Muath and volunteers (a few listeners, learners of the target and native speakers) rate the same two-host script from each of the 3 episode-voice vendors, blind, on naturalness, accent quality and "would you listen to this on your commute?", on post-doubling prices (ADR-25.6, owner action A2). Same protocol, with native-speaking volunteers, for each native language's Salma voice (M8 for Arabic). |
 | **FR-1331** | P0 | Recognizers | The 30-clip test (FR-862). |
 | **FR-1332** | P0 | Call latency | 50 scripted test calls; median host reply under 1.5 seconds after end of turn (NFR-107). |
 
@@ -815,7 +834,9 @@ The architecture documents own vendor choices, infrastructure and costs per role
 
 # PART 16 — SUCCESS METRICS AND GATES
 
-## 16.1 Beta gates (paid founding beta, 2027-03-17 to 2027-04-20; dates re-set 2026-11-12 by ADR-24.11)
+## 16.1 Launch health measures (read 4 and 8 weeks after launch)
+
+There is no beta and no gate review (ADR-25.5). These were the beta gates; they keep their ids, targets and stop lines and are read at 4 and 8 weeks after launch, over the learners who signed up since launch. A measure that needs more time than the read allows (GATE-08 renewal, GATE-06 the 4-weekly recording) is read first at 8 weeks.
 
 | ID | Metric | Target | Stop and rethink |
 |---|---|---|---|
@@ -834,9 +855,9 @@ The architecture documents own vendor choices, infrastructure and costs per role
 | **GATE-13** | Wrong memories | Under 1 in 100 callbacks | |
 | **GATE-14** | New trials from referrals and forwarded samples | 30%+ | Under 10% |
 
-If a gate fails, find which claim failed (the show is not wanted, the teacher is not felt, the price is wrong) before writing more code.
+If a measure crosses its stop line, find which claim failed (the show is not wanted, the teacher is not felt, the price is wrong) before building more features. Nothing before launch tests whether learners want the show (Milestone 0 is not run), so the 4-week read is the first answer to that question.
 
-## 16.2 Quality and health measures (tracked from day one)
+## 16.2 Quality and health measures (tracked from launch)
 
 | ID | Measure | Why |
 |---|---|---|
@@ -854,74 +875,88 @@ If a gate fails, find which claim failed (the show is not wanted, the teacher is
 | **GATE-M12** | "Worth it" and false-claim rate per language; recognizer error by first language | Quality and fairness across languages |
 | **GATE-M13** | Plan mix and share of each plan's allowance used | Whether the prices and the cost rule hold |
 | **GATE-M14** | Notebook fact edits in week 1 | Whether the glass box builds trust |
-| **GATE-M15** | Similarity score across each learner's episodes; monthly human read | Sameness |
+| **GATE-M15** | Similarity score across each learner's episodes; monthly review read (FR-436) | Sameness |
 | **GATE-M16** | Minutes per day: heavy-use outliers flagged | A warning light, never a goal |
 | **GATE-M17** | Time to first sound; time to first spoken sentence | The first ten minutes |
-| **GATE-M18** | Calls abandoned on the move; feed-to-call handoff | When to switch to native early (ADR-24.1) |
+| **GATE-M18** | Retired (ADR-25.4): no native app is planned, so there is no switch to watch for. | |
 
-## 16.3 Out of scope for the beta
+## 16.3 Out of scope for v1
 
-Character creation and the six chassis · learner-made or guest hosts · the news scout and any current-events facts the learner did not supply · the observer in the call · languages that have not passed the gate · native apps (ADR-24.1; earlier only if GATE-M18 fires) · detecting the learner's own language without the word button · settings beyond the Controls sheet · referral programs and community · social sharing of proof clips (a learner may download their own tape) · the learner's cloned voice · real-life rehearsal on demand · bring-your-own-input episodes · a yearly plan · regional prices · exploration slots in targeting · "where do I stand" for skills not yet calibrated · ask-first glosses · employer and university seats · playback above 1.0× · any chart, percentage or level on any surface.
+Character creation and the six chassis · learner-made or guest hosts · the news scout and any current-events facts the learner did not supply · the observer in the call · languages that have not passed the gate · native apps (none planned, ADR-25.4) · Sign in with Apple or Google (ADR-25.4) · Milestone 0, a beta, invites, a waitlist, founding prices and the external test (ADR-25.5) · detecting the learner's own language without the word button · settings beyond the Controls sheet · referral programs and community · social sharing of proof clips (a learner may download their own tape) · the learner's cloned voice · real-life rehearsal on demand · bring-your-own-input episodes · a yearly plan · regional prices · exploration slots in targeting · "where do I stand" for skills not yet calibrated · ask-first glosses · employer and university seats · playback above 1.0× · any chart, percentage or level on any surface.
 
 ---
 
 # PART 17 — OPEN ITEMS (COMPLETE LIST, ALL DECIDED 2026-11-12)
 
-Every item below was decided on 2026-11-12 under Muath's delegation (ADR-24). The ids stay because other documents cite them. Owner actions (A#) and measurements (M#) are in the register, §10 of [architecture/10-decision-records.md](architecture/10-decision-records.md).
+Every item below was decided on 2026-11-12 under Muath's delegation (ADR-24), and several were changed the same day by ADR-25; the "Decided" column gives the ruling that applies now. The ids stay because other documents cite them. Owner actions (A1 to A9) and measurements (M2 to M9) are in the register, §10 of [architecture/10-decision-records.md](architecture/10-decision-records.md); none carries a date.
 
 | ID | Item | Decided | Still to happen | ADR |
 |---|---|---|---|---|
-| **OPEN-01** | Web app plus private podcast feed, or native app, for the beta | Web app plus feed | M7 (GATE-M18 watch) | 24.1 |
+| **OPEN-01** | Web app plus private podcast feed, or native app | Web application plus the private feed; no native app planned | none | 24.1, 25.4 |
 | **OPEN-02** | First-session order (A1 to A10) and the suggested door order | Order A; Listen, Read, Call, Chat | none | 24.2 |
-| **OPEN-03** | Who writes the host bibles and Salma's | Drafts in `content/bibles/`, Muath owns them, a native editor reads them | A4, A5 by 2026-12-01 | 24.3 |
-| **OPEN-04** | Company and payment provider | Paddle (merchant of record) | A6 by 2026-12-02 | 24.4 |
-| **OPEN-05** | Legal review scoped by the beta's countries; hosting region | GDPR (EU, UK), PDPL, generic baseline; `eu-central-1`; SB 243 crisis duties for all; drafts in `legal/` | A1 by 2026-11-17, A8 by 2027-02-15 | 24.8, 24.9 |
-| **OPEN-06** | Confirm the three prices or the rule behind them | $19.99 / $29.99 / $44.99 kept, with the margin-at-measured-use trigger | M6 | 24.5 |
-| **OPEN-07** | Which countries the beta invites from | Any, 18+, under the generic notice, where the processor sells | none | 24.9 |
+| **OPEN-03** | Who writes the host bibles and Salma's | Drafts in `content/bibles/`; Muath owns them and reads the English bibles and Salma's Arabic; an AI review pass checks them; no hired editor | A3 | 24.3, 25.7 |
+| **OPEN-04** | Company and payment provider | Paddle (merchant of record) | A5 | 24.4 |
+| **OPEN-05** | Legal review; hosting region | Compliance by conservative design for every learner: GDPR-grade rights, `eu-central-1`, SB 243-style crisis duties for all; self-review checklist in `legal/00-self-review-checklist.md`; no counsel step | A4; A7 if it applies | 24.8, 24.9, 25.3 |
+| **OPEN-06** | Confirm the three prices or the rule behind them | $19.99 / $29.99 / $44.99 kept, with the margin-at-measured-use trigger for new signups; no founding lock | M6 | 24.5, 25.5 |
+| **OPEN-07** | Which countries can sign up | Open signup: any country where Paddle sells, 18+, under the generic notice; no invites | none | 24.9, 25.5 |
 | **OPEN-08** | English Grammar Profile permission | Don't wait: open-source inventory with EGP-style ids; wordfreq lexicon | none | 24.18 |
-| **OPEN-09** | External test choice | Duolingo English Test | A10 by 2027-03-17 | 24.19 |
-| **OPEN-10** | Similarity and recognizer confidence thresholds | Cosine 0.85 until measured; confidence from the 30-clip test | M3 | 24.20 |
-| **OPEN-11** | Which target languages open, and which vendors per language | English only unless another passes all five checks by the end of build week 2 | M2, M4 | 24.20 |
+| **OPEN-09** | External test choice | No external test (the Duolingo English Test choice is withdrawn) | none | 24.19, 25.5 |
+| **OPEN-10** | Similarity and recognizer confidence thresholds | Cosine 0.85 until tuned on real use; confidence from the recognizer test (FR-862) | M3 | 24.20, 25.6 |
+| **OPEN-11** | Which target languages open, and which vendors per language | English first; any other target opens when it passes all five checks | M2, M4 | 24.20, 25.1 |
 | **OPEN-12** | Private feed support in learners' podcast apps | Apple Podcasts, Overcast, Pocket Casts links; observed | M7 | 24.1 |
 
-Settled and not reopened: the trial needs no card; there is no launch learner, language pair or recruitment fallback (D1); Salma's Arabic variety is part of the per-language voice test (FR-524). A question during the build that this document does not answer escalates before it is built.
+Settled and not reopened: the trial needs no card; there is no launch learner, language pair or recruitment fallback (D1); Salma's Arabic variety is part of the per-language voice test (FR-524). A question during the build that this document does not answer escalates to Muath before it is built.
 
 ---
 
-# PART 18 — MILESTONE 0 AND THE BUILD SEQUENCE
+# PART 18 — BUILD SEQUENCE
 
-## 18.1 Milestone 0, hand-made: 2026-10-24 to 2026-11-18 (running)
+The plan carries no calendar dates (ADR-25.1). Work runs in dependency order, in phases, each ending with an exit check. Version 1 launches once, publicly, with open signup, when every P0 requirement works and the launch checklist is green (ADR-25.5).
 
-The pilot kit, scripts, protocols and day-by-day schedule live in [milestone-0/](milestone-0/) (start at 00-start-here.md). As of 2026-11-06, cohort A is on day 6 and cohort B on day 5 by that schedule; finales are Nov 14 and 15; blind rating and pre-pay close Nov 17; **the gate decision is Wed 2026-11-18.** What the PRD needs from it:
+## 18.1 Milestone 0 is not run
 
-1. 15 learners for 14 days, recruited by hand; English as the target language (FR-1110); episodes written with model help and checked by hand; delivered by WhatsApp; calls on ElevenLabs Agents with patient turn-taking; every call hand-tagged with the planned structure inventory.
-2. The pilot follows D3 where it touches the learner: no notes that correct, only "you mean..." in the call and the right forms in later episodes (the kit's "errors to echo").
-3. Week-0 and week-3 recordings of the then-and-now task (FR-851); personal versus generic days alternated within each learner; one blind comparison against a human-made learner podcast.
-4. **The gate:** 10 of 15 ask for the next episode unprompted; median 4+ sessions a week; 4+ minutes of their own speech a session; in week 2 most still choose tomorrow's episode and say the week was worth it; the week-3 recording is better, judged blind, on at least one of accuracy, fluency or complexity for most; personal days beat generic days; echoed-error rate falls from week 1 to week 2 for more than half of learners with data; 5 of 15 pre-pay.
-5. **What the beta inherits:** the first calibration set, the 30 recognizer clips for English, test-retest pairs for standard errors, the similarity threshold, the first ban list, evidence on the call timing and on the episode-versus-call voice mismatch.
-6. **If the gate fails,** find which claim failed before building. Revise the thesis, not the backlog.
+Milestone 0, the hand-made programme, does not run (ADR-25.5). Its kit stays in [milestone-0/](milestone-0/) as background and source material (prompts, protocols, the then-and-now task, the gate thinking); nothing in the build depends on it. What it was meant to produce is replaced as follows (ADR-25.6).
 
-## 18.2 Beta build: 2026-11-18 to 2027-03-12
-
-**Re-set 2026-11-12 (ADR-24.11).** The backlog's sizes put Day-1 work at about 136.5 engineer-days, so with two engineers from build start the build runs to 2027-03-12 and the beta opens 2027-03-17 (a third engineer from 2026-12-01 gives 2027-02-17; one engineer alone, 2027-07-07). The weeks below keep the 2026-11-06 *order of work*; the dated schedule is in [backlog/00-release-plan.md](backlog/00-release-plan.md). Milestone 0 learners who pre-paid keep receiving hand-made episodes until the open.
-
-| Week | Build | Requirements |
+| What Milestone 0 was to produce | What replaces it | Feeds |
 |---|---|---|
-| 1 (Nov 18) | Vendor tests and the language gate per candidate target; event log and learner-model schema; lexicon and scheduler; language package skeleton; cost tracing | FR-1330 to FR-1332, FR-1101, FR-6xx, FR-720, FR-1100, NFR-401 |
-| 2 (Nov 25) | Teacher, writer, fitter, editor and voice studio end to end for test learners in each language that passed; gloss cache; **the language list for the beta is fixed at the end of this week** | FR-7xx, FR-4xx, FR-371, FR-1107 |
-| 3 (Dec 2) | Onboarding A1 to A10; the player; the word sheet; the feed and drop notifications; the three plans, checkout and plan changes | FR-1xx, FR-31x, FR-37x, FR-23x, FR-12xx |
-| 4 (Dec 9) | The call pipeline with the word button, hold-to-talk and adaptive patience; "you mean..." recasts; voice-note fallback; chat | FR-32x to FR-34x, FR-36x |
-| 5 (Dec 16) | After-session pass, memory keeper, notebook, Controls, simple weekly proof, first then-and-now recording, data rules, crisis resources per country; the sample-episode landing page in many languages; end-to-end run with Milestone 0 learners | FR-8xx, FR-10xx, FR-904, FR-851, FR-57x, FR-101 |
+| The 30 recognizer clips for English | Learner clips from speechocean762 (Apache-2.0) plus about 30 volunteer clips from at least two native-language groups, each with a one-line recording consent (owner action A2) | FR-862, FR-804, M2, M3 |
+| The voice blind test | Muath and volunteers rate, blind, on post-doubling prices | FR-1330, FR-524, M2, M8 |
+| Hand-tagged calls as a regression set and fixtures; evidence on call timing | Synthetic learners and scripted calls generated by the agent; the `call-bench` scripted calls | NFR-501, FR-437, FR-323, FR-1332, M5 |
+| Evidence on the episode-versus-call voice mismatch | Rated in the voice blind test; watched after launch | FR-1324 |
+| The similarity threshold | Cosine 0.85 until tuned on real use | FR-433, M3 |
+| The first ban list | Drafted in `content/ban-lists/`, checked by the AI review pass, updated from the review read | FR-431, FR-436 |
+| Test-retest pairs for standard errors | Collected after launch; until then only event claims | FR-841 |
+| The first calibration set | Built after launch from opted-in learners' data; until then only event claims ship | FR-860, FR-1044 |
+| Milestone 0's gate (do learners want the show?) | No substitute before launch. The launch health measures answer it at 4 and 8 weeks | Part 16.1 |
 
-**Exit criteria for the open (2027-03-17):** every Day-1 P0 requirement works, every later P0 has a due date before the beta day it is first reachable, in every language that opens; a measured cost per session; a costed path to $0.35 or less.
+## 18.2 How it is built
 
-## 18.3 Paid founding beta: 2027-03-17 to 2027-04-20
+An AI coding agent builds the product story by story under Muath (ADR-25.2). For each story: the acceptance criteria are written as automated tests first; then the code; CI must pass; an independent AI review pass reads the change; Muath approves every merge to `main`, every database migration, every prompt and bible change, and every production deploy (owner action A8). Story sizes S, M and L are relative complexity only. In operation, automated fallbacks act first (FR-402, NFR-201, NFR-202), alerts go to Muath, and the agent runs the runbooks when Muath asks.
 
-About 50 invites a week into 7-day trials on the 2 a day plan, spread across the languages that passed; 20 to 30 English learners take the external test at week 0 and week 8. The Gemini 3.8 price doubling (2027-01-01) lands during the build, so the beta's costs are measured at post-doubling prices from the first day. P1 requirements ship during it: round two, shadowing, the season finale with its then-and-now comparison, the full claim gate, the tape, the offline test suite, the dial-in experiment. **Switch to a native app early** if many calls are abandoned on the move or the feed-to-call handoff loses most learners (GATE-M18).
+## 18.3 The phases
 
-## 18.4 After the beta (direction, not spec)
+The order of work below is the dependency order. The stories, sizes and exit checks of each phase are owned by [backlog/00-release-plan.md](backlog/00-release-plan.md); where the two differ, the release plan wins. No phase has a date.
 
-Public launch worldwide in every language that passed, at the three plans, moving to the floor stack piece by piece with blind tests (months 4 to 6); native apps and paid acquisition after retention holds (months 6 to 9); each new language opens as it passes the gate, and regional prices with a cheaper listen-first plan come once there is data on where learners are (months 9 to 12); employer and university seats and human bridges (year 2).
+| Phase | Build | Requirements |
+|---|---|---|
+| 1 Foundation and vendor choice | Repository, CI and staging in `eu-central-1`; the event log and learner-model schema; lexicon and scheduler; language package skeleton and the English package's gate result; cost tracing; the web shell; the vendor tests (recognizer test, voice blind test, call latency) | FR-6xx, FR-720, FR-1100, FR-1101, FR-862, FR-1330 to FR-1332, NFR-401 |
+| 2 The pipeline and the minimal call | Teacher, writer, fitter, editor, voice studio, publish and batch, end to end for test learners; the gloss cache; the player; a minimal call measured for latency | FR-4xx, FR-7xx, FR-371, FR-31x, NFR-107 |
+| 3 Onboarding, Today and the feed | A1 to A10 in order A; Today, the article, sessions and doors, the swap, the small door; the feed, the drop and push; the allowance and the trial; consent and the age gate | FR-1xx (except FR-102 to FR-104), FR-2xx, FR-30x, FR-319, FR-37x, FR-1201 |
+| 4 The full call and the after-session pass | The word button, hold-to-talk and adaptive patience; recasts and recall gaps; the voice-note fallback; the crisis protocol with the fail-safe; chat; the analyst, the memory keeper and the after-session pass; voice deletion within 15 minutes | FR-32x to FR-34x, FR-36x, FR-57x, FR-80x, FR-1041 |
+| 5 The first week's surfaces | The claim gate and the simple weekly proof; the baseline then-and-now recording; the notebook and Controls; plans, Paddle checkout and the day-6 email; the return episode | FR-840 to FR-842, FR-904, FR-851, FR-10xx, FR-12xx, FR-212 |
+| 6 Production and the exit | Production applied from the same infrastructure code; a full restore rehearsed; deletion and export verified on a test learner; the self-review checklist completed; the measured cost per session | NFR-207, FR-1046, FR-1047, FR-1051, NFR-401 |
+
+## 18.4 Launch
+
+**Exit criteria for launch (v1).** Every P0 requirement works in every language that launches. A measured cost per session from test learners, and a costed path to $0.35 or less. A full restore into staging rehearsed within 4 hours (NFR-207). A deletion and an export verified on a test learner (FR-1046, FR-1047). The self-review checklist complete and approved by Muath (FR-1051, A4). The owner actions needed before launch done: vendor accounts (A1), Paddle (A5), the domain (A6), the EU and UK representative if it applies (A7). Security checks green (ADR-25.11): dependency and secret scanning in CI, an OWASP ZAP baseline scan of staging, and an AI security review of every change touching auth, keys, media URLs, the feed or deletion. There is no paid penetration test at launch; one becomes necessary at 1,000 paying learners, before any B2B contract, or after any security incident. The launch checklist (release plan §4) green.
+
+**At launch.** Signup opens to anyone 18 or older in a country where Paddle sells (FR-004), into the 7-day trial on the 2 a day plan with no card (FR-1201). Gemini 3.8's price doubling (2027-01-01) is already reflected in the vendor choice and the cost measurements (FR-1326).
+
+**After launch (v1.1, P1).** Round two, shadowing, the season finale with its then-and-now comparison, the tape, the full claim gate once standard errors and the calibration set exist, the offline test suite, the dial-in experiment, the sample episode, the Show tab, our own failed-payment grace mechanics (Paddle's dunning covers it at launch), `prewrite_extra`. The launch health measures are read at 4 and 8 weeks (Part 16.1).
+
+## 18.5 Later (direction, not spec)
+
+Moving to the floor stack piece by piece with blind tests; paid acquisition once retention holds; each new language as it passes the gate; regional prices and a cheaper listen-first plan once there is data on where learners are; employer and university seats and human bridges after that.
 
 ---
 
@@ -962,12 +997,34 @@ Everything not listed here is PRD-v2's rule re-stated with an identifier.
 | **FR-313** | "English throughout" became "the target language throughout". | D1; the sentence contradicted the multi-language rule. |
 | **FR-812** | The stray "Salma" row in PRD-v2's measures table (10.3) is removed; Salma is specified in FR-520 to FR-524 only. | Editorial error in PRD-v2. |
 | **FR-1307**, FR-1308 | The host and producer rows of the roster are rewritten as two clean rows (PRD-v2's 14.1 had them merged into one malformed row). | Editorial error in PRD-v2. |
-| **FR-1110** | Milestone 0 is **English only** as the target language. | D1 as applied; the kit recommends it and the brief confirms it. |
+| **FR-1110** | Milestone 0 is **English only** as the target language. (Retired 2026-11-12, ADR-25.5.) | D1 as applied; the kit recommends it and the brief confirms it. |
 | **FR-1205**, FR-1232, FR-1233 | New: plan-change timing, failed-payment grace period, cancel behaviour. | PRD-v2 left billing mechanics unstated; the backlog needs them. **[PRD call]**, vetoable. |
 | **FR-402**, NFR-201 to NFR-206 | Reliability stated as requirements rather than scattered sentences. | Needed as acceptance criteria; no new behaviour. |
 | **NFR-403** | The $0.64 estimate is kept but the architecture cost page is named as the authority. | The architecture thread owns the cost model. |
 | **NFR-501**, NFR-6xx | New: a regression set before the offline suite exists; accessibility and right-to-left stated as requirements. | They were implied by PRD-v2's text; the design and engineering docs need them explicit. **[PRD call]**, vetoable. |
-| **Part 18.1** | Milestone 0 status updated to "running" with the kit's gate list, including the echoed-error gate. | The kit added gate 8 on 2026-10-23; dates unchanged. |
+| **Part 18.1** | Milestone 0 status updated to "running" with the kit's gate list, including the echoed-error gate. (Replaced 2026-11-12 by the build sequence, ADR-25.5.) | The kit added gate 8 on 2026-10-23; dates unchanged. |
+
+**Changed on 2026-11-12 by ADR-25** (direction change: AI-agent build, no dates, no lawyer, web only, no Milestone 0 or beta).
+
+| ID | What changed | Reason |
+|---|---|---|
+| **FR-105**, FR-106, FR-861, FR-1110, FR-1203, GATE-M18 | **Retired**: the waitlist form, invites and invite batches, the external test, Milestone 0 English-only, the founding-member lock and 100 cap, the native-switch watch. Ids kept, never reused. | ADR-25.4, 25.5 |
+| **FR-004**, FR-007, FR-101 to FR-104, FR-110, NFR-103, NFR-406 | Open signup from launch. A plain landing page is P0; the personalized sample episode becomes P1 acquisition, not a gate, and leads straight into onboarding. | ADR-25.5 |
+| **FR-1002**, FR-237, FR-1001, FR-1232 | The Show tab is P1 (the feed and Today cover the archive at launch). FR-1232's grace mechanics are P1; Paddle's dunning covers failed payments at launch. | Team-lead ruling, 2026-11-12 |
+| **FR-118** | Email one-time code is the only sign-in; Sign in with Apple and Google are removed. | ADR-25.4 |
+| **FR-009**, LAW-06, FR-302, Part 16.3 | Web application plus the private feed; no native app planned. | ADR-25.4 |
+| **FR-1202**, FR-1230, NFR-402, NFR-405 | No founding lock; a price rise under the margin trigger applies to new signups only, and existing subscribers keep their price while subscribed; the beta-cohort cost figure is gone. | ADR-24.5, ADR-25.5, ADR-25.10 |
+| **Part 16.1**, GATE-01 to GATE-14 | Beta gates become launch health measures read 4 and 8 weeks after launch, with the same ids, targets and stop lines. | ADR-25.5 |
+| **FR-433**, FR-841, FR-860, FR-862, FR-1324, FR-1330, NFR-501 | Milestone 0 inputs replaced: open-corpus plus volunteer clips, a blind test by Muath and volunteers, synthetic learners and scripted calls, threshold 0.85 until tuned, the calibration set built after launch from opted-in data (FR-860 split: P0 rule, P1 set). | ADR-25.6 |
+| **FR-436**, FR-501, FR-524, FR-1101, FR-1102, NFR-503, NFR-605, GATE-M15 | No hired reviewers: an AI review pass plus Muath replace the paid native reviewer and editor. | ADR-25.7 |
+| **FR-571**, FR-572, FR-1051, FR-1104, NFR-307 | No counsel step: compliance by conservative design, the self-review checklist, crisis resources from an international helpline directory, and the triggers for needing a lawyer. | ADR-25.3 |
+| **FR-422**, NFR-501 | Failure pages and change approval go to Muath; changes pass the independent AI review pass. | ADR-25.2 |
+| **FR-1046** | Export link within 72 hours until export is automated, then within 1 hour; no longer tied to a beta. | ADR-24.B7, ADR-25.5 |
+| **FR-206**, FR-904, FR-1107, FR-1105, FR-011, NFR-207, NFR-403, Part 15 | "Beta", "Day-1" and dated wording replaced by v1, v1.1, launch and build phases. | ADR-25.1, 25.5 |
+| **FR-114**, FR-115, FR-119, NFR-104, glossary | The onboarding episode is called **the first episode** (episode kind `first`, was `pilot`), the only name for it in the product. | ADR-24.B34 |
+| **FR-1049** (new), FR-118 | An explicit consent at signup, kind `special_category`, for processing conversation content; no account without it. The one-tap card (FR-622) still governs keeping a sensitive fact. | ADR-25.9 |
+| **Part 18.4** | Launch security: CI scanning, a ZAP baseline scan and an AI security review instead of a paid penetration test. | ADR-25.11 |
+| **Part 18** | Rewritten as the build sequence: Milestone 0 not run and its outputs replaced; how the agent builds; dependency-ordered phases with no dates; launch exit criteria. | ADR-25.1, 25.2, 25.5, 25.6 |
 
 # GLOSSARY
 
@@ -981,6 +1038,9 @@ Everything not listed here is PRD-v2's rule re-stated with an identifier.
 | Small door | The 90-second recap plus one voice note, for bad days |
 | Round two | A short second call on the same argument, shorter and faster |
 | Return episode | The first episode after 5+ days away |
+| First episode | The episode made for the learner during onboarding (FR-115); episode kind `first` (ADR-24.B34) |
+| Launch health measure | A GATE metric with a target and a stop line, read 4 and 8 weeks after launch (Part 16.1) |
+| v1, v1.1 | v1 is what launches (P0); v1.1 is what follows after launch (P1) |
 | Anchor | The learner's chosen moment for the episode, in life terms |
 | Rhythm | The learner's weekly intention with spare days |
 | Then-and-now recording | The same 3-minute speaking task every 4 weeks |
@@ -996,4 +1056,4 @@ Everything not listed here is PRD-v2's rule re-stated with an identifier.
 
 ---
 
-**Reading rule.** Parts 1 to 16 are settled; build as written. **[PRD call]** marks a decision this document (or PRD-v2 before it) made that no source made: veto it now or it stands. Part 17 lists the questions that were open, all decided on 2026-11-12 (ADR-24). If a question during implementation is answered nowhere here, it escalates before it is built.
+**Reading rule.** Parts 1 to 16 are settled; build as written. **[PRD call]** marks a decision this document (or PRD-v2 before it) made that no source made: veto it now or it stands. Part 17 lists the questions that were open, all decided on 2026-11-12 (ADR-24, as changed by ADR-25). Part 18 is the build sequence; the release plan owns its detail. If a question during implementation is answered nowhere here, it escalates to Muath before it is built.

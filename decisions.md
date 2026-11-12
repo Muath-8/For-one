@@ -17,6 +17,8 @@ The twelve threads asked Muath 48 questions. Many are the same question asked fr
 
 **Update 2026-11-12.** Decisions 6 to 10 are now **taken as recommended** under Muath's delegation of that day, with the beta platform (7) set as web app plus private feed. The rulings, and every other item still open, are in ADR-24 of [architecture/10-decision-records.md](architecture/10-decision-records.md).
 
+**Update 2026-11-12, later (ADR-25).** Muath changed direction after ADR-24: an AI coding agent builds the product under him; the plan keeps no dates; there is no lawyer (compliance by conservative design and a self-review checklist); the product is web only, with the private podcast feed; and there is no pilot and no beta. Version 1 launches once, publicly, with open signup. For this document that means: Milestone 0 (below) is not run, and its kit is kept as source material; decision 7 is web only, with no native app planned; decision 10's founding-member price and external test (10c) are dropped, while the 7-day trial without a card stays. Where this document and ADR-25 disagree, ADR-25 wins. See [PRD-v3.md](PRD-v3.md) Part 0.4.
+
 ## The five that gate everything
 
 1. **Who it is for and which languages:** anyone, anywhere; every target language that passes the language gate (decided).
