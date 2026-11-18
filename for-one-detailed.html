@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>For one in detail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F4F8; --panel:#FFFFFF; --ink:#101828; --soft:#475467; --line:#D9DEE8;
+  --blue:#3446E8; --blue-ink:#FFFFFF; --mark:#FFD94A; --mark-ink:#101828; --tint:#E8EBFD;
+  --display:'Bricolage Grotesque',system-ui,sans-serif; --body:'Public Sans',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--paper:#0D1220;--panel:#161D30;--ink:#EEF1F8;--soft:#A5AFC4;--line:#2A3350;--blue:#8793FF;--blue-ink:#0D1220;--tint:#1F2750}
+}
+:root[data-theme="dark"]{--paper:#0D1220;--panel:#161D30;--ink:#EEF1F8;--soft:#A5AFC4;--line:#2A3350;--blue:#8793FF;--blue-ink:#0D1220;--tint:#1F2750}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16.5px/1.65 var(--body)}
+a{color:var(--blue)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1180px;margin:0 auto;padding:0 20px;height:52px;display:flex;align-items:center;gap:14px}
+.logo{font:800 1.1rem var(--display);letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+.top .sp{flex:1}
+.btn{font:500 .85rem var(--body);background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:5px 11px;cursor:pointer}
+.btn:hover{background:var(--line)}
+
+.layout{max-width:1180px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px}
+aside{position:sticky;top:52px;align-self:start;max-height:calc(100vh - 52px);overflow:auto;padding:28px 0 28px;font-size:.9rem}
+aside a{display:block;color:var(--soft);text-decoration:none;padding:4px 10px;border-left:2px solid var(--line)}
+aside a:hover{color:var(--ink)}
+aside a.on{color:var(--ink);border-left-color:var(--blue);font-weight:600}
+aside .grp{font:700 .85rem var(--display);margin:16px 0 4px;color:var(--ink)}
+main{padding-bottom:80px;min-width:0}
+.read{max-width:68ch}
+
+h1,h2,h3,h4{font-family:var(--display);letter-spacing:-.02em;line-height:1.12;margin:0}
+h1{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;margin-top:44px}
+h2{font-size:clamp(1.6rem,3.2vw,2.15rem);font-weight:800;margin-bottom:10px}
+h3{font-size:1.2rem;font-weight:700;margin:28px 0 8px}
+h4{font-size:1rem;font-weight:700;margin:16px 0 4px}
+p{margin:0 0 13px}
+.lead{font-size:1.15rem;color:var(--soft);max-width:62ch}
+section{padding-top:64px}
+section>.sum{color:var(--soft);max-width:68ch;margin-bottom:14px}
+
+.hero-note{margin-top:20px;padding:14px 18px;background:var(--tint);border-radius:14px 14px 14px 4px;max-width:68ch;font-size:.97rem}
+
+table{width:100%;border-collapse:collapse;background:var(--panel);font-size:.91rem;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:color-mix(in srgb,var(--line) 55%,var(--panel));font-weight:600;font-size:.84rem}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:500;white-space:nowrap}
+td.wrapfirst:first-child,table.wf td:first-child{white-space:normal}
+.tw{overflow-x:auto;margin:10px 0 6px}
+.tw table{min-width:520px}
+
+details{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:10px 0;padding:0}
+details[open]{padding-bottom:6px}
+summary{cursor:pointer;padding:12px 16px;font:600 1rem var(--display);list-style:none;display:flex;gap:10px;align-items:baseline}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";display:inline-block;width:1.1em;color:var(--blue);font-weight:800}
+details[open]>summary::before{content:"\2212"}
+summary small{font:400 .85rem var(--body);color:var(--soft);margin-left:auto}
+details>*:not(summary){margin-left:16px;margin-right:16px}
+details>.tw{margin-left:12px;margin-right:12px}
+
+ul.b,ol.b{margin:6px 0 14px;padding-left:20px}
+ul.b li,ol.b li{margin:5px 0}
+code{background:var(--tint);padding:1px 6px;border-radius:5px;font-size:.88em}
+mark{background:var(--mark);color:var(--mark-ink);padding:0 3px;border-radius:3px}
+
+.seq{counter-reset:s;list-style:none;padding:0;margin:12px 0;display:grid;gap:8px}
+.seq li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.seq li::before{content:counter(s);font:800 1rem var(--display);background:var(--blue);color:var(--blue-ink);width:28px;height:28px;border-radius:8px;display:grid;place-items:center}
+.seq li b{display:block}
+.seq li span{color:var(--soft);font-size:.94rem}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.box h4{margin-top:0}
+.box p{color:var(--soft);font-size:.94rem;margin:0}
+.callout{border-left:4px solid var(--mark);background:var(--panel);padding:12px 16px;border-radius:0 12px 12px 0;margin:14px 0;font-size:.95rem;max-width:72ch}
+.pill{display:inline-block;font-size:.76rem;padding:0 8px;border-radius:99px;background:var(--tint);white-space:nowrap}
+.pill.v11{background:var(--mark);color:var(--mark-ink)}
+
+.arch{display:grid;gap:8px;margin:14px 0}
+.arch .row{display:grid;grid-template-columns:150px 1fr;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.arch .row b{font-family:var(--display)}
+.arch .row span{color:var(--soft);font-size:.93rem}
+
+footer{border-top:1px solid var(--line);margin-top:70px;padding-top:20px;color:var(--soft);font-size:.86rem;max-width:72ch}
+
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr;gap:0}
+  aside{position:static;max-height:none;padding:12px 0;display:flex;gap:6px;overflow-x:auto;white-space:nowrap}
+  aside a{border:0;background:var(--panel);border-radius:99px;padding:4px 12px;border:1px solid var(--line)}
+  aside .grp{display:none}
+  aside a.on{border-color:var(--blue)}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .arch .row{grid-template-columns:1fr;gap:2px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="in">
+    <a class="logo" href="#top">For one, in detail</a>
+    <span class="sp"></span>
+    <button class="btn" id="expand" type="button">Open all</button>
+    <button class="btn" id="theme" type="button">Theme</button>
+  </div>
+</header>
+
+<div class="layout">
+<aside id="toc" aria-label="Contents">
+  <div class="grp">The product</div>
+  <a href="#product">What it is</a>
+  <a href="#onboarding">First ten minutes</a>
+  <a href="#loop">The daily loop</a>
+  <a href="#doors">Inside a session</a>
+  <a href="#cast">Hosts, Salma, seasons</a>
+  <div class="grp">The brain</div>
+  <a href="#making">How an episode is made</a>
+  <a href="#model">The learner model</a>
+  <a href="#teacher">The teacher</a>
+  <a href="#assess">Assessment and proof</a>
+  <div class="grp">Around it</div>
+  <a href="#notebook">Notebook and controls</a>
+  <a href="#privacy">Privacy and safety</a>
+  <a href="#languages">Languages</a>
+  <a href="#billing">Billing</a>
+  <div class="grp">Engineering</div>
+  <a href="#arch">Architecture</a>
+  <a href="#data">Database</a>
+  <a href="#api">API</a>
+  <a href="#vendors">Vendors</a>
+  <a href="#numbers">Numbers</a>
+  <a href="#scope">Scope and build</a>
+</aside>
+
+<main id="top">
+<h1>For one, in detail</h1>
+<p class="lead">The long version of the overview. It covers what each part does, the rules it follows and the numbers behind them. Open any grey bar to see more.</p>
+<div class="hero-note">Source: the product requirements (PRD-v3), the decision records, the technical design and the backlog. Where documents disagree, the later decision wins (ADR-25 over ADR-24). Ids such as <code>FR-325</code> point to the exact requirement if you ever want the original wording.</div>
+
+<!-- ============ PRODUCT ============ -->
+<section id="product">
+  <h2>What it is</h2>
+  <p class="sum">One account is one private show: a daily episode, a call with its host, an article, a short chat, and a teacher behind it that plans each day from what you did yesterday.</p>
+  <div class="read">
+    <p>The learner is any adult (18 or older) who already understands part of a language, roughly A2 to C1, and wants to speak it. The design centre is the person who understands a lot and freezes when speaking. The product is a web app that can be installed on a phone's home screen, plus a private podcast feed. Nothing else is planned: no native app, no Apple or Google sign-in.</p>
+    <p>Everything an episode contains is made for one person from what that person said. Nothing is graded on screen, nobody is told they are wrong, and no game mechanic exists anywhere.</p>
+  </div>
+
+  <h3>The eleven parts of the system</h3>
+  <div class="tw"><table class="wf">
+    <tr><th>Part</th><th>What it does</th></tr>
+    <tr><td>Learner model</td><td>Nine stores calculated from an append-only log of everything the learner does and says</td></tr>
+    <tr><td>Series bible</td><td>The learner's world: hosts, 3 to 5 side characters, places, running jokes, open story arcs, the current season</td></tr>
+    <tr><td>Teacher (planner)</td><td>Chooses the words and grammar for tomorrow, the three ideas, and the reasons for each episode</td></tr>
+    <tr><td>Production pipeline</td><td>Writer, fitter, editor and voice studio that turn the teacher's brief into audio</td></tr>
+    <tr><td>Session engine</td><td>One episode and its doors: Listen, Read, Call, Chat, plus the small door</td></tr>
+    <tr><td>Live call</td><td>A host in a real-time voice pipeline, with a word button</td></tr>
+    <tr><td>Producer (Salma)</td><td>Onboarding, notebook, the weekly proof's voice. Never corrects</td></tr>
+    <tr><td>Assessment engine</td><td>After each call: transcribe, analyse, update the model. Plus the claim gate</td></tr>
+    <tr><td>Weekly proof and finale</td><td>A short audio message about real progress, and a season-ending special</td></tr>
+    <tr><td>Delivery</td><td>The web app, the drop time, the private feed, notifications</td></tr>
+    <tr><td>Billing and cost tracing</td><td>Three plans through Paddle, and a priced record of every AI call</td></tr>
+  </table></div>
+
+  <h3>Twelve laws</h3>
+  <p class="read">A feature that breaks a law does not ship. Each is enforced by something in code or in the review process, not just in a style guide.</p>
+  <details><summary>Read the twelve laws <small>and how each is enforced</small></summary>
+    <div class="tw"><table class="wf">
+      <tr><th>Law</th><th>Enforced by</th></tr>
+      <tr><td>1. No game furniture: no streaks, points, badges, levels, percentages, leaderboards, charts or confetti. Plain counts that only grow (hours heard, words owned) are allowed.</td><td>No such components exist in the web code; a lint rule; the editor's law scan on every generated text</td></tr>
+      <tr><td>2. Every moment has a hidden teaching shape and a social surface</td><td>Every door carries a brief of targets and due words</td></tr>
+      <tr><td>3. The learner owns topic, format and cast; the teacher owns pedagogy and shows its reasons on request</td><td>"Why this episode" stored per episode; vetoes re-plan the same day</td></tr>
+      <tr><td>4. Every episode is complete. Plot may persist, obligation never</td><td>Arcs advance only on learner sessions; the editor checks each episode stands alone</td></tr>
+      <tr><td>5. Honest about being AI: no fake lives, no "I miss you"</td><td>Disclosure lines, an "AI" mark on host portraits, the crisis protocol</td></tr>
+      <tr><td>6. Familiar formats: podcast, call-in, chat, a producer's notebook</td><td>The private feed is first-class</td></tr>
+      <tr><td>7. Correction is invisible: it lives inside the conversation and in the next episodes</td><td>Host move contract; a correction-word guard that allows zero explicit corrections</td></tr>
+      <tr><td>8. Conversations end like conversations, never with homework</td><td>Call and chat closers; "homework" words banned</td></tr>
+      <tr><td>9. The show is the gym; life is the game</td><td>An "Out in the world" log; real-life arcs; a mid-season rehearsal</td></tr>
+      <tr><td>10. The text is used once; the language comes back</td><td>Every episode is new; a spaced-repetition scheduler brings items back, not scripts</td></tr>
+      <tr><td>11. A finite, good portion: a set number of new episodes a day, no autoplay, no endless feed</td><td>Allowance check in the API; database uniqueness per learner, day and slot</td></tr>
+      <tr><td>12. No claim without proof</td><td>The claim gate: only code can write a progress sentence</td></tr>
+    </table></div>
+  </details>
+  <details><summary>The eight trust promises</summary>
+    <ul class="b">
+      <li><b>Never lie.</b> A memory is only stated if confirmed; a progress claim only if it passed the gate.</li>
+      <li><b>Never manipulate.</b> No guilt, dark patterns or "don't go" goodbyes. Exactly three kinds of message are ever sent.</li>
+      <li><b>Never hide what it is.</b> The hosts and Salma say they are AI at the start and whenever asked.</li>
+      <li><b>Prove progress honestly,</b> including flat and worse weeks.</li>
+      <li><b>The data is theirs:</b> see it, export it, delete it.</li>
+      <li><b>Told, not inferred.</b> The show uses only what the learner said to it. Nothing is looked up about them, nothing is guessed about health, money, relationships, religion, politics or sexuality.</li>
+      <li><b>A wrong memory is a bug.</b> Fixed immediately, and counted as a quality measure (target: fewer than 1 callback in 100 wrong).</li>
+      <li><b>Data use is opt-in.</b> De-identified transcripts help improve the teacher only if the learner switches it on. Off by default.</li>
+    </ul>
+  </details>
+</section>
+
+<!-- ============ ONBOARDING ============ -->
+<section id="onboarding">
+  <h2>The first ten minutes</h2>
+  <p class="sum">Sound inside a minute, speech inside five, and the account only after the first call. Ten steps, labelled A1 to A10 in the documents.</p>
+  <ol class="seq">
+    <li><div><b>A1 Open</b><span>One screen in the learner's own language: "Your own show, in English." A Start button and an "I'm 18 or older" checkbox. Nothing else.</span></div></li>
+    <li><div><b>A2 Microphone</b><span>Salma explains she will talk for about 3 minutes. Buttons: Talk (asks for the mic only now) or Type. A line under it says Salma is an AI and that voice is not kept unless the learner makes an account.</span></div></li>
+    <li><div><b>A3 Salma talks</b><span>Her voice starts within 60 seconds of opening. She asks three things: what the hosts should call you (said aloud so the hosts learn the pronunciation), what you could talk about for an hour, and what you need the language for. Each fact appears as a card with edit and remove. Twice she switches to English for one line: a comprehension check and an invitation to say anything back. At most 8 turns; a question skipped after one re-ask is left blank.</span></div></li>
+    <li><div><b>A4 Word check (optional)</b><span>"Tap the words you know." 48 items: 36 real words from six frequency bands plus 12 invented words. Stops at 75 seconds. Skip is as big as Start.</span></div></li>
+    <li><div><b>A5 Casting</b><span>While the first episode is being made (40 to 90 seconds) each host says hello. The learner can swap to another voice from the pool and pick an accent where there is more than one.</span></div></li>
+    <li><div><b>A6 The first episode</b><span>A 2 to 3 minute episode about the topic they gave, using their name once. The transcript is shown the first time, with a hint about "Huh?" and tapping words. Starts playing within 45 seconds of the end of A3.</span></div></li>
+    <li><div><b>A7 First call</b><span>60 to 90 seconds. A host asks a question answerable in a sentence or two. Before it rings, the other host explains the word button. No recasts in this call; the host only asks for clarification if meaning is lost.</span></div></li>
+    <li><div><b>A8 One thing managed</b><span>In the goodbye the host names one real thing the learner did that was not easy ("you used <i>should have</i>"). Nothing about what went wrong.</span></div></li>
+    <li><div><b>A9 Keep your show</b><span>Account by emailed one-time code, birth date (under 18 is refused), the drop time in life terms ("on my commute, 7:40"), a voice-storage choice, and one required consent to process what they say in calls (it can touch health, beliefs or relationships). The 7-day trial starts here on the 2-a-day plan with no card.</span></div></li>
+    <li><div><b>A10 Tomorrow</b><span>Three ideas for tomorrow plus "Tell Salma an idea". The learner picks one, sees "Tomorrow at 7:40", and gets a one-time card to add the app to the home screen and the show to a podcast app.</span></div></li>
+  </ol>
+  <details><summary>Details worth knowing</summary>
+    <ul class="b">
+      <li>The first episode counts as day 1's episode. The first three episodes are pitched one step easy and treated as calibration.</li>
+      <li>The word check and the first call give a starting estimate for listening, reading, speaking and writing, each with a wide range.</li>
+      <li>In Arabic, where "you" is gendered, A3 offers an optional chip for masculine, feminine or neutral wording. Default is neutral; it is never guessed.</li>
+      <li>Salma speaks in the learner's language; at A3 the default is that at least 80% of her words are in that language during season 1.</li>
+      <li>Day 2's episode must include a callback taken word for word from something said in onboarding.</li>
+      <li>Week 1 asks at most one personal question per session, in a fixed order: weekly rhythm, then the first then-and-now recording, then the season goal, then the optional note to the future self, then people and past attempts.</li>
+    </ul>
+  </details>
+  <p class="read"><b>After launch (not in the first release):</b> a landing page that lets visitors make a personalized 90-second sample episode before signing up. At launch the landing page is plain: one sentence and a "Start your show" button.</p>
+</section>
+
+<!-- ============ LOOP ============ -->
+<section id="loop">
+  <h2>The daily loop</h2>
+  <p class="sum">Choose tonight, it is made overnight, it arrives at a time you picked, and nothing else ever nudges you.</p>
+
+  <h3>Choosing tomorrow</h3>
+  <ul class="b read">
+    <li>At the end of the last thing you do today, and on the Today screen once the session is done, the app shows <b>three ideas</b>, each one line of at most 140 characters, with topic, format and cast ("Mona interviews you for the job, and she is not nice.").</li>
+    <li>Or <b>"Tell Salma an idea"</b>: type or say what you want. Salma confirms it in one line and it becomes the pick.</li>
+    <li>Rules for the three: at least one from the learner's own life if something is due; <b>exactly one wildcard</b> outside their usual interests; at most one continues an open story; no format that already ran twice in a row; no real-world news stated as fact unless the learner supplied it.</li>
+    <li><b>Remix:</b> long-press an idea to change its topic, format or cast.</li>
+    <li><b>Cutoff:</b> if nothing is chosen 6 hours before the drop time, the teacher's top-ranked idea is used.</li>
+    <li>If today brings news that changes an idea (the interview moved), the teacher rewrites that idea before showing it.</li>
+  </ul>
+
+  <h3>The allowance</h3>
+  <div class="tw"><table class="wf">
+    <tr><th>Rule</th><th>How it works</th></tr>
+    <tr><td>New episodes per day</td><td>1, 2 or 3 depending on the plan. Counted per local calendar day.</td></tr>
+    <tr><td>Active day</td><td>The learner played at least half an episode, tapped "Heard it" on a feed episode, started a call, or used the small door. A feed download alone never counts.</td></tr>
+    <tr><td>Episode 1</td><td>Made overnight in batch, dropped at the chosen time.</td></tr>
+    <tr><td>Episodes 2 and 3</td><td>A "Next one" button appears only after the current episode's listen is finished and only while the day's portion remains. The episode is made on demand from tonight's other ideas and starts within 30 seconds (streamed). Nothing extra is voiced in advance.</td></tr>
+    <tr><td>Skipped day</td><td>No new episode is made after an inactive day. An unplayed episode stays as the hero; no reminder fires. There is only ever one unplayed episode waiting.</td></tr>
+    <tr><td>Swap</td><td>One per day: "Not this one" on a dropped, unstarted episode makes the second-ranked idea on demand.</td></tr>
+    <tr><td>At the limit</td><td>Plain text, no button: "That's today's new episodes. Tomorrow's will be ready at 7:40." Unused allowance never carries over and is never mentioned.</td></tr>
+    <tr><td>Always unlimited</td><td>Re-listening, the archive, the feed, the article, chat, the small door, shadowing and one round-two call per episode.</td></tr>
+  </table></div>
+
+  <h3>Making and dropping</h3>
+  <ul class="b read">
+    <li>When the pick is made the teacher writes the brief and the pipeline runs on cheaper batch pricing. If it is not finished 90 minutes before the drop time, the remaining steps switch to standard on-demand pricing. The pipeline never fails to deliver: on any failure a fallback episode ships.</li>
+    <li>The episode appears in the app as soon as it is ready. The <b>drop time</b> controls the private feed and the notification, not access.</li>
+    <li>At the drop time: the episode is published to the private feed and <b>one</b> notification fires (web push, if installed and allowed). The title and length only, nothing else.</li>
+    <li><b>The feed version</b> adds a 5-second tag from the host at the end: "To call me, open the link in the notes". The notes carry the call and article links and a "Heard it" link. Feed URLs contain an unguessable token, are kept out of podcast directories, and can be reset.</li>
+  </ul>
+
+  <h3>The Today screen</h3>
+  <div class="tw"><table class="wf">
+    <tr><th>State</th><th>What is shown</th></tr>
+    <tr><td>Ready</td><td>A big typographic cover, length, a real remembered line from a host, "Why this episode?", and a Play button</td></tr>
+    <tr><td>In progress</td><td>The cover with doors Listen, Call, Read, Chat. Doors, not a progress bar</td></tr>
+    <tr><td>Done for today</td><td>"That's today's show", tomorrow's drop time, a one-line teaser, and "Round two" when available</td></tr>
+    <tr><td>Weekly proof day</td><td>The proof sits above today's episode with its own cover</td></tr>
+    <tr><td>After a gap</td><td>Exactly like any other day. Nothing records or shows missed days</td></tr>
+  </table></div>
+  <p class="read">Tabs at launch: <b>Today</b> and <b>Notebook</b>. The <b>Show</b> archive tab is added after launch; until then the private feed and Today cover the archive.</p>
+
+  <h3>Gaps, bad days and rhythm</h3>
+  <div class="grid2">
+    <div class="box"><h4>The small door</h4><p>Every episode ships with a 90-second recap by the hosts ending in one question. On a bad day, play it and record one voice note (up to 60 seconds). A host answers in one short text. It counts as an active day.</p></div>
+    <div class="box"><h4>Return episode</h4><p>After 5 or more days with no session, the next episode is one step easier, opens from something in the learner's life, never mentions the days missed, and includes one quick real win from checked evidence.</p></div>
+    <div class="box"><h4>Gap note (optional)</h4><p>Offered once in week 1. The learner writes a note to their future self and picks a gap of 7, 10 or 14 days. If that many days pass, the note is sent once by email and push, in their own words. Then nothing more.</p></div>
+    <div class="box"><h4>Anchor and rhythm</h4><p>The anchor is the drop time in life terms ("after I sit down on the 7:40 bus"). The rhythm is 3 to 6 days a week plus 2 spare days. It is never shown as a counter, calendar or flame. Salma offers a new anchor if no session happens near the anchor for two weeks.</p></div>
+  </div>
+
+  <h3>Every message that leaves the product</h3>
+  <p class="read">Exactly three kinds, and a unit test fixes the count:</p>
+  <ol class="b read">
+    <li><b>The drop notification</b> at the drop time, only when a new episode dropped. Can be turned off.</li>
+    <li><b>The gap note</b>, once, opt-in.</li>
+    <li><b>Transactional email:</b> sign-in code, receipts, trial ending (day 6), payment failed, export ready, account deleted.</li>
+  </ol>
+  <p class="read">No re-engagement, no "your hosts miss you", no streak warnings, no marketing email to learners. Only one module in the code is allowed to send email or push.</p>
+</section>
+
+<!-- ============ DOORS ============ -->
+<section id="doors">
+  <h2>Inside a session</h2>
+  <p class="sum">A session is one episode and everything attached to it. Each part is a door: Listen, Read, Call, Chat, Round two, Small door. Doors open in any order, with a few sensible limits.</p>
+  <ul class="b read">
+    <li>Chat opens after Listen, Read or Call has been used. Round two opens after the main call.</li>
+    <li>The episode ends by throwing to the learner. The screen offers <b>Call now</b>, <b>Read the article first</b>, or <b>Later</b>. Reading first is suggested because the article is planning time.</li>
+    <li>If the article is skipped, a 30-second planning card shows three words the learner might want. Skippable.</li>
+    <li>Position persists: audio, article scroll, chat history. A <b>call cannot resume</b>: an interrupted call restarts as a new call whose first line acknowledges the gap, never blaming the learner.</li>
+    <li>Skips are allowed and logged as signals. Nothing punishes a skip.</li>
+    <li>One session is open at a time. Starting the next episode closes the old one with no confirmation; nothing is lost.</li>
+  </ul>
+
+  <h3>Listen: the episode</h3>
+  <div class="tw"><table class="wf">
+    <tr><th>Part</th><th>Detail</th></tr>
+    <tr><td>Length</td><td>Target 5 to 7 minutes, hard bounds 4:00 and 8:00. Shortened on low-energy signals.</td></tr>
+    <tr><td>Structure</td><td>A cold open of at most 30 seconds that reuses yesterday's new words, then asks how you would say the episode's key idea and leaves a 3-second pause. Then 2 to 4 scenes. Then <b>the throw</b>: an unresolved question at about 50% certainty that plants the phrases you will need, and hands over to you by name. Mandatory.</td></tr>
+    <tr><td>Personal content</td><td>Interests lead. At most two life facts, only confirmed ones. Sensitive topics only if raised by the learner that week. Target words sit inside jokes and personal moments, never filler.</td></tr>
+    <tr><td>Speech</td><td>Target language throughout at 85 to 100% of natural rate, set per learner.</td></tr>
+    <tr><td>Player controls</td><td>Play/pause and scrub. <b>Replay line</b> repeats the last sentence (not 10 seconds). <b>Huh?</b> jumps back one sentence, replays at 0.85x and shows it with meanings under the hardest words. Speeds 0.75, 0.85, 1.0, never above 1.0. Karaoke-style transcript, folded on first play for learners at about B1 or above. Tap a word for the word sheet.</td></tr>
+    <tr><td>Lock screen</td><td>Media Session API: play/pause, previous replays the last sentence, next marks the moment (saved to the notebook with its audio).</td></tr>
+    <tr><td>Shadow <span class="pill v11">after launch</span></td><td>"Say two lines with the host?" The learner records two short lines and can play both back. Nothing is shown about how it went; pronunciation is scored internally.</td></tr>
+  </table></div>
+
+  <h3>Read: the article</h3>
+  <p class="read">150 to 300 words at A2, 250 to 450 at B1 and B2, 350 to 600 at C1 and above. It must add something the episode did not (a counterargument, a missed fact, or a reason to switch sides), never a recap. A host header says "This is what I'll throw at you on the call." At least 98% of the words are known. "Read it to me" plays it aloud, synced. Every word is tappable.</p>
+
+  <h3>Call: the live call</h3>
+  <p class="read">Entered with one tap from the throw, from Today or from the feed link. The screen stays awake. Earphones are suggested on the first call. The call needs the screen; there is no lock-screen call.</p>
+  <details open><summary>Turn-taking <small>how the host waits and listens</small></summary>
+    <div class="tw"><table class="wf">
+      <tr><th>Behavior</th><th>Rule</th></tr>
+      <tr><td>Open mic</td><td>Default. The host replies about 1 second after you stop (median target under 1.5 s).</td></tr>
+      <tr><td>Hold to keep the floor</td><td>While you hold the big pad the host waits as long as it takes.</td></tr>
+      <tr><td>Adaptive patience</td><td>End-of-turn silence starts at 1.5 s and adapts between 1.0 and 2.5 s from your stored pause profile.</td></tr>
+      <tr><td>Backchannel</td><td>On a pause over 1.2 s inside your sentence, one soft "mm" or "go on" per pause, never words that take the floor.</td></tr>
+      <tr><td>Silence</td><td>After 8 seconds the host asks a smaller version of the question. After two such offers it offers to wrap up.</td></tr>
+      <tr><td>Not understanding the host</td><td>Say "sorry?" or "slower" in either language and the host rephrases more simply.</td></tr>
+      <tr><td>Length</td><td>Target 5 to 7 minutes. The host starts closing at 6:30 and ends by 8:00. You can leave any time with the close button.</td></tr>
+      <tr><td>Talk time</td><td>Goal: 4 or more minutes of the learner's speech per session. The host's share is at most 40%.</td></tr>
+    </table></div>
+  </details>
+  <details><summary>The word button</summary>
+    <p>Hold the button and say a word in your own language. The audio goes to a recognizer for <i>your</i> language, not the host's. The host waits, then gives the word in English inside the conversation ("A <i>selection</i>? Of what?") and carries on. The word also shows in a small bubble.</p>
+    <p>If you have never produced the word, you get it. If you have produced it before, you get a hint first (its first sound, or "you used it on Tuesday about your manager") and the word on a second press. Using the button less over the weeks counts as progress evidence. Salma stays silent in calls; the host says the word so the call has one voice.</p>
+  </details>
+  <details><summary>The host's move contract <small>what it must, may and never does</small></summary>
+    <div class="tw"><table class="wf">
+      <tr><th>Move</th><th>Rule</th></tr>
+      <tr><td>Takes a position</td><td>Has an opinion from its brief and pushes back at least once. Absorbs side-switching, rejected premises and off-topic turns without steering back to a script.</td></tr>
+      <tr><td>Clarification request</td><td>A real "sorry, you did what?" when meaning blurs. At most 3 per call.</td></tr>
+      <tr><td>Recast</td><td>Says your point back the natural way inside a reply with its own point ("You <b>went</b>? With who?"). Only on the brief's targets or errors that blur meaning. At most 1 per learner turn. The changed word is bold in the caption.</td></tr>
+      <tr><td>Recall gaps</td><td>2 to 4 per call: "How did you put it on Tuesday? The word that made Mona laugh." Never scored.</td></tr>
+      <tr><td>Target necessity</td><td>One or two moves per grammar target and one per due word that make it close to essential ("Walk me through what happened" for past tense).</td></tr>
+      <tr><td>Retell</td><td>Once per call: "Mona missed it. Sixty seconds, go." A soft ring shows 60 to 90 seconds; it never turns red or cuts you off.</td></tr>
+      <tr><td>Hints before answers</td><td>Never completes your sentence. "How do I say X?" gets a hint first; the answer on a second ask.</td></tr>
+      <tr><td>Praise</td><td>At most one specific remark about the task per call ("you argued for four minutes in the past tense"). Never about the person.</td></tr>
+      <tr><td>Never</td><td>Says or implies "wrong", "mistake" or "the correct way is". Grades. Explains grammar unasked. Mentions progress. Interrupts mid-sentence. Guilts. Says it will miss you.</td></tr>
+    </table></div>
+  </details>
+  <details><summary>Anxiety mode, captions, failure, recording</summary>
+    <ul class="b">
+      <li><b>Anxiety mode</b> starts if your median turn in the first two minutes is under 4 words, or you have two 8-second silences, or your last call was abandoned. For the rest of the call: at most one recall gap, fewer recasts, more backchannel, simpler questions.</li>
+      <li><b>Captions:</b> the host's words are captioned by default (off in Controls). Your own words are never captioned live. No red, no ticks, no score on the call screen.</li>
+      <li><b>If live voice fails:</b> "Weak signal. Let's do voice notes." The same conversation continues as voice notes in the call thread. The session is never lost.</li>
+      <li><b>Recording:</b> the live transcript runs the conversation. After the call the audio is re-transcribed word for word. With voice storage on, audio is kept encrypted. With it off, audio is deleted when re-transcription succeeds, and always within 15 minutes of the call ending. Transcripts are always stored.</li>
+      <li><b>Round two</b> <span class="pill v11">after launch</span>: one short call per episode, 2 to 3 minutes: "Give me your take again, shorter and faster."</li>
+    </ul>
+  </details>
+
+  <h3>After the call</h3>
+  <p class="read">There is nothing to read. Today shows one honest line, such as "6:12 call, you spoke 3:40". No notes, no polish card, no list of mistakes from anyone. Behind the scenes the after-session pass logs what you said and the important errors become material for the next plan: the right forms come back in later episodes and calls. A first-ever success that passed the claim gate may be mentioned by a host in the next episode's opening, at most one per episode. A word you reached for and did not have becomes a planted word in the next episode.</p>
+
+  <h3>Chat</h3>
+  <ul class="b read">
+    <li>One long thread per host across days. The host's first message arrives within 30 seconds of opening or of the call ending.</li>
+    <li>The opener asks you to restate one point first, before adding anything new. The host sends 3 to 5 messages and ends at message 5 with a natural closer, then tomorrow's three ideas appear. If you keep writing, one final short reply, then quiet.</li>
+    <li>No margin note. At most once per chat the host may say your point back naturally ("So the meeting <i>was</i> cancelled? Classic."). If you ask how to write something, you get a hint first, not a rewrite.</li>
+    <li>Text only in v1. Each bubble sets its own text direction.</li>
+  </ul>
+
+  <h3>The word sheet</h3>
+  <p class="read">Tap a word to see its meaning in your language for <i>this</i> sense, the sentence it came from, a button to hear it (cut from the host audio), and <b>Keep this word</b>. Meanings come from a shared cache keyed by word, sense and native language, all prepared before the episode ships, so the sheet opens in under 300 ms. Keeping a word adds it to the notebook and tells the teacher to bring it back. A word tapped twice or more becomes a recall candidate.</p>
+</section>
+
+<!-- ============ CAST ============ -->
+<section id="cast">
+  <h2>Hosts, Salma and seasons</h2>
+  <div class="grid3">
+    <div class="box"><h4>Karim and Mona</h4><p>The English host duo, shared by every native language that learns English. Each has a written "bible": values, opinions, humour, how they disagree, how they treat the learner, what they never do, and their in-show storylines. People write the bibles; the AI only writes episodes. In the call you talk to one host, the one who threw to you.</p></div>
+    <div class="box"><h4>Salma</h4><p>One producer per native language. Her voice is closer and drier than the hosts'. On screen she is a monogram, not a face. She does onboarding, life updates, "tell Salma an idea", the notebook, settings by conversation, "what do you know about me?", fact corrections, "where do I stand?", and "why do we say it like that?" when asked. She never corrects, sends notes, or performs in the show.</p></div>
+    <div class="box"><h4>Voices</h4><p>Three candidate voices per host per accent, chosen by a blind listening test. The learner can swap within the pool. A voice swap or rename is announced on air in one line in the next episode. A host's personality never changes silently, even across a model or vendor upgrade.</p></div>
+  </div>
+  <details><summary>Salma's language balance</summary>
+    <p>In season 1 at least 80% of Salma's words are in the learner's own language. Each new season her English share rises by about 10 points if the speaking estimate rose, never above 70%. The learner can ask for more or less at any time.</p>
+  </details>
+
+  <h3>The series: world, arcs, seasons</h3>
+  <ul class="b read">
+    <li>Each learner has a <b>series bible</b>: authored hosts, 3 to 5 side characters made by the writer (a character based on a real person uses only what the learner said), places, running jokes, open arcs, the season goal, and the show canon (positions already taken, things already said), which blocks repeated angles and contradictions.</li>
+    <li><b>Arcs</b> last 1 to 3 weeks, at most two open at once, best taken from the learner's real life (an interview: prep, the day, the debrief). An arc waits for the learner; nothing happens while they are away. Every episode in an arc stands alone.</li>
+    <li><b>Seasons</b> are 4 weeks and cannot be broken: a season ends on its date whether the learner did 3 episodes or 25. Each season has one real goal in the learner's words, a learning goal and never a score. Salma names it from what happened ("Season 2: Interview season").</li>
+    <li><b>Mid-season rehearsal:</b> if the goal is a real scene (an interview, a call), one episode uses the rehearsal format. The call is the scene itself, with the host playing the other person.</li>
+  </ul>
+
+  <h3>Honesty and crisis</h3>
+  <ul class="b read">
+    <li>Salma says she is AI in her first lines and the hosts in theirs. Portraits carry a small "AI" mark. Every character answers "are you real?" honestly, every time.</li>
+    <li>The hosts' storylines are the show's fiction, like a sitcom. A host never claims to exist outside the show, to remember you personally between episodes, or to miss you.</li>
+    <li><b>Crisis protocol:</b> every live role and the analyst watch for self-harm or crisis. In a call, a keyword waits up to 2 seconds for the host's confirmation, then the protocol fires anyway (a missed crisis costs more than a false alarm). The host stops, and a pre-recorded clip in the learner's language, in Salma's voice, says plainly that this is an AI and cannot help with this. The screen then shows helplines for the learner's country from a maintained international directory. The session continues only if the learner chooses.</li>
+    <li>Each activation is logged without content (date, country, resource shown, whether the call ended). Muath is told only the weekly count.</li>
+  </ul>
+</section>
+
+<!-- ============ MAKING ============ -->
+<section id="making">
+  <h2>How an episode is made</h2>
+  <p class="sum">A durable chain of steps runs overnight. Each step has a timeout and retries.</p>
+  <ol class="seq">
+    <li><div><b>Brief (teacher)</b><span>Idea, format, cast, arc and season context, one grammar target, 2 to 4 due or new words, coverage targets, length, speech rate, up to two usable life facts, the callback, the learner's energy and anxiety state, and the "why this episode" reasons.</span></div></li>
+    <li><div><b>Writer</b><span>The script with scene breaks and speaker turns, the article, the call brief, the chat opener, the 90-second recap and two shadow lines.</span></div></li>
+    <li><div><b>Fitter</b><span>Code splits the text into words and phrases and gives each a probability that this learner understands it. Expected coverage is the average. Default pass: 95% for audio, 98% for text. Only failing sentences are rewritten, at most two rounds. New words must stay within budget, and every target and due word must appear where planned.</span></div></li>
+    <li><div><b>Editor</b><span>Eleven pass/fail checks (below), run by a model from a different company than the writer, plus code.</span></div></li>
+    <li><div><b>Voice studio</b><span>Two-voice audio with expressive tags, the article read-aloud, the recap, the feed tag, word timestamps, and the learner's name pronounced from their own recording.</span></div></li>
+    <li><div><b>Audio re-listen</b><span>The rendered audio is run back through speech recognition and compared with the script. Lines that are skipped, garbled, or mispronounce the learner's name or a target word are re-recorded up to twice, then rewritten with a synonym or shipped with that line marked.</span></div></li>
+    <li><div><b>Gloss precompute</b><span>Meanings for every word in the script and article, only for words not already in the shared cache.</span></div></li>
+    <li><div><b>Publish</b><span>To the app immediately; to the private feed at the drop time.</span></div></li>
+  </ol>
+
+  <details open><summary>The editor's eleven checks</summary>
+    <div class="tw"><table class="wf">
+      <tr><th>#</th><th>Check</th><th>Who</th></tr>
+      <tr><td>1</td><td>Level fit: the fitter passed</td><td>Code</td></tr>
+      <tr><td>2</td><td>Targets are present in every planned surface</td><td>Code</td></tr>
+      <tr><td>3</td><td>Language correctness: natural, grammatical English in the chosen accent's spelling</td><td>Model</td></tr>
+      <tr><td>4</td><td>Memory: every life fact is confirmed, unexpired, not marked "don't bring up", and its quote exists in the log. No more than two</td><td>Code</td></tr>
+      <tr><td>5</td><td>Not generic: would this episode work unchanged for another learner? If yes, it fails</td><td>Model</td></tr>
+      <tr><td>6</td><td>No unsourced world facts: no result, statistic or news unless the learner supplied it</td><td>Model</td></tr>
+      <tr><td>7</td><td>The fun carries the language: every joke or personal moment carries at least one target or due word, or it is cut</td><td>Model</td></tr>
+      <tr><td>8</td><td>Stands alone, even inside an arc</td><td>Model</td></tr>
+      <tr><td>9</td><td>Variety: format rule, ban list and similarity check pass</td><td>Model and code</td></tr>
+      <tr><td>10</td><td>Law scan: no game language, no grading, no explicit correction, no guilt, no "I miss you", no lesson words ("lesson", "test", "exercise", "level", "homework")</td><td>Model and code</td></tr>
+      <tr><td>11</td><td>Pitch test: would this person choose this over a real podcast at 8am?</td><td>Model</td></tr>
+    </table></div>
+    <p><b>On a fail:</b> a targeted repair and one recheck. On a second fail, the <b>fallback episode</b> ships: built from the learner's top interest with no life facts, no arc and no callbacks, and it must still pass checks 1 to 6 and 10. Three fallbacks for one learner in 7 days alert Muath.</p>
+  </details>
+
+  <details><summary>Variety and sameness defences</summary>
+    <ul class="b">
+      <li><b>Real input in every episode:</b> at least one element that did not come from the model: the learner's life, their words from the last call, or something they told the show this week.</li>
+      <li><b>Ban list:</b> stock names, settings and plots AI stories converge on, kept per language and updated monthly.</li>
+      <li><b>Format rotation</b> over the last 10 episodes, no format three times in a row. Formats: debate, story time, news-style rundown (of the learner's own news), interview, explain-it-to-me, mystery, gossip, roast, rehearsal. A learner can describe any other format to Salma.</li>
+      <li><b>Similarity check:</b> each script is compared with the last 20 scripts; above a cosine threshold of 0.85 it is regenerated.</li>
+      <li><b>Surprise in the content, never in rewards:</b> a callback from weeks ago, a returning side character, a one-day format change.</li>
+      <li><b>Review read:</b> an AI review pass, separate from the editor, reads 10 random episodes per learner per month for errors, sameness and law-breaking. Muath reads what it flags.</li>
+      <li><b>Shared once for everyone:</b> the word-meaning cache, the host and Salma bibles, the ban list and the sound design.</li>
+    </ul>
+  </details>
+</section>
+
+<!-- ============ MODEL ============ -->
+<section id="model">
+  <h2>The learner model</h2>
+  <p class="sum">An append-only log is the truth. Everything else is calculated from it and can be rebuilt.</p>
+  <ul class="b read">
+    <li><b>The event log:</b> every transcript, tap, replay, skip, timing and edit is appended and never changed. Each event stores the learner, session, door, type, time, payload, the model and prompt versions that produced it, and its cost. When the analyst improves, the whole model is rebuilt by re-running the after-session pass over the log. Claims already shown are never silently retracted.</li>
+    <li><b>Models propose, code decides.</b> Every model output is a candidate update in a fixed schema that code validates and applies.</li>
+    <li><b>Live roles never write.</b> The host and Salma only produce transcripts. Only the after-session roles write to the model.</li>
+    <li>Every estimate carries a range.</li>
+  </ul>
+
+  <h3>The nine stores</h3>
+  <div class="tw"><table class="wf">
+    <tr><th>Store</th><th>Holds</th><th>Written by</th></tr>
+    <tr><td>Word bank</td><td>Every word and phrase met: chance you understand it by ear, in reading, and can produce it; review schedule; where you met it; lookups; your own sentences using it</td><td>Code</td></tr>
+    <tr><td>Structure map</td><td>Each grammar structure: state (not seen, heard, attempting, taking, stable), accuracy over 14 days, avoidance flag, up to 3 of your own example sentences</td><td>Analyst, checked by code</td></tr>
+    <tr><td>Error profile</td><td>Recurring errors by category, each with 2 or 3 verbatim examples</td><td>Analyst</td></tr>
+    <tr><td>Skills</td><td>Listening, reading, speaking, writing estimates with ranges; speech rate, run length, pause rates; pause profile for turn-taking; reading speed</td><td>Code</td></tr>
+    <tr><td>Interests</td><td>Topic, salience, depth (curious, fan, expert), last engaged, dormant flag, hard dislikes</td><td>Memory keeper</td></tr>
+    <tr><td>Life</td><td>Facts with exact quote, confidence, sensitivity, valid-from, expiry, status, "don't bring up"; dated follow-ups</td><td>Memory keeper; the learner's edits</td></tr>
+    <tr><td>Goals</td><td>Real situations as can-do statements, the season goal, anchor and rhythm</td><td>Salma's conversations; the learner</td></tr>
+    <tr><td>Taste</td><td>Format and host completion, what makes you talk most, preferred length and time of day, swap and skip patterns. Preference only, never a "learning style"</td><td>Code</td></tr>
+    <tr><td>Show canon</td><td>Positions taken, running jokes, things said, side characters, open arcs</td><td>Analyst</td></tr>
+  </table></div>
+
+  <h3>Life-fact rules</h3>
+  <ol class="b read">
+    <li><b>Quote check:</b> a fact is stored only if its source quote appears word for word in a verbatim transcript or chat.</li>
+    <li><b>Confidence ladder:</b> said once means stored but never spoken, shown in the notebook as "I think...". Said again in another session, confirmed when asked, or left unedited on a notebook card the learner viewed means usable. Edited by the learner means ground truth at once.</li>
+    <li><b>Sensitive facts</b> (health, money, relationships, religion, politics, sexuality) are used only in the session where the learner raised them. They are stored and used later only after a one-tap confirmation card in the notebook. A spoken "yes" is not enough. Never brought up first.</li>
+    <li><b>Time:</b> each fact type has a shelf life (job: months; "sick this week": days). Expired facts are never spoken. A conflicting new fact replaces the old and keeps history. A dated event triggers one follow-up after its date.</li>
+    <li><b>Interests decay</b> over a few weeks without engagement. Dormant interests are never pitched but wake the moment the learner mentions them.</li>
+    <li><b>Corrections:</b> when you correct the show, it says "My mistake, noted." (the one allowed use of that word), fixes the fact at once, and logs a wrong-memory flag.</li>
+  </ol>
+
+  <h3>Compiled briefs</h3>
+  <p class="read">No role ever sees the whole file. Each gets a compiled brief:</p>
+  <div class="tw"><table class="wf">
+    <tr><th>Role</th><th>Gets</th></tr>
+    <tr><td>Teacher</td><td>Everything summarized, the full due list, the structure map, the last 14 days</td></tr>
+    <tr><td>Writer</td><td>The brief, up to two usable facts with quotes, series bible excerpt, targets, words, coverage and length, ban list</td></tr>
+    <tr><td>Host (live)</td><td>One page: position and pushback material, targets and their necessity moves, 2 to 4 recall gaps, 3 words to draw out, one callback, pause profile, anxiety flag, your name and pronunciation, your produced-word history</td></tr>
+    <tr><td>Salma</td><td>Usable life facts with quotes, goals, working-on list, claims that passed the gate. <b>Never error lists</b></td></tr>
+    <tr><td>Chat host</td><td>Call summary, targets, the opener</td></tr>
+    <tr><td>Proof producer</td><td>Claims that passed the gate, with evidence. Nothing else</td></tr>
+  </table></div>
+</section>
+
+<!-- ============ TEACHER ============ -->
+<section id="teacher">
+  <h2>The teacher</h2>
+  <p class="sum">An AI planner that never speaks. It decides what tomorrow teaches and why.</p>
+  <h3>When it runs</h3>
+  <ul class="b read">
+    <li>After each session, once the after-session pass finishes (within 10 minutes).</li>
+    <li>Nightly in batch: the weekly mix, arc and season progress, and tomorrow's three ideas.</li>
+    <li>When a dated follow-up comes due, after a gap of 5+ days (return episode), and at a season boundary. Overlapping triggers merge into one run.</li>
+    <li>If it fails, a rules-based brief is built from the due list, the top interest and the next format in rotation. If the model itself is unavailable, the last good plan is used. The learner always gets an episode.</li>
+  </ul>
+  <h3>Choosing targets</h3>
+  <p class="read">Candidate grammar structures and words are scored on six factors: <b>need</b> (how often it goes wrong and how much it hurts understanding), <b>goal fit</b>, <b>readiness</b>, <b>learnability</b>, <b>opportunity</b> (can tomorrow's episode make it natural and necessary) and <b>due</b> (about to be forgotten).</p>
+  <ul class="b read">
+    <li>Caps: 1 grammar target and 2 to 4 words per session; no target in more than 4 sessions in a row. Where you confuse two forms, both are targeted in the same episode so both are needed.</li>
+    <li>An error pattern enters targeting only after 3 observations across at least 2 sessions.</li>
+    <li>The <b>"working on" list</b> shows at most 3 items in plain words. You can veto one (it leaves targeting unless it breaks meaning) or add one ("I want to sound professional on calls"), and the teacher acts on it the same day.</li>
+  </ul>
+  <details open><summary>Treatment by learner state</summary>
+    <div class="tw"><table class="wf">
+      <tr><th>If you...</th><th>The teacher</th></tr>
+      <tr><td>never attempted it but are expected to by now</td><td>Input flood: hosts use it often and audibly for 1 to 2 weeks, no correction, before it becomes a speaking target</td></tr>
+      <tr><td>attempt a rule-based structure with errors</td><td>Clear recasts in calls; the form returns often in the next episodes and in calls that make it necessary</td></tr>
+      <tr><td>attempt word choices or collocations</td><td>A recast, then the item returns on schedule</td></tr>
+      <tr><td>avoid it (talk around it)</td><td>A host models it, then a call question that is hard to answer without it</td></tr>
+      <tr><td>speak slowly or brokenly on easy content</td><td>Retell tasks and "shorter and faster" in round two</td></tr>
+      <tr><td>say you do not care about a mistake</td><td>It is dropped from targeting unless it breaks meaning</td></tr>
+    </table></div>
+  </details>
+  <details><summary>Review schedule, new words, difficulty</summary>
+    <ul class="b">
+      <li><b>Review:</b> every word, phrase and structure has a spaced-repetition state (FSRS-style, in code). It is "due" when predicted recall falls below 0.85 by the next drop time. Grammar targets repeat every 1 to 3 days early on; words on widening gaps.</li>
+      <li>Due items return through four channels: the same day across surfaces; across days in new stories; through the recurring world (arcs, running jokes); and through hosts' "you mean..." lines that echo your sentences.</li>
+      <li><b>New words:</b> 3 to 6 per episode, at least 80% from the top 3,000 most common words.</li>
+      <li><b>The edge:</b> audio coverage default 95% (easier 96%, harder 94%, floor 93%); text default 98% (99%, 97%, floor 96%); speech rate steps of 5%; length default 6 minutes (plus or minus 1, cap 8).</li>
+      <li><b>One step easier</b> for: the first three episodes, a return episode, low-energy signals (short replies, a skipped call, an error spike, "today was too hard"), or a Huh? rate half again above your 2-week median. <b>One step harder</b> after two sessions in a row with a low Huh? rate, full uptake and no low-energy signal. At most one step per session.</li>
+      <li><b>Ideas</b> are ranked by predicted choice: interest salience times format history times arc pull times topic recency.</li>
+      <li><b>"Why this episode":</b> 2 to 4 plain reasons per episode, each traceable to the model ("You said on Monday the derby was Sunday."). Never a comment on days away.</li>
+    </ul>
+  </details>
+</section>
+
+<!-- ============ ASSESS ============ -->
+<section id="assess">
+  <h2>Assessment and proof</h2>
+  <p class="sum">Two standards: planning signals can be fast and noisy, because a wrong guess costs one slightly mistargeted episode. Claims to the learner must be slow and checked, because one false claim costs trust in every later one. Nothing in assessment runs during the live call.</p>
+  <div class="tw"><table class="wf">
+    <tr><th>Clock</th><th>What runs</th><th>May influence</th></tr>
+    <tr><td>During the call</td><td>Nothing is graded</td><td>The conversation only</td></tr>
+    <tr><td>After each session (10 min)</td><td>The after-session pass</td><td>Tomorrow's plan, never a claim</td></tr>
+    <tr><td>Weekly</td><td>Fluency and complexity on retell turns, smoothed over 2 weeks; avoidance check</td><td>Difficulty; the proof only through the gate</td></tr>
+    <tr><td>Every 4 weeks</td><td>The then-and-now recording, rated by a calibrated model plus code metrics</td><td>Speaking claims; skill estimates</td></tr>
+  </table></div>
+
+  <h3>The after-session pass</h3>
+  <ol class="seq">
+    <li><div><b>Verbatim re-transcription</b><span>Every learner audio turn, keeping fillers, false starts and self-corrections, with word timings and confidences. The live transcript is never used for assessment, because live recognizers silently fix learner errors.</span></div></li>
+    <li><div><b>Analyst</b><span>A small model with a fixed schema produces, for each turn, the smallest correction that makes it acceptable, a comprehension rating of 0 to 2, can-do moments, words reached for, whether you repeated a recast, and self-corrections.</span></div></li>
+    <li><div><b>Edit classifier (code)</b><span>Aligns original and corrected text and sorts each edit into the structure inventory and twelve reporting categories (verb tense, agreement, articles, prepositions, word order, word choice, plurals, pronouns, comparatives, conditionals, question formation, register).</span></div></li>
+    <li><div><b>Confidence filter</b><span>Edits inside speech the recognizer was unsure about are dropped and can never feed a claim.</span></div></li>
+    <li><div><b>Measures and updater (code)</b><span>Bayesian updates of skills, word probabilities and structure states, each with a range. Review schedules and target lifecycles move.</span></div></li>
+    <li><div><b>Memory keeper</b><span>A small model plus rules proposes life-fact candidates with quotes, interests, goals and show canon. Code validates them.</span></div></li>
+  </ol>
+
+  <details><summary>What is measured</summary>
+    <ul class="b">
+      <li><b>Accuracy:</b> correct use in obligatory contexts per structure; errors per 100 words by category, always read next to what was attempted.</li>
+      <li><b>Complexity and fluency:</b> clause length, lexical diversity, share of uncommon words; speech rate, run length, mid-clause pauses. Measured only on retell turns, round two and the 4-weekly recording, so like is compared with like.</li>
+      <li><b>Vocabulary and comprehension:</b> word probabilities and "words owned"; content uptake 0 to 2; Huh? rate; taps; pronunciation scores on known sentences only (internal, never shown); word-button use.</li>
+    </ul>
+  </details>
+  <details><summary>How a grammar structure becomes "learned"</summary>
+    <p>Not seen, then Heard, then Attempting (used at least once), then Active target (chosen by the teacher), then <b>Taking</b> (correct and unprompted in 2 different sessions, at least one a day or more after it was last targeted), then <b>Stable</b> (about 80% correct over 14+ days across at least 5 contexts, and confirmed in the next 4-weekly recording). Rechecked at 2, 4 and 8 weeks; a failed recheck returns it to Active.</p>
+    <p><b>"Learned"</b> in any claim means correct, unprompted, at least a day later, in a different session. <b>Words owned</b> means a word used correctly and unprompted in two different sessions at least a day apart.</p>
+  </details>
+
+  <h3>The claim gate</h3>
+  <p class="read">Every sentence about progress, in the proof, the finale, a host line or "where do I stand", must pass five rules in code:</p>
+  <ol class="b read">
+    <li><b>Like for like:</b> the same task type.</li>
+    <li><b>Beyond the noise:</b> the change exceeds about twice the measure's standard error.</li>
+    <li><b>Repeated:</b> at least two data points agree (first-ever events excepted).</li>
+    <li><b>Clean evidence:</b> grammar claims only from chat text or high-confidence speech.</li>
+    <li><b>Openable:</b> each claim carries its evidence and the learner can open "how we know".</li>
+  </ol>
+  <div class="callout"><b>At launch only two kinds of claim can pass:</b> first-ever events ("you used <i>should have</i> for the first time") and words owned. Fluency and accuracy claims need a hand-tagged calibration set that is built after launch from opted-in data. When nothing passes, the app says so honestly ("too early to tell"). The proof producer only ever receives passed claims, so fabricated wins are impossible by construction.</div>
+
+  <h3>Weekly proof, then-and-now, finale</h3>
+  <div class="grid2">
+    <div class="box"><h4>The weekly proof</h4><p>About 2 minutes, presented by Salma in your language, with your own clips and at most one host line. Sits above today's episode and in the feed. In order: one headline claim with "how we know"; the rhythm in words only if it was met; the next focus; the working-on list; and one question, "Was this week worth your time?". A slow week gets about 45 seconds about what has built up over time. A flat week says so and names the one thing being changed. A worse week says so with the likeliest reason.</p></div>
+    <div class="box"><h4>Then-and-now recording</h4><p>About 3 minutes of your speech, always the same kinds of task: a 60 to 90 second retell, a 60 to 90 second opinion, and 8 sentences to repeat. Nothing is scored on screen. The first "then" is offered after session 2, then once every season. Skippable; skipping means no voice comparison that month.</p></div>
+    <div class="box"><h4>Season finale <span class="pill v11">after launch</span></h4><p>Offered at the first session on or after day 28: the new recording played next to the last, at most two measured differences in plain words, the real-world attempt if there was one, a short recap (episodes, hours heard, minutes spoken, words owned), and next season's goal.</p></div>
+    <div class="box"><h4>"Where do I stand?"</h4><p>Only when asked. Salma answers per skill with a range and what it means in real situations ("listening around B1: you can follow a colleague who speaks clearly"), and only for skills whose calibration is met. Otherwise she says plainly she cannot say reliably yet. CEFR words never appear unprompted.</p></div>
+  </div>
+</section>
+
+<!-- ============ NOTEBOOK ============ -->
+<section id="notebook">
+  <h2>Notebook and controls</h2>
+  <p class="sum">The notebook is styled as Salma's file, open to the learner. Controls is a short sheet, not a settings app. Everything else is a sentence to Salma ("less football", "talk slower", "more English from you").</p>
+  <div class="tw"><table class="wf">
+    <tr><th>Notebook section</th><th>Holds</th></tr>
+    <tr><td>What I'm working on with you</td><td>At most 3 plain items, each with one of your own sentences. Veto or add by text or voice.</td></tr>
+    <tr><td>About you</td><td>Every fact, interest and goal, each with its source ("you said on Oct 3: ..."), edit, delete and "don't bring this up". Unconfirmed facts show as "I think...".</td></tr>
+    <tr><td>Words you own</td><td>Each word with your own sentence, date and audio. One quiet count that only grows.</td></tr>
+    <tr><td>Out in the world</td><td>Real uses you reported ("I had the interview"), dated.</td></tr>
+    <tr><td>Kept words and marked moments</td><td>From the word sheet and the headphone "next" button.</td></tr>
+    <tr><td>Hours</td><td>"About 41 hours heard, 6 hours spoken." Cumulative, never reset, no goal.</td></tr>
+    <tr><td>Why this episode</td><td>The stored reasons per episode, with "Something off? Tell Salma."</td></tr>
+    <tr><td>The tape <span class="pill v11">after launch</span></td><td>The then-and-now recordings, one per season.</td></tr>
+  </table></div>
+  <p class="read"><b>Controls holds:</b> drop time and notification; the podcast feed link (copy, reset); captions on calls, transcript default, default speed; keep my recordings on or off, and delete all recordings; help improve the teacher with de-identified transcripts (off by default); the gap note; plan, billing and cancel in one tap; see, export and delete all my data; theme, text size and interface language; sign out; delete account. Delete takes two taps and a typed "delete", with no survey and no "Karim will miss you". Cancel takes one tap.</p>
+</section>
+
+<!-- ============ PRIVACY ============ -->
+<section id="privacy">
+  <h2>Privacy and safety</h2>
+  <p class="sum">Compliance by conservative design: the strictest common rules apply to every learner wherever they live. There is no lawyer step; instead a written self-review checklist, checked by an AI pass and by Muath.</p>
+  <div class="tw"><table class="wf">
+    <tr><th>Topic</th><th>Rule</th></tr>
+    <tr><td>Age</td><td>18+. Checkbox on the first screen, birth date at account creation; under-18 is refused.</td></tr>
+    <tr><td>Voice storage</td><td>Off by default. Audio is analysed and deleted when re-transcription succeeds, and always within 15 minutes of the call. If on, audio is kept encrypted with a per-learner key until deleted. Turning it off deletes everything stored within 24 hours.</td></tr>
+    <tr><td>Transcripts and text</td><td>Always stored while the account exists (disclosed at consent).</td></tr>
+    <tr><td>Conversation consent</td><td>One required, explicit consent at signup for processing what the learner says, which may include health, beliefs or relationships. Without it the account is not created.</td></tr>
+    <tr><td>Sensitive facts</td><td>Kept and reused only after a one-tap notebook confirmation.</td></tr>
+    <tr><td>Improving the teacher</td><td>Opt-in in Controls, off by default, de-identified (names, places, employers replaced), never audio, never sold, never for ads.</td></tr>
+    <tr><td>Export</td><td>A zip with the model in plain JSON, transcripts and kept audio, emailed within 72 hours while done by hand and within 1 hour once automated. The download link is made on click, valid 15 minutes.</td></tr>
+    <tr><td>Deletion</td><td>Typed "delete". Access ends at once, live data is purged within 24 hours, backups within 30 days. No grace period.</td></tr>
+    <tr><td>Unpaid trial end</td><td>New episodes stop; archive, notebook, export and delete stay for 90 days, then the account is deleted after one email warning.</td></tr>
+    <tr><td>No voiceprints</td><td>No speaker identification or biometric matching.</td></tr>
+    <tr><td>Isolation</td><td>Row-level security on every learner table, checked by a CI test that walks the database. The only shared data: the word-meaning cache and opt-in de-identified transcripts.</td></tr>
+    <tr><td>Learner text stays home</td><td>Job-queue payloads carry ids only (a CI test rejects any field named text, name, email, quote, transcript or audio). Logs are scrubbed. AI tracing stores metadata only unless the learner opted in.</td></tr>
+    <tr><td>Region</td><td>AWS Frankfurt (<code>eu-central-1</code>), with standard contractual clauses for vendors. Moving it is one config variable.</td></tr>
+    <tr><td>Security checks</td><td>Secret and dependency scanning in CI, an OWASP ZAP scan of staging, and an AI security review of every change that touches auth, keys, media URLs, the feed or deletion. A paid penetration test is triggered later (1,000 paying learners, a B2B deal, or an incident).</td></tr>
+  </table></div>
+  <details><summary>When a lawyer becomes necessary</summary>
+    <p>A regulator or court contact; a reportable personal-data breach; a B2B or employer contract; or paid traffic from a country with a specific law the checklist does not cover. If the company sits outside the EU and UK, an EU and UK representative (a paid service, not a lawyer) must be appointed.</p>
+  </details>
+</section>
+
+<!-- ============ LANGUAGES ============ -->
+<section id="languages">
+  <h2>Languages</h2>
+  <p class="sum">Everything language-specific is configuration, not code. The two sides are separate, so any native language pairs with any target.</p>
+  <div class="grid2">
+    <div class="box"><h4>Target language: what you learn</h4><p>One package per target holds host bibles and voices, the grammar structure inventory, edit-classification rules, the twelve reporting categories, level descriptors, the calibration set, the word-frequency list and lemmatizer, word-check items, the then-and-now task bank, the ban list and the sound design. <b>Launch: English only</b>, with British and American accents.</p></div>
+    <div class="box"><h4>Native language: the app and Salma</h4><p>One package per native language holds Salma's bible and voice, the interface text and text direction, meaning and caption prompts, the crisis clip, and localized category names. <b>Launch: Arabic and English</b> (English is the universal fallback).</p></div>
+  </div>
+  <h3>The language gate: five checks to open a target</h3>
+  <ol class="b read">
+    <li><b>Voices:</b> Muath and native-speaking volunteers rate two-host episodes from the candidate vendors blind, and the winner is one most would listen to.</li>
+    <li><b>Learner speech:</b> on learner clips the verbatim transcript must keep the learner's errors instead of fixing them, and catch words said in the learner's own language.</li>
+    <li><b>Writing:</b> an AI review of 10 scripts against the laws and ban lists, then a fluent speaker finds them natural and correct.</li>
+    <li><b>The call:</b> the host answers within about a second on that language's speech stack.</li>
+    <li><b>Structures:</b> a grammar structure inventory exists.</li>
+  </ol>
+  <p class="read">A target that fails any check ships later, never with a weaker bar. A native language ships when Salma's voice passes the blind test with native volunteers, its interface text passes a native speaker's check of 50 items, and its recognizer catches words said with the word button. The testing order for later targets is an estimate, not a result: Spanish, French, German, Italian, Portuguese, Japanese, Korean, Mandarin, Arabic, Hindi, Turkish, Russian. A language whose "worth it" answers fall well behind English closes to new learners until fixed.</p>
+  <details><summary>English grammar inventory and word lists</summary>
+    <p>The grammar inventory is built from open sources with ids styled after the English Grammar Profile (a few hundred structures from A2 to B2). If a licence for the Profile ever arrives, it is mapped onto those ids. The word list uses <code>wordfreq</code>. The recognizer test uses an open learner-speech corpus (speechocean762, Apache-2.0) plus about 30 volunteer clips with a one-line consent each.</p>
+  </details>
+</section>
+
+<!-- ============ BILLING ============ -->
+<section id="billing">
+  <h2>Billing</h2>
+  <div class="grid3">
+    <div class="box"><h4>1 a day: $19.99</h4><p>About $0.67 per episode.</p></div>
+    <div class="box"><h4>2 a day: $29.99</h4><p>Marked "Recommended"; the trial plan. About $1 a day.</p></div>
+    <div class="box"><h4>3 a day: $44.99</h4><p>Same per-episode price as 2 a day, so 1 to 2 is the obvious step.</p></div>
+  </div>
+  <ul class="b read">
+    <li>Monthly only, USD. No free tier, no yearly plan, no ads, no credits. The 7-day trial starts at account creation with <b>no card</b>; payment is asked once on day 7, with a plain email on day 6.</li>
+    <li><b>Paddle</b> is the merchant of record, so it handles tax, invoices, refunds and the EU withdrawal right. Cards, Apple Pay, Google Pay and PayPal. Local methods (such as Mada) later.</li>
+    <li>Upgrade takes effect at the next drop with Paddle prorating the charge. Downgrade takes effect at the next billing date. Unused allowance is never refunded or carried over.</li>
+    <li>Cancel keeps the show running to the end of the paid period. No win-back offers, no survey wall. <b>Full refund on request within 14 days</b> of the first payment.</li>
+    <li>Failed payment: a 7-day grace period in which the show continues. At launch Paddle's own retries and emails cover this.</li>
+    <li>A price rise applies to new signups only. Planned trigger: if a plan's margin at measured use is below zero, the 2-a-day plan rises to $34.99 and the 3-a-day to $54.99 for new signups.</li>
+    <li><b>Allowed persuasion:</b> three plans with the middle one marked, "about $1 a day", the free first episode, and an honest tutor comparison (about $160 a month for two lessons a week). <b>Never:</b> fake countdowns, fake scarcity, hidden cancellation, guilt, pre-ticked upgrades, or an upgrade prompt anywhere except a once-a-week line in the proof for learners who hit their limit on 3 or more days.</li>
+  </ul>
+  <details><summary>Cost per session</summary>
+    <p>Cost per session covers the teacher's share, writing, fitting, editing, all audio, the call and round two, re-transcription, chat, the after-session pass and a quarter of the weekly proof. Budget: <b>about $0.60 at launch</b>, goal $0.35, stop line $1.00 with no plan to lower it. An early planning estimate put it at about $0.66, with voice studio the largest line at about $0.18, then the call at about $0.16 and the teacher at about $0.08. Several Gemini prices double on 2027-01-01, so vendor choices are made on the higher prices. Every vendor call is priced and recorded, so cost per session is a database query. Levers to reach $0.35: batch pricing for everything nobody waits on, a negotiated voice rate, cheaper models for the call host once an eval passes, and rendering read-aloud only on first tap.</p>
+  </details>
+</section>
+
+<!-- ============ ARCH ============ -->
+<section id="arch">
+  <h2>Architecture</h2>
+  <p class="sum">Four deployed services, one web app, and a set of vendors behind adapters.</p>
+  <div class="arch">
+    <div class="row"><b>web</b><span>Next.js 15 + TypeScript on Vercel. Screens, the service worker (offline and install), the player, the call screen, feed artwork.</span></div>
+    <div class="row"><b>api</b><span>FastAPI (Python 3.12) on AWS ECS Fargate behind a load balancer and WAF, 2 to 6 tasks. Auth, every <code>/v1</code> route, event ingestion, feed XML, media signing, admin.</span></div>
+    <div class="row"><b>workflows</b><span>FastAPI serving Inngest functions on Fargate. Every durable job: episode production, after-session pass, verbatim turns, retention, exports, deletion.</span></div>
+    <div class="row"><b>call-worker</b><span>LiveKit Agents worker in Python on Fargate (about 1 task per 6 to 8 concurrent calls, an assumption). The live call: speech recognition, host model, voice, the governor that rejects disallowed host moves, and the recorder.</span></div>
+    <div class="row"><b>Postgres</b><span>PostgreSQL 16 with pgvector on RDS Multi-AZ.</span></div>
+    <div class="row"><b>S3</b><span>Media, voice, exports. Learner voice encrypted per learner (SSE-C); show audio encrypted with the environment KMS key and served by short-lived signed URLs.</span></div>
+  </div>
+  <p class="read">One Docker image (<code>forone-python</code>) with three entrypoints chosen by <code>FORONE_SERVICE</code>. It bundles ffmpeg, the spaCy English model, LiveKit's turn-detector weights and the Silero voice-activity detector.</p>
+
+  <details><summary>How one day flows through the system</summary>
+    <ol class="b">
+      <li>Learner calls <code>POST /v1/ideas/choose</code> in the evening. The API emits <code>idea.chosen</code> to Inngest.</li>
+      <li>Workflows run teacher, writer, fitter, editor and voice (batch). The episode is ready before the drop time.</li>
+      <li>At the drop time the feed item is published and one web push is sent.</li>
+      <li>The app loads <code>GET /v1/today</code>, plays the episode and sends event batches to <code>POST /v1/events</code>.</li>
+      <li><code>POST /v1/calls</code> returns a room URL and token. The browser joins the LiveKit room over WebRTC.</li>
+      <li>The call worker streams speech recognition, the host model and voice per turn (about 1 second) and posts call events to the API.</li>
+      <li>Each learner turn's audio goes to workflows for verbatim re-transcription.</li>
+      <li>When the call ends, <code>session/after-pass</code> runs: analyst, measures, memory keeper, updater and claim gate, within 10 minutes. The teacher then plans tomorrow.</li>
+    </ol>
+  </details>
+  <details><summary>Code layout (packages)</summary>
+    <div class="tw"><table class="wf">
+      <tr><th>Package</th><th>Holds</th></tr>
+      <tr><td><code>core</code></td><td>Settings, database and migrations, event schemas and <code>events.append</code>, encryption keys, media, the outbox, messaging (the only module that can send email or push), rate limits, audit, the correction guard</td></tr>
+      <tr><td><code>adapters</code></td><td>One interface per capability, one module per vendor, the <code>vendors.yaml</code> loader, tracing middleware, the <code>prices.yaml</code> price book</td></tr>
+      <tr><td><code>pipeline</code></td><td>Teacher, writer, fitter, editor, variety, voice studio, glosses, publish</td></tr>
+      <tr><td><code>learner</code></td><td>Event log, the nine stores, the scheduler, the facts validator, compiled briefs</td></tr>
+      <tr><td><code>assess</code></td><td>Verbatim merge, analyst, edit classifier, measures, updater, memory keeper, claim gate, proof producer, rater</td></tr>
+      <tr><td><code>languages/en</code>, <code>native/ar</code>, <code>native/en</code></td><td>The language packages</td></tr>
+      <tr><td><code>forone_call</code> (in call-worker)</td><td>Governor, turn controller, recorder, word-button handling, Salma onboarding</td></tr>
+    </table></div>
+    <p>Tooling: <code>uv</code>, Ruff, Pyright (strict), pytest; <code>pnpm</code>, TypeScript (strict), Vitest, Playwright; Alembic migrations (one per pull request, run as a one-off task before each deploy); Terraform; GitHub Actions. Environments: dev (docker-compose with Postgres, MinIO, Inngest dev server, LiveKit dev server, Mailpit), staging, prod. In dev, <code>FORONE_FAKE_VENDORS=1</code> uses fakes instead of real vendors.</p>
+  </details>
+
+  <h3>The AI roles</h3>
+  <div class="tw"><table class="wf">
+    <tr><th>Role</th><th>When</th><th>Model</th></tr>
+    <tr><td>Teacher</td><td>Before (batch)</td><td>Claude Opus 5.5</td></tr>
+    <tr><td>Writer</td><td>Before (batch)</td><td>Claude Sonnet 5.5</td></tr>
+    <tr><td>Fitter</td><td>Before</td><td>Code plus Claude Haiku 5.5</td></tr>
+    <tr><td>Editor</td><td>Before</td><td>Gemini 3.8 Flash plus code. If the second vendor is down, Claude Opus 5.5, flagged for review</td></tr>
+    <tr><td>Voice studio</td><td>Before</td><td>Text-to-speech, alignment and re-listen</td></tr>
+    <tr><td>Host (call and chat)</td><td>Live</td><td>Claude Sonnet 5.5, cached brief, low effort</td></tr>
+    <tr><td>Salma</td><td>Live (never in calls except the crisis clip)</td><td>Claude Sonnet 5.5 plus Arabic voice</td></tr>
+    <tr><td>Verbatim re-transcription</td><td>After</td><td>AssemblyAI or ElevenLabs Scribe</td></tr>
+    <tr><td>Analyst, memory keeper</td><td>After</td><td>Claude Haiku 5.5, fixed schema</td></tr>
+    <tr><td>Updater, claim gate, edit classifier, measures, scheduler, coverage check</td><td>After</td><td>Plain code, not AI</td></tr>
+    <tr><td>Proof producer</td><td>Weekly</td><td>Claude Sonnet 5.5 plus voice</td></tr>
+    <tr><td>Recording rater</td><td>Every 4 weeks</td><td>A model pinned for each 4-week window so upgrades never look like learner progress</td></tr>
+  </table></div>
+  <p class="read">Not in v1: the scout (news and search), and the observer role that would whisper to the host mid-call.</p>
+
+  <h3>Rules the engineering follows</h3>
+  <ul class="b read">
+    <li>Every vendor behind an adapter; swapping is a config change. Two voice vendors are wired from the start. The writer and editor are never the same vendor.</li>
+    <li>Every model call is traced with role, vendor, model, prompt version, learner-model version, units and cost.</li>
+    <li>Paid side effects are idempotent: each pipeline step keys its vendor call by episode, step and attempt and reuses a stored result on retry.</li>
+    <li>Latency budgets are tests: a 50-call bench and a 30-clip recognizer test run in CI against staging; the host-reply median gate is 1.5 s.</li>
+    <li>No agent framework in production: a durable workflow engine calling model APIs directly.</li>
+    <li>Nothing per-country: time zones, scripts, voices, consent text and crisis resources come from the language packages and the learner's row.</li>
+    <li>Deploys are timed per learner: a release goes out only when under 2% of learners have a drop in the next 45 minutes.</li>
+  </ul>
+</section>
+
+<!-- ============ DATA ============ -->
+<section id="data">
+  <h2>Database</h2>
+  <p class="sum">PostgreSQL 16 with pgvector. Tables grouped by what they hold. Every table with a learner id has a row-level security policy.</p>
+  <div class="tw"><table class="wf">
+    <tr><th>Group</th><th>Key tables</th><th>Notes</th></tr>
+    <tr><td>Identity and account</td><td><code>learners</code>, <code>otp_codes</code>, <code>auth_sessions</code>, <code>learner_keys</code>, <code>learner_schedule</code>, <code>consents</code>, <code>subscriptions</code>, <code>payment_events</code></td><td>Status runs <code>pre_account, trial, paid, trial_ended, deleting, deleted</code>. Each learner row carries native language, target language, residence country and time zone. Time zone has no default. Payment events are kept 7 years for tax.</td></tr>
+    <tr><td>Episodes and media</td><td><code>episodes</code>, sessions, doors, media objects</td><td>Unique per learner, local date, kind and slot. Slot 1 is the drop; 2 and 3 are extras.</td></tr>
+    <tr><td>Calls and chat</td><td>calls, call turns, chat threads and messages</td><td>Turns hold live and verbatim text.</td></tr>
+    <tr><td>The log</td><td><code>events</code> (partitioned, append-only)</td><td>The source of truth for everything else.</td></tr>
+    <tr><td>Learner model</td><td>word bank, structure map and observations, errors, life facts, interests, goals, canon, learner-model versions</td><td>Rebuilt from the log. A life fact's source quote is not null.</td></tr>
+    <tr><td>Assessment</td><td>claims, proofs, recordings</td><td>Claim text is written only by the claim gate.</td></tr>
+    <tr><td>Cost</td><td><code>vendor_calls</code>, daily spend per learner, role and vendor roll-ups</td><td>A cost row is written the moment a vendor responds, idempotently.</td></tr>
+    <tr><td>Language packages</td><td>lexicon, structure inventory</td><td>Loaded at deploy, not per learner.</td></tr>
+  </table></div>
+  <p class="read">Event types include <code>play</code>, <code>pause</code>, <code>seek</code>, <code>speed</code>, <code>replay_line</code>, <code>huh</code>, <code>tap</code>, <code>keep</code>, <code>mark</code>, <code>call_turn</code>, <code>word_button</code>, <code>silence</code>, <code>chat_message</code>, <code>idea_shown</code>, <code>idea_chosen</code>, <code>swap</code>, <code>small_door</code>, <code>fact_card_edit</code>, <code>notebook_edit</code>, <code>working_on_edit</code>, <code>claim_shown</code>, <code>consent_change</code>, <code>worth_it_answer</code> and <code>wrong_memory_flag</code>.</p>
+</section>
+
+<!-- ============ API ============ -->
+<section id="api">
+  <h2>API surface</h2>
+  <p class="sum">REST under <code>/v1</code>, a server-sent-events stream, and WebRTC for calls. Sign-in is an emailed code and a cookie.</p>
+  <div class="tw"><table class="wf">
+    <tr><th>Area</th><th>Endpoints</th></tr>
+    <tr><td>Sign-in</td><td><code>POST /auth/otp/request</code>, <code>/auth/otp/verify</code>, <code>/auth/signout</code>; install handoff <code>/handoff/mint</code> and <code>/handoff/exchange</code></td></tr>
+    <tr><td>Onboarding</td><td><code>POST /onboarding/start</code>, <code>GET /onboarding</code>, <code>PUT /onboarding/casting</code>, <code>/onboarding/name</code>, <code>PUT /me</code></td></tr>
+    <tr><td>Today and ideas</td><td><code>GET /today</code>, <code>GET /stream</code> (SSE: new episode, chat message, proof ready), <code>GET /ideas</code>, <code>POST /ideas/choose</code>, <code>POST /episodes/next</code></td></tr>
+    <tr><td>Episodes</td><td><code>GET /episodes/{id}</code>, <code>/episodes/{id}/media/{asset}</code>, <code>/episodes/{id}/why</code>, <code>POST /sessions/{id}/swap</code>, <code>/sessions/{id}/small-door</code>, <code>GET /shelf</code></td></tr>
+    <tr><td>Events</td><td><code>POST /events</code> (batches of up to 50, also for offline replay)</td></tr>
+    <tr><td>Calls</td><td><code>POST /calls</code> (returns room URL, token and planning words), <code>/calls/{id}/voicenotes</code>, <code>/calls/{id}/talkback</code>, <code>GET /calls/{id}</code>, <code>POST /recordings</code></td></tr>
+    <tr><td>Chat and Salma</td><td><code>GET /chat/{host}</code>, <code>POST /chat/{host}/messages</code>, <code>POST /salma/explain</code>, <code>GET /proof/{id}</code></td></tr>
+    <tr><td>Notebook</td><td><code>GET /notebook/{section}</code>, <code>PUT/DELETE /notebook/facts/{id}</code>, <code>POST /notebook/working-on</code>, <code>/notebook/out-in-world</code>, <code>/notebook/wrong-memory</code></td></tr>
+    <tr><td>Account</td><td><code>GET/PUT /controls</code>, <code>GET /feed/url</code>, <code>POST /feed/reset</code>, <code>POST /push/subscribe</code>, <code>POST /me/export</code>, <code>DELETE /me</code></td></tr>
+    <tr><td>Billing</td><td><code>POST /billing/checkout</code>, <code>GET /billing</code>, <code>POST /billing/portal</code></td></tr>
+    <tr><td>Feed links</td><td><code>POST /links/exchange</code>, <code>POST /links/heard</code> (the "Heard it" link)</td></tr>
+  </table></div>
+  <p class="read">Typical errors worth knowing: <code>409 allowance_used</code>, <code>409 current_unheard</code>, <code>409 swap_used</code>, <code>409 call_done</code> (one main call per episode), <code>409 chat_closed</code>, <code>409 cutoff_passed</code>, <code>403 under_18</code>, and <code>410 deleted</code> after account deletion.</p>
+</section>
+
+<!-- ============ VENDORS ============ -->
+<section id="vendors">
+  <h2>Vendors and external services</h2>
+  <p class="sum">Each is listed in the records-of-processing document with what data it sees. Items marked "pending test" depend on a vendor test that is defined but not yet run.</p>
+  <div class="tw"><table class="wf">
+    <tr><th>Service</th><th>Used for</th><th>Learner data it sees</th><th>Status</th></tr>
+    <tr><td>Anthropic</td><td>Teacher, writer, host, Salma, analyst, memory keeper, proof producer, rater, editor fallback, review pass</td><td>Briefs with facts and quotes, transcripts, scripts. Zero data retention requested</td><td>Chosen</td></tr>
+    <tr><td>Google Gemini (paid tier)</td><td>Editor, embeddings, a text-to-speech candidate</td><td>Scripts and checked facts</td><td>Chosen</td></tr>
+    <tr><td>Text-to-speech</td><td>Episode voices and the call host's voice</td><td>Scripts</td><td>Pending test: Gemini 3.8 Flash TTS, Inworld TTS-2 or ElevenLabs v4. Default Gemini</td></tr>
+    <tr><td>Live speech recognition</td><td>The call</td><td>Live audio</td><td>Pending test: Soniox (default) or Deepgram</td></tr>
+    <tr><td>Verbatim recognition</td><td>After-session transcripts that keep errors</td><td>Learner audio, minimum retention</td><td>Pending test: AssemblyAI (default) or ElevenLabs Scribe</td></tr>
+    <tr><td>Pronunciation scoring</td><td>Known sentences only</td><td>Short audio</td><td>Speechace or Microsoft, not settled</td></tr>
+    <tr><td>LiveKit Cloud</td><td>Real-time call media relay</td><td>Call media in transit; recording disabled</td><td>Chosen</td></tr>
+    <tr><td>Inngest Cloud (EU)</td><td>Durable workflows</td><td>Ids, dates, enums only</td><td>Chosen</td></tr>
+    <tr><td>Langfuse Cloud (EU)</td><td>AI tracing and cost</td><td>Metadata; de-identified text only for opted-in learners; 30-day retention</td><td>Chosen</td></tr>
+    <tr><td>Paddle</td><td>Payments, tax, invoices</td><td>Billing details</td><td>Chosen (Stripe with Stripe Tax if Paddle declines)</td></tr>
+    <tr><td>Resend</td><td>Email, including sign-in codes</td><td>Email address, message; tracking off</td><td>Chosen</td></tr>
+    <tr><td>Sentry (EU)</td><td>Errors</td><td>Scrubbed traces, no learner ids; 90 days</td><td>Chosen</td></tr>
+    <tr><td>Vercel</td><td>Web hosting</td><td>Request logs with IPs</td><td>Chosen</td></tr>
+    <tr><td>Better Stack</td><td>Uptime and alerts to Muath</td><td>Ids only</td><td>Chosen</td></tr>
+    <tr><td>AWS</td><td>RDS, S3, ECS Fargate, KMS, Secrets Manager, WAF, ECR; GitHub Actions reaches it through OIDC with no long-lived keys</td><td>Everything stored</td><td>Chosen</td></tr>
+  </table></div>
+</section>
+
+<!-- ============ NUMBERS ============ -->
+<section id="numbers">
+  <h2>Numbers cheat sheet</h2>
+  <div class="tw"><table class="wf">
+    <tr><th>What</th><th>Value</th></tr>
+    <tr><td>First sound after opening</td><td>under 60 s</td></tr>
+    <tr><td>First spoken English sentence</td><td>under 5 min</td></tr>
+    <tr><td>First episode starts</td><td>under 45 s after intake</td></tr>
+    <tr><td>Dropped episode start / on-demand extra</td><td>under 2 s / under 30 s</td></tr>
+    <tr><td>Call connect</td><td>under 3 s</td></tr>
+    <tr><td>Host reply</td><td>median under 1.5 s, p95 under 2.5 s (design goal about 1 s)</td></tr>
+    <tr><td>Word sheet</td><td>under 300 ms</td></tr>
+    <tr><td>After-session pass</td><td>within 10 min</td></tr>
+    <tr><td>Voice deleted (storage off)</td><td>within 15 min of the call</td></tr>
+    <tr><td>Episode length / call length</td><td>5 to 7 min (4:00 to 8:00 bounds) / 5 to 7 min (end by 8:00)</td></tr>
+    <tr><td>Ideas per day / swap per day</td><td>3 (140 characters each, one wildcard) / 1</td></tr>
+    <tr><td>Idea cutoff</td><td>6 h before drop time</td></tr>
+    <tr><td>Batch-to-on-demand fallback</td><td>90 min before drop time</td></tr>
+    <tr><td>Known words in an episode</td><td>95% audio, 98% text</td></tr>
+    <tr><td>New words per episode</td><td>3 to 6, 80% from the top 3,000</td></tr>
+    <tr><td>Life facts per episode</td><td>at most 2</td></tr>
+    <tr><td>Grammar targets per session</td><td>1 (no more than 4 sessions in a row)</td></tr>
+    <tr><td>"Working on" items</td><td>at most 3</td></tr>
+    <tr><td>Recasts / clarifications / nudges per call</td><td>1 per turn / 3 / 1</td></tr>
+    <tr><td>Host talk share / learner talk goal</td><td>at most 40% / 4+ min</td></tr>
+    <tr><td>Chat length</td><td>3 to 5 host messages</td></tr>
+    <tr><td>Season</td><td>4 weeks</td></tr>
+    <tr><td>Return episode after</td><td>5+ days</td></tr>
+    <tr><td>Rhythm</td><td>3 to 6 days a week plus 2 spare</td></tr>
+    <tr><td>Weekly proof / slow week</td><td>about 2 min / about 45 s</td></tr>
+    <tr><td>Then-and-now recording</td><td>about 3 min</td></tr>
+    <tr><td>Trial</td><td>7 days, no card</td></tr>
+    <tr><td>Refund window</td><td>14 days</td></tr>
+    <tr><td>Deletion</td><td>live data 24 h, backups 30 days</td></tr>
+    <tr><td>Similarity threshold</td><td>cosine 0.85 against the last 20 scripts</td></tr>
+    <tr><td>Cost per session</td><td>about $0.60 now, goal $0.35, stop line $1.00</td></tr>
+  </table></div>
+</section>
+
+<!-- ============ SCOPE ============ -->
+<section id="scope">
+  <h2>Scope and how it is built</h2>
+  <div class="grid3">
+    <div class="box"><h4>In version 1</h4><p>Onboarding with Salma, the daily loop, the player, article, call, chat and word sheet, the private feed, the notebook and controls, the simple weekly proof, the claim gate with event claims only, the crisis protocol, plans and Paddle checkout, privacy features (export, deletion, voice-storage choice), cost tracing, evals.</p></div>
+    <div class="box"><h4>Version 1.1, after launch</h4><p>The Show archive tab, round two, shadowing, the season finale, the tape, the sample episode on the landing page, metric claims once a calibration set exists, own failed-payment handling, a second language through the gate, the observer role as the first addition.</p></div>
+    <div class="box"><h4>Not planned</h4><p>Native apps, Sign in with Apple or Google, character creation and guest hosts, a news scout, cloned learner voice, yearly plans, regional prices, referrals or community, employer or university seats, playback above 1.0x, any chart, percentage or level.</p></div>
+  </div>
+
+  <h3>How the build is run</h3>
+  <ul class="b read">
+    <li>An AI coding agent builds it one story at a time under Muath: 16 epics and about 164 stories, in six phases ordered by dependency (foundation; pipeline and a minimal call; onboarding, Today and the feed; the full call and the after-session pass; the first week's surfaces; production and launch). No calendar dates.</li>
+    <li>For each story, the acceptance criteria are written as failing automated tests first, then the smallest code that passes. One story per branch and pull request.</li>
+    <li>An independent AI review reads every pull request; a separate security review also reads anything touching auth, keys, media URLs, the feed or deletion.</li>
+    <li><b>Muath approves:</b> every merge to <code>main</code>, every database migration, every change to a prompt, rule file, bible, ban list, consent text, crisis resource or legal document, every change to vendor or price files, every production deploy, every new dependency that sends data to a new processor, and every change to the agent's own instructions.</li>
+    <li>The agent never holds a staging or production secret and never reads learner content. It works with synthetic learners and fakes.</li>
+    <li>When the documents do not answer a question, the agent stops and asks instead of inventing an answer.</li>
+    <li>Launch happens once, publicly, with open signup, when every v1 story passes and the launch checklist is green. Health measures are read 4 and 8 weeks later.</li>
+  </ul>
+  <h3>What only Muath can do before launch</h3>
+  <p class="read">Open the vendor and Paddle accounts, choose the domain, record the volunteer speech clips, read the English bibles and Salma's Arabic, complete the self-review, run the voice and recognizer tests (or rate them), and appoint an EU and UK representative if the company is outside them.</p>
+</section>
+
+<footer>
+  Written from docs/product/PRD-v3.md, decisions.md, architecture/10-decision-records.md, technical-design/00, 01 and 02, legal/05-ropa.md and backlog/01-epics.md. Each section is a summary, so the PRD remains the authority on exact wording and numbers. Items marked "after launch" are v1.1 in the backlog; the PRD labels some of them P1.
+</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  document.getElementById('theme').addEventListener('click',function(){
+    var dark=root.getAttribute('data-theme')==='dark'||(!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme:dark)').matches);
+    root.setAttribute('data-theme',dark?'light':'dark');
+  });
+
+  var all=function(){return document.querySelectorAll('main details')};
+  var btn=document.getElementById('expand'),open=false;
+  btn.addEventListener('click',function(){
+    open=!open;
+    all().forEach(function(d){d.open=open});
+    btn.textContent=open?'Close all':'Open all';
+  });
+
+  var links=[].slice.call(document.querySelectorAll('#toc a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'))});
+  function spy(){
+    var y=window.scrollY+110,cur=0;
+    secs.forEach(function(s,i){if(s&&s.offsetTop<=y)cur=i});
+    links.forEach(function(a,i){a.classList.toggle('on',i===cur)});
+  }
+  window.addEventListener('scroll',spy,{passive:true});spy();
+})();
+</script>
+</body>
+</html>

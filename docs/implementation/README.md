@@ -14,13 +14,21 @@ Each story gets acceptance tests committed before implementation, a local review
 
 - Manager: current session; requested GPT-6 Astra/high. This session exposes no tool to change or independently attest its own model configuration.
 - Implementation/review route: collaboration tool explicitly offers `gpt-6.1-sol`, with `reasoning_effort: high` and fresh context.
-- UI: Claude Code 2.1.322 installed and authenticated with first-party Claude login. Exact Opus 5.5 execution verification pending; no substitution authorized.
+- UI: Claude Code 2.1.322 authenticated with first-party Claude login. Successful CLI probe with `--model opus --effort high` returned `canonicalModel: claude-opus-5-5` and `READY`. UI implementation launched with explicit `--model claude-opus-5-5 --effort high`, no fallback, isolated worktree `../For-one-ui`.
 - Windows host: Node 22.17.0, pnpm 10.12.4 (canon requires 9), Python 3.13 (canon requires 3.12), uv 0.7.22. WSL Ubuntu exists. Docker, make and gitleaks absent from the initial PATH checks; environment setup pending.
 - Existing untracked `for-one-detailed.html` and `for-one-overview.html` belong to the user and must remain untouched.
 
 ## Status
 
-No application stories implemented or verified at initialization. Inventory reconciliation and foundation implementation are next. Per-story status must separately track implemented, locally verified, independently reviewed, externally verified, blocked and deferred; never flatten them into done.
+No application stories integrated yet. Per-story status must separately track implemented, locally verified, independently reviewed, externally verified, blocked and deferred; never flatten them into done.
+
+Assignments:
+- `foundation`: GPT-6.1 Sol/high, E01-S01 backend/build/CI infrastructure, `../For-one-e01-s01`, branch `codex/e01-s01-foundation`.
+- Claude Opus 5.5/high: E01-S01 renderable web shell slice and E07-S01 follow-up contract, `../For-one-ui`, branch `codex/e01-s01-web-shell`; owns JSX/CSS/components, Sol owns web package/config/lockfiles.
+- `inventory`: GPT-6.1 Sol/high, reconciled story/AC ledger and canonical dependency corrections, record files only.
+- `toolchain`: GPT-6.1 Sol/high, WSL development tools and secret hook setup, environment record only.
+
+The initial manager documentation commit inherited the repository's configured local author. Subsequent local commits use an explicit agent author; no remote GitHub identity or A10 verification is claimed.
 
 ## External requirements
 
